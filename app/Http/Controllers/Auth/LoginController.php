@@ -19,22 +19,15 @@ class LoginController extends Controller
         ];
     }
 
-    /**
-     * Display the login view. (Maps to GET /login)
-     */
     public function index()
     {
         return view('Auth.login');
     }
 
-    /**
-     * Handle the incoming authentication request. (Maps to POST /login)
-     */
     public function store(Request $request)
     {
         // 1. Validate the input fields
         $credentials = $request->validate([
-            // You can change 'email' to 'username' if you use usernames
             'userId' => ['required'], 
             'password' => ['required', 'string'],
         ]);
@@ -44,26 +37,18 @@ class LoginController extends Controller
         
         $request->session()->regenerate();
         
-        // 🛑 NEW LOGIC STARTS HERE 🛑
-        
         // Get the authenticated user
         $user = Auth::user();
         
-        // Check user role and redirect to the correct named route
-        // NOTE: This assumes your User model has a 'role' column 
-        //       or a 'hasRole' method. Adjust the condition as needed.
         if ($user && $user->role === 'Editor') {
             return redirect()->route('Editor.dashboard');
         } 
         
-        // If they have the other role (UserManagement), or any other role
-        // For UserManagement roles, redirect to its dashboard
         if ($user && $user->role === 'UserManagement') {
              return redirect()->route('UserManagement.dashboard');
         }
         
         // Fallback for any user that logged in but didn't match a specific role
-        // This is a safe route, but you should adjust the logic above to match all roles.
         return redirect('/');
         
     }
