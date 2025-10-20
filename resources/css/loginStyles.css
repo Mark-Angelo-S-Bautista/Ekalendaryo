@@ -1,0 +1,143 @@
+/* Basic Reset and Body Styling */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        "Helvetica Neue", Arial, sans-serif;
+    background-color: #f7fcf4; /* Light, slightly greenish-off-white background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+/* Color Variables for easy theme changing */
+:root {
+    --primary-green: #38761d; /* The main dark green color */
+    --light-green: #e9f0e6; /* Border/input background */
+    --link-color: #38761d;
+    --text-color: #333;
+    --card-bg: #fff;
+    --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.login-container {
+    text-align: center;
+    width: 100%;
+    max-width: 400px; /* Max width for the whole component */
+    padding: 20px;
+}
+
+/* Header Styling */
+.header {
+    margin-bottom: 30px;
+}
+
+.calendar-icon {
+    font-size: 40px;
+    color: var(--primary-green);
+    margin-bottom: 10px;
+}
+
+.header h1 {
+    color: var(--primary-green);
+    font-size: 28px;
+    margin: 0;
+    font-weight: 600;
+}
+
+.subtitle {
+    color: var(--text-color);
+    font-size: 14px;
+    margin-top: 5px;
+    font-weight: 400;
+}
+
+/* Login Card Styling */
+.login-card {
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    padding: 30px 25px;
+    box-shadow: var(--card-shadow);
+    text-align: center;
+    border: 1px solid #ddd; /* Light border similar to the image */
+}
+
+.login-card h2 {
+    color: var(--text-color);
+    font-size: 20px;
+    font-weight: 500;
+    margin-top: 0;
+    margin-bottom: 25px;
+}
+
+/* Input Group Styling */
+.input-group {
+    position: relative;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    background-color: var(--card-bg); /* White background for the input area */
+    padding: 10px 15px;
+}
+
+.input-group .icon {
+    color: #a0a0a0; /* Icon color */
+    font-size: 18px;
+    margin-right: 15px;
+}
+
+.input-group input {
+    flex-grow: 1;
+    border: none;
+    padding: 0;
+    outline: none;
+    font-size: 16px;
+    color: var(--text-color);
+}
+
+.input-group input::placeholder {
+    color: #a0a0a0;
+}
+
+.password-toggle {
+    color: #a0a0a0;
+    cursor: pointer;
+    font-size: 16px;
+    padding-left: 10px;
+}
+
+/* Sign In Button Styling */
+.sign-in-btn {
+    width: 100%;
+    background-color: var(--primary-green);
+    color: white;
+    border: none;
+    padding: 15px 0;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 10px;
+}
+
+.sign-in-btn:hover {
+    background-color: #316518; /* Slightly darker green on hover */
+}
+
+/* Forgot Password Link */
+.forgot-password {
+    display: block;
+    margin-top: 25px;
+    color: var(--link-color);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.forgot-password:hover {
+    text-decoration: underline;
+}
