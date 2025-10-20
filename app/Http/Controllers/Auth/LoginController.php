@@ -1,13 +1,26 @@
 <?php
 
 namespace App\Http\Controllers\Auth;
+
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 
 class LoginController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Get the middleware that should be assigned to the controller.
+     */
+    public static function middleware(): array
+    {
+        return [
+            'guest' => ['except' => 'destroy'],
+        ];
+    }
+
+    /**
+     * Display the login view. (Maps to GET /login)
      */
     public function index()
     {
@@ -15,50 +28,66 @@ class LoginController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
+     * Handle the incoming authentication request. (Maps to POST /login)
      */
     public function store(Request $request)
     {
+        // 1. Validate the input fields
+        $credentials = $request->validate([
+            // You can change 'email' to 'username' if you use usernames
+            'userId' => ['required'], 
+            'password' => ['required', 'string'],
+        ]);
+
+        // 2. Attempt to authenticate the user
+        if (Auth::attempt($credentials, $request->boolean('remember'))) {
+        
+        $request->session()->regenerate();
+        
+        // 🛑 NEW LOGIC STARTS HERE 🛑
+        
+        // Get the authenticated user
+        $user = Auth::user();
+        
+        // Check user role and redirect to the correct named route
+        // NOTE: This assumes your User model has a 'role' column 
+        //       or a 'hasRole' method. Adjust the condition as needed.
+        if ($user && $user->role === 'Editor') {
+            return redirect()->route('Editor.dashboard');
+        } 
+        
+        // If they have the other role (UserManagement), or any other role
+        // For UserManagement roles, redirect to its dashboard
+        if ($user && $user->role === 'UserManagement') {
+             return redirect()->route('UserManagement.dashboard');
+        }
+        
+        // Fallback for any user that logged in but didn't match a specific role
+        // This is a safe route, but you should adjust the logic above to match all roles.
+        return redirect('/');
         
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
+        // 3. Handle failure: throw an error message back to the login form
+        throw ValidationException::withMessages([
+            'userId' => __('auth.failed'), // The default message: 'These credentials do not match our records.'
+        ]);
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Log the user out of the application. (Maps to POST /logout)
      */
-    public function edit(string $id)
+    public function destroy(Request $request)
     {
-        //
-    }
+        Auth::logout();
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
+        // Invalidate the current session
+        $request->session()->invalidate();
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        // Regenerate the CSRF token for the next request
+        $request->session()->regenerateToken();
+
+        // Redirect the user back to the homepage or login page
+        return redirect('/');
     }
 }

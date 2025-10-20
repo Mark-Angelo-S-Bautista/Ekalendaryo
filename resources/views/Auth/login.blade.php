@@ -20,10 +20,11 @@
 
         <div class="login-card">
             <h2>Sign In</h2>
-            <form action="#" method="post">
+            <form action="{{ route('login') }}" method="post">
+                @csrf
                 <div class="input-group">
                     <i class="fas fa-user icon"></i>
-                    <input type="text" id="id" name="id" placeholder="Student ID or Employee ID"
+                    <input type="text" id="userId" name="userId" placeholder="Student ID or Employee ID"
                         required>
                 </div>
 
