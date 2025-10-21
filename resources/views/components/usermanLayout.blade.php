@@ -21,6 +21,11 @@
 
     <main>
         @yield('content')
+
+        <form action="{{ route('logout') }}" method="post">
+            @csrf
+            <button type="submit" class="sign-in-btn">Logout</button>
+        </form>
     </main>
 
 </body>

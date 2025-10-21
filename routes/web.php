@@ -3,12 +3,18 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\UserMan\UserManagementController;
 use App\Http\Controllers\Editor\EditorController;
+use App\Http\Controllers\Auth\PasswordResetController;
 use Illuminate\Support\Facades\Route;
 
 // Group the routes without a 'prefix' so they start at the root URL (/)
 
 Route::get('/', [LoginController::class, 'index'])->name('Auth.login');
 Route::post('/', [LoginController::class, 'store'])->name('login');
+Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
+Route::post('/password-reset', [PasswordResetController::class, 'sendResetLink'])
+    ->name('password.reset.request');
+// Route::get('/passwordreset', [PasswordResetController::class,'index'])->name('passwordreset');
+// Route::post('/passwordreset', [PasswordResetController::class,'passwordReset'])->name('passwordReset');
 
 Route::middleware('auth')->group(function () {
     

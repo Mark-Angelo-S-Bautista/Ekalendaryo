@@ -55,7 +55,7 @@ class LoginController extends Controller
 
         // 3. Handle failure: throw an error message back to the login form
         throw ValidationException::withMessages([
-            'userId' => __('auth.failed'), // The default message: 'These credentials do not match our records.'
+            'userId' => ('Incorrect ID or Password'), // The default message: 'These credentials do not match our records.'
         ]);
     }
 

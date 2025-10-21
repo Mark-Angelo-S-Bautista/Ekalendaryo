@@ -37,5 +37,23 @@ class UserSeeder extends Seeder
             'role' => 'UserManagement',
             'password' => Hash::make('password'), // The password is 'password'
         ]);
+
+        User::create([
+            'name' => 'Joenel Valeton',
+            'userId' => 'MA22013877', // The username for login
+            'email' => 'nel@gmail.com',
+            'phoneNum' => '09537329600',
+            'role' => 'Editor',
+            'password' => Hash::make('password'), // The password is 'password'
+        ]);
+
+        User::create([
+            'name' => 'Ella Mae DeCastro',
+            'userId' => 'MA22013878', // The username for login
+            'email' => 'ella@gmail.com',
+            'phoneNum' => '09537329654',
+            'role' => 'UserManagement',
+            'password' => Hash::make('password'), // The password is 'password'
+        ]);
     }
 }

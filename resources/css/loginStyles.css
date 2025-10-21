@@ -22,14 +22,24 @@ body {
 }
 
 .login-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     text-align: center;
     width: 100%;
-    max-width: 400px; /* Max width for the whole component */
+    max-width: 400px;
     padding: 20px;
+    height: 100vh; /* Vertically centers the container */
 }
 
 /* Header Styling */
 .header {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centers horizontally */
+    justify-content: center; /* Centers vertically inside its parent */
+    text-align: center;
     margin-bottom: 30px;
 }
 
@@ -128,11 +138,10 @@ body {
     background-color: #316518; /* Slightly darker green on hover */
 }
 
-/* Forgot Password Link */
 .forgot-password {
     display: block;
     margin-top: 25px;
-    color: var(--link-color);
+    color: #38761d;
     text-decoration: none;
     font-size: 14px;
     font-weight: 500;
@@ -140,4 +149,99 @@ body {
 
 .forgot-password:hover {
     text-decoration: underline;
+}
+
+/* === Modal Overlay === */
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999; /* higher than the login form */
+}
+
+/* === Modal Box === */
+.modal-content {
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.modal-content h2 {
+    color: #38761d;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.modal-content p {
+    color: #333;
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.modal-input {
+    margin-bottom: 1rem;
+}
+
+.modal-input input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 16px;
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1rem;
+}
+
+.modal-btn {
+    padding: 10px 20px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.cancel-btn {
+    background: #e5e7eb;
+    color: #333;
+}
+
+.cancel-btn:hover {
+    background: #d1d5db;
+}
+
+.reset-btn {
+    background: #38761d;
+    color: white;
+}
+
+.reset-btn:hover {
+    background: #316518;
+}
+
+.error-message {
+    color: red;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
