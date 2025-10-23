@@ -1,10 +1,12 @@
 <?php
 
+
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use App\Http\Middleware\EditorRole;
 use App\Http\Middleware\UserManagementRole;
+use App\Http\Middleware\ViewerRole;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -17,7 +19,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'auth' => \Illuminate\Auth\Middleware\Authenticate::class,
             // ADD YOUR CUSTOM ROLE MIDDLEWARE HERE
             'role.editor' => EditorRole::class, 
-            'role.usermanagement' => UserManagementRole::class
+            'role.usermanagement' => UserManagementRole::class,
+            'role.viewer' => ViewerRole::class
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

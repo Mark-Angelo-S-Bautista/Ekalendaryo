@@ -47,6 +47,10 @@ class LoginController extends Controller
         if ($user && $user->role === 'UserManagement') {
              return redirect()->route('UserManagement.dashboard');
         }
+
+        if ($user && $user->role === 'Viewer') {
+             return redirect()->route('Viewer.dashboard');
+        }
         
         // Fallback for any user that logged in but didn't match a specific role
         return redirect('/');

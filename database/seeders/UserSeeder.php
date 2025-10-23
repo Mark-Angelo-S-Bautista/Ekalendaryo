@@ -55,5 +55,14 @@ class UserSeeder extends Seeder
             'role' => 'UserManagement',
             'password' => Hash::make('password'), // The password is 'password'
         ]);
+
+        User::create([
+            'name' => 'Kenji Dela Cruz',
+            'userId' => 'MA22013879', // The username for login
+            'email' => 'kenj@gmail.com',
+            'phoneNum' => '09537329999',
+            'role' => 'Viewer',
+            'password' => Hash::make('password'), // The password is 'password'
+        ]);
     }
 }
