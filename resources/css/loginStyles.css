@@ -234,6 +234,9 @@ body {
 .error-message {
     color: red;
 }
+.modal-content .error-message-forgot {
+    color: red;
+}
 
 @keyframes fadeIn {
     from {

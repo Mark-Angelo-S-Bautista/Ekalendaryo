@@ -14,11 +14,9 @@ Route::post('/', [LoginController::class, 'store'])->name('login');
 Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
 Route::post('/password-reset', [PasswordResetController::class, 'sendResetLink'])
     ->name('password.reset.request');
-// Route::get('/passwordreset', [PasswordResetController::class,'index'])->name('passwordreset');
-// Route::post('/passwordreset', [PasswordResetController::class,'passwordReset'])->name('passwordReset');
+
 
 Route::middleware('auth')->group(function () {
-    
     // --- A. EDITOR ROUTES (Requires 'auth' + 'role.editor') ---
     // Applies the prefix 'editor/' and the route name prefix 'editor.'
     Route::middleware('role.editor')->prefix('editor')->name('Editor.')->group(function () {

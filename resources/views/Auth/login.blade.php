@@ -42,6 +42,9 @@
             <div class="modal-content">
                 <h2>Forgot Password</h2>
                 <p>Enter your email to receive a password reset link.</p>
+                @error('userId')
+                    <p class="error-message-forgot">{{ $message }}</p>
+                @enderror
                 <form action="{{ route('password.reset.request') }}" method="POST">
                     @csrf
                     <div class="modal-input">
