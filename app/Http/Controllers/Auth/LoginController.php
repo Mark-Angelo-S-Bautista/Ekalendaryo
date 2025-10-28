@@ -35,27 +35,27 @@ class LoginController extends Controller
         // 2. Attempt to authenticate the user
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
         
-        $request->session()->regenerate();
-        
-        // Get the authenticated user
-        $user = Auth::user();
-        
-        if ($user && $user->role === 'Editor') {
-            return redirect()->route('Editor.dashboard');
-        } 
-        
-        if ($user && $user->role === 'UserManagement') {
-             return redirect()->route('UserManagement.dashboard');
-        }
+            $request->session()->regenerate();
+            
+            // Get the authenticated user
+            $user = Auth::user();
+            
+            if ($user && $user->role === 'Editor') {
+                return redirect()->route('Editor.dashboard');
+            } 
+            
+            if ($user && $user->role === 'UserManagement') {
+                return redirect()->route('UserManagement.dashboard');
+            }
 
-        if ($user && $user->role === 'Viewer') {
-             return redirect()->route('Viewer.dashboard');
+            if ($user && $user->role === 'Viewer') {
+                return redirect()->route('Viewer.dashboard');
+            }
+            
+            // Fallback for any user that logged in but didn't match a specific role
+            return redirect('/');
+        
         }
-        
-        // Fallback for any user that logged in but didn't match a specific role
-        return redirect('/');
-        
-    }
 
         // 3. Handle failure: throw an error message back to the login form
         throw ValidationException::withMessages([
