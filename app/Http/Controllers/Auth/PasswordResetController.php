@@ -30,18 +30,16 @@ class PasswordResetController extends Controller
         }
 
         // ✅ 3. Generate a new random password
-        $newPassword = 'newpassword';
+        $newPassword = Str::random(10);
 
         // ✅ 4. Hash and update the password in the database
         $user->update([
             'password' => Hash::make($newPassword),
         ]);
 
-        // // ✅ 5. Send the new password to the user’s email
-        // Mail::raw("Hello {$user->name},\n\nYour password has been reset. Here’s your new password:\n\n{$newPassword}\n\nYou can now log in using this new password and change it afterward.", function ($message) use ($user) {
-        //     $message->to($user->email)
-        //             ->subject('Your New Password from eKalendaryo');
-        // });
+        Mail::to($user->email)->send(
+            new \App\Mail\NewPassword($user, $newPassword)
+        );
 
         // ✅ 6. Redirect back with a success message
         return redirect()->route('Auth.login')->with('success', 'A new password has been sent to your email.');
