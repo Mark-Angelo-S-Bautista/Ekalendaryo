@@ -58,4 +58,9 @@
             </div>
         </div>
     @endif
+    @if (session('success'))
+        <div id="toast" class="toast show">
+            <p>{{ session('success') }}</p>
+        </div>
+    @endif
 @endsection

@@ -44,6 +44,6 @@ class PasswordResetController extends Controller
         // });
 
         // ✅ 6. Redirect back with a success message
-        return redirect()->route('Auth.login')->with('status', 'A new password has been sent to your email.');
+        return redirect()->route('Auth.login')->with('success', 'A new password has been sent to your email.');
     }
 }

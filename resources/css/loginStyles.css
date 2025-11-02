@@ -212,6 +212,29 @@ body {
     color: red;
 }
 
+.toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background-color: #4bb543; /* green success */
+    color: #fff;
+    padding: 14px 24px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    font-size: 14px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    transform: translateY(20px);
+    z-index: 1000;
+}
+
+.toast.show {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
 @keyframes fadeIn {
     from {
         opacity: 0;
