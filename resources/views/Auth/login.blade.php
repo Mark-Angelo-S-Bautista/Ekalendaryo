@@ -1,38 +1,34 @@
 @extends('components.loginLayout')
 
 @section('content')
-    <div class="login-container">
-        <header class="header">
-            <i class="fas fa-calendar-alt calendar-icon"></i>
-            <h1>eKalendaryo</h1>
-            <p class="subtitle">Centralized Calendar Management System</p>
-        </header>
+    <div class="container">
+        <!-- Logo placeholder (replace this image with your own) -->
+        <div class="logo">
+            <img src="{{ asset('img/Main_logo.png') }}" alt="eKalendaryo Logo">
+            <p class="title">Centralized Calendar of Activities and Notification System for School Events</p>
+        </div>
 
-        <div class="login-card">
-            <h2>Sign In</h2>
+        <!-- Sign In Box -->
+        <div class="box">
+            <h3>Sign In</h3>
+            <p class=subtitle>Enter your credentials to access the system</p>
             <form action="{{ route('login') }}" method="post">
                 @csrf
-                <div class="input-group">
-                    <i class="fas fa-user icon"></i>
-                    <input type="text" id="userId" name="userId" placeholder="Student ID or Employee ID"
-                        value="{{ old('userId') }}" required>
+                <div class="form-group">
+                    <input type="text" id="userId" name="userId" placeholder="Ex. MA22013875" required>
+                    <div class="password-wrapper">
+                        <input type="password" id="password" name="password" placeholder="Password" required>
+                        <i id="password-toggle" class="fas fa-eye password-toggle"></i>
+                    </div>
                 </div>
-
-                <div class="input-group">
-                    <i class="fas fa-lock icon"></i>
-                    <input type="password" id="password" name="password" placeholder="Password" required>
-                    <i id="password-toggle" class="fas fa-eye password-toggle"></i>
-                </div>
-
                 @error('userId')
                     <p class="error-message">{{ $message }}</p>
                 @enderror
-
-                <button type="submit" class="sign-in-btn">Sign In</button>
+                <button type="submit" class="btn">Sign In</button>
             </form>
-
-            {{-- When clicked, adds ?forgot=1 to the URL --}}
-            <a href="{{ route('Auth.login', ['forgot' => 1]) }}" class="forgot-password">Forgot Password?</a>
+            <div class="forget-btn">
+                <a href="{{ route('Auth.login', ['forgot' => 1]) }}" class="forgot-password">Forgot Password?</a>
+            </div>
         </div>
     </div>
 

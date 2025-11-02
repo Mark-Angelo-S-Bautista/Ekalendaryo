@@ -1,141 +1,86 @@
 /* Basic Reset and Body Styling */
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-        "Helvetica Neue", Arial, sans-serif;
-    background-color: #f7fcf4; /* Light, slightly greenish-off-white background */
+    display: flex;
+    font-family: Arial, sans-serif;
+    background: #f6fff6;
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
     margin: 0;
-    box-sizing: border-box;
 }
 
-/* Color Variables for easy theme changing */
-:root {
-    --primary-green: #38761d; /* The main dark green color */
-    --light-green: #e9f0e6; /* Border/input background */
-    --link-color: #38761d;
-    --text-color: #333;
-    --card-bg: #fff;
-    --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.login-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+.container {
     text-align: center;
-    width: 100%;
     max-width: 400px;
-    padding: 20px;
-    height: 100vh; /* Vertically centers the container */
+    width: 100%;
+    margin-top: 100px;
 }
 
-/* Header Styling */
-.header {
-    display: flex;
-    flex-direction: column;
-    align-items: center; /* Centers horizontally */
-    justify-content: center; /* Centers vertically inside its parent */
-    text-align: center;
+.logo img {
+    max-width: 220px; /* Adjust logo size */
+}
+
+.box {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.box h3 {
+    margin-top: 0;
+    color: #198754;
+}
+
+.title {
     margin-bottom: 30px;
-}
-
-.calendar-icon {
-    font-size: 40px;
-    color: var(--primary-green);
-    margin-bottom: 10px;
-}
-
-.header h1 {
-    color: var(--primary-green);
-    font-size: 28px;
-    margin: 0;
-    font-weight: 600;
+    color: #555;
+    font-style: italic;
+    margin-block-start: 0px;
 }
 
 .subtitle {
-    color: var(--text-color);
     font-size: 14px;
-    margin-top: 5px;
-    font-weight: 400;
+    color: #555;
+    margin-bottom: 15px;
 }
 
-/* Login Card Styling */
-.login-card {
-    background-color: var(--card-bg);
-    border-radius: 12px;
-    padding: 30px 25px;
-    box-shadow: var(--card-shadow);
-    text-align: center;
-    border: 1px solid #ddd; /* Light border similar to the image */
+.incorrect {
+    font-size: 14px;
+    margin: auto;
+    justify-content: left;
+    text-align: left;
+    color: red;
+    display: none;
 }
 
-.login-card h2 {
-    color: var(--text-color);
-    font-size: 20px;
-    font-weight: 500;
-    margin-top: 0;
-    margin-bottom: 25px;
+.form-group {
+    margin-bottom: 15px;
 }
 
-/* Input Group Styling */
-.input-group {
-    position: relative;
-    margin-bottom: 20px;
+.box input {
+    width: 328px;
+    padding: 10px;
+    margin: 8px 0;
     border: 1px solid #ccc;
     border-radius: 6px;
-    display: flex;
-    align-items: center;
-    background-color: var(--card-bg); /* White background for the input area */
-    padding: 10px 15px;
 }
 
-.input-group .icon {
-    color: #a0a0a0; /* Icon color */
-    font-size: 18px;
-    margin-right: 15px;
-}
-
-.input-group input {
-    flex-grow: 1;
-    border: none;
-    padding: 0;
-    outline: none;
-    font-size: 16px;
-    color: var(--text-color);
-}
-
-.input-group input::placeholder {
-    color: #a0a0a0;
-}
-
-.password-toggle {
-    color: #a0a0a0;
-    cursor: pointer;
-    font-size: 16px;
-    padding-left: 10px;
-}
-
-/* Sign In Button Styling */
-.sign-in-btn {
-    width: 100%;
-    background-color: var(--primary-green);
+.btn {
+    background: #198754;
     color: white;
     border: none;
-    padding: 15px 0;
+    padding: 12px;
+    width: 100%;
     border-radius: 6px;
-    font-size: 16px;
-    font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.3s;
-    margin-top: 10px;
+    font-weight: bold;
 }
 
-.sign-in-btn:hover {
-    background-color: #316518; /* Slightly darker green on hover */
+.btn:hover {
+    background: #157347;
 }
 
 .forgot-password {
@@ -145,10 +90,6 @@ body {
     text-decoration: none;
     font-size: 14px;
     font-weight: 500;
-}
-
-.forgot-password:hover {
-    text-decoration: underline;
 }
 
 /* === Modal Overlay === */
@@ -163,6 +104,37 @@ body {
     align-items: center;
     justify-content: center;
     z-index: 999; /* higher than the login form */
+}
+
+.password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-wrapper input {
+    width: 100%;
+    padding-right: 40px; /* space for eye icon */
+}
+
+/* Eye icon styling */
+.password-toggle {
+    position: absolute;
+    right: 10px;
+    cursor: pointer;
+    color: #888;
+    transition: color 0.3s ease;
+}
+
+.password-toggle:hover {
+    color: #333;
+}
+
+/* Optional: Match icon vertical alignment */
+.password-wrapper i {
+    top: 50%;
+    transform: translateY(-50%);
+    position: absolute;
 }
 
 /* === Modal Box === */
@@ -192,11 +164,11 @@ body {
 }
 
 .modal-input input {
-    width: 100%;
+    width: 379px;
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 6px;
-    font-size: 16px;
+    font-size: 14px;
 }
 
 .modal-buttons {
@@ -216,6 +188,7 @@ body {
 .cancel-btn {
     background: #e5e7eb;
     color: #333;
+    text-decoration: none;
 }
 
 .cancel-btn:hover {
@@ -233,6 +206,7 @@ body {
 
 .error-message {
     color: red;
+    font-size: 14px;
 }
 .modal-content .error-message-forgot {
     color: red;
