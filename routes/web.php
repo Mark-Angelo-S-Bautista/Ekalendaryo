@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\UserMan\UserManagementController;
 use App\Http\Controllers\Editor\EditorController;
 use App\Http\Controllers\Auth\PasswordResetController;
+use App\Http\Controllers\UserMan\UserController;
 use App\Http\Controllers\Viewer\ViewerController;
 use Illuminate\Support\Facades\Route;
 
@@ -31,6 +32,14 @@ Route::middleware('auth')->group(function () {
         Route::get('/dashboard', [UserManagementController::class, 'dashboard'])->name('dashboard');
         Route::get('/calendar', [UserManagementController::class, 'calendar'])->name('calendar');
         Route::get('/profile', [UserManagementController::class, 'profile'])->name('profile');
+
+        Route::get('/users', [UserManagementController::class, 'users'])->name('users');
+        Route::post('/adduser', [UserController::class, 'adduser'])->name('adduser');
+
+        Route::get('/activity_log', [UserManagementController::class, 'activity_log'])->name('activity_log');
+        Route::get('/history', [UserManagementController::class, 'history'])->name('history');
+        Route::get('/archive', [UserManagementController::class, 'archive'])->name('archive');
+        Route::post('/logout', [UserManagementController::class, 'destroy'])->name('logout');
     });
 
     // --- C. VIEWER ROUTES (Requires 'auth' + 'role.viewer') ---
