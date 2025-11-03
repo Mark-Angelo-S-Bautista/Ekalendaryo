@@ -35,7 +35,15 @@
         </div>
 
         <div class="users_searchbar">
-            <input type="text" id="search" placeholder="Search users by username or email...">
+            <form action="{{ route('UserManagement.users') }}" method="GET" style="display: flex; gap: 0.5rem;">
+                <input type="text" id="search" name="query" placeholder="Search users by username or email..."
+                    value="{{ $query ?? '' }}">
+                <button type="submit" class="search_btn">Search</button>
+
+                @if (!empty($query))
+                    <a href="{{ route('UserManagement.users') }}" class="search_clear_btn">Clear</a>
+                @endif
+            </form>
         </div>
 
         <div class="users_active_filter" id="users_active_filter">

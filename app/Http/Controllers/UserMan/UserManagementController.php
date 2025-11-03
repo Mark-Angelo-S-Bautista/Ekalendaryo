@@ -23,11 +23,17 @@ class UserManagementController extends Controller
         return view('UserManagement.profile.profile');
     }
 
-    public function users()
+    public function users(Request $request)
     {
-         // Fetch all users from the database
-        $users = User::all();
+        $query = $request->input('query'); // get the text from the search bar
 
+        // Fetch users based on search query if exists
+        $users = User::when($query, function ($q) use ($query) {
+            $q->where('name', 'like', "%{$query}%")
+              ->orWhere('email', 'like', "%{$query}%");
+        })->get();
+
+        // Count users by role
         $totalUsers = User::count();
         $userManagementCount = User::where('role', 'UserManagement')->count();
         $editorCount = User::where('role', 'Editor')->count();
@@ -38,7 +44,8 @@ class UserManagementController extends Controller
             'userManagementCount',
             'editorCount',
             'viewerCount',
-            'users'
+            'users',
+            'query'
         ));
     }
 

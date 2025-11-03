@@ -514,6 +514,7 @@ section h2 {
     align-items: center;
     gap: 0.5em;
     font-size: 13px;
+    width: 100%; /* make search bar container full width */
 }
 
 input[type="text"] {
@@ -902,4 +903,44 @@ th {
         opacity: 1;
         transform: scale(1);
     }
+}
+
+.users_searchbar input[type="text"] {
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    flex-grow: 1; /* fills remaining space */
+    width: 100%; /* ensures it stretches fully */
+    box-sizing: border-box; /* includes padding in width */
+}
+
+.search_btn,
+.search_clear_btn {
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 14px;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.search_btn {
+    background-color: #38761d;
+    color: white;
+}
+
+.search_btn:hover {
+    background-color: #316518;
+}
+
+.search_clear_btn {
+    background-color: #e5e7eb;
+    color: #333;
+}
+
+.search_clear_btn:hover {
+    background-color: #d1d5db;
 }
