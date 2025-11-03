@@ -16,7 +16,7 @@
 
     </div>
 
-    <form action="{{ route('UserManagement.logout') }}" method="post">
+    <form action="{{ route('Editor.logout') }}" method="post">
         @csrf
         <button type="submit" class="logout-btn">Logout</button>
     </form>

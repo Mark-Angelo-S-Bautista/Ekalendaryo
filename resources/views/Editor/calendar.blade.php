@@ -1,6 +1,3 @@
-@extends('components.editorLayout')
+<x-editorLayout>
 
-@section('content')
-    <h2>This is the Calendar Tab Content</h2>
-    <p>Welcome! Click another tab to navigate.</p>
-@endsection
+</x-editorLayout>

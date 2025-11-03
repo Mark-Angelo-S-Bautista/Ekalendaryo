@@ -118,5 +118,4 @@
             </section>
         </div>
     </div>
-
 </x-editorLayout>

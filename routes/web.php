@@ -24,6 +24,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/dashboard', [EditorController::class, 'dashboard'])->name('dashboard');
         Route::get('/calendar', [EditorController::class, 'calendar'])->name('calendar');
         Route::get('/profile', [EditorController::class, 'profile'])->name('profile');
+        Route::post('/logout', [EditorController::class, 'destroy'])->name('logout');
     });
 
     // --- B. USER MANAGEMENT ROUTES (Requires 'auth' + 'role.usermanagement') ---
