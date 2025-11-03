@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>User Management System</title>
+    <title>eKalendaryo - User Management</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     @vite(['resources/css/umastyle.css', 'resources/js/auth/scriptuserman.js'])
 </head>
@@ -59,7 +59,7 @@
     <hr>
 
     <main>
-        @yield('content')
+        {{ $slot }}
     </main>
 
 </body>

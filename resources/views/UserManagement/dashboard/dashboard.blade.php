@@ -1,6 +1,4 @@
-@extends('components.usermanLayout')
-
-@section('content')
+<x-usermanLayout>
     <div id="dashboard" class="tab-content active">
         <div class = "dashboard-container">
             <div class="content_head">
@@ -116,11 +114,8 @@
                             placeholder="Share your thoughts, suggestions, or questions about this event...">
                         <button class="post-button"> Post Comment</button>
                     </div>
-
                 </div>
-
-
             </section>
         </div>
     </div>
-@endsection
+</x-usermanLayout>

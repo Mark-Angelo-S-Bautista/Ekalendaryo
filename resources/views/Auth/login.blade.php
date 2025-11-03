@@ -1,6 +1,4 @@
-@extends('components.loginLayout')
-
-@section('content')
+<x-loginLayout>
     <div class="container">
         <!-- Logo placeholder (replace this image with your own) -->
         <div class="logo">
@@ -41,4 +39,4 @@
             <p>{{ session('success') }}</p>
         </div>
     @endif
-@endsection
+</x-loginLayout>

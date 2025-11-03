@@ -1,6 +1,4 @@
-@extends('components.usermanLayout')
-
-@section('content')
+<x-usermanLayout>
     <div class="container">
         <div class="users_header">
             <div class="title">User Management</div>
@@ -134,4 +132,4 @@
             <p>{{ session('success') }}</p>
         </div>
     @endif
-@endsection
+</x-usermanLayout>

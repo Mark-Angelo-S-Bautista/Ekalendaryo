@@ -1,4 +1,3 @@
-@extends('components.usermanLayout')
+<x-usermanLayout>
 
-@section('content')
-@endsection
+</x-usermanLayout>
