@@ -2,7 +2,7 @@
 <div class="adduser_overlay" id="adduser_overlay">
     <div class="adduser_modal">
         <h2>Add New User</h2>
-        <form action=" {{ route('UserManagement.adduser') }} " method="post">
+        <form action="{{ route('UserManagement.adduser') }} " method="post">
             @csrf
             <div class="adduser_form-group">
                 <label class="adduser_label">Username</label>
@@ -20,8 +20,29 @@
             </div>
 
             <div class="adduser_form-group">
-                <label class="adduser_label">Phone Number</label>
-                <input type="text" id="phoneNum" name="phoneNum" class="adduser_input" placeholder="09*********">
+                <label class="adduser_label">Department</label>
+                <select id="department" name="department" class="adduser_select" onchange="updateAddUserForm()">
+                    <option value="">Select a Department</option>
+                    @foreach ($departments as $dept)
+                        <option value="{{ $dept->department_name }}">{{ $dept->department_name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="adduser_form-group">
+                <label class="adduser_label">Year Level</label>
+                <select id="yearlevel" name="yearlevel" class="adduser_select" onchange="updateAddUserForm()">
+                    <option value="">Select a Year Level</option>
+                    <option value="1stYear">1st Year</option>
+                    <option value="2ndYear">2nd Year</option>
+                    <option value="3rdYear">3rd Year</option>
+                    <option value="4thYear">4th Year</option>
+                </select>
+            </div>
+
+            <div class="adduser_form-group">
+                <label class="adduser_label">Section</label>
+                <input type="text" id="section" name="section" class="adduser_input" placeholder="eg. A, B, C, D">
             </div>
 
             <div class="adduser_form-group">
@@ -46,7 +67,7 @@
             <div id="adduser_dynamic-fields"></div>
 
             <div class="adduser_actions">
-                <button type= "button "class="adduser_btn adduser_btn-cancel"
+                <button type="button"class="adduser_btn adduser_btn-cancel"
                     onclick="closeAddUserModal()">Cancel</button>
                 <button type="submit" class="adduser_btn adduser_btn-create">Create User</button>
             </div>

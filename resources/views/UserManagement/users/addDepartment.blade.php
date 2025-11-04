@@ -1,21 +1,19 @@
-@extends('components.usermanLayout')
-
-@section('content')
-    <!-- Add Department Modal -->
-    <div class="adddept_modal" id="adddept_modal">
-        <div class="adddept_modal_content">
-            <div class="adddept_modal_header">
-                <h2>Add New Department</h2>
-                <span class="adddept_close" id="adddept_close">&times;</span>
-            </div>
-            <p>Create a new department that will be available for user assignment.</p>
-            <label>Department Name</label>
-            <input type="text" placeholder="e.g., COMPUTER SCIENCE, BUSINESS ADMINISTRATION">
-            <small>Department names will be automatically converted to uppercase.</small>
-            <div class="adddept_actions">
-                <button class="adddept_btn cancel" id="adddept_cancel">Cancel</button>
-                <button class="adddept_btn add">Add Department</button>
-            </div>
+<div class="adddept_modal" id="adddept_overlay">
+    <div class="adddept_modal_content">
+        <div class="adddept_modal_header">
+            <h2>Add Department</h2>
+            <span class="adddept_close" onclick="closeAddDeptModal()">&times;</span>
         </div>
+        <form action="{{ route('UserManagement.adddepartment') }}" method="POST">
+            @csrf
+            <label for="department_name">Department Name</label>
+            <input type="text" id="department_name" name="department_name" placeholder="e.g. BSIT, BSA, etc."
+                required>
+
+            <div class="adddept_actions">
+                <button type="button" class="adddept_btn cancel" onclick="closeAddDeptModal()">Cancel</button>
+                <button type="submit" class="adddept_btn add">Add</button>
+            </div>
+        </form>
     </div>
-@endsection
+</div>

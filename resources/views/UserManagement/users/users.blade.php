@@ -29,7 +29,8 @@
         </div>
 
         <div class="users_top_actions">
-            <button class="users_add_department" id="openAddDept">＋ Add Department</button>
+            <a href="{{ route('UserManagement.users', ['AddDepartment' => 1]) }}"class="users_add_department">＋ Add
+                Department</a>
         </div>
 
         <div class="users_searchbar">
@@ -59,6 +60,7 @@
                         <th>ID</th>
                         <th>Name</th>
                         <th>Email</th>
+                        <th>Department</th>
                         <th>Role</th>
                         <th>Actions</th>
                     </tr>
@@ -69,6 +71,7 @@
                             <td>{{ $user->userId }}</td>
                             <td>{{ $user->name }}</td>
                             <td>{{ $user->email }}</td>
+                            <td>{{ $user->department }}</td>
                             <td>{{ $user->role }}</td>
                             <td>
                                 {{-- <a href="{{ route('UserManagement.edit', $user->id) }}">Edit</a> |
@@ -97,6 +100,9 @@
             <div class="users_modal_body" id="users_modal_body"></div>
         </div>
     </div>
+
+    {{-- ADD USER MODAL --}}
+
     @if (request()->has('AddUser'))
         @include('UserManagement.users.addUser')
         <script>
@@ -127,6 +133,37 @@
             });
         </script>
     @endif
+
+    {{-- ADD DEPARTMENT --}}
+
+    @if (request()->has('AddDepartment'))
+        @include('UserManagement.users.addDepartment')
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const deptOverlay = document.getElementById('adddept_overlay');
+                if (deptOverlay) deptOverlay.style.display = 'flex';
+
+                window.closeAddDeptModal = function() {
+                    if (deptOverlay) deptOverlay.style.display = 'none';
+                    history.replaceState(null, '', '{{ url()->current() }}');
+                };
+
+                // Optional: make Add Department button open modal client-side without page reload
+                const deptLink = document.querySelector('.users_add_department');
+                if (deptLink) {
+                    deptLink.addEventListener('click', function(e) {
+                        const href = deptLink.getAttribute('href') || '';
+                        if (href.includes('AddDepartment')) {
+                            e.preventDefault();
+                            if (deptOverlay) deptOverlay.style.display = 'flex';
+                            history.replaceState(null, '', href);
+                        }
+                    });
+                }
+            });
+        </script>
+    @endif
+
     @if (session('success'))
         <div id="toast" class="toast show">
             <p>{{ session('success') }}</p>

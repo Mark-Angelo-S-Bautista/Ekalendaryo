@@ -4,6 +4,7 @@ namespace App\Http\Controllers\UserMan;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Department;
 use Illuminate\Support\Facades\Auth;
 
 class UserManagementController extends Controller
@@ -39,14 +40,32 @@ class UserManagementController extends Controller
         $editorCount = User::where('role', 'Editor')->count();
         $viewerCount = User::where('role', 'Viewer')->count();
 
+        $departments = Department::all(); // ✅ fetch all departments
+
         return view('UserManagement.users.users', compact(
             'totalUsers',
             'userManagementCount',
             'editorCount',
             'viewerCount',
             'users',
-            'query'
+            'query',
+            'departments'
         ));
+    }
+
+    public function addDepartment(Request $request)
+    {
+        $request->validate([
+            'department_name' => 'required|string|max:255|unique:departments,department_name',
+        ]);
+
+        Department::create([
+            'department_name' => $request->department_name,
+        ]);
+
+        return redirect()
+            ->route('UserManagement.users')
+            ->with('success', 'Department added successfully!');
     }
 
     public function activity_log()

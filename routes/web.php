@@ -37,6 +37,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/users', [UserManagementController::class, 'users'])->name('users');
         Route::get('/users/search', [UserManagementController::class, 'search'])->name('search');
         Route::post('/adduser', [UserController::class, 'adduser'])->name('adduser');
+        Route::post('/addDepartment', [UserManagementController::class, 'addDepartment'])->name('adddepartment');
 
         Route::get('/activity_log', [UserManagementController::class, 'activity_log'])->name('activity_log');
         Route::get('/history', [UserManagementController::class, 'history'])->name('history');

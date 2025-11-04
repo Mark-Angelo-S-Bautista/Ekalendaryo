@@ -22,7 +22,9 @@ class UserSeeder extends Seeder
             'name' => 'Mark Angelo',
             'userId' => 'MA22013875', // The username for login
             'email' => 'gelobautista0420@gmail.com',
-            'phoneNum' => '09537329603',
+            'department' => 'BSIS/ACT',
+            'yearlevel' => '4thYear',
+            'section' => 'B',
             'role' => 'Editor',
             'password' => Hash::make('password'), // The password is 'password'
             
@@ -33,7 +35,9 @@ class UserSeeder extends Seeder
             'name' => 'Juan DelaCruz',
             'userId' => 'MA22013876', // The username for login
             'email' => 'juan@gmail.com',
-            'phoneNum' => '09537329604',
+            'department' => 'BSIS/ACT',
+            'yearlevel' => '4thYear',
+            'section' => 'B',
             'role' => 'UserManagement',
             'password' => Hash::make('password'), // The password is 'password'
         ]);
@@ -42,7 +46,9 @@ class UserSeeder extends Seeder
             'name' => 'Joenel Valeton',
             'userId' => 'MA22013877', // The username for login
             'email' => 'nel@gmail.com',
-            'phoneNum' => '09537329600',
+            'department' => 'BSOM',
+            'yearlevel' => '1stYear',
+            'section' => 'D',
             'role' => 'Editor',
             'password' => Hash::make('password'), // The password is 'password'
         ]);
@@ -51,7 +57,9 @@ class UserSeeder extends Seeder
             'name' => 'Ella Mae DeCastro',
             'userId' => 'MA22013878', // The username for login
             'email' => 'ella@gmail.com',
-            'phoneNum' => '09537329654',
+            'department' => 'BSAIS',
+            'yearlevel' => '2ndYear',
+            'section' => 'B',
             'role' => 'UserManagement',
             'password' => Hash::make('password'), // The password is 'password'
         ]);
@@ -60,7 +68,9 @@ class UserSeeder extends Seeder
             'name' => 'Kenji Dela Cruz',
             'userId' => 'MA22013879', // The username for login
             'email' => 'kenj@gmail.com',
-            'phoneNum' => '09537329999',
+            'department' => 'BTVTED',
+            'yearlevel' => '3rdYear',
+            'section' => 'A',
             'role' => 'Viewer',
             'password' => Hash::make('password'), // The password is 'password'
         ]);
