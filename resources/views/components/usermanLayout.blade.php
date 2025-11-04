@@ -14,10 +14,10 @@
             <img src="{{ asset('img/Main_logo.png') }}" alt="eKalendaryo Logo">
             <span>User Management</span>
         </div>
-        <button class="logout_btn">
-            <img src="https://img.icons8.com/ios-filled/14/064420/logout-rounded.png" />
-            Logout
-        </button>
+        <form action="{{ route('UserManagement.logout') }}" method="post">
+            @csrf
+            <button type="submit" class="logout-btn">Logout</button>
+        </form>
     </header>
 
     <nav class="navbar">

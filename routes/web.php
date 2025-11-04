@@ -38,11 +38,14 @@ Route::middleware('auth')->group(function () {
         Route::get('/users/search', [UserManagementController::class, 'search'])->name('search');
         Route::post('/adduser', [UserController::class, 'adduser'])->name('adduser');
         Route::post('/addDepartment', [UserManagementController::class, 'addDepartment'])->name('adddepartment');
+        Route::delete('/deletedepartment/{id}', [UserManagementController::class, 'deleteDepartment'])->name('deletedepartment');
         // Show edit form
         Route::get('/edituser/{id}', [UserController::class, 'edit'])->name('edit');
         // Handle update
         Route::put('/edituser/{id}', [UserController::class, 'update'])->name('update'); 
         Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('delete');
+        //Insert users using CSV file
+        Route::post('/users', [UserController::class, 'import'])->name('import');
 
         Route::get('/activity_log', [UserManagementController::class, 'activity_log'])->name('activity_log');
         Route::get('/history', [UserManagementController::class, 'history'])->name('history');

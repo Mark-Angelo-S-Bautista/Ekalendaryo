@@ -1,38 +1,49 @@
 <x-usermanLayout>
-    <div class="container">
-        <div class="users_header">
-            <div class="title">User Management</div>
-            <div class="users_header_buttons">
-                <button class="users_btn">⬆ Import Users</button>
-                <a href="{{ route('UserManagement.users', ['AddUser' => 1]) }}"class="users_btn add">＋ Add
-                    User</a>
-            </div>
-        </div>
+    <!DOCTYPE html>
+    <html lang="en">
 
-        <div class="users_cards">
-            <div class="users_card active" data-role="All Users">
-                <h2>{{ $totalUsers }}</h2>
-                <p>All Users</p>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+        @vite(['resources/css/usersTabPractice.css', 'resources/js/usersTabPractice.js'])
+    </head>
+
+    <body>
+        <div class="container">
+            <div class="users_header">
+                <div class="title">User Management</div>
+                <div class="users_header_buttons">
+                    <button id="openImportModal" class="users_btn">📥 Import Users</button>
+                    <button class="users_btn add" id="openAddUser" onclick="openAddUserModal()">＋ Add User</button>
+                </div>
             </div>
-            <div class="users_card" data-role="Department Head">
-                <h2>{{ $userManagementCount }}</h2>
-                <p>User Management</p>
-            </div>
-            <div class="users_card" data-role="Student Government Adviser">
-                <h2>{{ $editorCount }}</h2>
-                <p>Editor</p>
-            </div>
-            <div class="users_card" data-role="Sports and Cultural Adviser">
-                <h2>{{ $viewerCount }}</h2>
-                <p>Viewer</p>
+
+            <div class="users_cards">
+                <div class="users_card active" data-role="All Users">
+                    <h2>{{ $totalUsers }}</h2>
+                    <p>All Users</p>
+                </div>
+                <div class="users_card" data-role="Department Head">
+                    <h2>{{ $userManagementCount }}</h2>
+                    <p>User Management</p>
+                </div>
+                <div class="users_card" data-role="Student Government Adviser">
+                    <h2>{{ $editorCount }}</h2>
+                    <p>Editor</p>
+                </div>
+                <div class="users_card" data-role="Sports and Cultural Adviser">
+                    <h2>{{ $viewerCount }}</h2>
+                    <p>Viewer</p>
+                </div>
             </div>
         </div>
 
         <div class="users_top_actions">
-            <a href="{{ route('UserManagement.users', ['AddDepartment' => 1]) }}"class="users_add_department">＋ Add
-                Department</a>
+            <button class="users_add_department" id="openAddDept">＋ Add Department</button>
         </div>
 
+        {{-- SEARCH BAR FEATURE --}}
         <div class="users_searchbar">
             <form action="{{ route('UserManagement.users') }}" method="GET" style="display: flex; gap: 0.5rem;">
                 <input type="text" id="search" name="query" placeholder="Search users by username or email..."
@@ -43,14 +54,6 @@
                     <a href="{{ route('UserManagement.users') }}" class="search_clear_btn">Clear</a>
                 @endif
             </form>
-        </div>
-
-        <div class="users_active_filter" id="users_active_filter">
-            <span>Active filters:</span>
-            <div class="users_filter_tag">
-                <span>All Users</span>
-                <button class="users_filter_close">&times;</button>
-            </div>
         </div>
 
         <div class="users_table">
@@ -90,86 +93,190 @@
                 </tbody>
             </table>
         </div>
-    </div>
 
-    <!-- Modal -->
-    <div class="users_modal" id="users_modal">
-        <div class="users_modal_content">
-            <div class="users_modal_header">
-                <h2>Select Department</h2>
-                <span class="users_modal_close" id="users_modal_close">&times;</span>
+        <!-- Modal -->
+        <div class="users_modal" id="users_modal">
+            <div class="users_modal_content">
+                <div class="users_modal_header">
+                    <h2>Select Department</h2>
+                    <span class="users_modal_close" id="users_modal_close">&times;</span>
+                </div>
+                <p>Choose a department to filter students</p>
+                <div class="users_modal_body" id="users_modal_body"></div>
             </div>
-            <p>Choose a department to filter students</p>
-            <div class="users_modal_body" id="users_modal_body"></div>
         </div>
-    </div>
 
-    {{-- ADD USER MODAL --}}
 
-    @if (request()->has('AddUser'))
-        @include('UserManagement.users.addUser')
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const overlay = document.getElementById('adduser_overlay');
-                if (overlay) overlay.style.display = 'flex'; // show modal overlay
+        <!-- Add Department Modal -->
+        <div class="adddept_modal" id="adddept_overlay">
+            <div class="adddept_modal_content">
+                <div class="adddept_modal_header">
+                    <h2>Manage Departments</h2>
+                    <span class="adddept_close" onclick="closeAddDeptModal()">&times;</span>
+                </div>
 
-                // referenced by the Cancel button in the modal
-                window.closeAddUserModal = function() {
-                    if (overlay) overlay.style.display = 'none';
-                    // remove the query param from the URL without reloading
-                    history.replaceState(null, '', '{{ url()->current() }}');
-                };
+                {{-- Add Department Form --}}
+                <form action="{{ route('UserManagement.adddepartment') }}" method="POST">
+                    @csrf
+                    <label for="department_name">Add New Department</label>
+                    <input type="text" id="department_name" name="department_name" placeholder="e.g. BSIT, BSA, etc."
+                        required>
 
-                // optionally: open modal without navigating (if user clicks the Add link)
-                const addLink = document.querySelector('a.users_btn.add');
-                if (addLink) {
-                    addLink.addEventListener('click', function(e) {
-                        // if href points to same page with ?AddUser=1, prevent navigation and show modal client-side
-                        const href = addLink.getAttribute('href') || '';
-                        if (href.includes('AddUser')) {
-                            e.preventDefault();
-                            if (overlay) overlay.style.display = 'flex';
-                            history.replaceState(null, '', href);
-                        }
-                    });
-                }
-            });
-        </script>
-    @endif
+                    <div class="adddept_actions">
+                        <button type="button" class="adddept_btn cancel" onclick="closeAddDeptModal()">Cancel</button>
+                        <button type="submit" class="adddept_btn add">Add</button>
+                    </div>
+                </form>
 
-    {{-- ADD DEPARTMENT --}}
-
-    @if (request()->has('AddDepartment'))
-        @include('UserManagement.users.addDepartment')
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const deptOverlay = document.getElementById('adddept_overlay');
-                if (deptOverlay) deptOverlay.style.display = 'flex';
-
-                window.closeAddDeptModal = function() {
-                    if (deptOverlay) deptOverlay.style.display = 'none';
-                    history.replaceState(null, '', '{{ url()->current() }}');
-                };
-
-                // Optional: make Add Department button open modal client-side without page reload
-                const deptLink = document.querySelector('.users_add_department');
-                if (deptLink) {
-                    deptLink.addEventListener('click', function(e) {
-                        const href = deptLink.getAttribute('href') || '';
-                        if (href.includes('AddDepartment')) {
-                            e.preventDefault();
-                            if (deptOverlay) deptOverlay.style.display = 'flex';
-                            history.replaceState(null, '', href);
-                        }
-                    });
-                }
-            });
-        </script>
-    @endif
-
-    @if (session('success'))
-        <div id="toast" class="toast show">
-            <p>{{ session('success') }}</p>
+                {{-- Existing Departments --}}
+                <div class="adddept_list">
+                    <h3>Existing Departments</h3>
+                    @if ($departments->count() > 0)
+                        <ul>
+                            @foreach ($departments as $department)
+                                <li>
+                                    <span>{{ $department->department_name }}</span>
+                                    <form action="{{ route('UserManagement.deletedepartment', $department->id) }}"
+                                        method="POST" style="display:inline;"
+                                        onsubmit="return confirm('Delete {{ $department->department_name }}?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="delete-dept-btn">🗑️</button>
+                                    </form>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @else
+                        <p class="no-dept">No departments found.</p>
+                    @endif
+                </div>
+            </div>
         </div>
-    @endif
+
+
+
+        <!-- Add User Modal -->
+        <div class="adduser_overlay" id="adduser_overlay">
+            <div class="adduser_modal">
+                <h2>Add New User</h2>
+                <form action="{{ route('UserManagement.adduser') }} " method="post">
+                    @csrf
+                    <div class="adduser_form-group">
+                        <label class="adduser_label">Username</label>
+                        <input type="text" id="name" name="name" class="adduser_input">
+                    </div>
+
+                    <div class="adduser_form-group">
+                        <label class="adduser_label">Student ID or Employee ID</label>
+                        <input type="text" id="userId" name="userId" class="adduser_input" placeholder="userId">
+                    </div>
+
+                    <div class="adduser_form-group">
+                        <label class="adduser_label">Email</label>
+                        <input type="email" id="email" name="email" class="adduser_input"
+                            placeholder="user@gmail.com">
+                    </div>
+
+                    <div class="adduser_form-group">
+                        <label class="adduser_label">Department</label>
+                        <select id="department" name="department" class="adduser_select"
+                            onchange="updateAddUserForm()">
+                            <option value="">Select a Department</option>
+                            @foreach ($departments as $dept)
+                                <option value="{{ $dept->department_name }}">{{ $dept->department_name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="adduser_form-group">
+                        <label class="adduser_label">Year Level</label>
+                        <select id="yearlevel" name="yearlevel" class="adduser_select"
+                            onchange="updateAddUserForm()">
+                            <option value="">Select a Year Level</option>
+                            <option value="1stYear">1st Year</option>
+                            <option value="2ndYear">2nd Year</option>
+                            <option value="3rdYear">3rd Year</option>
+                            <option value="4thYear">4th Year</option>
+                        </select>
+                    </div>
+
+                    <div class="adduser_form-group">
+                        <label class="adduser_label">Section</label>
+                        <input type="text" id="section" name="section" class="adduser_input"
+                            placeholder="eg. A, B, C, D">
+                    </div>
+
+                    <div class="adduser_form-group">
+                        <label class="adduser_label">Role</label>
+                        <select id="role" name="role" class="adduser_select" onchange="updateAddUserForm()">
+                            <option value="">Select a role</option>
+                            <option value="Viewer">Viewer</option>
+                            <option value="Editor">Editor</option>
+                            <option value="UserManagement">User Management</option>
+                        </select>
+                    </div>
+
+                    <div class="adduser_form-group">
+                        <label class="adduser_label">Default Password</label>
+                        <div class="adduser_password-box">
+                            <span class="adduser_password-lock">🔒</span>
+                            <input type="text" id="password" name="password" class="adduser_input"
+                                value="password" readonly>
+                        </div>
+                    </div>
+
+                    <div id="adduser_dynamic-fields"></div>
+
+                    <div class="adduser_actions">
+                        <button type="button"class="adduser_btn adduser_btn-cancel"
+                            onclick="closeAddUserModal()">Cancel</button>
+                        <button type="submit" class="adduser_btn adduser_btn-create">Create User</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Import Users Modal -->
+        <form action="{{ route('UserManagement.import') }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            <div class="import_modal" id="import_modal">
+                <div class="import_modal_content">
+                    <div class="import_modal_header">
+                        <h2>Import Users from CSV</h2>
+                        <span class="import_modal_close" id="import_close">&times;</span>
+                    </div>
+
+                    <div class="import_modal_body">
+                        <a href="{{ asset('files/user_import_template.csv') }}" download
+                            class="download_template_btn">⬇
+                            Download
+                            Template</a>
+                        <p style="font-size: 13px; color:#333;">Download the template first, then fill it with user
+                            data
+                        </p>
+
+                        <div class="import_file_input">
+                            <label for="csv_file" id="file_label">Choose File: No file chosen</label><br>
+                            <input type="file" id="csv_file" name="csv_file" accept=".csv" required
+                                style="display:none;">
+                        </div>
+                    </div>
+
+                    <div class="import_modal_actions">
+                        <button type="button" class="import_btn cancel" id="import_cancel">Cancel</button>
+                        <button type="submit" class="import_btn import">Import Users</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        @if (session('success'))
+            <div id="toast" class="toast show">
+                <p>{{ session('success') }}</p>
+            </div>
+        @endif
+
+    </body>
+
+    </html>
 </x-usermanLayout>

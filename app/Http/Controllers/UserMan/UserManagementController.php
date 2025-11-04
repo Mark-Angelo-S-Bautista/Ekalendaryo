@@ -68,6 +68,12 @@ class UserManagementController extends Controller
             ->with('success', 'Department added successfully!');
     }
 
+    public function deleteDepartment($id)
+    {
+        Department::findOrFail($id)->delete();
+        return back()->with('success', 'Department deleted successfully!');
+    }
+
     public function activity_log()
     {
         return view('UserManagement.activity_log.activity_log');

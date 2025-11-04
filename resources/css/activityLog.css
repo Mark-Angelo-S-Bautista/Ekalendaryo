@@ -100,3 +100,25 @@ body {
     background-color: #f6fff7;
     min-height: 100vh;
 }
+.logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border: 1px solid #006400;
+    border-radius: 6px;
+    background: none;
+    color: #006400;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: 0.2s ease;
+}
+
+.logout-btn:hover {
+    background: #006400;
+    color: #fff;
+}
+
+.logout-btn .icon {
+    font-style: normal; /* so it doesn’t go italic */
+}

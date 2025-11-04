@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Department;
 use Illuminate\Support\Facades\Hash;
+use League\Csv\Reader;
 
 class UserController extends Controller
 {
@@ -35,12 +36,12 @@ class UserController extends Controller
 
         return redirect()->route('UserManagement.users')->with('success', 'User added successfully!');
     }
-    public function edit($id)
+    public function edit($id)// ADDS DEPARTMENT
     {
         $user = User::findOrFail($id);
         $departments = Department::all(); // adjust if your model is named differently
 
-        return view('UserManagement.users.editUser', compact('user', 'departments'));
+        return view('UserManagement.users.editUser', compact('user', 'departments'))->with('success', 'Department Added Successfully');
     }
 
     public function update(Request $request, $id)
@@ -75,5 +76,39 @@ class UserController extends Controller
         $user->delete();
 
         return redirect()->route('UserManagement.users')->with('success', 'User deleted successfully!');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'csv_file' => 'required|mimes:csv,txt',
+        ]);
+
+        $file = $request->file('csv_file');
+
+        // Open CSV using League\Csv (install via composer require league/csv)
+        $csv = Reader::createFromPath($file->getRealPath(), 'r');
+        $csv->setHeaderOffset(0); // first row as header
+        $defaultpassword = 'password';
+
+        $records = $csv->getRecords(); // iterable
+
+        foreach ($records as $record) {
+            // Example CSV columns: name,userId,email,department,yearlevel,section,role,password
+            User::updateOrCreate(
+                ['userId' => $record['userId']], // match by userId
+                [
+                    'name' => $record['name'],
+                    'email' => $record['email'],
+                    'department' => $record['department'] ?? null,
+                    'yearlevel' => $record['yearlevel'] ?? null,
+                    'section' => $record['section'] ?? null,
+                    'role' => $record['role'] ?? 'Viewer',
+                    'password' => Hash::make($record['password'] ?? $defaultpassword), // default password
+                ]
+            );
+        }
+
+        return redirect()->back()->with('success', 'Users imported successfully!');
     }
 }
