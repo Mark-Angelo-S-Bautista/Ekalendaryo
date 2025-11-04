@@ -1,0 +1,102 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Inter", sans-serif;
+}
+
+body {
+    background-color: #f6fff7;
+    color: #1c1c1c;
+}
+
+/* Main Content */
+.content {
+    padding: 30px 50px;
+}
+
+.content h2 {
+    font-size: 1.5em;
+    margin-bottom: 15px;
+}
+
+.activity-section {
+    background-color: #ecfff0;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.activity-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    margin-bottom: 20px;
+}
+
+.activity-card {
+    background-color: #dfffde;
+    border-radius: 10px;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.activity-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.activity-card-header .icon {
+    font-size: 20px;
+    background-color: #c7f7c8;
+    border-radius: 50%;
+    padding: 5px 10px;
+    margin-right: 10px;
+}
+
+.activity-card-header .info h4 {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.activity-card-header .info p {
+    font-size: 14px;
+    color: #333;
+}
+
+.activity-card-header .status {
+    background-color: #b2f0b4;
+    color: #075e2f;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+}
+
+.activity-meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    font-size: 14px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    gap: 5px;
+}
+
+.activity-meta .performed {
+    grid-column: span 2;
+    color: #555;
+}
+
+.activity-details {
+    background-color: #f8fdf8;
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+/* Outer container for rounded edge (like screenshot) */
+.wrapper {
+    background-color: #f6fff7;
+    min-height: 100vh;
+}
