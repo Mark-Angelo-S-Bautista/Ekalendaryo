@@ -38,6 +38,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/users/search', [UserManagementController::class, 'search'])->name('search');
         Route::post('/adduser', [UserController::class, 'adduser'])->name('adduser');
         Route::post('/addDepartment', [UserManagementController::class, 'addDepartment'])->name('adddepartment');
+        // Show edit form
+        Route::get('/edituser/{id}', [UserController::class, 'edit'])->name('edit');
+        // Handle update
+        Route::put('/edituser/{id}', [UserController::class, 'update'])->name('update'); 
+        Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('delete');
 
         Route::get('/activity_log', [UserManagementController::class, 'activity_log'])->name('activity_log');
         Route::get('/history', [UserManagementController::class, 'history'])->name('history');

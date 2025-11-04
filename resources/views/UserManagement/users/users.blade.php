@@ -74,13 +74,16 @@
                             <td>{{ $user->department }}</td>
                             <td>{{ $user->role }}</td>
                             <td>
-                                {{-- <a href="{{ route('UserManagement.edit', $user->id) }}">Edit</a> |
+                                <a href="{{ route('UserManagement.edit', $user->id) }}" class="edit-btn">✏️ Edit</a> |
                                 <form action="{{ route('UserManagement.delete', $user->id) }}" method="POST"
-                                    style="display:inline">
+                                    style="display:inline;">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" onclick="return confirm('Are you sure?')">Delete</button>
-                                </form> --}}
+                                    <button type="submit" class="delete-btn"
+                                        onclick="return confirm('Are you sure you want to delete this user?')">
+                                        🗑️ Delete
+                                    </button>
+                                </form>
                             </td>
                         </tr>
                     @endforeach
