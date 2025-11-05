@@ -3,6 +3,7 @@
     <head>
         @vite(['resources/css/editor/editEvents.css'])
     </head>
+
     <div class="edit-event-container">
         <h1>Edit Event</h1>
 
@@ -35,9 +36,29 @@
                 <input type="time" name="end_time" value="{{ $event->end_time }}" required>
             </div>
 
+            <!-- Updated Event Location Field -->
             <div class="form-group">
-                <label>Event location</label>
-                <input type="text" name="location" value="{{ $event->location }}" required>
+                <label for="eventLocation">Event Location</label>
+
+                @php
+                    $locations = ['Covered Court', 'Activity Center', 'Library', 'Audio Visual Room', 'Auditorium'];
+                    $isOther = !in_array($event->location, $locations);
+                @endphp
+
+                <select id="eventLocation" name="location" required onchange="toggleOtherLocation()"
+                    class="form-control">
+                    <option value="">-- Select a location --</option>
+                    @foreach ($locations as $location)
+                        <option value="{{ $location }}" {{ $event->location === $location ? 'selected' : '' }}>
+                            {{ $location }}
+                        </option>
+                    @endforeach
+                    <option value="Other" {{ $isOther ? 'selected' : '' }}>Other</option>
+                </select>
+
+                <input type="text" id="otherLocation" name="location" placeholder="Please specify location"
+                    class="form-control" style="{{ $isOther ? '' : 'display: none;' }} margin-top: 10px;"
+                    value="{{ $isOther ? $event->location : '' }}">
             </div>
 
             <div class="form-group">
@@ -57,4 +78,20 @@
             <a href="{{ route('Editor.index') }}" class="btn-cancel">Cancel</a>
         </form>
     </div>
+
+    <script>
+        function toggleOtherLocation() {
+            const select = document.getElementById('eventLocation');
+            const otherInput = document.getElementById('otherLocation');
+
+            if (select.value === 'Other') {
+                otherInput.style.display = 'block';
+                otherInput.required = true;
+            } else {
+                otherInput.style.display = 'none';
+                otherInput.required = false;
+                otherInput.value = '';
+            }
+        }
+    </script>
 </x-editorLayout>

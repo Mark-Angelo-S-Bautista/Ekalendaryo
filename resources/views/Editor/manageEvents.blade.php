@@ -54,10 +54,39 @@
                             </div>
 
                             <div class="form-group">
-                                <label>Event location</label>
-                                <input type="text" id="eventLocation" name="location" placeholder="Event location"
-                                    required>
+                                <label for="eventLocation">Event Location</label>
+                                <select id="eventLocation" name="location" required onchange="toggleOtherLocation()"
+                                    class="form-control">
+                                    <option value="">-- Select a location --</option>
+                                    <option value="Covered Court">Covered Court</option>
+                                    <option value="Activity Center">Activity Center</option>
+                                    <option value="Library">Library</option>
+                                    <option value="Audio Visual Room">Audio Visual Room</option>
+                                    <option value="Auditorium">Auditorium</option>
+                                    <option value="Other">Other</option>
+                                </select>
+
+                                <!-- Input for custom location -->
+                                <input type="text" id="location" name="location"
+                                    placeholder="Please specify location" class="form-control"
+                                    style="display: none; margin-top: 10px;">
                             </div>
+
+                            <script>
+                                function toggleOtherLocation() {
+                                    const select = document.getElementById('eventLocation');
+                                    const otherInput = document.getElementById('otherLocation');
+
+                                    if (select.value === 'Other') {
+                                        otherInput.style.display = 'block';
+                                        otherInput.required = true;
+                                    } else {
+                                        otherInput.style.display = 'none';
+                                        otherInput.required = false;
+                                        otherInput.value = '';
+                                    }
+                                }
+                            </script>
 
                             <div class="form-group">
                                 <label>Target Year Levels</label>

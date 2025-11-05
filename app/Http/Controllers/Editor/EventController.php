@@ -19,16 +19,20 @@ class EventController extends Controller
             'target_year_levels' => 'nullable|array',
         ]);
 
+        $location = $request->location === 'Other'
+            ? $request->other_location
+            : $request->location;
+
         Event::create([
             'title' => $validated['title'],
             'description' => $validated['description'] ?? null,
             'date' => $validated['date'],
             'start_time' => $validated['start_time'],
             'end_time' => $validated['end_time'],
-            'location' => $validated['location'],
-            'school_year' => 'SY.2025-2026', // static for now
+            'location' => $location, // use the processed value
+            'school_year' => 'SY.2025-2026',
             'target_year_levels' => $validated['target_year_levels'] ?? [],
-            'department' => Auth::user()->department, // ← add this line
+            'department' => Auth::user()->department,
         ]);
 
         return redirect()->back()->with('success', 'Event created successfully!');
