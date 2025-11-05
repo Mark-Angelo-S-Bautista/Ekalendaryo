@@ -24,86 +24,79 @@
                         <h2>Create New Event</h2>
                         <p>Fill in the event details to create a new event</p>
 
-                        <div class="form-group">
-                            <label>Event title</label>
-                            <input type="text" placeholder="Event title">
-                        </div>
+                        <form action="{{ route('Editor.store') }}" method="POST">
+                            @csrf
 
-                        <div class="form-group">
-                            <label>Event description</label>
-                            <textarea placeholder="Event description"></textarea>
-                        </div>
+                            <div class="form-group">
+                                <label>Event title</label>
+                                <input type="text" id="eventTitle" name="title" placeholder="Event title" required>
+                            </div>
 
-                        <div class="form-group">
-                            <label>Date</label>
-                            <input type="date">
-                        </div>
+                            <div class="form-group">
+                                <label>Event description</label>
+                                <input type="text" id="eventDescription" name="description"
+                                    placeholder="Event Description">
+                            </div>
 
-                        <div class="form-group">
-                            <label>Start Time</label>
-                            <input type="time">
-                        </div>
+                            <div class="form-group">
+                                <label>Date</label>
+                                <input type="date" id="eventDate" name="date" required>
+                            </div>
 
-                        <div class="form-group">
-                            <label>End Time</label>
-                            <input type="time">
-                        </div>
+                            <div class="form-group">
+                                <label>Start Time</label>
+                                <input type="time" id="startTime" name="start_time" required>
+                            </div>
 
-                        <div class="form-group">
-                            <label>Event location</label>
-                            <input type="text" placeholder="Event location">
-                        </div>
+                            <div class="form-group">
+                                <label>End Time</label>
+                                <input type="time" id="endTime" name="end_time" required>
+                            </div>
 
-                        <div class="form-group">
-                            <label>School Year</label>
-                            <input type="text" placeholder="SY.2025-2026" disabled>
-                            <div class="note">Format: SY.YYYY-YYYY</div>
-                        </div>
+                            <div class="form-group">
+                                <label>Event location</label>
+                                <input type="text" id="eventLocation" name="location" placeholder="Event location"
+                                    required>
+                            </div>
 
-                        <div class="form-group">
-                            <label>Notification Settings</label>
-                            <label>Date</label>
-                            <input type="date">
-                            <label>Time</label>
-                            <input type="time">
-                        </div>
+                            <div class="form-group">
+                                <label>Target Year Levels</label>
+                                <p class="note">Select which year levels of students will receive notifications for
+                                    this
+                                    event</p>
 
-                        <div class="form-group">
-                            <label>Target Year Levels</label>
-                            <p class="note">Select which year levels of students will receive notifications for this
-                                event</p>
+                                <div class="checkbox_select">
+                                    <div class="checkbox-inline">
+                                        <input type="checkbox" id="select_all_create">
+                                        <label for="select_all_create">Select All Year Levels</label>
+                                    </div>
+                                </div>
 
-                            <div class="checkbox_select">
-                                <div class="checkbox-inline">
-                                    <input type="checkbox" id="select_all_create">
-                                    <label for="select_all_create">Select All Year Levels</label>
+                                <div class="checkbox-group">
+                                    <div class="checkbox-inline">
+                                        <input type="checkbox" name="target_year_levels[]" value="1st Year"
+                                            class="syear"> 1st Year
+                                    </div>
+                                    <div class="checkbox-inline">
+                                        <input type="checkbox" name="target_year_levels[]" value="2nd Year"
+                                            class="syear"> 2nd Year
+                                    </div>
+                                    <div class="checkbox-inline">
+                                        <input type="checkbox" name="target_year_levels[]" value="3rd Year"
+                                            class="syear"> 3rd Year
+                                    </div>
+                                    <div class="checkbox-inline">
+                                        <input type="checkbox" name="target_year_levels[]" value="4th Year"
+                                            class="syear"> 4th Year
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="checkbox-group">
-                                <div class="checkbox-inline">
-                                    <input type="checkbox" id="year1_create" class="syear">
-                                    <label for="year1_create">1st Year</label>
-                                </div>
-                                <div class="checkbox-inline">
-                                    <input type="checkbox" id="year2_create" class="syear">
-                                    <label for="year2_create">2nd Year</label>
-                                </div>
-                                <div class="checkbox-inline">
-                                    <input type="checkbox" id="year3_create" class="syear">
-                                    <label for="year3_create">3rd Year</label>
-                                </div>
-                                <div class="checkbox-inline">
-                                    <input type="checkbox" id="year4_create" class="syear">
-                                    <label for="year4_create">4th Year</label>
-                                </div>
+                            <div class="button-group">
+                                <button type="button" class="btn-cancel" id="closeModalBtn">Cancel</button>
+                                <button type="submit" class="btn-create">Create Event</button>
                             </div>
-                        </div>
-
-                        <div class="button-group">
-                            <button class="btn-cancel" id="closeModalBtn">Cancel</button>
-                            <button class="btn-create">Create Event</button>
-                        </div>
+                        </form>
                     </div>
                 </div>
 
@@ -197,28 +190,57 @@
                 </div>
 
                 <!-- Sample Event Cards -->
-                <div class="event-card">
-                    <div class="event-header">
-                        <h2>CS Department Meeting</h2>
-                        <div class="tags">
-                            <span class="tag department">department</span>
-                            <span class="tag upcoming">upcoming</span>
+                @if ($events->count() > 0)
+                    @foreach ($events as $event)
+                        <div class="event-card">
+                            <div class="event-header">
+                                <h2>{{ $event->title }}</h2>
+                                {{-- DITO AY DAPAT MAGING DYNAMIC YUNG TAGS BASED DUN SA ACCOUNT --}}
+                                <div class="tags">
+                                    <span class="tag department">department</span>
+                                    <span class="tag upcoming">
+                                        @if (strtotime($event->date) > time())
+                                            upcoming
+                                        @else
+                                            past
+                                        @endif
+                                    </span>
+                                </div>
+                            </div>
+
+                            <p>{{ $event->description ?? 'No description available.' }}</p>
+
+                            <div class="event-info">
+                                <span>📅 {{ \Carbon\Carbon::parse($event->date)->format('M d, Y') }}</span>
+                                <span>⏰ {{ \Carbon\Carbon::parse($event->start_time)->format('H:i') }} -
+                                    {{ \Carbon\Carbon::parse($event->end_time)->format('H:i') }}</span>
+                                <span>📍 {{ $event->location }}</span>
+                            </div>
+
+                            <div class="actions">
+                                <button class="edit" data-id="{{ $event->id }}">✏️</button>
+
+                                <form action="{{ route('Editor.destroy', $event->id) }}" method="POST"
+                                    style="display:inline;">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="delete"
+                                        onclick="return confirm('Are you sure you want to delete this event?')">🗑️</button>
+                                </form>
+                            </div>
                         </div>
-                    </div>
-                    <p>Monthly department meeting to discuss curriculum updates</p>
-                    <div class="event-info">
-                        <span>📅 9/1/2025</span>
-                        <span>⏰ 14:00</span>
-                        <span>📍 CS Conference Room</span>
-                    </div>
-                    <div class="actions">
-                        <button class="edit" id="editModal_btn">✏️</button>
-                        <button class="delete">🗑️</button>
-                    </div>
-                </div>
+                    @endforeach
+                @else
+                    <p style="color:#555; text-align:center;">No events found. Create one to get started!</p>
+                @endif
 
             </div>
         </div>
+        @if (session('success'))
+            <div id="toast" class="toast show">
+                <p>{{ session('success') }}</p>
+            </div>
+        @endif
     </body>
 
     </html>

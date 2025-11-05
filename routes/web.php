@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\UserMan\UserManagementController;
+use App\Http\Controllers\Editor\EventController;
 use App\Http\Controllers\Editor\EditorController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\UserMan\UserController;
@@ -23,12 +24,17 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role.editor')->prefix('editor')->name('Editor.')->group(function () {
         Route::get('/dashboard', [EditorController::class, 'dashboard'])->name('dashboard');
         Route::get('/calendar', [EditorController::class, 'calendar'])->name('calendar');
-        Route::get('/manageEvents', [EditorController::class, 'manageEvents'])->name('manageEvents');
+        // Route::get('/ManageEvents', [EditorController::class, 'manageEvents'])->name('manageEvents');
         Route::get('/activity_log', [EditorController::class, 'activity_log'])->name('activity_log');
         Route::get('/history', [EditorController::class, 'history'])->name('history');
         Route::get('/archive', [EditorController::class, 'archive'])->name('archive');
         Route::get('/profile', [EditorController::class, 'profile'])->name('profile');
         Route::post('/logout', [EditorController::class, 'destroy'])->name('logout');
+
+        //Insert event into Database
+        Route::get('/manageEvents', [EventController::class, 'index'])->name('index');
+        Route::post('/manageEvents', [EventController::class, 'store'])->name('store');
+        Route::delete('/manageEvents/{id}', [EventController::class, 'destroy'])->name('destroy');
     });
 
     // --- B. USER MANAGEMENT ROUTES (Requires 'auth' + 'role.usermanagement') ---
