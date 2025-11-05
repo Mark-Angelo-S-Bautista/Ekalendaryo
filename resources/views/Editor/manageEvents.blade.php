@@ -109,7 +109,7 @@
                                 <h2>{{ $event->title }}</h2>
                                 {{-- DITO AY DAPAT MAGING DYNAMIC YUNG TAGS BASED DUN SA ACCOUNT --}}
                                 <div class="tags">
-                                    <span class="tag department">department</span>
+                                    <span class="tag department">{{ $event->department }}</span>
                                     <span class="tag upcoming">
                                         @if (strtotime($event->date) > time())
                                             upcoming

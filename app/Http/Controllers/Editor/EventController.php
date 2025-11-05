@@ -3,6 +3,7 @@ namespace App\Http\Controllers\Editor;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;    
 use App\Models\Event;
+use Illuminate\Support\Facades\Auth;
 
 class EventController extends Controller
 {
@@ -27,6 +28,7 @@ class EventController extends Controller
             'location' => $validated['location'],
             'school_year' => 'SY.2025-2026', // static for now
             'target_year_levels' => $validated['target_year_levels'] ?? [],
+            'department' => Auth::user()->department, // ← add this line
         ]);
 
         return redirect()->back()->with('success', 'Event created successfully!');
@@ -34,18 +36,31 @@ class EventController extends Controller
 
     public function index()
     {
-        $events = Event::orderBy('date', 'asc')->get();
+        $userDepartment = Auth::user()->department;
+
+        $events = Event::where('department', $userDepartment)
+                    ->orderBy('date', 'asc')
+                    ->get();
+
         return view('Editor.manageEvents', compact('events'));
     }
+    
     public function edit($id)
     {
-        $event = Event::findOrFail($id);
+        $event = Event::where('id', $id)
+                  ->where('department', Auth::user()->department)
+                  ->firstOrFail();
+
         return view('Editor.editEvents', compact('event'));
     }
 
     public function update(Request $request, $id)
     {
-            $validated = $request->validate([
+        $event = Event::where('id', $id)
+                  ->where('department', Auth::user()->department)
+                  ->firstOrFail();
+
+        $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'date' => 'required|date',
@@ -71,7 +86,10 @@ class EventController extends Controller
 
     public function destroy($id)
     {
-        $event = Event::findOrFail($id);
+        $event = Event::where('id', $id)
+                  ->where('department', Auth::user()->department)
+                  ->firstOrFail();
+
         $event->delete();
 
         return redirect()->back()->with('success', 'Event deleted successfully!');

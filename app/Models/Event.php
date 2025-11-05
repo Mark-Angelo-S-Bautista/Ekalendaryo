@@ -15,6 +15,7 @@ class Event extends Model
         'location',
         'school_year',
         'target_year_levels',
+        'department',
     ];
 
     protected $casts = [
