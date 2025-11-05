@@ -13,7 +13,7 @@ class EventController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'date' => 'required|date',
+            'date' => 'required|date|after_or_equal:today',
             'start_time' => 'required',
             'end_time' => 'required',
             'location' => 'required|string|max:255',
@@ -46,6 +46,7 @@ class EventController extends Controller
                     'start_time' => $conflict->start_time,
                     'end_time' => $conflict->end_time,
                     'location' => $conflict->location,
+                    'department' => $conflict->department,
                 ]);
         }
 
@@ -95,7 +96,7 @@ class EventController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'date' => 'required|date',
+            'date' => 'required|date|after_or_equal:today',
             'start_time' => 'required',
             'end_time' => 'required',
             'location' => 'required|string|max:255',
@@ -188,6 +189,7 @@ class EventController extends Controller
                     'start_time' => $conflict->start_time,
                     'end_time' => $conflict->end_time,
                     'location' => $conflict->location,
+                    'department' => $conflict->department,
                 ]
             ]);
         }

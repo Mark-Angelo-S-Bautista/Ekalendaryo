@@ -41,7 +41,7 @@
 
             <div class="form-group">
                 <label>Date</label>
-                <input type="date" name="date" value="{{ $event->date }}" required>
+                <input type="date" name="date" value="{{ $event->date }}" required min="{{ date('Y-m-d') }}">
             </div>
 
             <div class="form-group">

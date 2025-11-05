@@ -40,7 +40,7 @@
 
                             <div class="form-group">
                                 <label>Date</label>
-                                <input type="date" id="eventDate" name="date" required>
+                                <input type="date" id="eventDate" name="date" required min="{{ date('Y-m-d') }}">
                             </div>
 
                             <div class="form-group">
@@ -141,6 +141,7 @@
                                 warningDiv.style.color = 'red';
                                 warningDiv.style.marginTop = '10px';
                                 warningDiv.style.fontWeight = '500';
+                                warningDiv.style.display = 'none';
                                 document.querySelector('.modal form').appendChild(warningDiv);
 
                                 function checkConflict() {
@@ -153,6 +154,7 @@
 
                                     // Skip if required fields are empty
                                     if (!date || !start || !end || !location) {
+                                        warningDiv.style.display = 'none';
                                         createBtn.disabled = false;
                                         warningDiv.innerHTML = '';
                                         return;
@@ -175,15 +177,18 @@
                                         .then(data => {
                                             if (data.conflict) {
                                                 createBtn.disabled = true;
+                                                warningDiv.style.display = 'block';
                                                 warningDiv.innerHTML = `
                                                 ⚠️ <b>Schedule Conflict!</b><br>
                                                 Event: <b>${data.event.title}</b><br>
+                                                Department: ${data.event.department}</br>
                                                 Date: ${data.event.date}<br>
                                                 Time: ${data.event.start_time} - ${data.event.end_time}<br>
                                                 Location: ${data.event.location}
                                             `;
                                             } else {
                                                 createBtn.disabled = false;
+                                                warningDiv.style.display = 'none';
                                                 warningDiv.innerHTML = '';
                                             }
                                         })
