@@ -1,7 +1,4 @@
 <x-usermanLayout>
-    <x-slot:vite>
-        @vite(['resources/css/userman/UserManDashboard.css', 'resources/js/userman/UserManDashboard.js'])
-    </x-slot:vite>
     <div class="dashboard_container">
         <!-- Welcome -->
         <section class="dashboard_welcome_card">

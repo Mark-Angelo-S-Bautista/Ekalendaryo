@@ -17,6 +17,26 @@ class EditorController extends Controller
         return view('Editor.calendar');
     }
 
+    public function manageEvents()
+    {
+        return view('Editor.manageEvents');
+    }
+
+    public function activity_log()
+    {
+        return view('Editor.activity_log');
+    }
+
+    public function history()
+    {
+        return view('Editor.history');
+    }
+
+    public function archive()
+    {
+        return view('Editor.archive');
+    }
+
     public function profile()
     {
         return view('Editor.profile');

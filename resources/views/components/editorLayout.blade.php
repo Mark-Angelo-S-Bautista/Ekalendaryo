@@ -5,7 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>eKalendaryo</title>
-    @vite(['resources/css/UserManDashboard.css', 'resources/js/UserManDashboard.js'])
+    @vite(['resources/css/editor/dashboard.css', 'resources/js/editor/dashboard.js'])
 </head>
 
 <header>
@@ -21,32 +21,32 @@
     </header>
 
     <nav class="navbar">
-        <a href="{{ route('UserManagement.dashboard') }}"
-            class="nav_item {{ request()->routeIs('UserManagement.dashboard') ? 'active' : '' }}">
+        <a href="{{ route('Editor.dashboard') }}"
+            class="nav_item {{ request()->routeIs('Editor.dashboard') ? 'active' : '' }}">
             Dashboard
         </a>
-        <a href="{{ route('UserManagement.calendar') }}"
-            class="nav_item {{ request()->routeIs('UserManagement.calendar') ? 'active' : '' }}">
+        <a href="{{ route('Editor.calendar') }}"
+            class="nav_item {{ request()->routeIs('Editor.calendar') ? 'active' : '' }}">
             Calendar
         </a>
-        <a href="{{ route('UserManagement.users') }}"
-            class="nav_item {{ request()->routeIs('UserManagement.users') ? 'active' : '' }}">
-            Users
+        <a href="{{ route('Editor.manageEvents') }}"
+            class="nav_item {{ request()->routeIs('Editor.manageEvents') ? 'active' : '' }}">
+            Manage Events
         </a>
-        <a href="{{ route('UserManagement.activity_log') }}"
-            class="nav_item {{ request()->routeIs('UserManagement.activity_log') ? 'active' : '' }}">
+        <a href="{{ route('Editor.activity_log') }}"
+            class="nav_item {{ request()->routeIs('Editor.activity_log') ? 'active' : '' }}">
             Activity Log
         </a>
-        <a href="{{ route('UserManagement.history') }}"
-            class="nav_item {{ request()->routeIs('UserManagement.history') ? 'active' : '' }}">
+        <a href="{{ route('Editor.history') }}"
+            class="nav_item {{ request()->routeIs('Editor.history') ? 'active' : '' }}">
             History
         </a>
-        <a href="{{ route('UserManagement.archive') }}"
-            class="nav_item {{ request()->routeIs('UserManagement.archive') ? 'active' : '' }}">
+        <a href="{{ route('Editor.archive') }}"
+            class="nav_item {{ request()->routeIs('Editor.archive') ? 'active' : '' }}">
             Archive
         </a>
-        <a href="{{ route('UserManagement.profile') }}"
-            class="nav_item {{ request()->routeIs('UserManagement.profile') ? 'active' : '' }}">
+        <a href="{{ route('Editor.profile') }}"
+            class="nav_item {{ request()->routeIs('Editor.profile') ? 'active' : '' }}">
             Profile
         </a>
 

@@ -23,6 +23,10 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role.editor')->prefix('editor')->name('Editor.')->group(function () {
         Route::get('/dashboard', [EditorController::class, 'dashboard'])->name('dashboard');
         Route::get('/calendar', [EditorController::class, 'calendar'])->name('calendar');
+        Route::get('/manageEvents', [EditorController::class, 'manageEvents'])->name('manageEvents');
+        Route::get('/activity_log', [EditorController::class, 'activity_log'])->name('activity_log');
+        Route::get('/history', [EditorController::class, 'history'])->name('history');
+        Route::get('/archive', [EditorController::class, 'archive'])->name('archive');
         Route::get('/profile', [EditorController::class, 'profile'])->name('profile');
         Route::post('/logout', [EditorController::class, 'destroy'])->name('logout');
     });
