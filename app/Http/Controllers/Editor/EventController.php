@@ -20,21 +20,21 @@ class EventController extends Controller
             'target_year_levels' => 'nullable|array',
         ]);
 
-        $location = $request->location === 'Other'
-            ? $request->other_location
-            : $request->location;
+        // Determine location value
+        $location = $request->location === 'Other' ? $request->other_location : $request->location;
 
+        // Create event with the authenticated user's ID
         Event::create([
-            'user_id' => auth()->user()->id(), // always assign
+            'user_id' => auth()->user()->id, // automatically assign current user
             'title' => $validated['title'],
             'description' => $validated['description'] ?? null,
             'date' => $validated['date'],
             'start_time' => $validated['start_time'],
             'end_time' => $validated['end_time'],
-            'location' => $location, // use the processed value
+            'location' => $location,
             'school_year' => 'SY.2025-2026',
             'target_year_levels' => $validated['target_year_levels'] ?? [],
-            'department' => Auth::user()->department,
+            'department' => auth()->user()->department, // assign current user's department
         ]);
 
         return redirect()->back()->with('success', 'Event created successfully!');
