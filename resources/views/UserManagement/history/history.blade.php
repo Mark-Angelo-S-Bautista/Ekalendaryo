@@ -5,7 +5,7 @@
     <head>
         <meta charset="UTF-8">
         <title>eKalendaryo - Event History</title>
-        @vite(['resources/css/history.css', 'resources/js/history.js'])
+        @vite(['resources/css/userman/history.css', 'resources/js/userman/history.js'])
     </head>
 
     <body>

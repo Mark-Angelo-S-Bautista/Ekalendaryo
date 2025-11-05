@@ -6,7 +6,7 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>eKalendaryo - Admin - SMS</title>
-        @vite(['resources/css/activityLog.css', 'resources/js/activityLog.js'])
+        @vite(['resources/css/userman/activityLog.css', 'resources/js/userman/activityLog.js'])
 
     </head>
 

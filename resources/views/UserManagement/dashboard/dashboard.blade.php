@@ -1,6 +1,6 @@
 <x-usermanLayout>
     <x-slot:vite>
-        @vite(['resources/css/UserManDashboard.css', 'resources/js/UserManDashboard.js'])
+        @vite(['resources/css/userman/UserManDashboard.css', 'resources/js/userman/UserManDashboard.js'])
     </x-slot:vite>
     <div class="dashboard_container">
         <!-- Welcome -->

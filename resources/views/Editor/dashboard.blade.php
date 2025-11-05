@@ -1,121 +1,73 @@
 <x-editorLayout>
-    <div id="dashboard" class="tab-content active">
-        <div class = "dashboard-container">
-            <div class="content_head">
-                <h1>Welcome back, admin!</h1>
-                <p>Admin Dashboard</p>
-            </div>
+    <!DOCTYPE html>
+    <html lang="en">
 
-            <div class="stats">
-                <div class="card">
-                    <div class="card-icon"><i class="fa-solid fa-calendar-days"></i></div>
-                    <div class="card-text">
-                        <h2>Total Events</h2>
-                        <p>10 visible to your role</p> <!--need back here-->
-                    </div>
-                </div>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>eKalendaryo - Admin Dashboard</title>
+        <link rel="stylesheet" href="../assets/css/editor_dashboard.css">
+    </head>
 
-                <div class="card">
-                    <div class="card-icon"><i class="fa-solid fa-clock"></i></div>
-                    <div class="card-text">
-                        <h2>Upcoming</h2>
-                        <p>7 events scheduled</p> <!--need back here-->
-                    </div>
+    <body>
+        <div class="dashboard_container">
+            <!-- Welcome -->
+            <section class="dashboard_welcome_card">
+                <div>
+                    <h2>Welcome back, SMIS!</h2>
+                    <p>Admin Dashboard</p>
+                    <p class="dashboard_school_year">Current School Year: SY.2025-2026</p>
                 </div>
+                <button class="dashboard_change_year_btn">Change School Year</button>
+            </section>
 
-                <div class="card">
-                    <div class="card-icon"><i class="fa-solid fa-calendar-day"></i></div>
-                    <div class="card-text">
-                        <h2>Today</h2>
-                        <p>0 events today</p> <!--need back here-->
-                    </div>
-                </div>
+            <!-- Search -->
+            <section class="dashboard_search_card">
+                <input type="text" class="dashboard_search_input" placeholder="Search Events" />
+                <button class="dashboard_clear_btn">Clear</button>
+            </section>
 
-                <div class="card">
-                    <div class="card-icon"><i class="fa-solid fa-star"></i></div>
-                    <div class="card-text">
-                        <h2>My Events</h2>
-                        <p>1 event you organized</p> <!--need back here-->
-                    </div>
+            <!-- Stats -->
+            <section class="dashboard_stats">
+                <div class="dashboard_stat_box dashboard_clickable" id="dashboard_department_box">
+                    <h3>My Events</h3>
+                    <p>9</p>
                 </div>
-
-                <div class="card">
-                    <div class="card-icon"><i class="fa-solid fa-users"></i></div>
-                    <div class="card-text">
-                        <h2>Total Users</h2>
-                        <p>9 registered users</p> <!--need back here-->
-                    </div>
-                </div>
-            </div>
+            </section>
 
             <!-- Upcoming Events -->
-            <section>
-                <h2>Upcoming Events</h2>
-                <p style="color:#666; font-size:14px; margin-bottom:15px;">
-                    Next 2 upcoming events
-                </p>
+            <section class="dashboard_upcoming_card">
+                <h3 class="dashboard_upcoming_title">Upcoming Events</h3>
+                <p>Next 2 upcoming events (within 30 days)</p>
 
-                <div class="event"> <!--need backend and dynamic here-->
-                    <div class="event-details">
-                        <h3>CS Department Meeting</h3>
-                        <p>5/12/2025 @ 14:00 - CS Conference Room</p>
-                        <p>Monthly department meeting to discuss curriculum updates</p>
-                        <div class="event-tags">
-                            <span class="tag">Department</span>
-                            <span class="tag">Upcoming</span>
-                        </div>
+                <div class="dashboard_event_card">
+                    <div class="dashboard_event_title">dsad</div>
+                    <div class="dashboard_event_details">📅 11/5/2025 &nbsp;&nbsp; 🕓 3:55 PM - 3:55 PM &nbsp;&nbsp; 📍
+                        COURT</div>
+                    <div class="dashboard_event_details">adaddsds</div>
+                    <div class="dashboard_event_details">SY.2025-2026</div>
+                    <div class="dashboard_event_tags">
+                        <span class="dashboard_tag dashboard_tag_admin">admin</span>
+                        <span class="dashboard_tag dashboard_tag_upcoming">upcoming</span>
                     </div>
-
-                    <button class="btn-comment" onclick="openComment()"><i class="fa-regular fa-comment"></i>
-                        Comments</button>
                 </div>
 
-                <div class="event">
-                    <div class="event-details">
-                        <h3>Basketball Tournament</h3>
-                        <p>5/13/2025 @ 10:00 - School Gymnasium</p>
-                        <p>Inter-department basketball tournament finals</p>
-                        <div class="event-tags">
-                            <span class="tag">Sports</span>
-                            <span class="tag">Upcoming</span>
-                        </div>
-                    </div>
-                    <button class="btn-comment" onclick="openComment()"><i class="fa-regular fa-comment"></i>
-                        Comments</button>
-                </div>
-
-                <!-- POPUP COMMENT -->
-
-                <div id="pop_comment" class="comment">
-
-                    <div class="popup">
-                        <div class="popup-header">
-                            <div class="popup-title">Comments for CS Department Meeting</div>
-                            <button class="close-button" onclick="closeComment()">×</button>
-                        </div>
-                        <div class="popup-content">
-                            Share your thoughts, suggestions, or messages about this event
-                        </div>
-                        <div class="tags">
-                            <div class="tag">department</div>
-                            <div class="tag">upcoming</div>
-                        </div>
-                        <div class="details">
-                            <div class="date">9/1/2025</div>
-                            <div class="time">14:00</div>
-                            <div class="location">CS Conference Room</div>
-                        </div>
-                        <div class="comment-section">
-                            Comments & Messages
-                            <p>No comments yet. Be the first to share your thoughts!</p>
-                        </div>
-                        <div class="add-comment">Add Your Comment</div>
-                        <input type="text" class="comment-input"
-                            placeholder="Share your thoughts, suggestions, or questions about this event...">
-                        <button class="post-button"> Post Comment</button>
+                <div class="dashboard_event_card">
+                    <div class="dashboard_event_title">dsadasdasdad</div>
+                    <div class="dashboard_event_details">📅 11/6/2025 &nbsp;&nbsp; 🕓 5:45 PM - 5:45 PM &nbsp;&nbsp; 📍
+                        BPC Court</div>
+                    <div class="dashboard_event_details">adaddsadsad</div>
+                    <div class="dashboard_event_details">SY.2025-2026</div>
+                    <div class="dashboard_event_tags">
+                        <span class="dashboard_tag dashboard_tag_admin">admin</span>
+                        <span class="dashboard_tag dashboard_tag_upcoming">upcoming</span>
                     </div>
                 </div>
             </section>
         </div>
-    </div>
+
+
+    </body>
+
+    </html>
 </x-editorLayout>

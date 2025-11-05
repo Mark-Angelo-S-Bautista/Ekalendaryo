@@ -6,7 +6,7 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>eKalendaryo Archive</title>
-        @vite(['resources/css/archive.css', 'resources/js/archive.js'])
+        @vite(['resources/css/userman/archive.css', 'resources/js/userman/archive.js'])
     </head>
 
     <body>

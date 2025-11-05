@@ -5,7 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>eKalendaryo</title>
-    @vite(['resources/css/UserManDashboard.css', 'resources/js/UserManDashboard.js'])
+    @vite(['resources/css/userman/UserManDashboard.css', 'resources/js/userman/UserManDashboard.js'])
 </head>
 
 <header>
