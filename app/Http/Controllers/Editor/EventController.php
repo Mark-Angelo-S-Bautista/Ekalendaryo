@@ -18,14 +18,40 @@ class EventController extends Controller
             'end_time' => 'required',
             'location' => 'required|string|max:255',
             'target_year_levels' => 'nullable|array',
+            'other_location' => 'nullable|string|max:255',
         ]);
 
-        // Determine location value
+        // Process location
         $location = $request->location === 'Other' ? $request->other_location : $request->location;
 
-        // Create event with the authenticated user's ID
+        // Check for conflicts
+        $conflict = Event::where('date', $validated['date'])
+            ->where('location', $location)
+            ->where(function ($query) use ($validated) {
+                $query->whereBetween('start_time', [$validated['start_time'], $validated['end_time']])
+                    ->orWhereBetween('end_time', [$validated['start_time'], $validated['end_time']])
+                    ->orWhere(function ($q) use ($validated) {
+                        $q->where('start_time', '<=', $validated['start_time'])
+                            ->where('end_time', '>=', $validated['end_time']);
+                    });
+            })
+            ->first();
+
+        if ($conflict) {
+            return redirect()->back()
+                ->withInput()
+                ->with('conflict_event', [
+                    'title' => $conflict->title,
+                    'date' => $conflict->date,
+                    'start_time' => $conflict->start_time,
+                    'end_time' => $conflict->end_time,
+                    'location' => $conflict->location,
+                ]);
+        }
+
+        // No conflict, create event
         Event::create([
-            'user_id' => auth()->user()->id, // automatically assign current user
+            'user_id' => auth()->id(), // make sure user_id is fillable
             'title' => $validated['title'],
             'description' => $validated['description'] ?? null,
             'date' => $validated['date'],
@@ -34,7 +60,7 @@ class EventController extends Controller
             'location' => $location,
             'school_year' => 'SY.2025-2026',
             'target_year_levels' => $validated['target_year_levels'] ?? [],
-            'department' => auth()->user()->department, // assign current user's department
+            'department' => auth()->user()->department,
         ]);
 
         return redirect()->back()->with('success', 'Event created successfully!');

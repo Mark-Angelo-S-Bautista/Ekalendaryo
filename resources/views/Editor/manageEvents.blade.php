@@ -132,8 +132,10 @@
                                 const startInput = document.getElementById('startTime');
                                 const endInput = document.getElementById('endTime');
                                 const locationSelect = document.getElementById('eventLocation');
+                                const otherInput = document.getElementById('otherLocation');
                                 const createBtn = document.querySelector('.btn-create');
 
+                                // Create the warning div
                                 const warningDiv = document.createElement('div');
                                 warningDiv.classList.add('conflict-warning');
                                 warningDiv.style.color = 'red';
@@ -145,9 +147,16 @@
                                     const date = dateInput.value;
                                     const start = startInput.value;
                                     const end = endInput.value;
-                                    const location = locationSelect.value;
 
-                                    if (!date || !start || !end || !location) return;
+                                    // Determine the actual location
+                                    const location = locationSelect.value === 'Other' ? otherInput.value.trim() : locationSelect.value;
+
+                                    // Skip if required fields are empty
+                                    if (!date || !start || !end || !location) {
+                                        createBtn.disabled = false;
+                                        warningDiv.innerHTML = '';
+                                        return;
+                                    }
 
                                     fetch("{{ route('Editor.checkConflict') }}", {
                                             method: 'POST',
@@ -181,9 +190,11 @@
                                         .catch(err => console.error('Error checking conflict:', err));
                                 }
 
-                                [dateInput, startInput, endInput, locationSelect].forEach(el =>
-                                    el.addEventListener('change', checkConflict)
-                                );
+                                // Listen for changes in all relevant inputs
+                                [dateInput, startInput, endInput, locationSelect, otherInput].forEach(el => {
+                                    el.addEventListener('change', checkConflict);
+                                    el.addEventListener('input', checkConflict); // ensures typing in 'Other' triggers check
+                                });
                             });
                         </script>
                     </div>
