@@ -34,6 +34,7 @@ Route::middleware('auth')->group(function () {
         //Insert event into Database
         Route::get('/manageEvents', [EventController::class, 'index'])->name('index');
         Route::post('/manageEvents', [EventController::class, 'store'])->name('store');
+        Route::post('/check-conflict', [EventController::class, 'checkConflict'])->name('checkConflict');
         Route::get('/manageEvents/{id}', [EventController::class, 'edit'])->name('editEvent');
         Route::put('/manageEvents/{id}', [EventController::class, 'update'])->name('update');
         Route::delete('/manageEvents/{id}', [EventController::class, 'destroy'])->name('destroy');

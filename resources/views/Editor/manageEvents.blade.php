@@ -67,7 +67,7 @@
                                 </select>
 
                                 <!-- Input for custom location -->
-                                <input type="text" id="location" name="location"
+                                <input type="text" id="otherLocation" name="other_location"
                                     placeholder="Please specify location" class="form-control"
                                     style="display: none; margin-top: 10px;">
                             </div>
@@ -126,6 +126,66 @@
                                 <button type="submit" class="btn-create">Create Event</button>
                             </div>
                         </form>
+                        <script>
+                            document.addEventListener('DOMContentLoaded', () => {
+                                const dateInput = document.getElementById('eventDate');
+                                const startInput = document.getElementById('startTime');
+                                const endInput = document.getElementById('endTime');
+                                const locationSelect = document.getElementById('eventLocation');
+                                const createBtn = document.querySelector('.btn-create');
+
+                                const warningDiv = document.createElement('div');
+                                warningDiv.classList.add('conflict-warning');
+                                warningDiv.style.color = 'red';
+                                warningDiv.style.marginTop = '10px';
+                                warningDiv.style.fontWeight = '500';
+                                document.querySelector('.modal form').appendChild(warningDiv);
+
+                                function checkConflict() {
+                                    const date = dateInput.value;
+                                    const start = startInput.value;
+                                    const end = endInput.value;
+                                    const location = locationSelect.value;
+
+                                    if (!date || !start || !end || !location) return;
+
+                                    fetch("{{ route('Editor.checkConflict') }}", {
+                                            method: 'POST',
+                                            headers: {
+                                                'Content-Type': 'application/json',
+                                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                            },
+                                            body: JSON.stringify({
+                                                date,
+                                                start_time: start,
+                                                end_time: end,
+                                                location
+                                            })
+                                        })
+                                        .then(response => response.json())
+                                        .then(data => {
+                                            if (data.conflict) {
+                                                createBtn.disabled = true;
+                                                warningDiv.innerHTML = `
+                                                ⚠️ <b>Schedule Conflict!</b><br>
+                                                Event: <b>${data.event.title}</b><br>
+                                                Date: ${data.event.date}<br>
+                                                Time: ${data.event.start_time} - ${data.event.end_time}<br>
+                                                Location: ${data.event.location}
+                                            `;
+                                            } else {
+                                                createBtn.disabled = false;
+                                                warningDiv.innerHTML = '';
+                                            }
+                                        })
+                                        .catch(err => console.error('Error checking conflict:', err));
+                                }
+
+                                [dateInput, startInput, endInput, locationSelect].forEach(el =>
+                                    el.addEventListener('change', checkConflict)
+                                );
+                            });
+                        </script>
                     </div>
                 </div>
 

@@ -6,7 +6,25 @@
 
     <div class="edit-event-container">
         <h1>Edit Event</h1>
+        @if (session('conflict'))
+            <div class="conflict-message">
+                {{ session('conflict') }}
+            </div>
+        @endif
 
+        @if (session('conflict_event'))
+            @php $conflictEvent = session('conflict_event'); @endphp
+            <div class="conflict-details">
+                <h4>Conflicting Event Schedule Detected:</h4>
+                <p><strong>Title:</strong> {{ $conflictEvent['title'] }}</p>
+                <p><strong>Date:</strong> {{ \Carbon\Carbon::parse($conflictEvent['date'])->format('F d, Y') }}</p>
+                <p><strong>Time:</strong>
+                    {{ \Carbon\Carbon::parse($conflictEvent['start_time'])->format('h:i A') }} -
+                    {{ \Carbon\Carbon::parse($conflictEvent['end_time'])->format('h:i A') }}
+                </p>
+                <p><strong>Location:</strong> {{ $conflictEvent['location'] }}</p>
+            </div>
+        @endif
         <form action="{{ route('Editor.update', $event->id) }}" method="POST">
             @csrf
             @method('PUT')
@@ -56,7 +74,7 @@
                     <option value="Other" {{ $isOther ? 'selected' : '' }}>Other</option>
                 </select>
 
-                <input type="text" id="otherLocation" name="location" placeholder="Please specify location"
+                <input type="text" id="otherLocation" name="other_location" placeholder="Please specify location"
                     class="form-control" style="{{ $isOther ? '' : 'display: none;' }} margin-top: 10px;"
                     value="{{ $isOther ? $event->location : '' }}">
             </div>

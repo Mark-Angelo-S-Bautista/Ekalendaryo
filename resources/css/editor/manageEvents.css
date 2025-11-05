@@ -335,3 +335,13 @@ button {
     border-color: #007bff;
     box-shadow: 0 0 4px rgba(0, 123, 255, 0.25);
 }
+.conflict-warning {
+    background: #ffe4e1;
+    border: 1px solid #ff5c5c;
+    border-radius: 8px;
+    padding: 10px;
+    color: #b30000;
+    margin-top: 10px;
+    text-align: left;
+    font-size: 14px;
+}

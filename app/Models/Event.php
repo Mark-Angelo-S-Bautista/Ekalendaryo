@@ -21,4 +21,9 @@ class Event extends Model
     protected $casts = [
         'target_year_levels' => 'array',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }
