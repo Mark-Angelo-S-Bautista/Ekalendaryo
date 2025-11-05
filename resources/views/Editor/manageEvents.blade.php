@@ -100,94 +100,6 @@
                     </div>
                 </div>
 
-                <!-- Edit Event POP UP -->
-                <div class="modal-overlay" id="edit_modalOverlay">
-                    <div class="modal">
-                        <h2>Edit Event</h2>
-                        <p>Update event details and settings</p>
-
-                        <div class="form-group">
-                            <label>Event title</label>
-                            <input type="text" placeholder="Event title">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Event description</label>
-                            <textarea placeholder="Event description"></textarea>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Date</label>
-                            <input type="date">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Start Time</label>
-                            <input type="time">
-                        </div>
-
-                        <div class="form-group">
-                            <label>End Time</label>
-                            <input type="time">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Event location</label>
-                            <input type="text" placeholder="Event location">
-                        </div>
-
-                        <div class="form-group">
-                            <label>School Year</label>
-                            <input type="text" placeholder="SY.2025-2026" disabled>
-                            <div class="note">Format: SY.YYYY-YYYY</div>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Notification Settings</label>
-                            <label>Date</label>
-                            <input type="date">
-                            <label>Time</label>
-                            <input type="time">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Target Year Levels</label>
-                            <p class="note">Select which year levels of students will receive notifications for this
-                                event</p>
-
-                            <div class="checkbox_select">
-                                <div class="checkbox-inline">
-                                    <input type="checkbox" id="select_all_edit">
-                                    <label for="select_all_edit">Select All Year Levels</label>
-                                </div>
-                            </div>
-
-                            <div class="checkbox-group">
-                                <div class="checkbox-inline">
-                                    <input type="checkbox" id="year1_edit" class="syear">
-                                    <label for="year1_edit">1st Year</label>
-                                </div>
-                                <div class="checkbox-inline">
-                                    <input type="checkbox" id="year2_edit" class="syear">
-                                    <label for="year2_edit">2nd Year</label>
-                                </div>
-                                <div class="checkbox-inline">
-                                    <input type="checkbox" id="year3_edit" class="syear">
-                                    <label for="year3_edit">3rd Year</label>
-                                </div>
-                                <div class="checkbox-inline">
-                                    <input type="checkbox" id="year4_edit" class="syear">
-                                    <label for="year4_edit">4th Year</label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="button-group">
-                            <button class="btn-cancel" id="edit_closeModalBtn">Cancel</button>
-                            <button class="btn-create">Create Event</button>
-                        </div>
-                    </div>
-                </div>
 
                 <!-- Sample Event Cards -->
                 @if ($events->count() > 0)
@@ -218,7 +130,7 @@
                             </div>
 
                             <div class="actions">
-                                <button class="edit" data-id="{{ $event->id }}">✏️</button>
+                                <a href="{{ route('Editor.editEvent', $event->id) }}" class="edit">✏️</a>
 
                                 <form action="{{ route('Editor.destroy', $event->id) }}" method="POST"
                                     style="display:inline;">
@@ -228,6 +140,7 @@
                                         onclick="return confirm('Are you sure you want to delete this event?')">🗑️</button>
                                 </form>
                             </div>
+
                         </div>
                     @endforeach
                 @else

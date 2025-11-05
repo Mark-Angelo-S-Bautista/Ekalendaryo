@@ -1,0 +1,161 @@
+/* General page setup */
+.edit-event-container {
+    max-width: 600px;
+    margin: 50px auto; /* centers the container */
+    padding: 30px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Header */
+.edit-event-container h1 {
+    text-align: center;
+    font-size: 28px;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+/* Form styling */
+.edit-event-container form {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #555;
+}
+
+.form-group input[type="text"],
+.form-group input[type="date"],
+.form-group input[type="time"],
+.form-group textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    border-color: green;
+    outline: none;
+}
+
+/* Textarea */
+textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+/* Checkbox group */
+.checkbox-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.checkbox-inline {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.checkbox-inline input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+}
+
+/* Buttons */
+.btn-update,
+.btn-cancel {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 15px;
+}
+
+.btn-update {
+    background-color: green;
+    color: #fff;
+}
+
+.btn-update:hover {
+    background-color: darkgreen;
+}
+
+.btn-cancel {
+    background-color: #f0f0f0;
+    color: #333;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+}
+
+.btn-cancel:hover {
+    background-color: #e0e0e0;
+}
+
+/* Responsive */
+@media screen and (max-width: 640px) {
+    .edit-event-container {
+        margin: 20px;
+        padding: 20px;
+    }
+
+    .btn-update,
+    .btn-cancel {
+        width: 100%;
+    }
+}
+.toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background-color: #4bb543; /* green success */
+    color: #fff;
+    padding: 14px 24px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    font-size: 14px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease, transform 0.4s ease,
+        visibility 0s linear 0.4s;
+    transform: translateY(20px);
+    z-index: 1000;
+    visibility: hidden;
+}
+
+.toast.show {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+    visibility: visible;
+    transition-delay: 0s;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}

@@ -77,7 +77,7 @@
                             <td>{{ $user->department }}</td>
                             <td>{{ $user->role }}</td>
                             <td>
-                                <a href="{{ route('UserManagement.edit', $user->id) }}" class="edit-btn">✏️ Edit</a> |
+                                <a href="{{ route('UserManagement.edit', $user->id) }}" class="edit-btn">✏️ Edit</a>
                                 <form action="{{ route('UserManagement.delete', $user->id) }}" method="POST"
                                     style="display:inline;">
                                     @csrf

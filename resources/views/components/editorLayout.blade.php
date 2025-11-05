@@ -29,8 +29,7 @@
             class="nav_item {{ request()->routeIs('Editor.calendar') ? 'active' : '' }}">
             Calendar
         </a>
-        <a href="{{ route('Editor.index') }}"
-            class="nav_item {{ request()->routeIs('Editor.manageEvents') ? 'active' : '' }}">
+        <a href="{{ route('Editor.index') }}" class="nav_item {{ request()->routeIs('Editor.index') ? 'active' : '' }}">
             Manage Events
         </a>
         <a href="{{ route('Editor.activity_log') }}"

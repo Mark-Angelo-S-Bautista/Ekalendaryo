@@ -37,6 +37,37 @@ class EventController extends Controller
         $events = Event::orderBy('date', 'asc')->get();
         return view('Editor.manageEvents', compact('events'));
     }
+    public function edit($id)
+    {
+        $event = Event::findOrFail($id);
+        return view('Editor.editEvents', compact('event'));
+    }
+
+    public function update(Request $request, $id)
+    {
+            $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'date' => 'required|date',
+            'start_time' => 'required',
+            'end_time' => 'required',
+            'location' => 'required|string|max:255',
+            'target_year_levels' => 'nullable|array',
+        ]);
+
+        $event = Event::findOrFail($id);
+        $event->update([
+            'title' => $validated['title'],
+            'description' => $validated['description'] ?? null,
+            'date' => $validated['date'],
+            'start_time' => $validated['start_time'],
+            'end_time' => $validated['end_time'],
+            'location' => $validated['location'],
+            'target_year_levels' => $validated['target_year_levels'] ?? [],
+        ]);
+
+        return redirect()->route('Editor.index')->with('success', 'Event updated successfully!');
+    }
 
     public function destroy($id)
     {

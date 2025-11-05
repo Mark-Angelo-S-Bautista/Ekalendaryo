@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Editor;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Event;
 
 class EditorController extends Controller
 {
@@ -15,11 +16,6 @@ class EditorController extends Controller
     public function calendar()
     {
         return view('Editor.calendar');
-    }
-
-    public function manageEvents()
-    {
-        return view('Editor.manageEvents');
     }
 
     public function activity_log()
