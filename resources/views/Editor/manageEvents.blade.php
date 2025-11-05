@@ -202,6 +202,27 @@
                                 });
                             });
                         </script>
+                        <script>
+                            document.addEventListener('DOMContentLoaded', () => {
+                                const selectAllCheckbox = document.getElementById('select_all_create');
+                                const yearCheckboxes = document.querySelectorAll('.syear');
+
+                                selectAllCheckbox.addEventListener('change', () => {
+                                    yearCheckboxes.forEach(cb => cb.checked = selectAllCheckbox.checked);
+                                });
+
+                                // Optional: if user manually unchecks any year checkbox, uncheck "Select All"
+                                yearCheckboxes.forEach(cb => {
+                                    cb.addEventListener('change', () => {
+                                        if (!cb.checked) {
+                                            selectAllCheckbox.checked = false;
+                                        } else if ([...yearCheckboxes].every(cb => cb.checked)) {
+                                            selectAllCheckbox.checked = true;
+                                        }
+                                    });
+                                });
+                            });
+                        </script>
                     </div>
                 </div>
 

@@ -17,6 +17,7 @@
             <div class="conflict-details">
                 <h4>Conflicting Event Schedule Detected:</h4>
                 <p><strong>Title:</strong> {{ $conflictEvent['title'] }}</p>
+                <p><strong>Department:</strong> {{ $conflictEvent['department'] }}</p>
                 <p><strong>Date:</strong> {{ \Carbon\Carbon::parse($conflictEvent['date'])->format('F d, Y') }}</p>
                 <p><strong>Time:</strong>
                     {{ \Carbon\Carbon::parse($conflictEvent['start_time'])->format('h:i A') }} -

@@ -130,6 +130,7 @@ class EventController extends Controller
                     'start_time' => $conflict->start_time,
                     'end_time' => $conflict->end_time,
                     'location' => $conflict->location,
+                    'department' => $conflict->department,
                 ]);
         }
 

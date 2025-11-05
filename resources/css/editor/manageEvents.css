@@ -187,13 +187,15 @@ textarea {
 
 /* ✅ FIXED SECTION BELOW */
 .checkbox_select {
-    width: 100%;
+    width: 150px;
     border: 3px solid #036938;
     border-radius: 10px;
     margin-bottom: 10px;
     padding: 8px 12px;
     display: flex;
-    align-items: center; /* Centers the checkbox vertically */
+    align-items: center; /* vertically center */
+    justify-content: center; /* horizontally center the content */
+    gap: 6px; /* space between checkbox and label */
 }
 
 .checkbox-inline {
