@@ -15,6 +15,7 @@ class UserController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
+            'title' => 'required|string|max:255',
             'userId' => 'required|string|unique:users,userId',
             'email' => 'required|email|unique:users,email',
             'department' => 'required|in:BSIS/ACT,BSOM,BSAIS,BTVTED,BSCA,DHRMT,HB',
@@ -25,6 +26,7 @@ class UserController extends Controller
 
         User::create([
             'name' => $request->name,
+            'title' => $request->title,
             'userId' => $request->userId,
             'email' => $request->email,
             'department' => $request->department,
@@ -48,6 +50,7 @@ class UserController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
+            'title' => 'required|string|max:255',
             'userId' => 'required|string|unique:users,userId,' . $id,
             'email' => 'required|email|unique:users,email,' . $id,
             'department' => 'required|string',
@@ -60,6 +63,7 @@ class UserController extends Controller
 
         $user->update([
             'name' => $request->name,
+            'title' => $request->title,
             'userId' => $request->userId,
             'email' => $request->email,
             'department' => $request->department,
@@ -99,6 +103,7 @@ class UserController extends Controller
                 ['userId' => $record['userId']], // match by userId
                 [
                     'name' => $record['name'],
+                    'title' => $record['title'],
                     'email' => $record['email'],
                     'department' => $record['department'] ?? null,
                     'yearlevel' => $record['yearlevel'] ?? null,

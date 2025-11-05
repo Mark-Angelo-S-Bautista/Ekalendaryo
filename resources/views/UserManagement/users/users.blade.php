@@ -60,7 +60,6 @@
             <table id="userTable">
                 <thead>
                     <tr>
-                        <th>ID</th>
                         <th>Name</th>
                         <th>Email</th>
                         <th>Department</th>
@@ -71,8 +70,10 @@
                 <tbody>
                     @foreach ($users as $user)
                         <tr>
-                            <td>{{ $user->userId }}</td>
-                            <td>{{ $user->name }}</td>
+                            <td>
+                                <span style="display:block; font-weight:bold;">{{ $user->title }}</span>
+                                <span>{{ $user->name }}</span>
+                            </td>
                             <td>{{ $user->email }}</td>
                             <td>{{ $user->department }}</td>
                             <td>{{ $user->role }}</td>
@@ -167,8 +168,15 @@
                     </div>
 
                     <div class="adduser_form-group">
+                        <label class="adduser_label">Title</label>
+                        <input type="text" id="title" name="title" class="adduser_input"
+                            placeholder="Student, Faculty, DeptHead, OfficeName">
+                    </div>
+
+                    <div class="adduser_form-group">
                         <label class="adduser_label">Student ID or Employee ID</label>
-                        <input type="text" id="userId" name="userId" class="adduser_input" placeholder="userId">
+                        <input type="text" id="userId" name="userId" class="adduser_input"
+                            placeholder="userId">
                     </div>
 
                     <div class="adduser_form-group">

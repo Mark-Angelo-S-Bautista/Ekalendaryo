@@ -12,6 +12,11 @@
             </div>
 
             <div class="edituser_form-group">
+                <label class="edituser_label">Title:</label>
+                <input type="text" name="title" value="{{ old('title', $user->title) }}" class="edituser_input">
+            </div>
+
+            <div class="edituser_form-group">
                 <label class="edituser_label">Student ID / Employee ID:</label>
                 <input type="text" name="userId" value="{{ old('userId', $user->userId) }}" class="edituser_input">
             </div>
