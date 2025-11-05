@@ -62,7 +62,10 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role.viewer')->prefix('viewer')->name('Viewer.')->group(function () {
         Route::get('/dashboard', [ViewerController::class, 'dashboard'])->name('dashboard');
         Route::get('/calendar', [ViewerController::class, 'calendar'])->name('calendar');
+        Route::get('/notifications', [ViewerController::class, 'notifications'])->name('notifications');
+        Route::get('/history', [ViewerController::class, 'history'])->name('history');
         Route::get('/profile', [ViewerController::class, 'profile'])->name('profile');
+        Route::post('/logout', [ViewerController::class, 'destroy'])->name('logout');
     });
 
 });

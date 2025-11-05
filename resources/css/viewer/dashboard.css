@@ -156,43 +156,6 @@ body {
     background-color: #eaf6ec;
 }
 
-/* Stats */
-.dashboard_stats {
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-    margin-bottom: 2rem;
-}
-
-.dashboard_stat_box {
-    background-color: #ffffff;
-    border-radius: 10px;
-    padding: 1rem;
-    padding-left: 30px;
-    border: 1px solid #d8eeda;
-    transition: all 0.3s;
-    cursor: default;
-}
-
-.dashboard_stat_box h3 {
-    margin: 5px 0;
-    color: #004d25;
-    font-size: 1rem;
-}
-
-.dashboard_stat_box p {
-    font-size: 1.6rem;
-    font-weight: bold;
-    color: #007f3d;
-}
-
-.dashboard_stat_box:hover {
-    box-shadow: 0 2px 6px rgba(0, 100, 0, 0.15);
-}
-
-.dashboard_clickable {
-    cursor: pointer;
-}
-
 /* Upcoming Events */
 .dashboard_upcoming_card {
     background-color: #ffffff;

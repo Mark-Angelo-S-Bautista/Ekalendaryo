@@ -1,0 +1,256 @@
+:root {
+    --bg: #f3fff5;
+    --panel: #eefaf0;
+    --muted: #9fbf9e;
+    --accent: #0f5b24;
+    --accent-2: #0b4a1b;
+    --inner: #f6fdf7;
+    --box-border: #d8eed6;
+    --card-radius: 12px;
+    --gap: 18px;
+    --container-w: 1100px;
+}
+
+* {
+    box-sizing: border-box;
+}
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f3fbf4;
+    color: #333;
+    margin: 0;
+}
+
+.page {
+    max-width: var(--container-w);
+    margin: 26px auto;
+    padding: 0 22px 60px;
+    position: relative;
+}
+
+h1.page-title {
+    font-size: 1.5em;
+    font-weight: 600;
+    margin: 6px 0 18px;
+}
+
+.floating-action {
+    position: absolute;
+    right: 22px;
+    top: 8px;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border-radius: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-weight: 300;
+    border: 1px solid rgba(0, 0, 0, 0.04);
+    transition: all 0.2s ease;
+}
+.btn:hover,
+.btn-cancel:hover,
+.btn-save:hover,
+.change-btn:hover {
+    transform: translateY(-1px);
+    opacity: 0.9;
+}
+
+.btn-edit {
+    background: var(--accent-2);
+    color: #fff;
+}
+.btn-save-top {
+    background: var(--accent-2);
+    color: #fff;
+}
+
+.section-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 18px 0 8px;
+}
+
+.card {
+    background: var(--panel);
+    border: 1px solid var(--box-border);
+    border-radius: var(--card-radius);
+    padding: 18px;
+    margin-bottom: 18px;
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02);
+}
+
+/* --- FIXED PERSONAL DETAILS LAYOUT --- */
+.personal-row {
+    display: flex;
+    gap: 18px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.personal-row .label {
+    width: 160px;
+    font-weight: 700;
+    color: #2d4f37;
+    flex-shrink: 0;
+    margin-top: 6px;
+}
+.personal-row > div:last-child {
+    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px;
+}
+.employment-row {
+    margin: 10px;
+}
+
+.input-pill {
+    background: var(--inner);
+    border-radius: 10px;
+    border: 1px solid rgba(200, 230, 200, 0.6);
+    padding: 10px 14px;
+    flex: 1;
+    color: #547a62;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    min-width: 220px;
+}
+
+.input-pill input {
+    border: none;
+    background: transparent;
+    outline: none;
+    width: 100%;
+    color: #547a62;
+    font-size: 14px;
+}
+.input-pill.disabled {
+    opacity: 0.9;
+}
+
+.inner-panel {
+    background: #f8fef7;
+    border-radius: 8px;
+    padding: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid rgba(150, 210, 170, 0.4);
+}
+
+.muted-small {
+    color: #6b8b72;
+    font-size: 13px;
+}
+.muted-tiny {
+    color: #6b8b72;
+    font-size: 12px;
+    margin-top: 6px;
+}
+
+.change-btn {
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-weight: 300;
+    background: #fff;
+    border: 1px solid var(--accent-2);
+    color: var(--accent-2);
+    cursor: pointer;
+    min-width: 110px;
+    box-shadow: none;
+    transition: all 0.2s ease;
+}
+
+.card-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 12px;
+}
+.btn-cancel {
+    background: #fff;
+    color: var(--accent-2);
+    border: 1px solid rgba(6, 106, 28, 0.15);
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-weight: 300;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.btn-save {
+    background: var(--accent-2);
+    color: white;
+    border-radius: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-weight: 300;
+    border: 1px solid rgba(0, 0, 0, 0.04);
+    transition: all 0.2s ease;
+}
+
+.security .card {
+    margin-top: 12px;
+}
+.email-row,
+.password-row {
+    display: block;
+}
+
+.card h4 {
+    margin: 0 0 10px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #2f6241;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.badge {
+    background: #e3ebff;
+    color: #214b8f;
+    font-size: 12px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+@media (max-width: 900px) {
+    :root {
+        --container-w: 92%;
+    }
+    .personal-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .label {
+        width: 100%;
+    }
+}
+.logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border: 1px solid #006400;
+    border-radius: 6px;
+    background: none;
+    color: #006400;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: 0.2s ease;
+}
+
+.logout-btn:hover {
+    background: #006400;
+    color: #fff;
+}
+
+.logout-btn .icon {
+    font-style: normal; /* so it doesn’t go italic */
+}
