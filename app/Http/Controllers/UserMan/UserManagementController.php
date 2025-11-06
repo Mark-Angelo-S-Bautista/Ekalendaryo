@@ -12,7 +12,40 @@ class UserManagementController extends Controller
 {
     public function dashboard()
     {
-        return view('UserManagement.dashboard.dashboard');
+        //fetch the users info
+        $user = Auth::user(); // Get the currently logged-in user
+
+            // Fetch all events
+        $events = Event::all();
+
+        // Fetch all departments from database (so it’s dynamic)
+        $departments = Department::pluck('department_name')->toArray(); // adjust column name if needed
+
+        // Total events
+        $totalEvents = $events->count();
+
+        // Count per department
+        $departmentCounts = $events
+            ->groupBy('department')
+            ->map(fn($group) => $group->count());
+
+        // Merge event counts with department list, fill missing ones with 0
+        $finalDeptCounts = collect($departments)->mapWithKeys(function ($dept) use ($departmentCounts) {
+            return [$dept => $departmentCounts[$dept] ?? 0];
+        });
+
+        // Upcoming events (within next 30 days)
+        $upcomingEvents = $events
+            ->whereBetween('date', [now(), now()->addDays(30)])
+            ->sortBy('date')
+            ->take(2);
+
+        return view('UserManagement.dashboard.dashboard', [
+            'user' => $user,
+            'totalEvents' => $totalEvents,
+            'departmentCounts' => $finalDeptCounts,
+            'upcomingEvents' => $upcomingEvents,
+        ]);
     }
 
     public function calendar()

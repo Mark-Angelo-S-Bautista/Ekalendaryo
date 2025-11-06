@@ -3,67 +3,49 @@
         <!-- Welcome -->
         <section class="dashboard_welcome_card">
             <div>
-                <h2>Welcome back, SMIS!</h2>
-                <p>Admin Dashboard</p>
-                <p class="dashboard_school_year">Current School Year: SY.2025-2026</p>
+                <h2>Welcome back, {{ $user->name ?? 'User' }}!</h2>
+                <p>{{ $user->title ?? 'Admin Dashboard' }} Dashboard</p>
+                {{-- <p class="dashboard_school_year">Current School Year: {{ $currentSchoolYear }}</p> --}}
             </div>
             <button class="dashboard_change_year_btn">Change School Year</button>
         </section>
 
-        <!-- Search -->
-        <section class="dashboard_search_card">
-            <input type="text" class="dashboard_search_input" placeholder="🔍 Search Events" />
-            <button class="dashboard_clear_btn">Clear</button>
-        </section>
-
         <!-- Stats -->
         <section class="dashboard_stats">
+            <div class="dashboard_stat_box">
+                <h3>Total Events</h3>
+                <p>{{ $totalEvents }}</p>
+            </div>
             <div class="dashboard_stat_box dashboard_clickable" id="dashboard_department_box">
-                <h3>Department Events</h3>
-                <p>9</p>
-            </div>
-            <div class="dashboard_stat_box">
-                <h3>SG Events</h3>
-                <p>2</p>
-            </div>
-            <div class="dashboard_stat_box">
-                <h3>Sports Events</h3>
-                <p>3</p>
-            </div>
-            <div class="dashboard_stat_box">
-                <h3>Admin Events</h3>
-                <p>4</p>
+                <h3>Department and Offices Events</h3>
+                <p>{{ $departmentCounts->sum() }}</p>
             </div>
         </section>
 
         <!-- Upcoming Events -->
         <section class="dashboard_upcoming_card">
             <h3 class="dashboard_upcoming_title">Upcoming Events</h3>
-            <p>Next 2 upcoming events (within 30 days)</p>
+            <p>Next upcoming events (within 30 days)</p>
 
-            <div class="dashboard_event_card">
-                <div class="dashboard_event_title">dsad</div>
-                <div class="dashboard_event_details">📅 11/5/2025 &nbsp;&nbsp; 🕓 3:55 PM - 3:55 PM &nbsp;&nbsp; 📍
-                    COURT</div>
-                <div class="dashboard_event_details">adaddsds</div>
-                <div class="dashboard_event_details">SY.2025-2026</div>
-                <div class="dashboard_event_tags">
-                    <span class="dashboard_tag dashboard_tag_admin">admin</span>
-                    <span class="dashboard_tag dashboard_tag_upcoming">upcoming</span>
+            @forelse ($upcomingEvents as $event)
+                <div class="dashboard_event_card">
+                    <div class="dashboard_event_title">{{ $event->title }}</div>
+                    <div class="dashboard_event_details">
+                        📅 {{ \Carbon\Carbon::parse($event->date)->format('m/d/Y') }}
+                        &nbsp;&nbsp; 🕓 {{ \Carbon\Carbon::parse($event->start_time)->format('g:i A') }} -
+                        {{ \Carbon\Carbon::parse($event->end_time)->format('g:i A') }}
+                        &nbsp;&nbsp; 📍 {{ $event->location }}
+                    </div>
+                    <div class="dashboard_event_details">{{ $event->description ?? 'No description provided.' }}</div>
+                    <div class="dashboard_event_details">{{ $event->school_year }}</div>
+                    <div class="dashboard_event_tags">
+                        <span class="dashboard_tag dashboard_tag_admin">{{ $event->department }}</span>
+                        <span class="dashboard_tag dashboard_tag_upcoming">upcoming</span>
+                    </div>
                 </div>
-            </div>
-
-            <div class="dashboard_event_card">
-                <div class="dashboard_event_title">dsadasdasdad</div>
-                <div class="dashboard_event_details">📅 11/6/2025 &nbsp;&nbsp; 🕓 5:45 PM - 5:45 PM &nbsp;&nbsp; 📍 BPC
-                    Court</div>
-                <div class="dashboard_event_details">adaddsadsad</div>
-                <div class="dashboard_event_details">SY.2025-2026</div>
-                <div class="dashboard_event_tags">
-                    <span class="dashboard_tag dashboard_tag_admin">admin</span>
-                    <span class="dashboard_tag dashboard_tag_upcoming">upcoming</span>
-                </div>
-            </div>
+            @empty
+                <p>No upcoming events.</p>
+            @endforelse
         </section>
     </div>
 
@@ -77,34 +59,12 @@
             <div class="dashboard_modal_body">
                 <p>Event counts by department</p>
                 <div class="dashboard_department_grid">
-                    <div class="dashboard_department_card">
-                        <h4>BSAIS</h4>
-                        <p>0 events</p>
-                    </div>
-                    <div class="dashboard_department_card">
-                        <h4>BSCA</h4>
-                        <p>0 events</p>
-                    </div>
-                    <div class="dashboard_department_card">
-                        <h4>BSIS-ACT</h4>
-                        <p>6 events</p>
-                    </div>
-                    <div class="dashboard_department_card">
-                        <h4>BSOM</h4>
-                        <p>3 events</p>
-                    </div>
-                    <div class="dashboard_department_card">
-                        <h4>BTVTED</h4>
-                        <p>0 events</p>
-                    </div>
-                    <div class="dashboard_department_card">
-                        <h4>DHRMT</h4>
-                        <p>0 events</p>
-                    </div>
-                    <div class="dashboard_department_card">
-                        <h4>HB</h4>
-                        <p>0 events</p>
-                    </div>
+                    @foreach ($departmentCounts as $dept => $count)
+                        <div class="dashboard_department_card">
+                            <h4>{{ $dept }}</h4>
+                            <p>{{ $count }} events</p>
+                        </div>
+                    @endforeach
                 </div>
             </div>
         </div>
