@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Viewer;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Event;
 
 class ViewerController extends Controller
 {
@@ -14,7 +15,8 @@ class ViewerController extends Controller
 
     public function calendar()
     {
-        return view('Viewer.calendar');
+        $events = Event::all();
+        return view('UserManagement.calendar.calendar', compact('events'));
     }
 
     public function notifications()

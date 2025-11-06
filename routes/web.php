@@ -7,6 +7,7 @@ use App\Http\Controllers\Editor\EditorController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\UserMan\UserController;
 use App\Http\Controllers\Viewer\ViewerController;
+use App\Http\Controllers\UserMan\CalendarController;
 use Illuminate\Support\Facades\Route;
 
 // Group the routes without a 'prefix' so they start at the root URL (/)

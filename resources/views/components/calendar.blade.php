@@ -5,7 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>eKalendaryo</title>
+    <script>
+        const events = @json($events);
+        console.log("Loaded events:", events);
+    </script>
     @vite(['resources/css/userman/calendar.css', 'resources/js/userman/calendar.js'])
+
 </head>
 
 <body>
@@ -31,22 +36,20 @@
             </div>
         </div>
 
+        <!-- ✅ Day Headers -->
+        <div class="calendar_day-headers">
+            <div>Su</div>
+            <div>Mo</div>
+            <div>Tu</div>
+            <div>We</div>
+            <div>Th</div>
+            <div>Fr</div>
+            <div>Sa</div>
+        </div>
+
+        <!-- Calendar Grid -->
         <div class="calendar_grid" id="calendar_grid"></div>
 
-        <div class="calendar_legend">
-            <div class="calendar_legend-item">
-                <div class="calendar_dot calendar_department"></div>Department Events
-            </div>
-            <div class="calendar_legend-item">
-                <div class="calendar_dot calendar_studentgov"></div>Student Government
-            </div>
-            <div class="calendar_legend-item">
-                <div class="calendar_dot calendar_sports"></div>Sports Events
-            </div>
-            <div class="calendar_legend-item">
-                <div class="calendar_dot calendar_admin"></div>Admin Events
-            </div>
-        </div>
     </div>
 
     <!-- Modal -->
@@ -59,11 +62,6 @@
             <div id="calendar_modal-body"></div>
         </div>
     </div>
-
-
-
-
-
 
 </body>
 

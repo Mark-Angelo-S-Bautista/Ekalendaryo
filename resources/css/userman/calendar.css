@@ -90,17 +90,6 @@ body {
     background-color: #eaf4ff;
 }
 
-.calendar_legend {
-    display: flex;
-    gap: 20px;
-    margin-top: 20px;
-}
-.calendar_legend-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 14px;
-}
 .calendar_dot {
     width: 14px;
     height: 14px;
@@ -222,6 +211,10 @@ body {
     align-items: center;
     gap: 5px;
 }
+.calendar_today {
+    border: 2px solid #2d6a4f;
+    background-color: #e6f4ea;
+}
 
 @keyframes fadeIn {
     from {
@@ -254,4 +247,13 @@ body {
 
 .logout-btn .icon {
     font-style: normal; /* so it doesn’t go italic */
+}
+.calendar_day-headers {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #333;
+    padding-top: 40px;
 }

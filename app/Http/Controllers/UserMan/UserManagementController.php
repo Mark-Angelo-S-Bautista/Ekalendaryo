@@ -4,6 +4,7 @@ namespace App\Http\Controllers\UserMan;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Event;
 use App\Models\Department;
 use Illuminate\Support\Facades\Auth;
 
@@ -16,7 +17,21 @@ class UserManagementController extends Controller
 
     public function calendar()
     {
-        return view('UserManagement.calendar.calendar');
+        $events = Event::all()->map(function ($event) {
+            return [
+                'date' => $event->date,
+                'title' => $event->title,
+                'description' => $event->description ?? 'No description provided.', // default if null
+                'timeStart' => $event->start_time,
+                'timeEnd' => $event->end_time,
+                'location' => $event->location,
+                'sy' => $event->school_year,
+                'type' => strtolower(str_replace(['/', ' '], '_', $event->department ?? 'general')),
+                'organizer' => $event->department ?? 'N/A',
+            ];
+        });
+
+        return view('UserManagement.calendar.calendar', ['events' => $events]);
     }
 
     public function profile()
