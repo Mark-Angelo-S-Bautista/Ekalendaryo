@@ -71,7 +71,13 @@
                     @foreach ($users as $user)
                         <tr>
                             <td>
-                                <span style="display:block; font-weight:bold;">{{ $user->title }}</span>
+                                <span style="display:block; font-weight:bold;">
+                                    @if ($user->department === 'OFFICES')
+                                        {{ $user->office_name }}
+                                    @else
+                                        {{ $user->title }}
+                                    @endif
+                                </span>
                                 <span>{{ $user->name }}</span>
                             </td>
                             <td>{{ $user->email }}</td>

@@ -3,8 +3,14 @@
         <!-- Welcome -->
         <section class="dashboard_welcome_card">
             <div>
-                <h2>Welcome back, {{ $user->name ?? 'User' }}!</h2>
-                <p>{{ $user->title ?? 'Admin Dashboard' }} Dashboard</p>
+                <h2>Welcome back, {{ Auth::user()->name ?? 'User' }}!</h2>
+                <p>
+                    @if (Auth::user()->department === 'OFFICES')
+                        {{ Auth::user()->office_name }}
+                    @else
+                        {{ Auth::user()->title }}
+                    @endif Dashboard
+                </p>
                 {{-- <p class="dashboard_school_year">Current School Year: {{ $currentSchoolYear }}</p> --}}
             </div>
             <button class="dashboard_change_year_btn">Change School Year</button>
@@ -50,7 +56,7 @@
                     <div class="dashboard_event_tags">
                         <span class="dashboard_tag dashboard_tag_admin">
                             @if ($event->department === 'OFFICES')
-                                {{ $event->user->title }}
+                                {{ $event->office_name }}
                             @else
                                 {{ $event->department }}
                             @endif

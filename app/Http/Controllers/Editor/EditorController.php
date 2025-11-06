@@ -15,7 +15,7 @@ class EditorController extends Controller
         $user = Auth::user();
         $officeusers = User::all();
         $dept = $user->department;
-        $title = $user->title;
+        $title = $user->office_name;
         $userId = $user->id; // Get the user's ID
 
         // Start a new query

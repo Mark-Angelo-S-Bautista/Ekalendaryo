@@ -48,7 +48,7 @@
                         <div class="dashboard_event_tags">
                             <span class="dashboard_tag dashboard_tag_admin">
                                 @if ($event->department === 'OFFICES')
-                                    {{ $event->user->title }}
+                                    {{ $event->user->office_name }}
                                 @else
                                     {{ $event->department }}
                                 @endif

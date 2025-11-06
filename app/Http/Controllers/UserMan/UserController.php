@@ -18,6 +18,7 @@ class UserController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
+            'office_name' => 'string|max:255',
             'userId' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users,email',
             'role' => 'required|string',
@@ -49,6 +50,7 @@ class UserController extends Controller
 
         $user = User::create([
             'name' => $request->name,
+            'office_name' => $request->office_name,
             'userId' => $request->userId,
             'email' => $request->email,
             'role' => $request->role,

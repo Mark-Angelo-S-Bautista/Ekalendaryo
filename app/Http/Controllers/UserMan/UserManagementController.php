@@ -15,6 +15,7 @@ class UserManagementController extends Controller
     {
         //fetch the users info
         $user = Auth::user(); // Get the currently logged-in user
+        $office_name = $user->office_name;
 
             // Fetch all events
         $events = Event::all();
@@ -46,6 +47,7 @@ class UserManagementController extends Controller
             'totalEvents' => $totalEvents,
             'departmentCounts' => $finalDeptCounts,
             'upcomingEvents' => $upcomingEvents,
+            'office_name' => $office_name,
         ]);
     }
 

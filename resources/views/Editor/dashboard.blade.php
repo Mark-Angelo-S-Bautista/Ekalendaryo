@@ -4,7 +4,13 @@
         <section class="dashboard_welcome_card">
             <div>
                 <h2>Welcome back, {{ Auth::user()->name }}!</h2>
-                <p>{{ $title }} Dashboard</p>
+                <p>
+                    @if (Auth::user()->department === 'OFFICES')
+                        {{ Auth::user()->office_name }}
+                    @else
+                        {{ Auth::user()->title }}
+                    @endif Dashboard
+                </p>
                 <p class="dashboard_school_year">Current School Year: SY.2025-2026</p>
             </div>
         </section>
@@ -44,7 +50,7 @@
                     <div class="dashboard_event_tags">
                         <span class="dashboard_tag dashboard_tag_admin">
                             @if ($event->department === 'OFFICES')
-                                {{ $event->user->title }}
+                                {{ $event->user->office_name }}
                             @else
                                 {{ $event->department }}
                             @endif
