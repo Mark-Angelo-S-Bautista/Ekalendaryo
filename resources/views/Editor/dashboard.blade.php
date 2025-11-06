@@ -75,11 +75,10 @@
                     .then(data => {
                         const events = data.events;
 
-                        // Reset header
+                        // Reset header to match the Blade file's header
                         eventContainer.innerHTML = `
-                    <h3 class="dashboard_upcoming_title">Upcoming Events</h3>
-                    <p>Next 2 upcoming events (within 30 days)</p>
-                `;
+                        <h3 class="dashboard_upcoming_title">Upcoming Events</h3>
+                    `;
 
                         if (events.length === 0) {
                             eventContainer.innerHTML += `<p>No events found.</p>`;
@@ -88,25 +87,28 @@
 
                         // Render matching events
                         events.forEach(event => {
+                            // --- THIS IS THE UPDATED/FIXED PART ---
+
                             const date = new Date(event.date).toLocaleDateString('en-US');
-                            const startTime = event.start_time ? event.start_time.substring(0,
-                                5) : '';
-                            const endTime = event.end_time ? event.end_time.substring(0, 5) :
-                                '';
+
+                            // FIX 1: Use pre-formatted times from the controller
+                            const startTime = event.formatted_start_time || '';
+                            const endTime = event.formatted_end_time || '';
 
                             eventContainer.innerHTML += `
-                        <div class="dashboard_event_card">
-                            <div class="dashboard_event_title">${event.title}</div>
-                            <div class="dashboard_event_details">
-                                📅 ${date} &nbsp; 🕓 ${startTime} - ${endTime} &nbsp; 📍 ${event.location || ''}
+                            <div class="dashboard_event_card">
+                                <div class="dashboard_event_title">${event.title}</div>
+                                <div class="dashboard_event_details">
+                                    📅 ${date} &nbsp; 🕓 ${startTime} - ${endTime} &nbsp; 📍 ${event.location || ''}
+                                </div>
+                                <div class="dashboard_event_details">${event.description || ''}</div>
+                                <div class="dashboard_event_tags">
+                                    <span class="dashboard_tag dashboard_tag_admin">${event.tag_name}</span>
+                                    <span class="dashboard_tag dashboard_tag_upcoming">upcoming</span>
+                                </div>
                             </div>
-                            <div class="dashboard_event_details">${event.description || ''}</div>
-                            <div class="dashboard_event_tags">
-                                <span class="dashboard_tag dashboard_tag_admin">${event.department}</span>
-                                <span class="dashboard_tag dashboard_tag_upcoming">upcoming</span>
-                            </div>
-                        </div>
-                    `;
+                        `;
+                            // --- END OF UPDATED/FIXED PART ---
                         });
                     })
                     .catch(error => console.error('Error fetching search results:', error));

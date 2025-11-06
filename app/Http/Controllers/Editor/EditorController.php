@@ -16,21 +16,31 @@ class EditorController extends Controller
         $officeusers = User::all();
         $dept = $user->department;
         $title = $user->title;
+        $userId = $user->id; // Get the user's ID
 
-        // fetch events that belong to user's department OR OFFICES
-        $events = Event::where('department', $dept)
-            ->orWhere('department', 'OFFICES')
-            ->orderBy('date', 'asc')
-            ->get();
+        // Start a new query
+        $eventsQuery = Event::query();
+
+        // --- APPLY NEW LOGIC ---
+        if ($dept === 'OFFICES') {
+            // If user is from OFFICES, they only see events they created
+            $eventsQuery->where('user_id', $userId);
+        } else {
+            // Otherwise, they see their department's events + all OFFICE events
+            // We also need to eager-load the 'user' relationship for the tag
+            $eventsQuery->with('user')->where(function ($q) use ($dept) {
+                $q->where('department', $dept)
+                ->orWhere('department', 'OFFICES');
+            });
+        }
+        // --- END NEW LOGIC ---
+
+        // Get the results
+        $events = $eventsQuery->orderBy('date', 'asc')->get();
 
         $myEventsCount = $events->count();
 
-        // // upcoming within 30 days (future events)
-        // $upcomingEvents = $events->filter(function ($ev) {
-        //     $evDate = Carbon::parse($ev->date);
-        //     return $evDate->isFuture() && $evDate->diffInDays(Carbon::now()) <= 30;
-        // })->values()->take(2); // ->values() to reindex the collection
-
+        // The rest of your code stays the same
         return view('Editor.dashboard', compact('myEventsCount', 'events', 'title', 'officeusers'));
     }
 
@@ -92,20 +102,52 @@ class EditorController extends Controller
         $query = $request->get('query', '');
         $user = Auth::user();
         $dept = $user->department;
+        $userId = $user->id;
 
-        $events = Event::where(function ($q) use ($dept) {
+        // Start a new query
+        $eventsQuery = Event::query();
+
+        // --- APPLY THE SAME LOGIC AS THE DASHBOARD ---
+        if ($dept === 'OFFICES') {
+            // If user is from OFFICES, they only see events they created
+            $eventsQuery->where('user_id', $userId);
+        } else {
+            // Otherwise, they see their department's events + all OFFICE events
+            $eventsQuery->with('user')->where(function ($q) use ($dept) {
                 $q->where('department', $dept)
                 ->orWhere('department', 'OFFICES');
-            })
-            ->when($query, function ($q) use ($query) {
-                $q->where(function ($inner) use ($query) {
-                    $inner->where('title', 'like', "%{$query}%")
-                        ->orWhere('location', 'like', "%{$query}%")
-                        ->orWhere('description', 'like', "%{$query}%");
-                });
-            })
-            ->orderBy('date', 'asc')
-            ->get();
+            });
+        }
+        // --- END NEW LOGIC ---
+
+        // Now, add the search condition to the query
+        $eventsQuery->when($query, function ($q) use ($query) {
+            $q->where(function ($inner) use ($query) {
+                $inner->where('title', 'like', "%{$query}%")
+                    ->orWhere('location', 'like', "%{$query}%")
+                    ->orWhere('description', 'like', "%{$query}%");
+            });
+        });
+
+        // Get the results
+        $events = $eventsQuery->orderBy('date', 'asc')->get();
+
+        // --- Add this data transformation ---
+        // This makes sure your JavaScript gets the correct tag name and time formats
+        $events->transform(function ($event) {
+            // Create the tag name
+            if ($event->department === 'OFFICES' && $event->user) {
+                $event->tag_name = $event->user->title;
+            } else {
+                $event->tag_name = $event->department;
+            }
+
+            // Pre-format the time
+            $event->formatted_start_time = Carbon::parse($event->start_time)->format('g:i A');
+            $event->formatted_end_time = Carbon::parse($event->end_time)->format('g:i A');
+
+            return $event;
+        });
 
         return response()->json(['events' => $events]);
     }

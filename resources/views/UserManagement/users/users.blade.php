@@ -171,8 +171,19 @@
 
                     <div class="adduser_form-group">
                         <label class="adduser_label">Title</label>
-                        <input type="text" id="title" name="title" class="adduser_input"
-                            placeholder="Student, Faculty, DeptHead, OfficeName">
+                        <select id="title" name="title" class="adduser_select" required>
+                            <option value="">Select a Title</option>
+                            <option value="Student">Student</option>
+                            <option value="Faculty">Faculty</option>
+                            <option value="Department Head">Department Head</option>
+                            <option value="Offices">Offices</option>
+                        </select>
+                    </div>
+
+                    <div class="adduser_form-group" id="office_name_field" style="display: none;">
+                        <label class="adduser_label">Office Name</label>
+                        <input type="text" id="office_name" name="office_name" class="adduser_input"
+                            placeholder="Enter name of office">
                     </div>
 
                     <div class="adduser_form-group">
@@ -189,8 +200,7 @@
 
                     <div class="adduser_form-group">
                         <label class="adduser_label">Department</label>
-                        <select id="department" name="department" class="adduser_select"
-                            onchange="updateAddUserForm()" required>
+                        <select id="department" name="department" class="adduser_select" required>
                             <option value="">Select a Department</option>
                             @foreach ($departments as $dept)
                                 <option value="{{ $dept->department_name }}">{{ $dept->department_name }}</option>
@@ -200,8 +210,7 @@
 
                     <div class="adduser_form-group">
                         <label class="adduser_label">Year Level</label>
-                        <select id="yearlevel" name="yearlevel" class="adduser_select"
-                            onchange="updateAddUserForm()">
+                        <select id="yearlevel" name="yearlevel" class="adduser_select">
                             <option value="">Select a Year Level</option>
                             <option value="1stYear">1st Year</option>
                             <option value="2ndYear">2nd Year</option>
@@ -218,8 +227,7 @@
 
                     <div class="adduser_form-group">
                         <label class="adduser_label">Role</label>
-                        <select id="role" name="role" class="adduser_select" onchange="updateAddUserForm()"
-                            required>
+                        <select id="role" name="role" class="adduser_select" required>
                             <option value="">Select a role</option>
                             <option value="Viewer">Viewer</option>
                             <option value="Editor">Editor</option>

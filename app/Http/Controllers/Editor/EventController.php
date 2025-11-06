@@ -1,13 +1,20 @@
 <?php
+
 namespace App\Http\Controllers\Editor;
+
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;    
+use Illuminate\Http\Request;
 use App\Models\Event;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon; // Make sure this is imported
+
 /** @var \App\Models\User $user */
 
 class EventController extends Controller
 {
+    // =========================================================================
+    // This function is correct, no changes needed.
+    // =========================================================================
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -67,31 +74,92 @@ class EventController extends Controller
         return redirect()->back()->with('success', 'Event created successfully!');
     }
 
+    // =========================================================================
+    // MODIFIED: This function now includes your new logic.
+    // =========================================================================
     public function index()
     {
-        $userDepartment = Auth::user()->department;
+        $user = Auth::user();
+        $dept = $user->department;
+        $userId = $user->id;
 
-        $events = Event::where('department', $userDepartment)
-                    ->orderBy('date', 'asc')
-                    ->get();
+        // Start query and *always* include 'user' for the dynamic tags
+        $query = Event::with('user');
+
+        // --- ADDED LOGIC ---
+        if ($dept === 'OFFICES') {
+            // If from OFFICES, only show events this user created
+            $query->where('user_id', $userId);
+        } else {
+            // Otherwise, show their department's events + all 'OFFICES' events
+            $query->where(function ($q) use ($dept) {
+                $q->where('department', $dept)
+                  ->orWhere('department', 'OFFICES');
+            });
+        }
+        // --- END ADDED LOGIC ---
+
+        $events = $query->orderBy('date', 'asc')->get();
 
         return view('Editor.manageEvents', compact('events'));
     }
-    
+
+    // =========================================================================
+    // MODIFIED: Applied new logic for security.
+    // =========================================================================
     public function edit($id)
     {
-        $event = Event::where('id', $id)
-                  ->where('department', Auth::user()->department)
-                  ->firstOrFail();
+        $user = Auth::user();
+        $dept = $user->department;
+        $userId = $user->id;
+
+        // Start query to find the event
+        $query = Event::query();
+
+        // --- ADDED LOGIC ---
+        // Apply same rules as index() to ensure user is authorized
+        if ($dept === 'OFFICES') {
+            $query->where('user_id', $userId);
+        } else {
+            $query->where(function ($q) use ($dept) {
+                $q->where('department', $dept)
+                  ->orWhere('department', 'OFFICES');
+            });
+        }
+        // --- END ADDED LOGIC ---
+
+        // Find the event by ID *within the authorized set*
+        $event = $query->findOrFail($id);
 
         return view('Editor.editEvents', compact('event'));
     }
 
+    // =========================================================================
+    // MODIFIED: Applied new logic for security.
+    // =========================================================================
     public function update(Request $request, $id)
     {
-        $event = Event::where('id', $id)
-                  ->where('department', Auth::user()->department)
-                  ->firstOrFail();
+        $user = Auth::user();
+        $dept = $user->department;
+        $userId = $user->id;
+
+        // Start query to find the event
+        $query = Event::query();
+
+        // --- ADDED LOGIC ---
+        // Apply same rules as index() to ensure user is authorized
+        if ($dept === 'OFFICES') {
+            $query->where('user_id', $userId);
+        } else {
+            $query->where(function ($q) use ($dept) {
+                $q->where('department', $dept)
+                  ->orWhere('department', 'OFFICES');
+            });
+        }
+        // --- END ADDED LOGIC ---
+
+        // Find the event by ID *within the authorized set*
+        $event = $query->findOrFail($id);
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -104,8 +172,8 @@ class EventController extends Controller
         ]);
 
         $location = $request->location === 'Other'
-        ? $request->other_location
-        : $request->location;
+            ? $request->other_location
+            : $request->location;
 
         // Check for conflicting events (excluding the current event)
         $conflict = Event::where('id', '!=', $event->id)
@@ -146,20 +214,44 @@ class EventController extends Controller
         ]);
 
         return redirect()->route('Editor.index')->with('success', 'Event updated successfully!');
-
     }
 
+    // =========================================================================
+    // MODIFIED: Applied new logic for security.
+    // =========================================================================
     public function destroy($id)
     {
-        $event = Event::where('id', $id)
-                  ->where('department', Auth::user()->department)
-                  ->firstOrFail();
+        $user = Auth::user();
+        $dept = $user->department;
+        $userId = $user->id;
+
+        // Start query to find the event
+        $query = Event::query();
+
+        // --- ADDED LOGIC ---
+        // Apply same rules as index() to ensure user is authorized
+        if ($dept === 'OFFICES') {
+            $query->where('user_id', $userId);
+        } else {
+            $query->where(function ($q) use ($dept) {
+                $q->where('department', $dept)
+                  ->orWhere('department', 'OFFICES');
+            });
+        }
+        // --- END ADDED LOGIC ---
+
+        // Find the event by ID *within the authorized set*
+        $event = $query->findOrFail($id);
 
         $event->delete();
 
         return redirect()->back()->with('success', 'Event deleted successfully!');
     }
 
+    // =========================================================================
+    // This function is correct, no changes needed.
+    // It should check conflicts against ALL events in the database.
+    // =========================================================================
     public function checkConflict(Request $request)
     {
         $request->validate([
@@ -177,7 +269,7 @@ class EventController extends Controller
                     ->orWhere(function ($q) use ($request) {
                         $q->where('start_time', '<', $request->start_time)
                             ->where('end_time', '>', $request->end_time);
-                });
+                    });
             })
             ->first();
 

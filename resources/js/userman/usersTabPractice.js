@@ -116,6 +116,10 @@ const closeAddUserModal = () => {
             addUserMessage.classList.remove("success");
         }
         if (addUserForm) addUserForm.reset();
+
+        // --- NEW ---
+        // Also reset the form fields visibility when closing
+        updateAddUserForm();
     }
 };
 window.openAddUserModal = openAddUserModal;
@@ -124,8 +128,12 @@ window.addEventListener("click", (e) => {
     if (e.target === addUserOverlay) closeAddUserModal();
 });
 
-// Show/hide yearlevel & section based on department
-const addUserDeptField = addUserForm.querySelector("#department");
+// ==========================
+// --- Dynamic Add User Form Fields ---
+// (This is the new/updated block)
+// ==========================
+const titleDropdown = addUserForm.querySelector("#title");
+const officeNameField = addUserForm.querySelector("#office_name_field");
 const yearLevelFieldAdd = addUserForm
     .querySelector('select[name="yearlevel"]')
     .closest(".adduser_form-group");
@@ -134,18 +142,51 @@ const sectionFieldAdd = addUserForm
     .closest(".adduser_form-group");
 
 const updateAddUserForm = () => {
-    const selectedDept = addUserDeptField.value.toUpperCase();
-    if (selectedDept.includes("OFFICES")) {
-        yearLevelFieldAdd.style.display = "none";
-        sectionFieldAdd.style.display = "none";
-    } else {
+    // Check if the fields exist before trying to access them
+    if (
+        !titleDropdown ||
+        !officeNameField ||
+        !yearLevelFieldAdd ||
+        !sectionFieldAdd
+    ) {
+        console.error(
+            "One or more dynamic form fields are missing from the DOM."
+        );
+        return;
+    }
+
+    const selectedTitle = titleDropdown.value;
+
+    // --- Logic for Year Level and Section ---
+    // Show only if the title is 'Student'
+    if (selectedTitle === "Student") {
         yearLevelFieldAdd.style.display = "block";
         sectionFieldAdd.style.display = "block";
+    } else {
+        yearLevelFieldAdd.style.display = "none";
+        sectionFieldAdd.style.display = "none";
+    }
+
+    // --- Logic for Office Name ---
+    // Show only if the title is 'Offices'
+    if (selectedTitle === "Offices") {
+        officeNameField.style.display = "block";
+    } else {
+        officeNameField.style.display = "none";
     }
 };
-updateAddUserForm();
-addUserDeptField.addEventListener("change", updateAddUserForm);
 
+// Set the initial state of the form when the page loads
+updateAddUserForm();
+
+// Add the listener ONLY to the title dropdown
+if (titleDropdown) {
+    titleDropdown.addEventListener("change", updateAddUserForm);
+}
+
+// ==========================
+// --- Form Submission (AJAX) ---
+// ==========================
 addUserForm?.addEventListener("submit", function (e) {
     e.preventDefault();
     if (addUserMessage) {
@@ -177,7 +218,7 @@ addUserForm?.addEventListener("submit", function (e) {
                     const newRow = document.createElement("tr");
                     newRow.setAttribute("data-user-id", data.user.id);
                     newRow.innerHTML = `
-                        <td>${data.user.name}<br>${data.user.title}</td>
+                        <td>${data.user.title}<br>${data.user.name}</td>
                         <td>${data.user.userId}</td>
                         <td>${data.user.email}</td>
                         <td>${data.user.department}</td>
@@ -188,7 +229,7 @@ addUserForm?.addEventListener("submit", function (e) {
                     usersTableBody.appendChild(newRow);
                 }
                 addUserForm.reset();
-                updateAddUserForm();
+                updateAddUserForm(); // This resets the field visibility
             }
         })
         .catch((err) => {
