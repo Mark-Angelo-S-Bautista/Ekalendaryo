@@ -8,35 +8,60 @@ use App\Models\User;
 use App\Models\Department;
 use Illuminate\Support\Facades\Hash;
 use League\Csv\Reader;
+use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
     public function adduser(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'title' => 'required|string|max:255',
-            'userId' => 'required|string|unique:users,userId',
-            'email' => 'required|email|unique:users,email',
-            'department' => 'required|in:BSIS/ACT,BSOM,BSAIS,BTVTED,BSCA,DHRMT,HB',
-            'yearlevel' => 'required|in:1stYear,2ndYear,3rdYear,4thYear',
-            'section' => 'required|string|max:1',
-            'role' => 'required|in:Editor,UserManagement,Viewer',
+            'userId' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email',
+            'role' => 'required|string',
+            'department' => 'required|string',
+            'title' => 'nullable|string|max:255',
+            'yearlevel' => 'nullable|string|max:50',
+            'section' => 'nullable|string|max:50',
+            'password' => 'required|string|min:6',
         ]);
 
-        User::create([
+        // Check if user with same name + userId exists
+        $exists = User::where('name', $request->name)
+                    ->where('userId', $request->userId)
+                    ->exists();
+
+        if ($exists) {
+            return response()->json([
+                'status' => 'error',
+                'errors' => ['User with this Name and ID already exists.'],
+            ]);
+        }
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'errors' => $validator->errors()->all(),
+            ]);
+        }
+
+        $user = User::create([
             'name' => $request->name,
-            'title' => $request->title,
             'userId' => $request->userId,
             'email' => $request->email,
+            'role' => $request->role,
             'department' => $request->department,
+            'title' => $request->title,
             'yearlevel' => $request->yearlevel,
             'section' => $request->section,
-            'role' => $request->role,
-            'password' => Hash::make('password'), // default password
+            'password' => bcrypt($request->password),
         ]);
 
-        return redirect()->route('UserManagement.users')->with('success', 'User added successfully!');
+        return response()->json([
+            'status' => 'success',
+            'message' => 'User added successfully!',
+            'user' => $user,
+        ]);
     }
     public function edit($id)// ADDS DEPARTMENT
     {
@@ -48,29 +73,39 @@ class UserController extends Controller
 
     public function update(Request $request, $id)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'title' => 'required|string|max:255',
             'userId' => 'required|string|unique:users,userId,' . $id,
             'email' => 'required|email|unique:users,email,' . $id,
             'department' => 'required|string',
-            'yearlevel' => 'required|string',
-            'section' => 'required|string|max:1',
+            'yearlevel' => 'nullable|string',
+            'section' => 'nullable|string|max:1',
             'role' => 'required|string',
         ]);
 
-        $user = User::findOrFail($id);
+        if ($validator->fails()) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'status' => 'error',
+                    'errors' => $validator->errors()->all()
+                ]);
+            }
+            return back()->withErrors($validator)->withInput();
+        }
 
-        $user->update([
-            'name' => $request->name,
-            'title' => $request->title,
-            'userId' => $request->userId,
-            'email' => $request->email,
-            'department' => $request->department,
-            'yearlevel' => $request->yearlevel,
-            'section' => $request->section,
-            'role' => $request->role,
-        ]);
+        $user = User::findOrFail($id);
+        $user->update($request->only([
+            'name', 'title', 'userId', 'email', 'department', 'yearlevel', 'section', 'role'
+        ]));
+
+        if ($request->ajax()) {
+            return response()->json([
+                'status' => 'success',
+                'message' => 'User updated successfully!',
+                'user' => $user
+            ]);
+        }
 
         return redirect()->route('UserManagement.users')->with('success', 'User updated successfully!');
     }

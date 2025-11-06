@@ -1395,3 +1395,22 @@ th {
 .logout-btn .icon {
     font-style: normal; /* so it doesn’t go italic */
 }
+
+.adddept_message {
+    margin-top: 10px;
+    font-weight: bold;
+    color: red; /* default for errors */
+}
+.adddept_message.success {
+    color: green;
+}
+
+.adduser_message {
+    font-size: 15px;
+    margin-top: 10px;
+    font-weight: bold;
+    color: red; /* default for errors */
+}
+.adduser_message.success {
+    color: green;
+}

@@ -3,7 +3,7 @@
     <html lang="en">
 
     <head>
-        <meta charset="UTF-8">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Document</title>
         @vite(['resources/css/userman/usersTabPractice.css', 'resources/js/userman/usersTabPractice.js'])
@@ -117,11 +117,13 @@
                 </div>
 
                 {{-- Add Department Form --}}
-                <form action="{{ route('UserManagement.adddepartment') }}" method="POST">
+                <form id="addDepartmentForm" action="{{ route('UserManagement.adddepartment') }}">
                     @csrf
                     <label for="department_name">Add New Department</label>
                     <input type="text" id="department_name" name="department_name" placeholder="e.g. BSIT, BSA, etc."
                         required>
+
+                    <div id="addDeptMessage" class="adddept_message"></div> {{-- Placeholder for error/success messages --}}
 
                     <div class="adddept_actions">
                         <button type="button" class="adddept_btn cancel" onclick="closeAddDeptModal()">Cancel</button>
@@ -164,7 +166,7 @@
                     @csrf
                     <div class="adduser_form-group">
                         <label class="adduser_label">Username</label>
-                        <input type="text" id="name" name="name" class="adduser_input">
+                        <input type="text" id="name" name="name" class="adduser_input" required>
                     </div>
 
                     <div class="adduser_form-group">
@@ -176,19 +178,19 @@
                     <div class="adduser_form-group">
                         <label class="adduser_label">Student ID or Employee ID</label>
                         <input type="text" id="userId" name="userId" class="adduser_input"
-                            placeholder="userId">
+                            placeholder="userId" required>
                     </div>
 
                     <div class="adduser_form-group">
                         <label class="adduser_label">Email</label>
                         <input type="email" id="email" name="email" class="adduser_input"
-                            placeholder="user@gmail.com">
+                            placeholder="user@gmail.com" required>
                     </div>
 
                     <div class="adduser_form-group">
                         <label class="adduser_label">Department</label>
                         <select id="department" name="department" class="adduser_select"
-                            onchange="updateAddUserForm()">
+                            onchange="updateAddUserForm()" required>
                             <option value="">Select a Department</option>
                             @foreach ($departments as $dept)
                                 <option value="{{ $dept->department_name }}">{{ $dept->department_name }}</option>
@@ -216,7 +218,8 @@
 
                     <div class="adduser_form-group">
                         <label class="adduser_label">Role</label>
-                        <select id="role" name="role" class="adduser_select" onchange="updateAddUserForm()">
+                        <select id="role" name="role" class="adduser_select" onchange="updateAddUserForm()"
+                            required>
                             <option value="">Select a role</option>
                             <option value="Viewer">Viewer</option>
                             <option value="Editor">Editor</option>
@@ -236,6 +239,7 @@
                     <div id="adduser_dynamic-fields"></div>
 
                     <div class="adduser_actions">
+                        <div id="addUserMessage" class="adduser_message"></div> {{-- Placeholder for errors/success --}}
                         <button type="button"class="adduser_btn adduser_btn-cancel"
                             onclick="closeAddUserModal()">Cancel</button>
                         <button type="submit" class="adduser_btn adduser_btn-create">Create User</button>

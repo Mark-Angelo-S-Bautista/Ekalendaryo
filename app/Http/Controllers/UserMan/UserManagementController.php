@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Event;
 use App\Models\Department;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class UserManagementController extends Controller
 {
@@ -103,17 +104,27 @@ class UserManagementController extends Controller
 
     public function addDepartment(Request $request)
     {
-        $request->validate([
+        // Validate only the department_name
+        $validator = Validator::make($request->all(), [
             'department_name' => 'required|string|max:255|unique:departments,department_name',
         ]);
 
-        Department::create([
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'errors' => $validator->errors()->all(),
+            ]);
+        }
+
+        $department = Department::create([
             'department_name' => $request->department_name,
         ]);
 
-        return redirect()
-            ->route('UserManagement.users')
-            ->with('success', 'Department added successfully!');
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Department added successfully!',
+            'department' => $department,
+        ]);
     }
 
     public function deleteDepartment($id)

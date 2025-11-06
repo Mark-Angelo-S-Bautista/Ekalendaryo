@@ -14,6 +14,11 @@
                 <button type="button" class="adddept_btn cancel" onclick="closeAddDeptModal()">Cancel</button>
                 <button type="submit" class="adddept_btn add">Add</button>
             </div>
+            @error('department_name')
+                <div class="alert alert-danger mt-2">
+                    {{ $message }}
+                </div>
+            @enderror
         </form>
     </div>
 </div>

@@ -1,4 +1,8 @@
 <x-usermanLayout>
+
+    <head>
+        @vite(['resources/css/userman/userTabPractice.css', 'resources/js/userman/userTabPractice.js'])
+    </head>
     <div class="edituser_wrapper">
         <h2>Edit User</h2>
 
@@ -69,6 +73,7 @@
             </div>
 
             <div class="edituser_actions">
+                <div id="editUserMessage" class="edituser_message"></div>
                 <a href="{{ route('UserManagement.users') }}" class="edituser_btn edituser_btn-cancel">Cancel</a>
                 <button type="submit" class="edituser_btn edituser_btn-save">Save Changes</button>
             </div>
