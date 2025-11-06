@@ -9,6 +9,8 @@ use App\Models\Department;
 use Illuminate\Support\Facades\Hash;
 use League\Csv\Reader;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Event;
 
 class UserController extends Controller
 {
@@ -150,5 +152,30 @@ class UserController extends Controller
         }
 
         return redirect()->back()->with('success', 'Users imported successfully!');
+    }
+    public function search(Request $request)
+    {
+        $query = $request->get('query', '');
+
+        // We no longer need the user or department for this query
+        // $user = Auth::user();
+        // $dept = $user->department;
+
+        $events = Event::query() // Start with a clean Event query
+            // ->where(function ($q) use ($dept) {  <-- REMOVE THIS BLOCK
+            //     $q->where('department', $dept)
+            //     ->orWhere('department', 'OFFICES');
+            // })                                     <-- REMOVE THIS BLOCK
+            ->when($query, function ($q) use ($query) {
+                $q->where(function ($inner) use ($query) {
+                    $inner->where('title', 'like', "%{$query}%")
+                        ->orWhere('location', 'like', "%{$query}%")
+                        ->orWhere('description', 'like', "%{$query}%");
+                });
+            })
+            ->orderBy('date', 'asc')
+            ->get();
+
+        return response()->json(['events' => $events]);
     }
 }

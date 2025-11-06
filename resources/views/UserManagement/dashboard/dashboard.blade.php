@@ -10,6 +10,15 @@
             <button class="dashboard_change_year_btn">Change School Year</button>
         </section>
 
+        <!-- Search -->
+        <section class="dashboard_search_card">
+            <div class="dashboard_search_box">
+                <input type="text" id="eventSearch" placeholder="Search events..." class="dashboard_search_input">
+                <button class="dashboard_clear_btn">Clear</button>
+            </div>
+
+        </section>
+
         <!-- Stats -->
         <section class="dashboard_stats">
             <div class="dashboard_stat_box">
@@ -31,7 +40,7 @@
                 <div class="dashboard_event_card">
                     <div class="dashboard_event_title">{{ $event->title }}</div>
                     <div class="dashboard_event_details">
-                        📅 {{ \Carbon\Carbon::parse($event->date)->format('m/d/Y') }}
+                        📅 {{ \Carbon\Carbon::parse($event->date)->format('n/j/Y') }}
                         &nbsp;&nbsp; 🕓 {{ \Carbon\Carbon::parse($event->start_time)->format('g:i A') }} -
                         {{ \Carbon\Carbon::parse($event->end_time)->format('g:i A') }}
                         &nbsp;&nbsp; 📍 {{ $event->location }}
@@ -39,7 +48,13 @@
                     <div class="dashboard_event_details">{{ $event->description ?? 'No description provided.' }}</div>
                     <div class="dashboard_event_details">{{ $event->school_year }}</div>
                     <div class="dashboard_event_tags">
-                        <span class="dashboard_tag dashboard_tag_admin">{{ $event->department }}</span>
+                        <span class="dashboard_tag dashboard_tag_admin">
+                            @if ($event->department === 'OFFICES')
+                                {{ $event->user->title }}
+                            @else
+                                {{ $event->department }}
+                            @endif
+                        </span>
                         <span class="dashboard_tag dashboard_tag_upcoming">upcoming</span>
                     </div>
                 </div>
@@ -69,4 +84,62 @@
             </div>
         </div>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchInput = document.getElementById('eventSearch');
+            const eventContainer = document.querySelector('.dashboard_upcoming_card');
+            const clearButton = document.querySelector('.dashboard_clear_btn');
+
+            const renderEvents = (events) => {
+                eventContainer.innerHTML = `
+            <h3 class="dashboard_upcoming_title">Upcoming Events</h3>
+            <p>Upcoming events (within 30 days)</p>
+        `;
+
+                if (events.length === 0) {
+                    eventContainer.innerHTML += `<p>No events found.</p>`;
+                    return;
+                }
+
+                events.forEach(event => {
+                    const date = new Date(event.date).toLocaleDateString('en-US');
+                    const startTime = event.start_time ? event.start_time.substring(0, 5) : '';
+                    const endTime = event.end_time ? event.end_time.substring(0, 5) : '';
+
+                    eventContainer.innerHTML += `
+                <div class="dashboard_event_card">
+                    <div class="dashboard_event_title">${event.title}</div>
+                    <div class="dashboard_event_details">
+                        📅 ${date} &nbsp; 🕓 ${startTime} - ${endTime} &nbsp; 📍 ${event.location || ''}
+                    </div>
+                    <div class="dashboard_event_details">${event.description || ''}</div>
+                    <div class="dashboard_event_tags">
+                        <span class="dashboard_tag dashboard_tag_admin">${event.department}</span>
+                        <span class="dashboard_tag dashboard_tag_upcoming">upcoming</span>
+                    </div>
+                </div>
+            `;
+                });
+            };
+
+            const fetchEvents = (query = '') => {
+                fetch(`/usermanagement/dashboard/search?query=${encodeURIComponent(query)}`)
+                    .then(res => res.json())
+                    .then(data => renderEvents(data.events))
+                    .catch(err => console.error(err));
+            };
+
+            // Initial fetch to show all events
+            fetchEvents();
+
+            // Search as you type
+            searchInput.addEventListener('input', () => fetchEvents(searchInput.value.trim()));
+
+            // Clear search
+            clearButton.addEventListener('click', () => {
+                searchInput.value = '';
+                fetchEvents();
+            });
+        });
+    </script>
 </x-usermanLayout>
