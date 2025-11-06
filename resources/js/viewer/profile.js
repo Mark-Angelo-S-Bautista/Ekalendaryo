@@ -1,61 +1,59 @@
-const btnTopEdit = document.getElementById("btnTopEdit");
-const btnTopSave = document.getElementById("btnTopSave");
-const inlineActions = document.getElementById("inlineActions");
-const btnCancel = document.getElementById("btnCancel");
-const btnSave = document.getElementById("btnSave");
-const inputs = [
-    document.getElementById("inputName"),
-    document.getElementById("inputRole"),
-];
-const pill1 = document.getElementById("pill1");
-const pill2 = document.getElementById("pill2");
+const editProfile = document.getElementById("editProfile");
+const saveProfile = document.getElementById("saveProfile");
+const cancelEdit = document.getElementById("cancelEdit");
+const saveEdit = document.getElementById("saveEdit");
+const editActions = document.getElementById("editActions");
+const nameInput = document.getElementById("adminName");
+const roleInput = document.getElementById("adminRole");
 
-function setEditing(on) {
-    if (on) {
-        btnTopEdit.style.display = "none";
-        btnTopSave.style.display = "inline-flex";
-        inlineActions.style.display = "flex";
-        inputs.forEach((i) => {
-            i.disabled = false;
-            i.style.cursor = "text";
-        });
-        pill1.classList.remove("disabled");
-        pill2.classList.remove("disabled");
+editProfile.onclick = () => {
+    editProfile.classList.add("hidden");
+    saveProfile.classList.remove("hidden");
+    editActions.classList.remove("hidden");
+    nameInput.disabled = false;
+    roleInput.disabled = false;
+};
+saveProfile.onclick = cancelEdit.onclick = () => {
+    editProfile.classList.remove("hidden");
+    saveProfile.classList.add("hidden");
+    editActions.classList.add("hidden");
+    nameInput.disabled = true;
+    roleInput.disabled = true;
+};
+saveEdit.onclick = () => {
+    editProfile.classList.remove("hidden");
+    saveProfile.classList.add("hidden");
+    editActions.classList.add("hidden");
+    nameInput.disabled = true;
+    roleInput.disabled = true;
+    alert("Changes saved!");
+};
+
+const btnChangeEmail = document.getElementById("btnChangeEmail");
+const btnChangePassword = document.getElementById("btnChangePassword");
+const emailForm = document.getElementById("emailForm");
+const passwordForm = document.getElementById("passwordForm");
+const cancelEmail = document.getElementById("cancelEmail");
+const cancelPassword = document.getElementById("cancelPassword");
+
+btnChangeEmail.onclick = () => {
+    emailForm.classList.toggle("hidden");
+    passwordForm.classList.add("hidden");
+};
+btnChangePassword.onclick = () => {
+    passwordForm.classList.toggle("hidden");
+    emailForm.classList.add("hidden");
+};
+cancelEmail.onclick = () => emailForm.classList.add("hidden");
+cancelPassword.onclick = () => passwordForm.classList.add("hidden");
+
+function togglePassword(id, btn) {
+    const input = document.getElementById(id);
+    if (input.type === "password") {
+        input.type = "text";
+        btn.textContent = "🙈";
     } else {
-        btnTopEdit.style.display = "inline-flex";
-        btnTopSave.style.display = "none";
-        inlineActions.style.display = "none";
-        inputs.forEach((i) => {
-            i.disabled = true;
-            i.style.cursor = "default";
-        });
-        pill1.classList.add("disabled");
-        pill2.classList.add("disabled");
+        input.type = "password";
+        btn.textContent = "👁";
     }
 }
-
-setEditing(false);
-
-btnTopEdit.addEventListener("click", () => setEditing(true));
-
-btnTopSave.addEventListener("click", () => {
-    setEditing(false);
-    const original = btnTopSave.innerHTML;
-    btnTopSave.innerHTML = "Saved ✓";
-    setTimeout(() => (btnTopSave.innerHTML = original), 1200);
-});
-
-btnCancel.addEventListener("click", () => setEditing(false));
-
-btnSave.addEventListener("click", () => {
-    setEditing(false);
-    const orig = btnSave.innerHTML;
-    btnSave.innerHTML = "Saved ✓";
-    setTimeout(() => (btnSave.innerHTML = orig), 900);
-});
-
-document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") {
-        setEditing(false);
-    }
-});

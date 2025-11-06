@@ -15,8 +15,21 @@ class ViewerController extends Controller
 
     public function calendar()
     {
-        $events = Event::all();
-        return view('UserManagement.calendar.calendar', compact('events'));
+        $events = Event::all()->map(function ($event) {
+            return [
+                'date' => $event->date,
+                'title' => $event->title,
+                'description' => $event->description ?? 'No description provided.', // default if null
+                'timeStart' => $event->start_time,
+                'timeEnd' => $event->end_time,
+                'location' => $event->location,
+                'sy' => $event->school_year,
+                'type' => strtolower(str_replace(['/', ' '], '_', $event->department ?? 'general')),
+                'organizer' => $event->department ?? 'N/A',
+            ];
+        });
+
+        return view('Viewer.calendar', ['events' => $events]);
     }
 
     public function notifications()

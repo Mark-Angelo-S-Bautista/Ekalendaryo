@@ -1,0 +1,238 @@
+body {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f3f8f4;
+    margin: 0;
+    color: #2e2e2e;
+}
+
+/* Container */
+.dashboard_container {
+    padding: 1.5rem;
+}
+
+/* Welcome Card */
+.dashboard_welcome_card {
+    background-color: #eaf6ec;
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.dashboard_welcome_card h2 {
+    margin: 0 0 5px 0;
+    color: #004d25;
+}
+
+.dashboard_school_year {
+    color: #007f3d;
+    font-size: 0.9rem;
+}
+
+.dashboard_change_year_btn {
+    background-color: #007f3d;
+    border: none;
+    color: white;
+    padding: 10px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.dashboard_change_year_btn:hover {
+    background-color: #005d2c;
+}
+
+/* Search */
+.dashboard_search_card {
+    background-color: #ffffff;
+    border: 1px solid #d8eeda;
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.dashboard_search_input {
+    width: calc(100% - 90px);
+    padding: 8px 10px;
+    border: 1px solid #cde6cd;
+    border-radius: 8px;
+    outline: none;
+    font-size: 0.9rem;
+}
+
+.dashboard_clear_btn {
+    background-color: #ffffff;
+    border: 1px solid #cde6cd;
+    color: #004d25;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.dashboard_clear_btn:hover {
+    background-color: #eaf6ec;
+}
+
+/* Upcoming Events */
+.dashboard_upcoming_card {
+    background-color: #ffffff;
+    border: 1px solid #d8eeda;
+    border-radius: 10px;
+    padding: 1.2rem;
+}
+
+.dashboard_upcoming_title {
+    color: #004d25;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.dashboard_event_card {
+    border: 1px solid #cde6cd;
+    border-radius: 10px;
+    padding: 0.9rem 1rem;
+    margin-bottom: 0.8rem;
+    background-color: #ffffff;
+}
+
+.dashboard_event_card:hover {
+    background-color: #f5fbf5;
+}
+
+.dashboard_event_title {
+    font-weight: 600;
+    color: #004d25;
+}
+
+.dashboard_event_details {
+    font-size: 0.85rem;
+    color: #444;
+    margin: 4px 0;
+}
+
+.dashboard_event_tags {
+    display: flex;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.dashboard_tag {
+    font-size: 0.75rem;
+    padding: 4px 8px;
+    border-radius: 5px;
+    font-weight: 500;
+    text-transform: lowercase;
+}
+
+.dashboard_tag_admin {
+    background-color: #8b5e34;
+    color: white;
+}
+
+.dashboard_tag_upcoming {
+    background-color: #007f3d;
+    color: white;
+}
+
+/* Modal */
+.dashboard_modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(2px);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.dashboard_modal_content {
+    background: #ffffff;
+    border-radius: 10px;
+    width: 520px;
+    max-width: 90%;
+    padding: 1.5rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.dashboard_modal_header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #d8eeda;
+    padding-bottom: 0.5rem;
+}
+
+.dashboard_modal_header h3 {
+    margin: 0;
+    color: #004d25;
+    font-size: 1.05rem;
+}
+
+.dashboard_close_btn {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: #333;
+}
+
+.dashboard_modal_body {
+    margin-top: 1rem;
+}
+
+.dashboard_modal_body p {
+    color: #555;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.dashboard_department_grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 15px;
+}
+
+.dashboard_department_card {
+    border: 1px solid #cde6cd;
+    border-radius: 10px;
+    text-align: center;
+    padding: 12px;
+    background-color: #fff;
+    transition: 0.2s;
+}
+
+.dashboard_department_card:hover {
+    background-color: #f2fbf2;
+}
+
+.dashboard_department_card h4 {
+    margin: 0;
+    color: #004d25;
+    font-size: 0.95rem;
+}
+
+.dashboard_department_card p {
+    margin: 5px 0 0;
+    font-size: 0.85rem;
+    color: #007f3d;
+}

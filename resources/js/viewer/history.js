@@ -22,3 +22,28 @@ function clearFilters() {
 
 searchInput.addEventListener("input", filterEvents);
 filterSelect.addEventListener("change", filterEvents);
+
+// Feedback Modal Logic
+const modalOverlay = document.getElementById("feedbackModal");
+const closeModal = document.getElementById("closeModal");
+const modalTitle = document.getElementById("modalTitle");
+const feedbackButtons = document.querySelectorAll(".feedback-btn");
+
+feedbackButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+        const card = btn.closest(".event-card");
+        const title = card.dataset.title;
+        modalTitle.textContent = `Leave Feedback for ${title}`;
+        modalOverlay.style.display = "flex";
+    });
+});
+
+closeModal.addEventListener("click", () => {
+    modalOverlay.style.display = "none";
+});
+
+window.addEventListener("click", (e) => {
+    if (e.target === modalOverlay) {
+        modalOverlay.style.display = "none";
+    }
+});
