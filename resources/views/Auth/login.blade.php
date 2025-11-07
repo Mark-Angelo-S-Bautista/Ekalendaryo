@@ -9,7 +9,6 @@
         <!-- Sign In Box -->
         <div class="box">
             <h3>Sign In</h3>
-            <p class=subtitle>Enter your credentials to access the system</p>
             <form action="{{ route('login') }}" method="post">
                 @csrf
                 <div class="form-group">

@@ -114,6 +114,10 @@
     color: #444;
 }
 
+a {
+    text-decoration: none;
+}
+
 /* Create event popup */
 .modal-overlay {
     position: fixed;

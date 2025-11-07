@@ -6,17 +6,19 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Event;
 use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon; // Make sure this is imported
+use Carbon\Carbon;
 
 /** @var \App\Models\User $user */
 
 class EventController extends Controller
 {
     // =========================================================================
-    // This function is correct, no changes needed.
+    // STORE FUNCTION (Correct - associates event with Auth::id())
     // =========================================================================
     public function store(Request $request)
     {
+        // ... (validation and conflict check logic is correct) ...
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -28,10 +30,8 @@ class EventController extends Controller
             'other_location' => 'nullable|string|max:255',
         ]);
 
-        // Process location
         $location = $request->location === 'Other' ? $request->other_location : $request->location;
 
-        // Check for conflicts
         $conflict = Event::where('date', $validated['date'])
             ->where('location', $location)
             ->where(function ($query) use ($validated) {
@@ -59,7 +59,7 @@ class EventController extends Controller
 
         // No conflict, create event
         Event::create([
-            'user_id' => auth()->id(), // make sure user_id is fillable
+            'user_id' => auth()->id(),
             'title' => $validated['title'],
             'description' => $validated['description'] ?? null,
             'date' => $validated['date'],
@@ -75,91 +75,49 @@ class EventController extends Controller
     }
 
     // =========================================================================
-    // MODIFIED: This function now includes your new logic.
+    // MODIFIED: STRICT User-ID filtering applied.
     // =========================================================================
     public function index()
     {
-        $user = Auth::user();
-        $dept = $user->department;
-        $userId = $user->id;
+        $userId = Auth::id();
 
-        // Start query and *always* include 'user' for the dynamic tags
-        $query = Event::with('user');
-
-        // --- ADDED LOGIC ---
-        if ($dept === 'OFFICES') {
-            // If from OFFICES, only show events this user created
-            $query->where('user_id', $userId);
-        } else {
-            // Otherwise, show their department's events + all 'OFFICES' events
-            $query->where(function ($q) use ($dept) {
-                $q->where('department', $dept)
-                  ->orWhere('department', 'OFFICES');
-            });
-        }
-        // --- END ADDED LOGIC ---
-
-        $events = $query->orderBy('date', 'asc')->get();
+        // ONLY show events where event's user_id matches the authenticated user's ID
+        $events = Event::with('user')
+                        ->where('user_id', $userId)
+                        ->orderBy('date', 'asc')
+                        ->get();
 
         return view('Editor.manageEvents', compact('events'));
     }
 
     // =========================================================================
-    // MODIFIED: Applied new logic for security.
+    // MODIFIED: STRICT User-ID filtering applied for security.
     // =========================================================================
     public function edit($id)
     {
-        $user = Auth::user();
-        $dept = $user->department;
-        $userId = $user->id;
+        $userId = Auth::id();
 
-        // Start query to find the event
-        $query = Event::query();
-
-        // --- ADDED LOGIC ---
-        // Apply same rules as index() to ensure user is authorized
-        if ($dept === 'OFFICES') {
-            $query->where('user_id', $userId);
-        } else {
-            $query->where(function ($q) use ($dept) {
-                $q->where('department', $dept)
-                  ->orWhere('department', 'OFFICES');
-            });
-        }
-        // --- END ADDED LOGIC ---
-
-        // Find the event by ID *within the authorized set*
-        $event = $query->findOrFail($id);
+        // Find event ONLY if its ID and user_id match
+        $event = Event::where('id', $id)
+                    ->where('user_id', $userId)
+                    ->firstOrFail(); // Throws 404 if not found or not owned
 
         return view('Editor.editEvents', compact('event'));
     }
 
     // =========================================================================
-    // MODIFIED: Applied new logic for security.
+    // MODIFIED: STRICT User-ID filtering applied for security.
     // =========================================================================
     public function update(Request $request, $id)
     {
-        $user = Auth::user();
-        $dept = $user->department;
-        $userId = $user->id;
+        $userId = Auth::id();
 
-        // Start query to find the event
-        $query = Event::query();
+        // Find event ONLY if its ID and user_id match
+        $event = Event::where('id', $id)
+                    ->where('user_id', $userId)
+                    ->firstOrFail();
 
-        // --- ADDED LOGIC ---
-        // Apply same rules as index() to ensure user is authorized
-        if ($dept === 'OFFICES') {
-            $query->where('user_id', $userId);
-        } else {
-            $query->where(function ($q) use ($dept) {
-                $q->where('department', $dept)
-                  ->orWhere('department', 'OFFICES');
-            });
-        }
-        // --- END ADDED LOGIC ---
-
-        // Find the event by ID *within the authorized set*
-        $event = $query->findOrFail($id);
+        // ... (validation and conflict check logic is correct) ...
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -169,6 +127,7 @@ class EventController extends Controller
             'end_time' => 'required',
             'location' => 'required|string|max:255',
             'target_year_levels' => 'nullable|array',
+            'other_location' => 'nullable|string|max:255', // Added back 'other_location' validation
         ]);
 
         $location = $request->location === 'Other'
@@ -217,31 +176,16 @@ class EventController extends Controller
     }
 
     // =========================================================================
-    // MODIFIED: Applied new logic for security.
+    // MODIFIED: STRICT User-ID filtering applied for security.
     // =========================================================================
     public function destroy($id)
     {
-        $user = Auth::user();
-        $dept = $user->department;
-        $userId = $user->id;
+        $userId = Auth::id();
 
-        // Start query to find the event
-        $query = Event::query();
-
-        // --- ADDED LOGIC ---
-        // Apply same rules as index() to ensure user is authorized
-        if ($dept === 'OFFICES') {
-            $query->where('user_id', $userId);
-        } else {
-            $query->where(function ($q) use ($dept) {
-                $q->where('department', $dept)
-                  ->orWhere('department', 'OFFICES');
-            });
-        }
-        // --- END ADDED LOGIC ---
-
-        // Find the event by ID *within the authorized set*
-        $event = $query->findOrFail($id);
+        // Find event ONLY if its ID and user_id match
+        $event = Event::where('id', $id)
+                    ->where('user_id', $userId)
+                    ->firstOrFail();
 
         $event->delete();
 
@@ -249,8 +193,7 @@ class EventController extends Controller
     }
 
     // =========================================================================
-    // This function is correct, no changes needed.
-    // It should check conflicts against ALL events in the database.
+    // checkConflict function is correct (checks against all events for scheduling)
     // =========================================================================
     public function checkConflict(Request $request)
     {

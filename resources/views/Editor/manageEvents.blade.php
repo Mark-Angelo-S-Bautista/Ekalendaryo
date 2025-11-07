@@ -256,14 +256,14 @@
                             </div>
 
                             <div class="actions">
-                                <a href="{{ route('Editor.editEvent', $event->id) }}" class="edit">✏️</a>
+                                <a href="{{ route('Editor.editEvent', $event->id) }}" class="edit">✏️Edit</a>
 
                                 <form action="{{ route('Editor.destroy', $event->id) }}" method="POST"
                                     style="display:inline;">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="delete"
-                                        onclick="return confirm('Are you sure you want to delete this event?')">🗑️</button>
+                                        onclick="return confirm('Are you sure you want to delete this event?')">🗑️Delete</button>
                                 </form>
                             </div>
 
