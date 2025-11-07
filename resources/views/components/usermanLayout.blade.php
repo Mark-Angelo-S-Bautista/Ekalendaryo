@@ -69,6 +69,15 @@
                 loadTab(item.dataset.page);
             });
         });
+
+        // This function checks if the page is being loaded from the browser's bfcache.
+        window.addEventListener('pageshow', function(event) {
+            // persisted == true means the page was loaded from the bfcache
+            if (event.persisted) {
+                // Force a hard reload, which forces the browser to make a fresh server request.
+                window.location.reload();
+            }
+        });
     </script>
 </header>
 

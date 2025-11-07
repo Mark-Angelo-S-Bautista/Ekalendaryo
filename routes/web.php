@@ -19,7 +19,7 @@ Route::post('/password-reset', [PasswordResetController::class, 'sendResetLink']
     ->name('password.reset.request');
 
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'backhistory'])->group(function () {
     // --- A. EDITOR ROUTES (Requires 'auth' + 'role.editor') ---
     // Applies the prefix 'editor/' and the route name prefix 'editor.'
     Route::middleware('role.editor')->prefix('editor')->name('Editor.')->group(function () {

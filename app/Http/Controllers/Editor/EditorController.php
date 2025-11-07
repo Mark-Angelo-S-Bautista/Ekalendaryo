@@ -94,7 +94,7 @@ class EditorController extends Controller
         $request->session()->regenerateToken();
 
         // Redirect the user back to the homepage or login page
-        return redirect('/');
+        return redirect()->route('login');
     }
 
     public function search(Request $request)

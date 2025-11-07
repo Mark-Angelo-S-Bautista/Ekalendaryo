@@ -5,6 +5,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use App\Http\Middleware\EditorRole;
+use App\Http\Middleware\PreventBackHistory;
 use App\Http\Middleware\UserManagementRole;
 use App\Http\Middleware\ViewerRole;
 
@@ -20,7 +21,8 @@ return Application::configure(basePath: dirname(__DIR__))
             // ADD YOUR CUSTOM ROLE MIDDLEWARE HERE
             'role.editor' => EditorRole::class, 
             'role.usermanagement' => UserManagementRole::class,
-            'role.viewer' => ViewerRole::class
+            'role.viewer' => ViewerRole::class,
+            'backhistory' => PreventBackHistory::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

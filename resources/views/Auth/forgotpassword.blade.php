@@ -2,7 +2,7 @@
     <div class="modal-backdrop">
         <div class="modal-content">
             <h2>Forgot Password</h2>
-            <p>Enter your email to receive a password reset link.</p>
+            <p>Enter your ID and email to receive a new password from your email.</p>
             @error('userId')
                 <p class="error-message-forgot">{{ $message }}</p>
             @enderror
