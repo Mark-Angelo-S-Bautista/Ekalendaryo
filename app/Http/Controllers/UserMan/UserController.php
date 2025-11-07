@@ -61,11 +61,9 @@ class UserController extends Controller
             'password' => bcrypt($request->password),
         ]);
 
-        return response()->json([
-            'status' => 'success',
-            'message' => 'User added successfully!',
-            'user' => $user,
-        ]);
+        return redirect()
+        ->route('UserManagement.users')
+        ->with('success', 'User added successfully!');
     }
     public function edit($id)// ADDS DEPARTMENT
     {

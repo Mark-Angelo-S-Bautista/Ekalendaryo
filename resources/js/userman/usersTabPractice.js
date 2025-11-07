@@ -184,60 +184,57 @@ if (titleDropdown) {
     titleDropdown.addEventListener("change", updateAddUserForm);
 }
 
-// ==========================
-// --- Form Submission (AJAX) ---
-// ==========================
-addUserForm?.addEventListener("submit", function (e) {
-    e.preventDefault();
-    if (addUserMessage) {
-        addUserMessage.textContent = "";
-        addUserMessage.classList.remove("success");
-    }
-    const formData = new FormData(addUserForm);
+// // ==========================
+// // --- Form Submission (AJAX) ---
+// // ==========================
+// addUserForm?.addEventListener("submit", function (e) {
+//     e.preventDefault();
+//     if (addUserMessage) {
+//         addUserMessage.textContent = "";
+//         addUserMessage.classList.remove("success");
+//     }
+//     const formData = new FormData(addUserForm);
 
-    fetch(addUserForm.action, {
-        method: "POST",
-        headers: {
-            "X-CSRF-TOKEN": formData.get("_token"),
-            Accept: "application/json",
-        },
-        body: formData,
-    })
-        .then((res) => res.json())
-        .then((data) => {
-            if (data.status === "error") {
-                addUserMessage.textContent = data.errors.join(", ");
-                addUserMessage.classList.remove("success");
-                addUserOverlay.style.display = "flex";
-                addUserOverlay.style.opacity = "1";
-            } else {
-                addUserMessage.textContent = data.message;
-                addUserMessage.classList.add("success");
+//     fetch(addUserForm.action, {
+//         method: "POST",
+//         headers: {
+//             "X-CSRF-TOKEN": formData.get("_token"),
+//             Accept: "application/json",
+//         },
+//         body: formData,
+//     })
+//         .then((res) => res.json())
+//         .then((data) => {
+//             if (data.status === "error") {
+//                 addUserMessage.textContent = data.errors.join(", ");
+//                 addUserMessage.classList.remove("success");
+//                 addUserOverlay.style.display = "flex";
+//                 addUserOverlay.style.opacity = "1";
+//             } else {
+//                 addUserMessage.textContent = data.message;
+//                 addUserMessage.classList.add("success");
 
-                if (usersTableBody && data.user) {
-                    const newRow = document.createElement("tr");
-                    newRow.setAttribute("data-user-id", data.user.id);
-                    newRow.innerHTML = `
-                        <td>${data.user.title}<br>${data.user.name}</td>
-                        <td>${data.user.userId}</td>
-                        <td>${data.user.email}</td>
-                        <td>${data.user.department}</td>
-                        <td>${data.user.yearlevel || "-"}</td>
-                        <td>${data.user.section || "-"}</td>
-                        <td>${data.user.role}</td>
-                    `;
-                    usersTableBody.appendChild(newRow);
-                }
-                addUserForm.reset();
-                updateAddUserForm(); // This resets the field visibility
-            }
-        })
-        .catch((err) => {
-            addUserMessage.textContent = "Something went wrong!";
-            addUserMessage.classList.remove("success");
-            console.error(err);
-        });
-});
+//                 if (usersTableBody && data.user) {
+//                     const newRow = document.createElement("tr");
+//                     newRow.setAttribute("data-user-id", data.user.id);
+//                     newRow.innerHTML = `
+//                         <td><span>${data.user.title}</span><br>${data.user.name}</td>
+//                         <td>${data.user.email}</td>
+//                         <td>${data.user.department}</td>
+//                         <td>${data.user.role}</td>
+//                     `;
+//                     usersTableBody.appendChild(newRow);
+//                 }
+//                 addUserForm.reset();
+//                 updateAddUserForm(); // This resets the field visibility
+//             }
+//         })
+//         .catch((err) => {
+//             addUserMessage.textContent = "Something went wrong!";
+//             addUserMessage.classList.remove("success");
+//             console.error(err);
+//         });
+// });
 
 // ==========================
 // --- EDIT USER ---
