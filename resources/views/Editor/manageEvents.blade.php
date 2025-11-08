@@ -253,6 +253,16 @@
                                 <span>⏰ {{ \Carbon\Carbon::parse($event->start_time)->format('H:i') }} -
                                     {{ \Carbon\Carbon::parse($event->end_time)->format('H:i') }}</span>
                                 <span>📍 {{ $event->location }}</span>
+                                <span>
+                                    👥
+                                    @if (is_array($event->target_year_levels) && count($event->target_year_levels) > 0)
+                                        @foreach ($event->target_year_levels as $yearLevel)
+                                            {{ $yearLevel . ',' }}
+                                        @endforeach
+                                    @else
+                                        <p>No specific year levels targeted for this event.</p>
+                                    @endif
+                                </span>
                             </div>
 
                             <div class="actions">

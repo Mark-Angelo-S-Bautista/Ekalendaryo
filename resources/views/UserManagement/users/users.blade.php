@@ -145,13 +145,13 @@
                             @foreach ($departments as $department)
                                 <li>
                                     <span>{{ $department->department_name }}</span>
-                                    <form action="{{ route('UserManagement.deletedepartment', $department->id) }}"
+                                    {{-- <form action="{{ route('UserManagement.deletedepartment', $department->id) }}"
                                         method="POST" style="display:inline;"
                                         onsubmit="return confirm('Delete {{ $department->department_name }}?')">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="delete-dept-btn">🗑️</button>
-                                    </form>
+                                    </form> --}}
                                 </li>
                             @endforeach
                         </ul>

@@ -45,6 +45,16 @@
                         - {{ \Carbon\Carbon::parse($event->end_time)->format('g:i A') }}
                         &nbsp;&nbsp; 📍 {{ $event->location }}
                     </div>
+                    <div class="dashboard_event_details">
+                        👥
+                        @if (is_array($event->target_year_levels) && count($event->target_year_levels) > 0)
+                            @foreach ($event->target_year_levels as $yearLevel)
+                                {{ $yearLevel . ',' }}
+                            @endforeach
+                        @else
+                            <p>No specific year levels targeted for this event.</p>
+                        @endif
+                    </div>
                     <div class="dashboard_event_details">{{ $event->description ?? 'No description provided.' }}</div>
                     <div class="dashboard_event_details">{{ $event->school_year }}</div>
                     <div class="dashboard_event_tags">

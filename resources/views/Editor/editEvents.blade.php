@@ -83,10 +83,30 @@
             <div class="form-group">
                 <label>Target Year Levels</label>
                 <div class="checkbox-group">
+
+                    {{-- NEW: Safe Guard Logic --}}
+                    @php
+                        // 1. Get the current value, defaulting to an empty string if null.
+                        $currentLevels = $event->target_year_levels;
+
+                        // 2. Determine the array to use for checking:
+                        if (is_array($currentLevels)) {
+                            $selectedLevels = $currentLevels;
+                        } elseif (is_string($currentLevels)) {
+                            // This handles old string/JSON data if casting failed.
+                            // We decode the JSON string, defaulting to an empty array if decoding fails.
+                            $selectedLevels = json_decode($currentLevels, true) ?? [];
+                        } else {
+                            // Default to an empty array for any other unexpected format (like null).
+                            $selectedLevels = [];
+                        }
+                    @endphp
+
+                    {{-- Loop now uses the guaranteed array: $selectedLevels --}}
                     @foreach (['1st Year', '2nd Year', '3rd Year', '4th Year'] as $year)
                         <div class="checkbox-inline">
                             <input type="checkbox" name="target_year_levels[]" value="{{ $year }}"
-                                {{ in_array($year, $event->target_year_levels ?? []) ? 'checked' : '' }}>
+                                {{ in_array($year, $selectedLevels) ? 'checked' : '' }}>
                             {{ $year }}
                         </div>
                     @endforeach
