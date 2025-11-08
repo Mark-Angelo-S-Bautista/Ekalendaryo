@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('events', function (Blueprint $table) {
             $table->id();
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->string('title');
             $table->text('description')->nullable();
             $table->date('date');
@@ -20,6 +21,7 @@ return new class extends Migration
             $table->time('end_time');
             $table->string('location');
             $table->string('school_year')->default('SY.2025-2026');
+            $table->string('department');
             $table->json('target_year_levels')->nullable();
             $table->timestamps();
         });
