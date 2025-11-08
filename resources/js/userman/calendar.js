@@ -13,6 +13,8 @@ const formattedEvents = (typeof events !== "undefined" ? events : []).map(
         sy: ev.sy, // match PHP key
         type: ev.type, // use the type sent by PHP
         organizer: ev.organizer, // use the organizer sent by PHP
+        // 👇 ADD THIS LINE
+        targetYearLevels: ev.targetYearLevels,
     })
 );
 
@@ -206,6 +208,26 @@ function openDayModal(date) {
 function openEventDetail(eventData) {
     modal.style.display = "flex";
     modalTitle.textContent = formatDate(eventData.date);
+
+    // --- REFINED LOGIC START ---
+    let yearLevelsString = "All year levels"; // Default message
+
+    // 1. Check if the property exists and is an array.
+    if (Array.isArray(eventData.targetYearLevels)) {
+        // 2. Check if the array has content.
+        if (eventData.targetYearLevels.length > 0) {
+            yearLevelsString = eventData.targetYearLevels.join(", ");
+        }
+        // If the array exists but is empty, it remains 'All year levels' (the default)
+    } else if (
+        eventData.targetYearLevels === null ||
+        eventData.targetYearLevels === undefined
+    ) {
+        // If data is null/undefined (e.g., old data or bad mapping), it remains 'All year levels'
+        yearLevelsString = "Not specified (All year levels)";
+    }
+    // --- REFINED LOGIC END ---
+
     modalBody.innerHTML = `
     <div class="calendar_event-detail">
         <div class="calendar_badges">
@@ -220,6 +242,7 @@ function openEventDetail(eventData) {
             <div>⏰ ${eventData.timeStart} - ${eventData.timeEnd}</div>
             <div>📍 ${eventData.location}</div>
             <div>👤 ${eventData.organizer}</div>
+            <div>🎓 Target Levels: **${yearLevelsString}**</div> 
             <div>${eventData.sy}</div>
         </div>
     </div>`;
