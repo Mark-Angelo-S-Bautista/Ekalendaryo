@@ -14,8 +14,15 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
+        // 🛑 Temporarily disable foreign key checks
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+
         // Clear the table before seeding to avoid duplicates
-        User::truncate();
+        // This will now work without the foreign key error
+        User::truncate(); 
+
+        // 🟢 Re-enable foreign key checks (immediately after the destructive operation)
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
         // Create a 'UserManagement' user
         User::create([
