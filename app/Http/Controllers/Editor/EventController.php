@@ -20,14 +20,14 @@ class EventController extends Controller
         // ... (validation and conflict check logic is correct) ...
 
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'title' => 'required|string|max:50',
+            'description' => 'nullable|string|max:100',
             'date' => 'required|date|after_or_equal:today',
             'start_time' => 'required',
             'end_time' => 'required',
-            'location' => 'required|string|max:255',
+            'location' => 'required|string|max:50',
             'target_year_levels' => 'nullable|array',
-            'other_location' => 'nullable|string|max:255',
+            'other_location' => 'nullable|string|max:50|required_if:location,Other',
         ]);
 
         $location = $request->location === 'Other' ? $request->other_location : $request->location;
