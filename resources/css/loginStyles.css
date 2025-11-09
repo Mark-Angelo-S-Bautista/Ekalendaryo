@@ -1,4 +1,4 @@
-/* Basic Reset and Body Styling */
+@import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css");
 body {
     display: flex;
     font-family: Arial, sans-serif;
