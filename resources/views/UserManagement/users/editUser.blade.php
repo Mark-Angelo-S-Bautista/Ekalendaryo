@@ -1,7 +1,7 @@
 <x-usermanLayout>
 
     <head>
-        @vite(['resources/css/userman/userTabPractice.css', 'resources/js/userman/userTabPractice.js'])
+        @vite(['resources/css/userman/usersTabPractice.css', 'resources/js/userman/usersTabPractice.js'])
     </head>
     <div class="edituser_wrapper">
         <h2>Edit User</h2>
