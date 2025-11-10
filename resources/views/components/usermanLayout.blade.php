@@ -33,14 +33,14 @@
             class="nav_item {{ request()->routeIs('UserManagement.users') ? 'active' : '' }}">
             Users
         </a>
-        <a href="{{ route('UserManagement.activity_log') }}"
+        {{-- <a href="{{ route('UserManagement.activity_log') }}"
             class="nav_item {{ request()->routeIs('UserManagement.activity_log') ? 'active' : '' }}">
             Activity Log
         </a>
         <a href="{{ route('UserManagement.history') }}"
             class="nav_item {{ request()->routeIs('UserManagement.history') ? 'active' : '' }}">
             History
-        </a>
+        </a> --}}
         <a href="{{ route('UserManagement.archive') }}"
             class="nav_item {{ request()->routeIs('UserManagement.archive') ? 'active' : '' }}">
             Archive

@@ -9,11 +9,13 @@ export default defineConfig({
                 // JS FILES
                 "resources/js/auth/login.js",
                 "resources/js/auth/scriptuserman.js",
+
                 "resources/js/editor/archive.js",
                 "resources/js/editor/dashboard.js",
                 "resources/js/editor/history.js",
                 "resources/js/editor/manageEvents.js",
                 "resources/js/editor/profile.js",
+                "resources/js/editor/activity_log.js",
 
                 "resources/js/userman/activityLog.js",
                 "resources/js/userman/archive.js",

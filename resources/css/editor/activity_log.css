@@ -10,14 +10,43 @@ body {
     color: #1c1c1c;
 }
 
-/* Main Content */
 .content {
     padding: 30px 50px;
 }
 
-.content h2 {
-    font-size: 1.5em;
+.content-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     margin-bottom: 15px;
+}
+
+.content h2 {
+    font-size: 22px;
+}
+
+/* ✅ Refined Dropdown to Match Your Screenshot */
+.filter-dropdown select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-color: #fff;
+    border: 1px solid #cddfcc;
+    border-radius: 4px;
+    padding: 6px 30px 6px 10px;
+    font-size: 14px;
+    cursor: pointer;
+    color: #000;
+    background-image: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path fill='black' d='M0 0l5 6 5-6z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 10px;
+}
+
+.filter-dropdown select:focus {
+    outline: none;
+    border-color: #a2c9a2;
+    box-shadow: 0 0 3px rgba(72, 187, 120, 0.3);
 }
 
 .activity-section {
@@ -72,6 +101,7 @@ body {
     padding: 2px 8px;
     border-radius: 12px;
     font-size: 12px;
+    text-transform: lowercase;
 }
 
 .activity-meta {

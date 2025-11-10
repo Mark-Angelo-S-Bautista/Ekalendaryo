@@ -21,3 +21,10 @@ function filterStudents() {
             filter === "all" || stu.dataset.dept === filter ? "block" : "none";
     });
 }
+
+/* ✅ Restore button function */
+function restoreItem(button) {
+    const item = button.closest(".event");
+    alert(`Restored: ${item.querySelector("h4").innerText}`);
+    item.remove();
+}

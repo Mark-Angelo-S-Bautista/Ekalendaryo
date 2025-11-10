@@ -10,9 +10,8 @@ main {
 }
 
 h2 {
-    font-size: 1.6em;
+    font-size: 1.5em;
     margin-bottom: 5px;
-    margin-top: 0;
 }
 
 p {
@@ -108,6 +107,7 @@ p {
     padding: 12px;
     border-radius: 10px;
     margin-bottom: 12px;
+    position: relative;
 }
 
 .event h4,
@@ -132,6 +132,25 @@ select {
 .icon {
     font-size: 20px;
     color: #007a3d;
+}
+
+/* Added for Recently Deleted */
+.restore-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: background-color 0.2s;
+}
+
+.restore-btn:hover {
+    background-color: #45a049;
 }
 .logout-btn {
     display: flex;

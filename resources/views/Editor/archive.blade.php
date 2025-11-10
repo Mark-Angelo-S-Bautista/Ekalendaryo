@@ -7,7 +7,6 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>eKalendaryo Archive</title>
         @vite(['resources/css/editor/archive.css', 'resources/js/editor/archive.js'])
-
     </head>
 
     <body>
@@ -31,15 +30,16 @@
                         <p>5 completed events from SY.2024-2025</p>
                     </div>
 
-                    <div class="subcard" onclick="openModal('studentsModal')">
-                        <h4>👥 Student Records</h4>
-                        <p>3 student records from SY.2024-2025</p>
+                    <!-- ✅ Added Recently Deleted card -->
+                    <div class="subcard" onclick="openModal('deletedModal')">
+                        <h4>🗑️ Recently Deleted</h4>
+                        <p>View and restore deleted items</p>
                     </div>
                 </div>
             </div>
         </main>
 
-        <!-- Events Modal -->
+        <!-- Events Modal (Unchanged) -->
         <div id="eventsModal" class="modal">
             <div class="modal-content">
                 <span class="close-btn" onclick="closeModal('eventsModal')">&times;</span>
@@ -88,44 +88,39 @@
             </div>
         </div>
 
-        <!-- Student Records Modal -->
-        <div id="studentsModal" class="modal">
+        <!-- ✅ Recently Deleted Modal -->
+        <div id="deletedModal" class="modal">
             <div class="modal-content">
-                <span class="close-btn" onclick="closeModal('studentsModal')">&times;</span>
+                <span class="close-btn" onclick="closeModal('deletedModal')">&times;</span>
                 <div class="modal-header">
-                    <span class="icon">🎓</span>
-                    Student Records - SY.2024-2025
+                    <span class="icon">🗑️</span>
+                    Recently Deleted - SY.2024-2025
                 </div>
-                <p>3 of 3 student records</p>
+                <p>3 deleted events</p>
 
-                <label for="studentFilter">Filter by Department: </label>
-                <select id="studentFilter" onchange="filterStudents()">
-                    <option value="all">All Departments</option>
-                    <option value="BSAIS">BSAIS</option>
-                    <option value="BSIS-ACT">BSIS-ACT</option>
-                    <option value="BSOM">BSOM</option>
-                </select>
-
-                <div id="studentList">
-                    <div class="student" data-dept="BSAIS">
-                        <h4>Jessica Brown</h4>
-                        <p>ID: BSAIS2024002 | Dept: BSAIS | Section: B</p>
-                        <p>Email: former2@school.edu | DOB: 12/3/2002</p>
-                        <p>📞 +1-234-567-8914</p>
+                <div id="deletedList" class="eventlist_">
+                    <div class="event">
+                        <button class="restore-btn" onclick="restoreItem(this)">Restore</button>
+                        <h4>Orientation Day 2024 <span class="tag">student</span></h4>
+                        <p>Freshmen orientation event</p>
+                        <p>📍 Gymnasium | ⏰ August 12, 2024 (8AM - 12PM)</p>
+                        <p>👤 Organizer: SG Office | 🧍‍♂️ 4 attendees</p>
                     </div>
 
-                    <div class="student" data-dept="BSIS-ACT">
-                        <h4>John Williams</h4>
-                        <p>ID: BSIS2024001 | Dept: BSIS-ACT | Section: A</p>
-                        <p>Email: former1@school.edu | DOB: 8/14/2002</p>
-                        <p>📞 +1-234-567-8913</p>
+                    <div class="event">
+                        <button class="restore-btn" onclick="restoreItem(this)">Restore</button>
+                        <h4>Cleanup Drive 2024 <span class="tag">department</span></h4>
+                        <p>Environmental awareness activity</p>
+                        <p>📍 Campus Grounds | ⏰ July 25, 2024 (9AM - 11AM)</p>
+                        <p>👤 Organizer: Department of Environment | 🧍‍♂️ 12 attendees</p>
                     </div>
 
-                    <div class="student" data-dept="BSOM">
-                        <h4>Michael Davis</h4>
-                        <p>ID: BSOM2024003 | Dept: BSOM | Section: C</p>
-                        <p>Email: former3@school.edu | DOB: 6/18/2002</p>
-                        <p>📞 +1-234-567-8915</p>
+                    <div class="event">
+                        <button class="restore-btn" onclick="restoreItem(this)">Restore</button>
+                        <h4>Alumni Meet 2024 <span class="tag">admin</span></h4>
+                        <p>Gathering of alumni and admin officials</p>
+                        <p>📍 Main Hall | ⏰ May 30, 2024 (6PM - 9PM)</p>
+                        <p>👤 Organizer: Admin Office | 🧍‍♂️ 8 attendees</p>
                     </div>
                 </div>
             </div>
