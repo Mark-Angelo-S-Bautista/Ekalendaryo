@@ -14,57 +14,57 @@ use App\Models\Event;
 
 class UserController extends Controller
 {
-    public function adduser(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'office_name' => '',
-            'userId' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:users,email',
-            'role' => 'required|string',
-            'department' => 'required|string',
-            'title' => 'nullable|string|max:255',
-            'yearlevel' => 'nullable|string|max:50',
-            'section' => 'nullable|string|max:50',
-            'password' => 'required|string|min:6',
-        ]);
+    // public function adduser(Request $request)
+    // {
+    //     $validator = Validator::make($request->all(), [
+    //         'name' => 'required|string|max:255',
+    //         'office_name' => '',
+    //         'userId' => 'required|string|max:255',
+    //         'email' => 'required|email|max:255|unique:users,email',
+    //         'role' => 'required|string',
+    //         'department' => 'required|string',
+    //         'title' => 'nullable|string|max:255',
+    //         'yearlevel' => 'nullable|string|max:50',
+    //         'section' => 'nullable|string|max:50',
+    //         'password' => 'required|string|min:6',
+    //     ]);
 
-        // Check if user with same name + userId exists
-        $exists = User::where('name', $request->name)
-                    ->where('userId', $request->userId)
-                    ->exists();
+    //     // Check if user with same name + userId exists
+    //     $exists = User::where('name', $request->name)
+    //                 ->where('userId', $request->userId)
+    //                 ->exists();
 
-        if ($exists) {
-            return response()->json([
-                'status' => 'error',
-                'errors' => ['User with this Name and ID already exists.'],
-            ]);
-        }
+    //     if ($exists) {
+    //         return response()->json([
+    //             'status' => 'error',
+    //             'errors' => ['User with this Name and ID already exists.'],
+    //         ]);
+    //     }
 
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => 'error',
-                'errors' => $validator->errors()->all(),
-            ]);
-        }
+    //     if ($validator->fails()) {
+    //         return response()->json([
+    //             'status' => 'error',
+    //             'errors' => $validator->errors()->all(),
+    //         ]);
+    //     }
 
-        $user = User::create([
-            'name' => $request->name,
-            'office_name' => $request->office_name,
-            'userId' => $request->userId,
-            'email' => $request->email,
-            'role' => $request->role,
-            'department' => $request->department,
-            'title' => $request->title,
-            'yearlevel' => $request->yearlevel,
-            'section' => $request->section,
-            'password' => bcrypt($request->password),
-        ]);
+    //     $user = User::create([
+    //         'name' => $request->name,
+    //         'office_name' => $request->office_name,
+    //         'userId' => $request->userId,
+    //         'email' => $request->email,
+    //         'role' => $request->role,
+    //         'department' => $request->department,
+    //         'title' => $request->title,
+    //         'yearlevel' => $request->yearlevel,
+    //         'section' => $request->section,
+    //         'password' => bcrypt($request->password),
+    //     ]);
 
-        return redirect()
-        ->route('UserManagement.users')
-        ->with('success', 'User added successfully!');
-    }
+    //     return redirect()
+    //     ->route('UserManagement.users')
+    //     ->with('success', 'User added successfully!');
+    // }
     public function edit($id)// ADDS DEPARTMENT
     {
         $user = User::findOrFail($id);

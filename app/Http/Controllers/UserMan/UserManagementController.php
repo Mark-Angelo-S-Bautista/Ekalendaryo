@@ -51,39 +51,70 @@ class UserManagementController extends Controller
         ]);
     }
 
-    public function calendar()
+    public function adduser(Request $request)
     {
-        $events = Event::all()->map(function ($event) {
-            
-            // --- NEW SANITIZATION LOGIC START ---
-            $targetYearLevels = $event->target_year_levels;
+        // Base rules
+        $rules = [
+            'name' => 'required|string|max:255|unique:users,name',
+            'userId' => 'required|string|max:255|unique:users,userId',
+            'email' => 'required|email|max:255|unique:users,email',
+            'role' => 'required|string',
+            'department' => 'required|string',
+            'title' => 'required|string|max:255',
+            'password' => 'required|string|min:6',
+        ];
 
-            // If casting failed (likely because data is a JSON string *not* an array),
-            // we manually decode it. If that fails too, default to an empty array.
-            if (is_string($targetYearLevels)) {
-                $targetYearLevels = json_decode($targetYearLevels, true) ?? [];
-            } elseif (!is_array($targetYearLevels)) {
-                // Handle null, undefined, or any other unexpected type
-                $targetYearLevels = [];
+        // Conditional rules
+        if ($request->title === 'Student') {
+            $rules['yearlevel'] = 'required|string|max:50';
+            $rules['section'] = 'required|string|max:50';
+        } elseif ($request->title === 'Offices') {
+            $rules['office_name'] = 'required|string|max:255';
+        }
+
+        $validator = Validator::make($request->all(), $rules);
+
+        $errors = [];
+
+        // Custom check for duplicate user
+        if (User::where('name', $request->name)->where('userId', $request->userId)->exists()) {
+            $errors['userId'][] = 'User with this Name and ID already exists.';
+        }
+
+        // Add validator errors
+        if ($validator->fails()) {
+            foreach ($validator->errors()->messages() as $field => $messages) {
+                $errors[$field] = $messages;
             }
-            // --- NEW SANITIZATION LOGIC END ---
+        }
 
-            return [
-                'date' => $event->date,
-                'title' => $event->title,
-                'description' => $event->description ?? 'No description provided.',
-                'timeStart' => $event->start_time,
-                'timeEnd' => $event->end_time,
-                'location' => $event->location,
-                'sy' => $event->school_year,
-                'type' => strtolower(str_replace(['/', ' '], '_', $event->department ?? 'general')),
-                'organizer' => $event->department ?? 'N/A',
-                'targetYearLevels' => $targetYearLevels, // Use the sanitized variable
-            ];
-        });
+        if (!empty($errors)) {
+            return response()->json([
+                'status' => 'error',
+                'errors' => $errors,
+            ]);
+        }
 
-        return view('UserManagement.calendar.calendar', ['events' => $events]);
+        // Create user
+        User::create([
+            'name' => $request->name,
+            'office_name' => $request->office_name,
+            'userId' => $request->userId,
+            'email' => $request->email,
+            'role' => $request->role,
+            'department' => $request->department,
+            'title' => $request->title,
+            'yearlevel' => $request->yearlevel,
+            'section' => $request->section,
+            'password' => bcrypt($request->password),
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'User added successfully!',
+        ]);
     }
+
 
     public function profile()
     {

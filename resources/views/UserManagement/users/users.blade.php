@@ -126,8 +126,8 @@
                 <form id="addDepartmentForm" action="{{ route('UserManagement.adddepartment') }}">
                     @csrf
                     <label for="department_name">Add New Department</label>
-                    <input type="text" id="department_name" name="department_name" placeholder="e.g. BSIT, BSA, etc."
-                        required>
+                    <input type="text" id="department_name" name="department_name"
+                        placeholder="e.g. BSIT, BSA, etc.">
 
                     <div id="addDeptMessage" class="adddept_message"></div> {{-- Placeholder for error/success messages --}}
 
@@ -168,77 +168,97 @@
         <div class="adduser_overlay" id="adduser_overlay">
             <div class="adduser_modal">
                 <h2>Add New User</h2>
-                <form action="{{ route('UserManagement.adduser') }} " method="post">
+                <form action="{{ route('UserManagement.adduser') }}" method="POST" id="addUserForm">
                     @csrf
+
                     <div class="adduser_form-group">
                         <label class="adduser_label">Username</label>
-                        <input type="text" id="name" name="name" class="adduser_input" required>
+                        <input type="text" id="name" name="name" class="adduser_input"
+                            value="{{ old('name') }}">
+                        <div class="error-text" id="error-name"></div>
                     </div>
 
                     <div class="adduser_form-group">
                         <label class="adduser_label">Title</label>
-                        <select id="title" name="title" class="adduser_select" required>
+                        <select id="title" name="title" class="adduser_select">
                             <option value="">Select a Title</option>
-                            <option value="Student">Student</option>
-                            <option value="Faculty">Faculty</option>
-                            <option value="Department Head">Department Head</option>
-                            <option value="Offices">Offices</option>
+                            <option value="Student" {{ old('title') == 'Student' ? 'selected' : '' }}>Student</option>
+                            <option value="Faculty" {{ old('title') == 'Faculty' ? 'selected' : '' }}>Faculty</option>
+                            <option value="Department Head" {{ old('title') == 'Department Head' ? 'selected' : '' }}>
+                                Department Head</option>
+                            <option value="Offices" {{ old('title') == 'Offices' ? 'selected' : '' }}>Offices</option>
                         </select>
+                        <div class="error-text" id="error-title"></div>
                     </div>
 
-                    <div class="adduser_form-group" id="office_name_field" style="display: none;">
+                    <div class="adduser_form-group" id="office_name_field" style="display:none;">
                         <label class="adduser_label">Office Name</label>
                         <input type="text" id="office_name" name="office_name" class="adduser_input"
-                            placeholder="Enter name of office">
+                            value="{{ old('office_name') }}">
+                        <div class="error-text" id="error-office_name"></div>
                     </div>
 
                     <div class="adduser_form-group">
                         <label class="adduser_label">Student ID or Employee ID</label>
                         <input type="text" id="userId" name="userId" class="adduser_input"
-                            placeholder="userId" required>
+                            value="{{ old('userId') }}">
+                        <div class="error-text" id="error-userId"></div>
                     </div>
 
                     <div class="adduser_form-group">
                         <label class="adduser_label">Email</label>
                         <input type="email" id="email" name="email" class="adduser_input"
-                            placeholder="user@gmail.com" required>
+                            value="{{ old('email') }}">
+                        <div class="error-text" id="error-email"></div>
                     </div>
 
                     <div class="adduser_form-group">
                         <label class="adduser_label">Department</label>
-                        <select id="department" name="department" class="adduser_select" required>
+                        <select id="department" name="department" class="adduser_select">
                             <option value="">Select a Department</option>
                             @foreach ($departments as $dept)
-                                <option value="{{ $dept->department_name }}">{{ $dept->department_name }}</option>
+                                <option value="{{ $dept->department_name }}"
+                                    {{ old('department') == $dept->department_name ? 'selected' : '' }}>
+                                    {{ $dept->department_name }}
+                                </option>
                             @endforeach
                         </select>
+                        <div class="error-text" id="error-department"></div>
                     </div>
 
                     <div class="adduser_form-group">
                         <label class="adduser_label">Year Level</label>
                         <select id="yearlevel" name="yearlevel" class="adduser_select">
                             <option value="">Select a Year Level</option>
-                            <option value="1stYear">1st Year</option>
-                            <option value="2ndYear">2nd Year</option>
-                            <option value="3rdYear">3rd Year</option>
-                            <option value="4thYear">4th Year</option>
+                            <option value="1stYear" {{ old('yearlevel') == '1stYear' ? 'selected' : '' }}>1st Year
+                            </option>
+                            <option value="2ndYear" {{ old('yearlevel') == '2ndYear' ? 'selected' : '' }}>2nd Year
+                            </option>
+                            <option value="3rdYear" {{ old('yearlevel') == '3rdYear' ? 'selected' : '' }}>3rd Year
+                            </option>
+                            <option value="4thYear" {{ old('yearlevel') == '4thYear' ? 'selected' : '' }}>4th Year
+                            </option>
                         </select>
+                        <div class="error-text" id="error-yearlevel"></div>
                     </div>
 
                     <div class="adduser_form-group">
                         <label class="adduser_label">Section</label>
                         <input type="text" id="section" name="section" class="adduser_input"
-                            placeholder="eg. A, B, C, D">
+                            value="{{ old('section') }}">
+                        <div class="error-text" id="error-section"></div>
                     </div>
 
                     <div class="adduser_form-group">
                         <label class="adduser_label">Role</label>
-                        <select id="role" name="role" class="adduser_select" required>
+                        <select id="role" name="role" class="adduser_select">
                             <option value="">Select a role</option>
-                            <option value="Viewer">Viewer</option>
-                            <option value="Editor">Editor</option>
-                            <option value="UserManagement">User Management</option>
+                            <option value="Viewer" {{ old('role') == 'Viewer' ? 'selected' : '' }}>Viewer</option>
+                            <option value="Editor" {{ old('role') == 'Editor' ? 'selected' : '' }}>Editor</option>
+                            <option value="UserManagement" {{ old('role') == 'UserManagement' ? 'selected' : '' }}>
+                                User Management</option>
                         </select>
+                        <div class="error-text" id="error-role"></div>
                     </div>
 
                     <div class="adduser_form-group">
@@ -250,11 +270,9 @@
                         </div>
                     </div>
 
-                    <div id="adduser_dynamic-fields"></div>
-
                     <div class="adduser_actions">
-                        <div id="addUserMessage" class="adduser_message"></div> {{-- Placeholder for errors/success --}}
-                        <button type="button"class="adduser_btn adduser_btn-cancel"
+                        <div id="addUserMessage" class="adduser_message"></div>
+                        <button type="button" class="adduser_btn adduser_btn-cancel"
                             onclick="closeAddUserModal()">Cancel</button>
                         <button type="submit" class="adduser_btn adduser_btn-create">Create User</button>
                     </div>
@@ -283,7 +301,7 @@
 
                         <div class="import_file_input">
                             <label for="csv_file" id="file_label">Choose File: No file chosen</label><br>
-                            <input type="file" id="csv_file" name="csv_file" accept=".csv" required
+                            <input type="file" id="csv_file" name="csv_file" accept=".csv"
                                 style="display:none;">
                         </div>
                     </div>
