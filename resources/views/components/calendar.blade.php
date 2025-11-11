@@ -5,12 +5,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>eKalendaryo</title>
-    <script>
-        const events = @json($events);
-        console.log("Loaded events:", events);
+
+    <script id="calendar-event-data" type="application/json">
+        @json($events)
     </script>
+
     @vite(['resources/css/userman/calendar.css', 'resources/js/userman/calendar.js'])
 
+    <script>
+        // This function checks if the page is being loaded from the browser's bfcache.
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                window.location.reload();
+            }
+        });
+    </script>
 </head>
 
 <script>
