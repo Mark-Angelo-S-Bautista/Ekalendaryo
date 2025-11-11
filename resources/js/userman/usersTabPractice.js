@@ -219,7 +219,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     setTimeout(() => {
                         closeAddUserModal(); // Close modal
                         location.reload(); // Refresh page
-                    }, 2000);
+                    }, 1000);
                 }
             });
     });
