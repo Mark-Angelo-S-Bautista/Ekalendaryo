@@ -56,17 +56,6 @@
             </div>
         </div>
 
-        <!-- ✅ Day Headers -->
-        <div class="calendar_day-headers">
-            <div>Su</div>
-            <div>Mo</div>
-            <div>Tu</div>
-            <div>We</div>
-            <div>Th</div>
-            <div>Fr</div>
-            <div>Sa</div>
-        </div>
-
         <!-- Calendar Grid -->
         <div class="calendar_grid" id="calendar_grid"></div>
 
