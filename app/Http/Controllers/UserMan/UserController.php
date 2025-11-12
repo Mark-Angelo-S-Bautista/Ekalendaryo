@@ -24,42 +24,77 @@ class UserController extends Controller
 
     public function update(Request $request, $id)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'title' => 'required|string|max:255',
-            'userId' => 'required|string|unique:users,userId,' . $id,
-            'email' => 'required|email|unique:users,email,' . $id,
-            'department' => 'required|string',
-            'yearlevel' => 'nullable|string',
-            'section' => 'nullable|string|max:1',
-            'role' => 'required|string',
-        ]);
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'name' => 'required|string|max:255',
+                'title' => 'required|string|max:255',
+                'userId' => 'required|string|max:255|unique:users,userId,' . $id,
+                'email' => 'required|email|max:255|unique:users,email,' . $id,
+                'department' => 'required|string|max:255',
+                'yearlevel' => 'nullable|string|max:50',
+                'section' => 'nullable|string|max:50',
+                'role' => 'required|string|max:255',
+            ],
+            [
+                // Custom error messages
+                'name.required' => 'The name field is required.',
+                'name.max' => 'The name may not be greater than 255 characters.',
+
+                'title.required' => 'The title field is required.',
+                'title.max' => 'The title may not be greater than 255 characters.',
+
+                'userId.required' => 'The user ID field is required.',
+                'userId.unique' => 'This user ID already exists.',
+                'userId.max' => 'The user ID may not be greater than 255 characters.',
+
+                'email.required' => 'The email field is required.',
+                'email.email' => 'Please enter a valid email address.',
+                'email.unique' => 'This email is already taken.',
+                'email.max' => 'The email may not be greater than 255 characters.',
+
+                'department.required' => 'The department field is required.',
+                'department.max' => 'The department may not be greater than 255 characters.',
+
+                'yearlevel.max' => 'The year level may not be greater than 50 characters.',
+
+                'section.max' => 'The section may not be greater than 50 characters.',
+
+                'role.required' => 'The role field is required.',
+                'role.max' => 'The role may not be greater than 255 characters.',
+            ]
+        );
 
         if ($validator->fails()) {
             if ($request->ajax()) {
                 return response()->json([
                     'status' => 'error',
-                    'errors' => $validator->errors()->all()
-                ]);
+                    'errors' => $validator->errors()->toArray(), // IMPORTANT: plain array
+                ], 422);
             }
+
             return back()->withErrors($validator)->withInput();
         }
 
         $user = User::findOrFail($id);
+
         $user->update($request->only([
-            'name', 'title', 'userId', 'email', 'department', 'yearlevel', 'section', 'role'
+            'name', 'title', 'userId', 'email', 'department', 'yearlevel', 'section', 'role',
         ]));
 
         if ($request->ajax()) {
             return response()->json([
                 'status' => 'success',
                 'message' => 'User updated successfully!',
-                'user' => $user
+                'user' => $user,
             ]);
         }
 
-        return redirect()->route('UserManagement.users')->with('success', 'User updated successfully!');
+        return redirect()
+            ->route('UserManagement.users')
+            ->with('success', 'User updated successfully!');
     }
+
     public function destroy($id)
     {
         $user = User::findOrFail($id);

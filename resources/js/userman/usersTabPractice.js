@@ -281,76 +281,91 @@ if (titleDropdown) {
 // ==========================
 // --- EDIT USER ---
 // ==========================
-document.addEventListener("DOMContentLoaded", () => {
-    const editUserForm = document.querySelector(".edituser_wrapper form");
-    const editUserMessage = document.getElementById("editUserMessage");
-    // Assuming error messages in the edit form use IDs like error-edit-name
-    const editErrorTexts = document.querySelectorAll(
-        ".edituser_wrapper .error-text"
-    );
+document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("editUserForm");
+    const titleInput = form.querySelector('input[name="title"]');
+    const yearLevelGroup = form
+        .querySelector('select[name="yearlevel"]')
+        .closest(".edituser_form-group");
+    const sectionGroup = form
+        .querySelector('input[name="section"]')
+        .closest(".edituser_form-group");
 
-    if (!editUserForm) return;
+    // Function to toggle fields based on title
+    function toggleFieldsByTitle() {
+        const title = titleInput.value.trim();
+        if (title === "Offices" || title === "Department Head") {
+            yearLevelGroup.style.display = "none";
+            sectionGroup.style.display = "none";
+        } else {
+            yearLevelGroup.style.display = "";
+            sectionGroup.style.display = "";
+        }
+    }
 
-    editUserForm.addEventListener("submit", function (e) {
+    // Initial check on page load
+    toggleFieldsByTitle();
+
+    // Listen for changes in title
+    titleInput.addEventListener("input", toggleFieldsByTitle);
+
+    // ==========================
+    // --- EDIT USER SUBMIT ---
+    // ==========================
+    form.addEventListener("submit", async function (e) {
         e.preventDefault();
 
-        // Clear previous messages and errors
-        if (editUserMessage) {
-            editUserMessage.textContent = "";
-            editUserMessage.classList.remove("success");
-        }
-        editErrorTexts.forEach((el) => (el.textContent = ""));
+        const formData = new FormData(form);
+        formData.append("_method", "PUT");
 
-        const formData = new FormData(editUserForm);
+        // Clear previous errors
+        document
+            .querySelectorAll(".error-text")
+            .forEach((el) => (el.textContent = ""));
+        const messageDiv = document.getElementById("editUserMessage");
+        messageDiv.textContent = "";
 
-        fetch(editUserForm.action, {
-            method: "POST", // Laravel will read _method=PUT
-            headers: {
-                "X-CSRF-TOKEN": formData.get("_token"),
-                Accept: "application/json",
-            },
-            body: formData,
-        })
-            .then((res) => res.json())
-            .then((data) => {
-                if (data.status === "error") {
-                    // ❌ Validation Errors: Display them below the fields
-
-                    // Loop through all error messages and place them by field ID
-                    Object.keys(data.errors).forEach((key) => {
-                        // Assuming edit form error IDs are error-field_name
-                        const errorElement = document.getElementById(
-                            `error-edit-${key}`
-                        );
-                        if (errorElement) {
-                            errorElement.textContent = data.errors[key][0];
-                        }
-                    });
-
-                    // Set general error message
-                    if (editUserMessage) {
-                        editUserMessage.textContent =
-                            "Please correct the errors above.";
-                        editUserMessage.style.color = "red";
-                    }
-                } else if (data.status === "success") {
-                    // ✅ Success message
-                    if (editUserMessage) {
-                        editUserMessage.textContent = data.message;
-                        editUserMessage.classList.add("success");
-                        editUserMessage.style.color = "green";
-                    }
-                    // Typically, after a successful edit, you'd update the row in the main table
-                    // and optionally close the modal/redirect the user.
-                }
-            })
-            .catch((err) => {
-                if (editUserMessage) {
-                    editUserMessage.textContent = "Something went wrong!";
-                    editUserMessage.style.color = "red";
-                }
-                console.error(err);
+        try {
+            const response = await fetch(form.action, {
+                method: "POST",
+                body: formData,
+                headers: {
+                    "X-CSRF-TOKEN": document.querySelector(
+                        'input[name="_token"]'
+                    ).value,
+                    Accept: "application/json",
+                    "X-Requested-With": "XMLHttpRequest",
+                },
             });
+
+            if (response.status === 422) {
+                const data = await response.json();
+                const errors = data.errors;
+                for (const [field, messages] of Object.entries(errors)) {
+                    const errorField = document.getElementById(
+                        `error-${field}`
+                    );
+                    if (errorField) {
+                        errorField.textContent = messages[0];
+                    }
+                }
+                return;
+            }
+
+            const data = await response.json();
+            if (data.status === "success") {
+                messageDiv.textContent =
+                    data.message || "User successfully updated!";
+                messageDiv.style.color = "green";
+
+                setTimeout(() => {
+                    window.location.href = "/users"; // redirect to users list
+                }, 1500);
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            messageDiv.textContent = "Something went wrong. Please try again.";
+        }
     });
 });
 
