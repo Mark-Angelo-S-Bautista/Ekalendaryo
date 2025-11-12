@@ -311,7 +311,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div>⏰ ${eventData.timeStart} - ${eventData.timeEnd}</div>
                 <div>📍 ${eventData.location}</div>
                 <div>👤 ${eventData.organizer}</div>
-                <div>🎓 Target Levels: <strong>${yearLevelsString}</strong></div>
+                <div>🎓 ${yearLevelsString}</div>
                 <div>${eventData.sy}</div>
             </div>
         </div>`;
