@@ -186,9 +186,38 @@ class UserManagementController extends Controller
         return view('UserManagement.activity_log.activity_log');
     }
 
-    public function history()
+    public function calendar()
     {
-        return view('UserManagement.history.history');
+        $events = Event::all()->map(function ($event) {
+            
+            // --- NEW SANITIZATION LOGIC START ---
+            $targetYearLevels = $event->target_year_levels;
+
+            // If casting failed (likely because data is a JSON string *not* an array),
+            // we manually decode it. If that fails too, default to an empty array.
+            if (is_string($targetYearLevels)) {
+                $targetYearLevels = json_decode($targetYearLevels, true) ?? [];
+            } elseif (!is_array($targetYearLevels)) {
+                // Handle null, undefined, or any other unexpected type
+                $targetYearLevels = [];
+            }
+            // --- NEW SANITIZATION LOGIC END ---
+
+            return [
+                'date' => $event->date,
+                'title' => $event->title,
+                'description' => $event->description ?? 'No description provided.',
+                'timeStart' => $event->start_time,
+                'timeEnd' => $event->end_time,
+                'location' => $event->location,
+                'sy' => $event->school_year,
+                'type' => strtolower(str_replace(['/', ' '], '_', $event->department ?? 'general')),
+                'organizer' => $event->department ?? 'N/A',
+                'targetYearLevels' => $targetYearLevels, // Use the sanitized variable
+            ];
+        });
+
+        return view('UserManagement.calendar.calendar', ['events' => $events]);
     }
 
     public function archive()
