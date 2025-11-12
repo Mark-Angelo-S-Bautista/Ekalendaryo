@@ -24,12 +24,13 @@
                         <h2>Create New Event</h2>
                         <p>Fill in the event details to create a new event</p>
 
+                        <!-- Create Event FORM -->
                         <form action="{{ route('Editor.store') }}" method="POST">
                             @csrf
 
                             <div class="form-group">
                                 <label>Event title</label>
-                                <input type="text" id="eventTitle" name="title" placeholder="Event title" required>
+                                <input type="text" id="eventTitle" name="title" placeholder="Event title">
                             </div>
 
                             <div class="form-group">
@@ -40,22 +41,22 @@
 
                             <div class="form-group">
                                 <label>Date</label>
-                                <input type="date" id="eventDate" name="date" required min="{{ date('Y-m-d') }}">
+                                <input type="date" id="eventDate" name="date" min="{{ date('Y-m-d') }}">
                             </div>
 
                             <div class="form-group">
                                 <label>Start Time</label>
-                                <input type="time" id="startTime" name="start_time" required>
+                                <input type="time" id="startTime" name="start_time">
                             </div>
 
                             <div class="form-group">
                                 <label>End Time</label>
-                                <input type="time" id="endTime" name="end_time" required>
+                                <input type="time" id="endTime" name="end_time">
                             </div>
 
                             <div class="form-group">
                                 <label for="eventLocation">Event Location</label>
-                                <select id="eventLocation" name="location" required onchange="toggleOtherLocation()"
+                                <select id="eventLocation" name="location" onchange="toggleOtherLocation()"
                                     class="form-control">
                                     <option value="">-- Select a location --</option>
                                     <option value="Covered Court">Covered Court</option>
