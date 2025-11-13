@@ -144,6 +144,9 @@ a {
     box-sizing: border-box;
     overflow: auto;
 }
+.btn-view-details {
+    padding-right: 100px;
+}
 
 .modal h2 {
     font-size: 18px;

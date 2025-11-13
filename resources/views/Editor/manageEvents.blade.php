@@ -267,7 +267,6 @@
                         <div class="event-card">
                             <div class="event-header">
                                 <h2>{{ $event->title }}</h2>
-                                {{-- DITO AY DAPAT MAGING DYNAMIC YUNG TAGS BASED DUN SA ACCOUNT --}}
                                 <div class="tags">
                                     <span class="tag department">{{ $event->department }}</span>
                                     <span class="tag upcoming">
@@ -290,16 +289,20 @@
                                 <span>
                                     👥
                                     @if (is_array($event->target_year_levels) && count($event->target_year_levels) > 0)
-                                        @foreach ($event->target_year_levels as $yearLevel)
-                                            {{ $yearLevel . ',' }}
-                                        @endforeach
+                                        {{ implode(', ', $event->target_year_levels) }}
                                     @else
-                                        <p>No specific year levels targeted for this event.</p>
+                                        No specific year levels targeted for this event.
                                     @endif
                                 </span>
+
                             </div>
 
                             <div class="actions">
+                                <!-- View Details Button -->
+                                <button class="btn-view-details" data-details="{{ $event->more_details }}">👁️ View
+                                    Details</button>
+
+
                                 <a href="{{ route('Editor.editEvent', $event->id) }}" class="edit">✏️Edit</a>
 
                                 <form action="{{ route('Editor.destroy', $event->id) }}" method="POST"
@@ -309,13 +312,33 @@
                                     <button type="submit" class="delete"
                                         onclick="return confirm('Are you sure you want to delete this event?')">🗑️Delete</button>
                                 </form>
-                            </div>
 
+
+                            </div>
                         </div>
                     @endforeach
                 @else
                     <p style="color:#555; text-align:center;">No events found. Create one to get started!</p>
                 @endif
+                <!-- View Details Modal -->
+                <div class="modal-overlay" id="viewDetailsModal" style="display:none;">
+                    <div class="modal"
+                        style="width: 600px; max-width: 90%; height: 80%; display: flex; flex-direction: column;">
+                        <div style="flex-shrink: 0;">
+                            <h2>Event Details</h2>
+                        </div>
+
+                        <div id="detailsContent"
+                            style="flex-grow: 1; overflow-y: auto; padding: 12px; border: 1px solid #ccc; border-radius: 10px;">
+                            <!-- Content will be injected by JS -->
+                        </div>
+
+                        <div class="button-group"
+                            style="flex-shrink: 0; display: flex; justify-content: flex-end; margin-top:10px;">
+                            <button type="button" class="btn-cancel" id="closeViewDetailsBtn">Close</button>
+                        </div>
+                    </div>
+                </div>
 
             </div>
         </div>

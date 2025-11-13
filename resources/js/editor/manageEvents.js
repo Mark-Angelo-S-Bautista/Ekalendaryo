@@ -1,3 +1,23 @@
+document.addEventListener("DOMContentLoaded", () => {
+    const viewButtons = document.querySelectorAll(".btn-view-details");
+    const modal = document.getElementById("viewDetailsModal");
+    const content = document.getElementById("detailsContent");
+    const closeBtn = document.getElementById("closeViewDetailsBtn");
+
+    viewButtons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+            content.innerHTML =
+                btn.dataset.details || "No additional details available.";
+            modal.style.display = "flex";
+        });
+    });
+
+    closeBtn.addEventListener("click", () => {
+        modal.style.display = "none";
+    });
+});
+
+// MODAL FOR THE ADD MORE DETAILS FOR THE EVENT
 document.addEventListener("DOMContentLoaded", function () {
     const openModalBtn = document.getElementById("openModalBtn");
     const modalOverlay = document.getElementById("modalOverlay");
