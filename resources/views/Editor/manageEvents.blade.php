@@ -40,18 +40,28 @@
                             </div>
 
                             <div class="form-group">
+                                <button type="button" id="openDetailsModalBtn" class="btn-secondary">
+                                    ➕ Add More Details
+                                </button>
+                            </div>
+
+                            <!-- Hidden input to store More Details -->
+                            <input type="hidden" id="moreDetailsInput" name="more_details">
+
+                            <div class="form-group">
                                 <label>Date</label>
-                                <input type="date" id="eventDate" name="date" min="{{ date('Y-m-d') }}">
+                                <input type="date" id="eventDate" name="date"
+                                    min="{{ date('Y-m-d', strtotime('+1 day')) }}">
                             </div>
 
                             <div class="form-group">
                                 <label>Start Time</label>
-                                <input type="time" id="startTime" name="start_time">
+                                <input type="time" id="startTime" name="start_time" min="07:00" max="17:00">
                             </div>
 
                             <div class="form-group">
                                 <label>End Time</label>
-                                <input type="time" id="endTime" name="end_time">
+                                <input type="time" id="endTime" name="end_time" min="07:00" max="17:00">
                             </div>
 
                             <div class="form-group">
@@ -127,6 +137,8 @@
                                 <button type="submit" class="btn-create">Create Event</button>
                             </div>
                         </form>
+
+
                         <script>
                             document.addEventListener('DOMContentLoaded', () => {
                                 const dateInput = document.getElementById('eventDate');
@@ -224,6 +236,27 @@
                                 });
                             });
                         </script>
+                    </div>
+                </div>
+                <div class="modal-overlay" id="detailsModalOverlay" style="display:none;">
+                    <div class="modal"
+                        style="width: 600px; max-width: 90%; height: 80%; display: flex; flex-direction: column;">
+                        <!-- Header -->
+                        <div style="flex-shrink: 0;">
+                            <h2>More Details</h2>
+                            <p style="margin-bottom: 10px; color: #555;">Provide additional info about the event.</p>
+                        </div>
+
+                        <!-- Textarea fills most of modal -->
+                        <textarea id="detailsTextarea" placeholder="Type additional details..."
+                            style="flex-grow: 1; width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ccc; font-size: 15px; line-height: 1.5; resize: none; outline: none;"></textarea>
+
+                        <!-- Buttons -->
+                        <div class="button-group"
+                            style="flex-shrink: 0; display: flex; justify-content: flex-end; gap: 10px; margin-top:10px;">
+                            <button type="button" class="btn-cancel" id="closeDetailsModalBtn">Cancel</button>
+                            <button type="button" class="btn-create" id="saveDetailsBtn">Save Details</button>
+                        </div>
                     </div>
                 </div>
 

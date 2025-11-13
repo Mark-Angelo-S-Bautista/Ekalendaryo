@@ -1,3 +1,44 @@
+document.addEventListener("DOMContentLoaded", function () {
+    const openModalBtn = document.getElementById("openModalBtn");
+    const modalOverlay = document.getElementById("modalOverlay");
+    const closeModalBtn = document.getElementById("closeModalBtn");
+
+    const openDetailsBtn = document.getElementById("openDetailsModalBtn");
+    const detailsOverlay = document.getElementById("detailsModalOverlay");
+    const closeDetailsBtn = document.getElementById("closeDetailsModalBtn");
+    const saveDetailsBtn = document.getElementById("saveDetailsBtn");
+    const detailsTextarea = document.getElementById("detailsTextarea");
+    const hiddenDetailsInput = document.getElementById("moreDetailsInput");
+
+    // --- Open/Close Create Event Modal ---
+    openModalBtn.addEventListener("click", () => {
+        modalOverlay.style.display = "flex";
+    });
+
+    closeModalBtn.addEventListener("click", () => {
+        modalOverlay.style.display = "none";
+    });
+
+    // --- Open More Details Modal ---
+    openDetailsBtn.addEventListener("click", () => {
+        detailsOverlay.style.display = "flex";
+        // Pre-fill textarea with existing value if already entered
+        detailsTextarea.value = hiddenDetailsInput.value || "";
+    });
+
+    closeDetailsBtn.addEventListener("click", () => {
+        detailsOverlay.style.display = "none";
+    });
+
+    // --- Save More Details ---
+    saveDetailsBtn.addEventListener("click", () => {
+        // Save value to hidden input
+        hiddenDetailsInput.value = detailsTextarea.value;
+        // Close More Details modal and return to Create Event modal
+        detailsOverlay.style.display = "none";
+    });
+});
+
 //toast notification
 document.addEventListener("DOMContentLoaded", function () {
     const toast = document.getElementById("toast");
@@ -66,4 +107,3 @@ editButtons.forEach((button) => {
 closeEditModalBtn.addEventListener("click", () => {
     editModal.style.display = "none";
 });
-//toast Notification

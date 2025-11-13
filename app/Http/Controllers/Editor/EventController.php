@@ -17,21 +17,42 @@ class EventController extends Controller
     // =========================================================================
     public function store(Request $request)
     {
-        // ... (validation and conflict check logic is correct) ...
-
+        // Validate input
         $validated = $request->validate([
             'title' => 'required|string|max:50',
             'description' => 'nullable|string|max:100',
-            'date' => 'required|date|after_or_equal:today',
-            'start_time' => 'required',
-            'end_time' => 'required',
+            'more_details' => 'nullable|string', // ✅ added field
+            'date' => 'required|date|after:today',
+            'start_time' => [
+                'required',
+                'date_format:H:i',
+                function ($attribute, $value, $fail) {
+                    if ($value < '07:00' || $value > '17:00') {
+                        $fail('The start time must be between 7:00 AM and 5:00 PM.');
+                    }
+                },
+            ],
+            'end_time' => [
+                'required',
+                'date_format:H:i',
+                function ($attribute, $value, $fail) use ($request) {
+                    if ($value < '07:00' || $value > '17:00') {
+                        $fail('The end time must be between 7:00 AM and 5:00 PM.');
+                    }
+                    if ($request->start_time && $value <= $request->start_time) {
+                        $fail('The end time must be after the start time.');
+                    }
+                },
+            ],
             'location' => 'required|string|max:50',
             'target_year_levels' => 'nullable|array',
             'other_location' => 'nullable|string|max:50|required_if:location,Other',
         ]);
 
+        // Determine final location
         $location = $request->location === 'Other' ? $request->other_location : $request->location;
 
+        // Check for schedule conflict
         $conflict = Event::where('date', $validated['date'])
             ->where('location', $location)
             ->where(function ($query) use ($validated) {
@@ -57,11 +78,12 @@ class EventController extends Controller
                 ]);
         }
 
-        // No conflict, create event
+        // ✅ Create event (with more_details)
         Event::create([
             'user_id' => auth()->id(),
             'title' => $validated['title'],
             'description' => $validated['description'] ?? null,
+            'more_details' => $validated['more_details'] ?? null, // ✅ added field
             'date' => $validated['date'],
             'start_time' => $validated['start_time'],
             'end_time' => $validated['end_time'],
