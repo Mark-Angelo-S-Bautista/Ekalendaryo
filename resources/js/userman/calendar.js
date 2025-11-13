@@ -1,76 +1,56 @@
 // Ensure the script runs ONLY after the HTML is fully loaded and parsed.
 document.addEventListener("DOMContentLoaded", () => {
-    // --- NEW DATA LOADING LOGIC (now safely inside DOMContentLoaded) ---
+    // --- NEW DATA LOADING LOGIC ---
     let events = []; // Default to an empty array
-
-    // 1. Find the data block in the HTML
     const eventDataElement = document.getElementById("calendar-event-data");
 
-    // 2. Check if the data block exists
     if (eventDataElement) {
         try {
-            // 3. Parse the JSON data from the element's content
             events = JSON.parse(eventDataElement.textContent);
-            console.log(
-                "✅ Successfully loaded events from data block:",
-                events
-            );
+            console.log("✅ Successfully loaded events:", events);
         } catch (e) {
-            console.error(
-                "❌ Failed to parse event JSON data from <script> block:",
-                e
-            );
+            console.error("❌ Failed to parse event JSON:", e);
         }
     } else {
         console.error(
-            "❌ CRITICAL: Could not find <script id='calendar-event-data'> element! (Check your Blade component and layout.)"
+            "❌ Could not find <script id='calendar-event-data'> element!"
         );
     }
-    // --- END NEW DATA LOADING LOGIC ---
 
-    // 4. NOW, map the 'events' variable we just loaded.
     const formattedEvents = events.map((ev) => ({
         date: ev.date,
         title: ev.title,
         description: ev.description || "No description provided.",
-        timeStart: ev.timeStart, // match PHP key
-        timeEnd: ev.timeEnd, // match PHP key
+        moreDetails: ev.moreDetails || "No additional details.",
+        timeStart: ev.timeStart,
+        timeEnd: ev.timeEnd,
         location: ev.location,
-        sy: ev.sy, // match PHP key
-        type: ev.type, // use the type sent by PHP
-        organizer: ev.organizer, // use the organizer sent by PHP
+        sy: ev.sy,
+        type: ev.type,
+        organizer: ev.organizer,
         targetYearLevels: ev.targetYearLevels,
+        more_details: ev.more_details || "No additional details provided.",
     }));
 
-    // 🔍 DEBUG: Check what data we're receiving
-    console.log("=== DEBUG: Formatted Events ===");
-    console.log("Total events:", formattedEvents.length);
-    if (formattedEvents.length > 0) {
-        console.log("First event full data:", formattedEvents[0]);
-        console.log(
-            "First event targetYearLevels:",
-            formattedEvents[0].targetYearLevels
-        );
-    }
+    console.log("=== Formatted Events ===", formattedEvents);
 
-    let currentMonth = new Date().getMonth(); // current month (0–11)
+    let currentMonth = new Date().getMonth();
     let currentYear = new Date().getFullYear();
 
     const grid = document.getElementById("calendar_grid");
     const monthYear = document.getElementById("calendar_monthYear");
     const eventFilter = document.getElementById("calendar_eventFilter");
 
-    // 🎨 DEPARTMENT COLORS - Moved to global scope
     const departmentColors = {
         bsis_act: "#0000FF",
-        bsom: "#FF69B4", // Pink
-        bsais: "#FFD700", // Yellow
-        btvted: "#87CEFA", // Light Blue
-        bsca: "#DAA520", // Gold
-        default: "#28a745", // Green for all others
+        bsom: "#FF69B4",
+        bsais: "#FFD700",
+        btvted: "#87CEFA",
+        bsca: "#DAA520",
+        default: "#28a745",
     };
 
-    // 🗓️ RENDER CALENDAR
+    // 🗓️ Render Calendar
     function renderCalendar() {
         grid.innerHTML = "";
 
@@ -95,7 +75,6 @@ document.addEventListener("DOMContentLoaded", () => {
         ];
         monthYear.textContent = `${monthNames[currentMonth]} ${currentYear}`;
 
-        // 🗓️ Add weekday labels (Su–Sa)
         const weekdays = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
         weekdays.forEach((day) => {
             const dayHeader = document.createElement("div");
@@ -109,14 +88,12 @@ document.addEventListener("DOMContentLoaded", () => {
             today.getMonth() + 1
         ).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
-        // Empty slots before the 1st day
         for (let i = 0; i < startDay; i++) {
             const empty = document.createElement("div");
             empty.classList.add("calendar_empty");
             grid.appendChild(empty);
         }
 
-        // 🧭 Create each day cell
         for (let d = 1; d <= totalDays; d++) {
             const dayEl = document.createElement("div");
             dayEl.classList.add("calendar_day");
@@ -157,13 +134,16 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // 🎯 MODAL LOGIC
+    // 🎯 Modal Logic
     const modal = document.getElementById("calendar_modal");
     const modalTitle = document.getElementById("calendar_modal-title");
     const modalBody = document.getElementById("calendar_modal-body");
     const modalClose = document.getElementById("calendar_close");
 
-    // Helper: convert "HH:mm" (24-hour) to decimal
+    const moreDetailsModal = document.getElementById("moreDetailsModal");
+    const moreDetailsContent = document.getElementById("moreDetailsContent");
+    const moreDetailsClose = document.getElementById("closeMoreDetailsBtn");
+
     function timeStrToNumber(timeStr) {
         if (!timeStr) return 0;
         const [h, m] = timeStr.split(":").map(Number);
@@ -175,13 +155,11 @@ document.addEventListener("DOMContentLoaded", () => {
         modalTitle.textContent = formatDate(date);
 
         const dayEvents = formattedEvents.filter((ev) => ev.date === date);
-
-        const startHour = 8;
-        const endHour = 18;
-        const slotInterval = 30; // minutes
-
+        const startHour = 8,
+            endHour = 18,
+            slotInterval = 30;
         let timeSlotsHTML = "";
-        const renderedEvents = new Set(); // Track which events we've already rendered
+        const renderedEvents = new Set();
 
         for (let hour = startHour; hour < endHour; hour++) {
             for (let min = 0; min < 60; min += slotInterval) {
@@ -189,8 +167,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 const timeLabel = `${String(hour).padStart(2, "0")}:${String(
                     min
                 ).padStart(2, "0")}`;
-
-                // Find event covering this slot
                 const eventForSlot = dayEvents.find((ev) => {
                     const startNum = timeStrToNumber(ev.timeStart);
                     const endNum = timeStrToNumber(ev.timeEnd);
@@ -198,13 +174,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
 
                 if (eventForSlot) {
-                    // Only render the event title at its start time
                     const eventStartNum = timeStrToNumber(
                         eventForSlot.timeStart
                     );
                     const isStartSlot =
                         Math.abs(slotTimeNum - eventStartNum) < 0.01;
-
                     const bgColor =
                         departmentColors[eventForSlot.type.toLowerCase()] ||
                         departmentColors.default;
@@ -214,88 +188,41 @@ document.addEventListener("DOMContentLoaded", () => {
                         !renderedEvents.has(eventForSlot.title)
                     ) {
                         renderedEvents.add(eventForSlot.title);
-                        timeSlotsHTML += `
-                            <div class='calendar_event-time' style='background-color: ${bgColor}; color:#fff; font-weight: bold; padding: 8px;'>
-                                ${timeLabel} - ${eventForSlot.title}
-                            </div>
-                        `;
+                        timeSlotsHTML += `<div class='calendar_event-time' style='background-color:${bgColor}; color:#fff; font-weight:bold; padding:8px;'>${timeLabel} - ${eventForSlot.title}</div>`;
                     } else {
-                        // Continuation of the event (no title)
-                        timeSlotsHTML += `
-                            <div class='calendar_event-time' style='background-color: ${bgColor}; color:#fff; padding: 8px;'>
-                                ${timeLabel}
-                            </div>
-                        `;
+                        timeSlotsHTML += `<div class='calendar_event-time' style='background-color:${bgColor}; color:#fff; padding:8px;'>${timeLabel}</div>`;
                     }
                 } else {
-                    // Empty slot
-                    timeSlotsHTML += `
-                        <div class='calendar_noevent-time' style='background-color: #f5f5f5; color:#666; padding: 8px;'>
-                            ${timeLabel}
-                        </div>
-                    `;
+                    timeSlotsHTML += `<div class='calendar_noevent-time' style='background-color:#f5f5f5; color:#666; padding:8px;'>${timeLabel}</div>`;
                 }
             }
         }
 
-        modalBody.innerHTML = `
-            <div class="calendar_noevent-list">
-                ${timeSlotsHTML}
-            </div>
-        `;
+        modalBody.innerHTML = `<div class="calendar_noevent-list">${timeSlotsHTML}</div>`;
     }
 
     function openEventDetail(eventData) {
         modal.style.display = "flex";
         modalTitle.textContent = formatDate(eventData.date);
 
-        // 🔍 DEBUG: Log what we're receiving
-        console.log("=== DEBUG: Event Detail Modal ===");
-        console.log("Full event data:", eventData);
-        console.log("targetYearLevels:", eventData.targetYearLevels);
-        console.log("Type:", typeof eventData.targetYearLevels);
-
-        let yearLevelsString = "All year levels"; // Default message
-
-        // 1. Check if it's a string that needs parsing (This is the most common Laravel issue)
+        let yearLevelsString = "All year levels";
         if (typeof eventData.targetYearLevels === "string") {
-            console.log(
-                "⚠️ WARNING: targetYearLevels is a string! Attempting parse..."
-            );
             try {
                 const parsed = JSON.parse(eventData.targetYearLevels);
-                if (Array.isArray(parsed) && parsed.length > 0) {
+                if (Array.isArray(parsed) && parsed.length > 0)
                     yearLevelsString = parsed.join(", ");
-                    console.log("✅ Parsed string to array:", yearLevelsString);
-                } else {
-                    console.log("⚠️ Parsed but array is empty");
-                }
             } catch (e) {
-                console.log("❌ Could not parse string:", e);
                 yearLevelsString = "Error parsing year levels";
             }
-        }
-        // 2. Check if it's already an array
-        else if (Array.isArray(eventData.targetYearLevels)) {
-            if (eventData.targetYearLevels.length > 0) {
+        } else if (Array.isArray(eventData.targetYearLevels)) {
+            if (eventData.targetYearLevels.length > 0)
                 yearLevelsString = eventData.targetYearLevels.join(", ");
-                console.log("✅ Array found:", yearLevelsString);
-            } else {
-                console.log("⚠️ Array is empty");
-            }
-        }
-        // 3. Handle null/undefined (original issue fallback)
-        else if (
+        } else if (
             eventData.targetYearLevels === null ||
-            eventData.targetYearLevels === undefined ||
-            (Array.isArray(eventData.targetYearLevels) &&
-                eventData.targetYearLevels.length === 0) // Explicitly check for empty array if needed
+            eventData.targetYearLevels === undefined
         ) {
             yearLevelsString = "Not specified (All year levels)";
-            console.log("⚠️ Value is null, undefined, or empty array");
         }
-
-        console.log("Final yearLevelsString:", yearLevelsString);
 
         modalBody.innerHTML = `
         <div class="calendar_event-detail">
@@ -303,9 +230,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div class="calendar_event-title">${eventData.title}</div>
                 <span class="calendar_badge upcoming">upcoming</span>
             </div>
-            <div class="calendar_event-description">
-                ${eventData.description || "No description provided."}
-            </div>
+            <div class="calendar_event-description">${
+                eventData.description || "No description provided."
+            }</div>
             <div class="calendar_event-info">
                 <div>📅 ${formatShortDate(eventData.date)}</div>
                 <div>⏰ ${eventData.timeStart} - ${eventData.timeEnd}</div>
@@ -314,15 +241,44 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div>🎓 ${yearLevelsString}</div>
                 <div>${eventData.sy}</div>
             </div>
+            <button id="viewMoreDetailsBtn" style="margin-top:10px; padding:8px 12px; background:#007bff; color:#fff; border:none; border-radius:5px; cursor:pointer;">
+                View More Details
+            </button>
         </div>`;
+
+        const detailsBtn = document.getElementById("viewMoreDetailsBtn");
+        if (detailsBtn)
+            detailsBtn.addEventListener("click", () =>
+                openMoreDetailsModal(eventData)
+            );
     }
 
+    function openMoreDetailsModal(eventData) {
+        const modal = document.getElementById("moreDetailsModal");
+        const content = document.getElementById("moreDetailsContent");
+
+        content.innerHTML = `
+        <h2>${eventData.title}</h2>
+        <p>${eventData.moreDetails || "No additional details."}</p>
+    `;
+        modal.style.display = "flex";
+    }
+
+    // Close modals
     modalClose.addEventListener("click", () => (modal.style.display = "none"));
+    if (moreDetailsClose)
+        moreDetailsClose.addEventListener(
+            "click",
+            () => (moreDetailsModal.style.display = "none")
+        );
+
     window.addEventListener("click", (e) => {
         if (e.target === modal) modal.style.display = "none";
+        if (e.target === moreDetailsModal)
+            moreDetailsModal.style.display = "none";
     });
 
-    // 🔄 Navigation
+    // Navigation
     document
         .getElementById("calendar_prevMonth")
         .addEventListener("click", () => {
@@ -333,7 +289,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             renderCalendar();
         });
-
     document
         .getElementById("calendar_nextMonth")
         .addEventListener("click", () => {
@@ -347,19 +302,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
     eventFilter.addEventListener("change", renderCalendar);
 
-    // 📅 Helpers
     function formatDate(dateStr) {
         const d = new Date(dateStr + "T00:00:00");
         return `${d.toLocaleString("default", {
             month: "long",
         })} ${d.getDate()}, ${d.getFullYear()}`;
     }
-
     function formatShortDate(dateStr) {
         const d = new Date(dateStr + "T00:00:00");
         return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`;
     }
 
-    // 🏁 Initial render
+    // Initial render
     renderCalendar();
 });

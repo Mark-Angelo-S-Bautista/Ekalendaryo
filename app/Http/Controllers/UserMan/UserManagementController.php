@@ -207,6 +207,7 @@ class UserManagementController extends Controller
                 'date' => $event->date,
                 'title' => $event->title,
                 'description' => $event->description ?? 'No description provided.',
+                'moreDetails' => $event->more_details ?? 'No additional details.', // <-- Add this
                 'timeStart' => $event->start_time,
                 'timeEnd' => $event->end_time,
                 'location' => $event->location,

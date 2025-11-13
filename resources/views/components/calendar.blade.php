@@ -56,6 +56,35 @@
             </div>
         </div>
 
+        <!-- More Details Modal -->
+        <div id="moreDetailsModal" class="modal"
+            style="display:none;
+                    position:fixed;
+                    top:0;
+                    left:0;
+                    width:100%;
+                    height:100%;
+                    background:rgba(0,0,0,0.5);
+                    justify-content:center;
+                    align-items:center;
+                    z-index:1050;
+                    white-space: pre-wrap;">
+            <div
+                style="background:#fff;
+                        padding:20px;
+                        border-radius:8px;
+                        max-width:600px;
+                        width:90%;
+                        max-height:80vh;
+                        overflow-y:auto;
+                        position:relative;
+                        z-index:1060;">
+                <button id="closeMoreDetailsBtn"
+                    style="position:absolute; top:10px; right:10px; background:none; border:none; font-size:18px; cursor:pointer;">&times;</button>
+                <div id="moreDetailsContent"></div>
+            </div>
+        </div>
+
         <!-- Calendar Grid -->
         <div class="calendar_grid" id="calendar_grid"></div>
 
