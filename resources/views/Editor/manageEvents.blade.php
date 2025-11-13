@@ -329,7 +329,7 @@
                         </div>
 
                         <div id="detailsContent"
-                            style="flex-grow: 1; overflow-y: auto; padding: 12px; border: 1px solid #ccc; border-radius: 10px;">
+                            style="flex-grow: 1; overflow-y: auto; padding: 12px; border: 1px solid #ccc; border-radius: 10px; white-space: pre-wrap;">
                             <!-- Content will be injected by JS -->
                         </div>
 
