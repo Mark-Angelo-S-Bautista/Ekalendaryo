@@ -27,7 +27,7 @@ class UserController extends Controller
         $validator = Validator::make(
             $request->all(),
             [
-                'name' => 'required|string|max:255',
+                'name' => 'required|string|max:255|unique:users,name,',
                 'title' => 'required|string|max:255',
                 'userId' => 'required|string|max:255|unique:users,userId,' . $id,
                 'email' => 'required|email|max:255|unique:users,email,' . $id,
@@ -39,6 +39,7 @@ class UserController extends Controller
             [
                 // Custom error messages
                 'name.required' => 'The name field is required.',
+                'name.unique' => 'This name already exists.',
                 'name.max' => 'The name may not be greater than 255 characters.',
 
                 'title.required' => 'The title field is required.',

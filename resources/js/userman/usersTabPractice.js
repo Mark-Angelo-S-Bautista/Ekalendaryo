@@ -359,7 +359,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 messageDiv.style.color = "green";
 
                 setTimeout(() => {
-                    window.location.href = "/users"; // redirect to users list
+                    window.location.href = "/usermanagement/users"; // redirect to users list
                 }, 1500);
             }
         } catch (error) {
