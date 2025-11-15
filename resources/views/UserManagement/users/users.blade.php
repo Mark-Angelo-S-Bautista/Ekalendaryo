@@ -212,7 +212,7 @@
                         <div class="error-text" id="error-email"></div>
                     </div>
 
-                    <div class="adduser_form-group">
+                    <div class="adduser_form-group" id="department_field">
                         <label class="adduser_label">Department</label>
                         <select id="department" name="department" class="adduser_select">
                             <option value="">Select a Department</option>

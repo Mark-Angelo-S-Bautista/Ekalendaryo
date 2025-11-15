@@ -425,3 +425,37 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 4000);
     }
 });
+document.addEventListener("DOMContentLoaded", () => {
+    const titleSelect = document.getElementById("title");
+    const officeField = document.getElementById("office_name_field");
+    const departmentField = document.getElementById("department_field");
+    const departmentSelect = document.getElementById("department");
+
+    const toggleFields = () => {
+        const title = titleSelect.value;
+
+        if (title === "Offices") {
+            // Show office name, hide department
+            officeField.style.display = "block";
+            departmentField.style.display = "none";
+
+            // Set default value for department
+            departmentSelect.value = "OFFICES";
+        } else {
+            // Hide office name, show department
+            officeField.style.display = "none";
+            departmentField.style.display = "block";
+
+            // Reset department if it was previously OFFICES
+            if (departmentSelect.value === "OFFICES") {
+                departmentSelect.value = "";
+            }
+        }
+    };
+
+    // Run on page load in case old value is set
+    toggleFields();
+
+    // Run whenever the title changes
+    titleSelect.addEventListener("change", toggleFields);
+});
