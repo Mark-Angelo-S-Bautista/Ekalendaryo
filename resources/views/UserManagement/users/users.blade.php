@@ -292,11 +292,9 @@
 
                     <div class="import_modal_body">
                         <a href="{{ asset('files/user_import_template.csv') }}" download
-                            class="download_template_btn">⬇
-                            Download
-                            Template</a>
-                        <p style="font-size: 13px; color:#333;">Download the template first, then fill it with user
-                            data
+                            class="download_template_btn">⬇ Download Template</a>
+                        <p style="font-size: 13px; color:#333;">
+                            Download the template first, then fill it with user data
                         </p>
 
                         <div class="import_file_input">
@@ -304,6 +302,9 @@
                             <input type="file" id="csv_file" name="csv_file" accept=".csv"
                                 style="display:none;">
                         </div>
+
+                        <!-- Error container -->
+                        <div id="import_errors_container" style="color:red; margin-top:10px;"></div>
                     </div>
 
                     <div class="import_modal_actions">
@@ -313,6 +314,58 @@
                 </div>
             </div>
         </form>
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                const importModal = document.getElementById("import_modal");
+                const openImportBtn = document.getElementById("openImportModal");
+                const closeImportBtn = document.getElementById("import_close");
+                const cancelImportBtn = document.getElementById("import_cancel");
+                const csvInput = document.getElementById("csv_file");
+                const fileLabel = document.getElementById("file_label");
+                const errorContainer = document.getElementById("import_errors_container");
+
+                // --- Open modal manually ---
+                if (openImportBtn) {
+                    openImportBtn.addEventListener("click", () => {
+                        if (importModal) importModal.style.display = "flex";
+                    });
+                }
+
+                // --- Close modal ---
+                const closeModal = () => importModal.style.display = "none";
+
+                if (closeImportBtn) closeImportBtn.addEventListener("click", closeModal);
+                if (cancelImportBtn) cancelImportBtn.addEventListener("click", closeModal);
+
+                window.addEventListener("click", (e) => {
+                    if (e.target === importModal) closeModal();
+                });
+
+                // --- Show selected filename ---
+                if (fileLabel && csvInput) {
+                    fileLabel.addEventListener("click", () => csvInput.click());
+                    csvInput.addEventListener("change", () => {
+                        const fileName = csvInput.files.length ? csvInput.files[0].name : "No file chosen";
+                        fileLabel.textContent = `Choose File: ${fileName}`;
+                    });
+                }
+
+                // --- Automatically open modal if there are import errors ---
+                const importErrors = @json(session('importErrors') ?? []);
+                if (importErrors.length && importModal) {
+                    importModal.style.display = "flex";
+
+                    if (errorContainer) {
+                        let html = "<h4>Rows skipped due to errors:</h4><ul>";
+                        importErrors.forEach((error) => {
+                            html += `<li>Row ${error.row}: ${error.errors.join(", ")}</li>`;
+                        });
+                        html += "</ul>";
+                        errorContainer.innerHTML = html;
+                    }
+                }
+            });
+        </script>
 
         @if (session('success'))
             <div id="toast" class="toast show">

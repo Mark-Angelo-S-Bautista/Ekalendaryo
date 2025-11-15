@@ -110,33 +110,55 @@ class UserController extends Controller
         ]);
 
         $file = $request->file('csv_file');
-
-        // Open CSV using League\Csv (install via composer require league/csv)
         $csv = Reader::createFromPath($file->getRealPath(), 'r');
-        $csv->setHeaderOffset(0); // first row as header
-        $defaultpassword = 'password';
+        $csv->setHeaderOffset(0);
 
-        $records = $csv->getRecords(); // iterable
+        $defaultPassword = 'password';
+        $records = $csv->getRecords();
+        $importErrors = [];
 
-        foreach ($records as $record) {
-            // Example CSV columns: name,userId,email,department,yearlevel,section,role,password
-            User::updateOrCreate(
-                ['userId' => $record['userId']], // match by userId
-                [
-                    'name' => $record['name'],
-                    'title' => $record['title'],
-                    'email' => $record['email'],
-                    'department' => $record['department'] ?? null,
-                    'yearlevel' => $record['yearlevel'] ?? null,
-                    'section' => $record['section'] ?? null,
-                    'role' => $record['role'] ?? 'Viewer',
-                    'password' => Hash::make($record['password'] ?? $defaultpassword), // default password
-                ]
-            );
+        foreach ($records as $index => $record) {
+            $rowNumber = $index + 1; // CSV header is row 1
+            $errors = [];
+
+            // Check for duplicates
+            if (User::where('userId', $record['userId'])->exists()) {
+                $errors[] = "Duplicate userId: {$record['userId']}";
+            }
+            if (User::where('email', $record['email'])->exists()) {
+                $errors[] = "Duplicate email: {$record['email']}";
+            }
+
+            if (!empty($errors)) {
+                $importErrors[] = [
+                    'row' => $rowNumber,
+                    'errors' => $errors,
+                    'data' => $record,
+                ];
+                continue; // skip inserting this row
+            }
+
+            // Create user
+            User::create([
+                'userId' => $record['userId'],
+                'name' => $record['name'],
+                'title' => $record['title'] ?? null,
+                'email' => $record['email'],
+                'department' => $record['department'] ?? null,
+                'yearlevel' => $record['yearlevel'] ?? null,
+                'section' => $record['section'] ?? null,
+                'role' => $record['role'] ?? 'Viewer',
+                'password' => Hash::make($record['password'] ?? $defaultPassword),
+            ]);
+        }
+
+        if (!empty($importErrors)) {
+            return redirect()->back()->with('importErrors', $importErrors);
         }
 
         return redirect()->back()->with('success', 'Users imported successfully!');
     }
+
     public function search(Request $request)
     {
         $query = $request->get('query', '');
