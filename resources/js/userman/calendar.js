@@ -256,12 +256,17 @@ document.addEventListener("DOMContentLoaded", () => {
     function openMoreDetailsModal(eventData) {
         const modal = document.getElementById("moreDetailsModal");
         const content = document.getElementById("moreDetailsContent");
+        const closeBtn = document.getElementById("userDetailsCloseBtn");
 
         content.innerHTML = `
         <h2>${eventData.title}</h2>
         <p>${eventData.moreDetails || "No additional details."}</p>
     `;
         modal.style.display = "flex";
+        closeBtn.addEventListener(
+            "click",
+            () => (modal.style.display = "none")
+        );
     }
 
     // Close modals

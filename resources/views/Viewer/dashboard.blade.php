@@ -51,25 +51,13 @@
                             @endif
                         </span>
                         <span class="dashboard_tag dashboard_tag_upcoming">upcoming</span>
-                        <span><!-- View Details Button -->
-                            <button class="dashboard_view_btn"
-                                data-details="{{ e($event->more_details ?? 'No additional details.') }}"
-                                style="
-                                    padding: 6px 15px;
-                                    background: #2b5eff;
-                                    color: #fff;
-                                    border: none;
-                                    border-radius: 8px;
-                                    font-size: 0.78rem;
-                                    cursor: pointer;
-                                    font-weight: 500;
-                                    transition: 0.25s;
-                                "
-                                onmouseover="this.style.background='#1a3ed8'"
-                                onmouseout="this.style.background='#2b5eff'">
-                                👁️ View Details
-                            </button></span>
                     </div>
+                    <!-- View Details Button -->
+                    <button class="dashboard_view_btn"
+                        data-details="{{ e($event->more_details ?? 'No additional details.') }}"
+                        style="padding:10px 22px; background:#e8ecf5; border:none; border-radius:10px; font-size:1rem; cursor:pointer; font-weight:600; color:#36415d; margin-top:10px;">
+                        👁️ View Details
+                    </button>
                 </div>
             @empty
                 <p>No upcoming events found.</p>

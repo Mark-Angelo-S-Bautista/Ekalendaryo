@@ -58,35 +58,24 @@
 
         <!-- More Details Modal -->
         <div id="moreDetailsModal" class="modal"
-            style="display:none;
-                    position:fixed;
-                    top:0;
-                    left:0;
-                    width:100%;
-                    height:100%;
-                    background:rgba(0,0,0,0.5);
-                    justify-content:center;
-                    align-items:center;
-                    z-index:1050;
-                    white-space: pre-wrap;">
+            style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.65); z-index:9999; justify-content:center; align-items:center; padding:20px;">
             <div
-                style="background:#fff;
-                        padding:20px;
-                        border-radius:8px;
-                        max-width:600px;
-                        width:90%;
-                        max-height:80vh;
-                        overflow-y:auto;
-                        position:relative;
-                        z-index:1060;">
-                <button id="closeMoreDetailsBtn"
-                    style="position:absolute; top:10px; right:10px; background:none; border:none; font-size:18px; cursor:pointer;">&times;</button>
-                <div id="moreDetailsContent"></div>
+                style="background:#ffffff; padding:30px; width:85%; max-width:1000px; height:75%; border-radius:18px; box-shadow:0 12px 45px rgba(0,0,0,0.30); display:flex; flex-direction:column; border-top:6px solid #2b5eff;">
+                <div id="moreDetailsContent"
+                    style="flex:1; overflow-y:auto; padding:15px; font-size:1.05rem; border-radius:12px; background:#f1f4fb; color:#2b2b2b; white-space: pre-wrap;">
+                </div>
+                <div style="display:flex; justify-content:flex-end; margin-top:18px;">
+                    <button id="userDetailsCloseBtn"
+                        style="padding:10px 22px; background:#e8ecf5; border:none; border-radius:10px; font-size:1rem; cursor:pointer; font-weight:600; color:#36415d;"
+                        onmouseover="this.style.background='#d4d9e6'"
+                        onmouseout="this.style.background='#e8ecf5'">Close</button>
+                </div>
             </div>
         </div>
+    </div>
 
-        <!-- Calendar Grid -->
-        <div class="calendar_grid" id="calendar_grid"></div>
+    <!-- Calendar Grid -->
+    <div class="calendar_grid" id="calendar_grid"></div>
 
     </div>
 

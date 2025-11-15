@@ -71,28 +71,13 @@
                         </span>
 
                         <span class="dashboard_tag dashboard_tag_upcoming">upcoming</span>
-                        <span>
-                            <!-- VIEW DETAILS BUTTON (use prepared, escaped attribute) -->
-                            <button class="dashboard_view_btn" data-id="{{ $event->id }}"
-                                data-details="{{ e($event->more_details_attr ?? 'No additional details.') }}"
-                                style="
-                                    z-index: 10001;
-                                    background:#2b5eff;
-                                    color:white;
-                                    border:none;
-                                    padding:5px 8px;
-                                    border-radius:8px;
-                                    cursor:pointer;
-                                    font-size:0.80rem;
-                                    font-weight:400;
-                                    transition:0.25s;
-                                "
-                                onmouseover="this.style.background='#1e47d6'"
-                                onmouseout="this.style.background='#2b5eff'">
-                                View Details
-                            </button>
-                        </span>
                     </div>
+                    <!-- VIEW DETAILS BUTTON (use prepared, escaped attribute) -->
+                    <button class="dashboard_view_btn" data-id="{{ $event->id }}"
+                        data-details="{{ e($event->more_details_attr ?? 'No additional details.') }}"
+                        style="padding:10px 22px; background:#e8ecf5; border:none; border-radius:10px; font-size:1rem; cursor:pointer; font-weight:600; color:#36415d; margin-top:10px;">
+                        👁️ View Details
+                    </button>
                 </div>
             @empty
                 <p>No upcoming events found.</p>
