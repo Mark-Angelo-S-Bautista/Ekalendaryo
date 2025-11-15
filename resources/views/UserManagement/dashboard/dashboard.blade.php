@@ -35,7 +35,6 @@
         <!-- Upcoming Events -->
         <section class="dashboard_upcoming_card">
             <h3 class="dashboard_upcoming_title">Upcoming Events</h3>
-            <p>Next upcoming events (within 30 days)</p>
 
             @forelse ($upcomingEvents as $event)
                 <div class="dashboard_event_card">
@@ -131,7 +130,6 @@
             const renderEvents = (events) => {
                 eventContainer.innerHTML = `
                     <h3 class="dashboard_upcoming_title">Upcoming Events</h3>
-                    <p>Upcoming events (within 30 days)</p>
                 `;
 
                 if (events.length === 0) {
