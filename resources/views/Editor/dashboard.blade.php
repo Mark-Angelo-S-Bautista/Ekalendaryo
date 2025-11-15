@@ -39,12 +39,14 @@
             @forelse ($events as $event)
                 <div class="dashboard_event_card">
                     <div class="dashboard_event_title">{{ $event->title }}</div>
+
                     <div class="dashboard_event_details">
                         📅 {{ \Carbon\Carbon::parse($event->date)->format('n/j/Y') }}
                         &nbsp;&nbsp; 🕓 {{ \Carbon\Carbon::parse($event->start_time)->format('g:i A') }}
                         - {{ \Carbon\Carbon::parse($event->end_time)->format('g:i A') }}
                         &nbsp;&nbsp; 📍 {{ $event->location }}
                     </div>
+
                     <div class="dashboard_event_details">
                         👥
                         @if (is_array($event->target_year_levels) && count($event->target_year_levels) > 0)
@@ -55,17 +57,41 @@
                             <p>No specific year levels targeted for this event.</p>
                         @endif
                     </div>
+
                     <div class="dashboard_event_details">{{ $event->description ?? 'No description provided.' }}</div>
                     <div class="dashboard_event_details">{{ $event->school_year }}</div>
+
                     <div class="dashboard_event_tags">
                         <span class="dashboard_tag dashboard_tag_admin">
                             @if ($event->department === 'OFFICES')
-                                {{ $event->user->office_name }}
+                                {{ $event->user->office_name ?? 'Office' }}
                             @else
                                 {{ $event->department }}
                             @endif
                         </span>
+
                         <span class="dashboard_tag dashboard_tag_upcoming">upcoming</span>
+                        <span>
+                            <!-- VIEW DETAILS BUTTON (use prepared, escaped attribute) -->
+                            <button class="dashboard_view_btn" data-id="{{ $event->id }}"
+                                data-details="{{ e($event->more_details_attr ?? 'No additional details.') }}"
+                                style="
+                                    z-index: 10001;
+                                    background:#2b5eff;
+                                    color:white;
+                                    border:none;
+                                    padding:5px 8px;
+                                    border-radius:8px;
+                                    cursor:pointer;
+                                    font-size:0.80rem;
+                                    font-weight:400;
+                                    transition:0.25s;
+                                "
+                                onmouseover="this.style.background='#1e47d6'"
+                                onmouseout="this.style.background='#2b5eff'">
+                                View Details
+                            </button>
+                        </span>
                     </div>
                 </div>
             @empty
@@ -137,5 +163,105 @@
             });
         });
     </script>
+    <script>
+        // -------------------------------
+        // VIEW DETAILS MODAL
+        // -------------------------------
+        const detailsModal = document.getElementById("dashboardDetailsModalOverlay");
+        const detailsTextarea = document.getElementById("dashboardDetailsTextarea");
+        const detailsCloseBtn = document.getElementById("dashboardDetailsCloseBtn");
+
+        // When clicking a View Details button
+        document.addEventListener("click", function(e) {
+            if (e.target.classList.contains("dashboard_view_btn")) {
+                const details = e.target.dataset.details || "No additional details.";
+                detailsTextarea.value = details.trim();
+                detailsModal.style.display = "flex";
+            }
+        });
+
+        // Close button
+        detailsCloseBtn.addEventListener("click", () => {
+            detailsModal.style.display = "none";
+        });
+
+        // Click outside close
+        window.addEventListener("click", (e) => {
+            if (e.target === detailsModal) {
+                detailsModal.style.display = "none";
+            }
+        });
+    </script>
+
+    <!-- MORE DETAILS MODAL -->
+    <div id="dashboardDetailsModalOverlay"
+        style="
+        display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+        background:rgba(0,0,0,0.65); z-index:9999;
+        justify-content:center; align-items:center;
+        padding:20px;
+    ">
+
+        <div
+            style="
+            background:#ffffff;
+            padding:30px;
+            width:85%;
+            max-width:1200px;
+            height:85%;
+            border-radius:18px;
+            box-shadow:0 12px 45px rgba(0,0,0,0.30);
+            display:flex;
+            flex-direction:column;
+            animation: fadeInScale 0.28s ease-out;
+
+            border-top:7px solid #2b5eff;
+        ">
+
+            <h2
+                style="
+            margin-bottom:15px;
+            font-size:1.7rem;
+            color:#2b3a67;
+            font-weight:700;
+        ">
+                Event Details</h2>
+
+            <textarea id="dashboardDetailsTextarea" readonly
+                style="
+            width:100%;
+            flex:1;
+            resize:none;
+            padding:15px;
+            font-size:1.05rem;
+            border-radius:12px;
+            border:1px solid #d0d7e3;
+            outline:none;
+            transition:0.2s;
+            background:#f9fbff;
+        "
+                onfocus="this.style.border='1px solid #2b5eff'; this.style.boxShadow='0 0 0 3px rgba(43,94,255,0.15)'"
+                onblur="this.style.border='1px solid #d0d7e3'; this.style.boxShadow='none'"></textarea>
+
+            <div style="display:flex; justify-content:flex-end; margin-top:18px;">
+                <button id="dashboardDetailsCloseBtn"
+                    style="
+                padding:10px 22px;
+                background:#e8ecf5;
+                border:none;
+                border-radius:10px;
+                font-size:1rem;
+                cursor:pointer;
+                transition:0.25s;
+                font-weight:600;
+                color:#36415d;
+            "
+                    onmouseover="this.style.background='#d4d9e6'" onmouseout="this.style.background='#e8ecf5'">
+                    Close
+                </button>
+            </div>
+
+        </div>
+    </div>
 
 </x-editorLayout>

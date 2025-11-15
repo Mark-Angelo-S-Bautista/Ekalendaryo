@@ -38,6 +38,14 @@ class EditorController extends Controller
         // Get the results
         $events = $eventsQuery->orderBy('date', 'asc')->get();
 
+        $events->transform(function ($event) {
+            $raw = $event->more_details ?? 'No additional details.';
+            // Replace real newlines with literal backslash + n so it fits inside a data-attribute
+            $attrSafe = str_replace(["\r\n", "\n"], '\\n', trim($raw));
+            $event->more_details_attr = $attrSafe;
+            return $event;
+        });
+
         $myEventsCount = $events->count();
 
         // The rest of your code stays the same
