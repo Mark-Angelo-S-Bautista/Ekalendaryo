@@ -16,39 +16,50 @@ class EditorController extends Controller
         $officeusers = User::all();
         $dept = $user->department;
         $title = $user->office_name;
-        $userId = $user->id; // Get the user's ID
+        $userId = $user->id;
 
-        // Start a new query
+        // Current timestamp
+        $now = Carbon::now();
+
+        // Start building query
         $eventsQuery = Event::query();
 
-        // --- APPLY NEW LOGIC ---
+        // --- ACCESS LOGIC ---
         if ($dept === 'OFFICES') {
-            // If user is from OFFICES, they only see events they created
+            // OFFICES users only see the events they created
             $eventsQuery->where('user_id', $userId);
         } else {
-            // Otherwise, they see their department's events + all OFFICE events
-            // We also need to eager-load the 'user' relationship for the tag
-            $eventsQuery->with('user')->where(function ($q) use ($dept) {
-                $q->where('department', $dept)
-                ->orWhere('department', 'OFFICES');
-            });
+            // Others see their department + all OFFICE events
+            $eventsQuery
+                ->with('user')
+                ->where(function ($q) use ($dept) {
+                    $q->where('department', $dept)
+                    ->orWhere('department', 'OFFICES');
+                });
         }
-        // --- END NEW LOGIC ---
 
-        // Get the results
+        // --- HIDE PAST EVENTS (IMPORTANT) ---
+        $eventsQuery->where(function ($q) use ($now) {
+            $q->where('date', '>', $now->toDateString()) // future dates
+            ->orWhere(function ($q2) use ($now) {
+                $q2->where('date', $now->toDateString())   // today
+                    ->where('end_time', '>=', $now->format('H:i:s')); // not finished
+            });
+        });
+
+        // Now get filtered events
         $events = $eventsQuery->orderBy('date', 'asc')->get();
 
+        // Transform for modal compatibility
         $events->transform(function ($event) {
             $raw = $event->more_details ?? 'No additional details.';
-            // Replace real newlines with literal backslash + n so it fits inside a data-attribute
-            $attrSafe = str_replace(["\r\n", "\n"], '\\n', trim($raw));
-            $event->more_details_attr = $attrSafe;
+            $event->more_details_attr = str_replace(["\r\n", "\n"], '\\n', trim($raw));
             return $event;
         });
 
+        // Count only upcoming events
         $myEventsCount = $events->count();
 
-        // The rest of your code stays the same
         return view('Editor.dashboard', compact('myEventsCount', 'events', 'title', 'officeusers'));
     }
 

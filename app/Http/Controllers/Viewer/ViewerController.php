@@ -6,32 +6,78 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Event;
 use App\Models\User;
+use Illuminate\Support\Facades\Log;
 
 class ViewerController extends Controller
 {
     public function dashboard()
-    {
-        $user = Auth::user();
-        $officeusers = User::all();
-        $dept = $user->department;
-        $title = $user->title;
+{
+    $user = Auth::user();
+    $officeusers = User::all();
+    $dept = $user->department;
+    $title = $user->title;
+    $yearLevel = $user->yearlevel ?? null; // e.g., "1stYear"
 
-        // fetch events that belong to user's department OR OFFICES
-        $events = Event::where('department', $dept)
-            ->orWhere('department', 'OFFICES')
-            ->orderBy('date', 'asc')
-            ->get();
+    $now = now();
 
-        $myEventsCount = $events->count();
+    // Fetch events from user's department or OFFICES
+    $events = Event::whereIn('department', [$dept, 'OFFICES'])
+        ->orderBy('date', 'asc')
+        ->get();
 
-        // // upcoming within 30 days (future events)
-        // $upcomingEvents = $events->filter(function ($ev) {
-        //     $evDate = Carbon::parse($ev->date);
-        //     return $evDate->isFuture() && $evDate->diffInDays(Carbon::now()) <= 30;
-        // })->values()->take(2); // ->values() to reindex the collection
+    $events = $events->filter(function ($ev) use ($now, $yearLevel, $title, $dept) {
 
-        return view('Viewer.dashboard', compact('myEventsCount', 'events', 'title', 'officeusers'));
-    }
+        // --- Hide past events ---
+        $eventDateTime = \Carbon\Carbon::parse($ev->date . ' ' . $ev->start_time);
+        if ($eventDateTime->lt($now)) {
+            return false;
+        }
+
+        // --- If Faculty ---
+        if (strtolower($title) === 'faculty') {
+            // Show all events from their department or OFFICES events
+            return $ev->department === $dept || $ev->department === 'OFFICES';
+        }
+
+        // --- If Student ---
+        // First check: event must be from their department or OFFICES
+        if ($ev->department !== $dept && $ev->department !== 'OFFICES') {
+            return false;
+        }
+
+        // Second check: verify student's year level is in target_year_levels
+        $targetYearLevels = $ev->target_year_levels;
+        if (is_string($targetYearLevels)) {
+            $targetYearLevels = json_decode($targetYearLevels, true) ?? [];
+        }
+
+        // If target_year_levels is empty or null, show the event to all students
+        if (empty($targetYearLevels)) {
+            return true;
+        }
+
+        // Normalize: remove spaces and lowercase for matching
+        $targetYearLevelsNormalized = array_map(function ($lvl) {
+            return strtolower(str_replace(' ', '', $lvl)); // "1st Year" -> "1styear"
+        }, $targetYearLevels);
+
+        // If student has no year level, don't show the event
+        if (empty($yearLevel)) {
+            return false;
+        }
+
+        $userYearLevelNormalized = strtolower(str_replace(' ', '', $yearLevel)); // "1stYear" -> "1styear"
+
+        // Show event only if user's year level is in target_year_levels
+        return in_array($userYearLevelNormalized, $targetYearLevelsNormalized);
+
+    })->values();
+
+    $myEventsCount = $events->count();
+
+    return view('Viewer.dashboard', compact('myEventsCount', 'events', 'title', 'officeusers'));
+}
+
 
     public function calendar()
     {
