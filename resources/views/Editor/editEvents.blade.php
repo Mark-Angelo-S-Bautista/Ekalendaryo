@@ -41,6 +41,19 @@
             </div>
 
             <div class="form-group">
+                <label>More Details</label>
+
+                <!-- Button to open the modal -->
+                <button type="button" id="openMoreDetailsBtn" class="btn-update" style="margin-bottom:10px;">
+                    Edit More Details
+                </button>
+
+                <!-- Hidden input that will store the final saved text -->
+                <input type="hidden" id="moreDetailsInput" name="more_details"
+                    value="{{ old('more_details', $event->more_details) }}">
+            </div>
+
+            <div class="form-group">
                 <label>Date</label>
                 <input type="date" name="date" value="{{ $event->date }}" required min="{{ date('Y-m-d') }}">
             </div>
@@ -133,4 +146,69 @@
             }
         }
     </script>
+
+    {{-- JS SCRIPT FOR EVENTS DETAILS MODAL --}}
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const openMoreBtn = document.getElementById("openMoreDetailsBtn");
+            const modal = document.getElementById("moreDetailsModalOverlay");
+            const closeMoreBtn = document.getElementById("closeMoreDetailsBtn");
+            const saveMoreBtn = document.getElementById("saveMoreDetailsBtn");
+            const textarea = document.getElementById("moreDetailsTextarea");
+            const hiddenInput = document.getElementById("moreDetailsInput");
+
+            // OPEN modal
+            openMoreBtn.addEventListener("click", () => {
+                textarea.value = hiddenInput.value || "";
+                modal.style.display = "flex";
+            });
+
+            // CLOSE modal
+            closeMoreBtn.addEventListener("click", () => {
+                modal.style.display = "none";
+            });
+
+            // SAVE details and close
+            saveMoreBtn.addEventListener("click", () => {
+                hiddenInput.value = textarea.value;
+                modal.style.display = "none";
+            });
+        });
+    </script>
+    <!-- ==========================
+        MORE DETAILS MODAL
+    ============================= -->
+    <div id="moreDetailsModalOverlay"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+        background:rgba(0,0,0,0.6); z-index:9999; justify-content:center; align-items:center;">
+
+        <div
+            style="background:#fff;
+                padding:25px;
+                width:80%;
+                max-width:1200px;
+                height:85%;                 /* <-- made modal taller */
+                border-radius:15px;
+                box-shadow:0 10px 30px rgba(0,0,0,0.25);
+                display:flex;
+                flex-direction:column;
+                animation: fadeInScale 0.25s ease-out;">
+
+            <h2>Edit More Details</h2>
+
+            <textarea id="moreDetailsTextarea"
+                style="width:100%;
+                   flex:1;                    /* <-- textarea fills most of modal */
+                   resize:vertical;
+                   font-size:1rem;
+                   padding:10px;
+                   margin-top:10px;
+                   margin-bottom:15px;"></textarea>
+
+            <div style="display:flex; justify-content:flex-end; gap:10px;">
+                <button type="button" id="closeMoreDetailsBtn" class="btn-cancel">Cancel</button>
+                <button type="button" id="saveMoreDetailsBtn" class="btn-update">Save</button>
+            </div>
+        </div>
+    </div>
 </x-editorLayout>

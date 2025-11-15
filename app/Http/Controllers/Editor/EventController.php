@@ -144,6 +144,7 @@ class EventController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'more_details' => 'nullable|string',
             'date' => 'required|date|after_or_equal:today',
             'start_time' => 'required',
             'end_time' => 'required',
@@ -187,6 +188,7 @@ class EventController extends Controller
         $event->update([
             'title' => $validated['title'],
             'description' => $validated['description'] ?? null,
+            'more_details' => $validated['more_details'] ?? null,
             'date' => $validated['date'],
             'start_time' => $validated['start_time'],
             'end_time' => $validated['end_time'],
