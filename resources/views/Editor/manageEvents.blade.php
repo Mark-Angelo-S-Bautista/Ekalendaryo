@@ -283,8 +283,8 @@
 
                             <div class="event-info">
                                 <span>📅 {{ \Carbon\Carbon::parse($event->date)->format('M d, Y') }}</span>
-                                <span>⏰ {{ \Carbon\Carbon::parse($event->start_time)->format('H:i') }} -
-                                    {{ \Carbon\Carbon::parse($event->end_time)->format('H:i') }}</span>
+                                <span>⏰ {{ \Carbon\Carbon::parse($event->start_time)->format('g:i A') }} -
+                                    {{ \Carbon\Carbon::parse($event->end_time)->format('g:i A') }}</span>
                                 <span>📍 {{ $event->location }}</span>
                                 <span>
                                     👥

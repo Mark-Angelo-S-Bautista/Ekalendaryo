@@ -161,12 +161,18 @@ document.addEventListener("DOMContentLoaded", () => {
         let timeSlotsHTML = "";
         const renderedEvents = new Set();
 
+        // Helper function to convert "HH:MM" to 12-hour format
+        function formatTime12Hour(hour, min) {
+            const period = hour >= 12 ? "PM" : "AM";
+            let hour12 = hour % 12;
+            if (hour12 === 0) hour12 = 12;
+            return `${hour12}:${String(min).padStart(2, "0")} ${period}`;
+        }
+
         for (let hour = startHour; hour < endHour; hour++) {
             for (let min = 0; min < 60; min += slotInterval) {
                 const slotTimeNum = hour + min / 60;
-                const timeLabel = `${String(hour).padStart(2, "0")}:${String(
-                    min
-                ).padStart(2, "0")}`;
+                const timeLabel = formatTime12Hour(hour, min); // <-- use 12-hour format
                 const eventForSlot = dayEvents.find((ev) => {
                     const startNum = timeStrToNumber(ev.timeStart);
                     const endNum = timeStrToNumber(ev.timeEnd);
