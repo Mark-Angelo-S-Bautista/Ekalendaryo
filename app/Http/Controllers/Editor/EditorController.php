@@ -13,41 +13,40 @@ class EditorController extends Controller
     public function dashboard()
     {
         $user = Auth::user();
-        $officeusers = User::all();
         $dept = $user->department;
-        $title = $user->office_name;
+        $title = $user->title; // use title for Department Head logic
         $userId = $user->id;
 
-        // Current timestamp
         $now = Carbon::now();
 
-        // Start building query
         $eventsQuery = Event::query();
 
         // --- ACCESS LOGIC ---
         if ($dept === 'OFFICES') {
-            // OFFICES users only see the events they created
+            // OFFICE users only see the events they created
+            $eventsQuery->where('user_id', $userId);
+        } elseif ($title === 'Department Head') {
+            // Department Heads only see the events they created
             $eventsQuery->where('user_id', $userId);
         } else {
-            // Others see their department + all OFFICE events
-            $eventsQuery
-                ->with('user')
+            // Other users see their department events + all OFFICE events
+            $eventsQuery->with('user')
                 ->where(function ($q) use ($dept) {
                     $q->where('department', $dept)
                     ->orWhere('department', 'OFFICES');
                 });
         }
 
-        // --- HIDE PAST EVENTS (IMPORTANT) ---
+        // --- HIDE PAST EVENTS ---
         $eventsQuery->where(function ($q) use ($now) {
-            $q->where('date', '>', $now->toDateString()) // future dates
+            $q->where('date', '>', $now->toDateString()) // future events
             ->orWhere(function ($q2) use ($now) {
-                $q2->where('date', $now->toDateString())   // today
+                $q2->where('date', $now->toDateString()) // today
                     ->where('end_time', '>=', $now->format('H:i:s')); // not finished
             });
         });
 
-        // Now get filtered events
+        // Fetch events
         $events = $eventsQuery->orderBy('date', 'asc')->get();
 
         // Transform for modal compatibility
@@ -57,10 +56,9 @@ class EditorController extends Controller
             return $event;
         });
 
-        // Count only upcoming events
         $myEventsCount = $events->count();
 
-        return view('Editor.dashboard', compact('myEventsCount', 'events', 'title', 'officeusers'));
+        return view('Editor.dashboard', compact('myEventsCount', 'events', 'title'));
     }
 
     public function calendar()
