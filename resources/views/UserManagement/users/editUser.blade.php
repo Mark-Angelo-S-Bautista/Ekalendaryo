@@ -80,6 +80,13 @@
                 <div class="error-text" id="error-role"></div>
             </div>
 
+            <div class="edituser_form-group">
+                <label class="edituser_label">Change Password:</label>
+                <input type="password" name="password" class="edituser_input"
+                    placeholder="Leave blank to keep current password">
+                <div class="error-text" id="error-password"></div>
+            </div>
+
             <div class="edituser_actions">
                 <div id="editUserMessage" class="edituser_message"></div>
                 <a href="{{ route('UserManagement.users') }}" class="edituser_btn edituser_btn-cancel">Cancel</a>

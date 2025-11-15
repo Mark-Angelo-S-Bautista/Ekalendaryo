@@ -35,6 +35,7 @@ class UserController extends Controller
                 'yearlevel' => 'nullable|string|max:50',
                 'section' => 'nullable|string|max:50',
                 'role' => 'required|string|max:255',
+                'password' => 'nullable|string|min:6', // <- optional password field
             ],
             [
                 // Custom error messages
@@ -62,6 +63,8 @@ class UserController extends Controller
 
                 'role.required' => 'The role field is required.',
                 'role.max' => 'The role may not be greater than 255 characters.',
+
+                'password.min' => 'Password must be at least 6 characters.',
             ]
         );
 
@@ -78,9 +81,16 @@ class UserController extends Controller
 
         $user = User::findOrFail($id);
 
-        $user->update($request->only([
-            'name', 'title', 'userId', 'email', 'department', 'yearlevel', 'section', 'role',
-        ]));
+        // Only update password if provided
+        $updateData = $request->only([
+            'name', 'title', 'userId', 'email', 'department', 'yearlevel', 'section', 'role'
+        ]);
+
+        if ($request->filled('password')) {
+            $updateData['password'] = bcrypt($request->password);
+        }
+
+        $user->update($updateData);
 
         if ($request->ajax()) {
             return response()->json([
