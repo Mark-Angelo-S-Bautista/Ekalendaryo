@@ -173,15 +173,10 @@ class UserController extends Controller
     {
         $query = $request->get('query', '');
 
-        // We no longer need the user or department for this query
-        // $user = Auth::user();
-        // $dept = $user->department;
+        $now = now();
+        $limitDate = $now->copy()->addDays(30);
 
-        $events = Event::query() // Start with a clean Event query
-            // ->where(function ($q) use ($dept) {  <-- REMOVE THIS BLOCK
-            //     $q->where('department', $dept)
-            //     ->orWhere('department', 'OFFICES');
-            // })                                     <-- REMOVE THIS BLOCK
+        $events = Event::query()
             ->when($query, function ($q) use ($query) {
                 $q->where(function ($inner) use ($query) {
                     $inner->where('title', 'like', "%{$query}%")
@@ -189,8 +184,18 @@ class UserController extends Controller
                         ->orWhere('description', 'like', "%{$query}%");
                 });
             })
-            ->orderBy('date', 'asc')
-            ->get();
+            ->get()
+            ->filter(function ($event) use ($now, $limitDate) {
+                // Combine date + start_time into full datetime
+                $eventDateTime = \Carbon\Carbon::parse($event->date . ' ' . $event->start_time);
+
+                // Must not be past, AND must be within 30 days
+                return $eventDateTime->between($now, $limitDate);
+            })
+            ->sortBy(function ($event) {
+                return \Carbon\Carbon::parse($event->date . ' ' . $event->start_time);
+            })
+            ->values(); // important for correct indexing
 
         return response()->json(['events' => $events]);
     }

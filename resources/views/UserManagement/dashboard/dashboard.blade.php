@@ -26,12 +26,12 @@
 
         <!-- Stats -->
         <section class="dashboard_stats">
-            <div class="dashboard_stat_box">
+            {{-- <div class="dashboard_stat_box">
                 <h3>Total Events</h3>
                 <p>{{ $totalEvents }}</p>
-            </div>
+            </div> --}}
             <div class="dashboard_stat_box dashboard_clickable" id="dashboard_department_box">
-                <h3>Department and Offices Events</h3>
+                <h3>Total Departments and Offices Events</h3>
                 <p>{{ $departmentCounts->sum() }}</p>
             </div>
         </section>

@@ -13,40 +13,67 @@ class UserManagementController extends Controller
 {
     public function dashboard()
     {
-        //fetch the users info
-        $user = Auth::user(); // Get the currently logged-in user
+        $user = Auth::user();
         $office_name = $user->office_name;
 
-            // Fetch all events
+        // Fetch all events once
         $events = Event::all();
 
-        // Fetch all departments from database (so it’s dynamic)
-        $departments = Department::pluck('department_name')->toArray(); // adjust column name if needed
+        // Fetch departments
+        $departments = Department::pluck('department_name')->toArray();
 
-        // Total events
-        $totalEvents = $events->count();
+        $now = now();
 
-        // Count per department
-        $departmentCounts = $events
+        /*
+        |--------------------------------------------------------------------------
+        | FILTER UPCOMING EVENTS (future + within next 30 days)
+        |--------------------------------------------------------------------------
+        */
+        $upcomingEvents = $events
+            ->filter(function ($event) use ($now) {
+
+                // Combine date + start_time → proper datetime comparison
+                $eventDateTime = \Carbon\Carbon::parse($event->date . ' ' . $event->start_time);
+
+                // Must NOT be past
+                if ($eventDateTime->lessThan($now)) {
+                    return false;
+                }
+
+                // Must be within next 30 days
+                return $eventDateTime->between($now, $now->copy()->addDays(30));
+            })
+            ->sortBy(function ($event) {
+                return \Carbon\Carbon::parse($event->date . ' ' . $event->start_time);
+            });
+
+        /*
+        |--------------------------------------------------------------------------
+        | COUNT ONLY UPCOMING EVENTS
+        |--------------------------------------------------------------------------
+        */
+
+        // TOTAL upcoming events
+        $totalEvents = $upcomingEvents->count();
+
+        // COUNT per department (only upcoming)
+        $departmentCounts = $upcomingEvents
             ->groupBy('department')
             ->map(fn($group) => $group->count());
 
-        // Merge event counts with department list, fill missing ones with 0
+        // Ensure every department appears even if count=0
         $finalDeptCounts = collect($departments)->mapWithKeys(function ($dept) use ($departmentCounts) {
             return [$dept => $departmentCounts[$dept] ?? 0];
         });
 
-        // Upcoming events (within next 30 days)
-        $upcomingEvents = $events
-            ->whereBetween('date', [now(), now()->addDays(30)])
-            ->sortBy('date')
-            ->take(2);
+        // Show only FIRST 2 events in Upcoming Preview Cards
+        $upcomingEventsPreview = $upcomingEvents->take(2);
 
         return view('UserManagement.dashboard.dashboard', [
             'user' => $user,
             'totalEvents' => $totalEvents,
             'departmentCounts' => $finalDeptCounts,
-            'upcomingEvents' => $upcomingEvents,
+            'upcomingEvents' => $upcomingEventsPreview,
             'office_name' => $office_name,
         ]);
     }
