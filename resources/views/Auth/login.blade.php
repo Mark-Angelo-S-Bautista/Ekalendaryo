@@ -12,9 +12,10 @@
             <form action="{{ route('login') }}" method="post">
                 @csrf
                 <div class="form-group">
-                    <input type="text" id="userId" name="userId" placeholder="Ex. MA22013875" required>
+                    <input type="text" id="userId" name="userId" placeholder="Enter your ID Number" required>
                     <div class="password-wrapper">
-                        <input type="password" id="password" name="password" placeholder="Password" required>
+                        <input type="password" id="password" name="password" placeholder="Enter your Password"
+                            required>
                         <i id="password-toggle" class="fas fa-eye password-toggle"></i>
                     </div>
                 </div>

@@ -2,17 +2,17 @@
     <div class="modal-backdrop">
         <div class="modal-content">
             <h2>Forgot Password</h2>
-            <p>Enter your ID and email to receive a new password from your email.</p>
+            <p>Enter your ID Number and email to receive a new password from your email.</p>
             @error('userId')
                 <p class="error-message-forgot">{{ $message }}</p>
             @enderror
             <form action="{{ route('password.reset.request') }}" method="POST">
                 @csrf
                 <div class="modal-input">
-                    <input type="text" name="userId" placeholder="Enter your Student ID or Employee ID" required>
+                    <input type="text" name="userId" placeholder="Enter your ID Number" required>
                 </div>
                 <div class="modal-input">
-                    <input type="email" name="email" placeholder="Enter your email" required>
+                    <input type="email" name="email" placeholder="Enter your Email" required>
                 </div>
                 <div class="modal-buttons">
                     {{-- Clicking Cancel removes the ?forgot=1 --}}
