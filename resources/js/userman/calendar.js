@@ -242,7 +242,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div>${eventData.sy}</div>
             </div>
             <button id="viewMoreDetailsBtn" style="margin-top:10px; padding:8px 12px; background:#007bff; color:#fff; border:none; border-radius:5px; cursor:pointer;">
-                View More Details
+                👁️ View More Details
             </button>
         </div>`;
 
