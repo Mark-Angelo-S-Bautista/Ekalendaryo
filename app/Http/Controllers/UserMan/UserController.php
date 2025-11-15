@@ -176,7 +176,8 @@ class UserController extends Controller
         $now = now();
         $limitDate = $now->copy()->addDays(30);
 
-        $events = Event::query()
+        // Eager load the user to get office_name
+        $events = Event::with('user')
             ->when($query, function ($q) use ($query) {
                 $q->where(function ($inner) use ($query) {
                     $inner->where('title', 'like', "%{$query}%")
@@ -186,16 +187,19 @@ class UserController extends Controller
             })
             ->get()
             ->filter(function ($event) use ($now, $limitDate) {
-                // Combine date + start_time into full datetime
                 $eventDateTime = \Carbon\Carbon::parse($event->date . ' ' . $event->start_time);
-
-                // Must not be past, AND must be within 30 days
                 return $eventDateTime->between($now, $limitDate);
             })
             ->sortBy(function ($event) {
                 return \Carbon\Carbon::parse($event->date . ' ' . $event->start_time);
             })
-            ->values(); // important for correct indexing
+            ->values();
+
+        // Attach office_name for JS
+        $events->transform(function ($event) {
+            $event->office_name = $event->user->office_name ?? null;
+            return $event;
+        });
 
         return response()->json(['events' => $events]);
     }
