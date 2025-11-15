@@ -11,7 +11,7 @@
                         {{ Auth::user()->title }}
                     @endif Dashboard
                 </p>
-                {{-- <p class="dashboard_school_year">Current School Year: {{ $currentSchoolYear }}</p> --}}
+                <p class="dashboard_school_year">Current School Year: SY.2025-2026</p>
             </div>
             <button class="dashboard_change_year_btn">Change School Year</button>
         </section>
@@ -26,10 +26,6 @@
 
         <!-- Stats -->
         <section class="dashboard_stats">
-            {{-- <div class="dashboard_stat_box">
-                <h3>Total Events</h3>
-                <p>{{ $totalEvents }}</p>
-            </div> --}}
             <div class="dashboard_stat_box dashboard_clickable" id="dashboard_department_box">
                 <h3>Total Departments and Offices Events</h3>
                 <p>{{ $departmentCounts->sum() }}</p>
@@ -50,6 +46,15 @@
                         {{ \Carbon\Carbon::parse($event->end_time)->format('g:i A') }}
                         &nbsp;&nbsp; 📍 {{ $event->location }}
                     </div>
+                    <div class="dashboard_event_details">
+                        👥
+                        @php
+                            $yearLevelsText = is_array($event->target_year_levels)
+                                ? implode(', ', $event->target_year_levels)
+                                : 'No specific year levels targeted for this event.';
+                        @endphp
+                        {{ $yearLevelsText }}
+                    </div>
                     <div class="dashboard_event_details">{{ $event->description ?? 'No description provided.' }}</div>
                     <div class="dashboard_event_details">{{ $event->school_year }}</div>
                     <div class="dashboard_event_tags">
@@ -63,7 +68,7 @@
                         <span class="dashboard_tag dashboard_tag_upcoming">upcoming</span>
                     </div>
 
-                    <!-- ✅ View Details Button -->
+                    <!-- View Details Button -->
                     <button class="dashboard_view_btn" data-details='@json($event->more_details ?? 'No additional details.')'
                         style="padding:10px 22px; background:#e8ecf5; border:none; border-radius:10px; font-size:1rem; cursor:pointer; font-weight:600; color:#36415d; margin-top:10px;"
                         onmouseover="this.style.background='#d4d9e6'" onmouseout="this.style.background='#e8ecf5'">
@@ -97,7 +102,7 @@
         </div>
     </div>
 
-    <!-- VIEW DETAILS MODAL -->
+    <!-- View Details Modal -->
     <div id="userDetailsModalOverlay"
         style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.65); z-index:9999; justify-content:center; align-items:center; padding:20px;">
         <div
@@ -121,25 +126,23 @@
             const eventContainer = document.querySelector('.dashboard_upcoming_card');
             const clearButton = document.querySelector('.dashboard_clear_btn');
 
-            // 1. Initialize an array to store fetched events
             let currentFetchedEvents = [];
 
             const renderEvents = (events) => {
                 eventContainer.innerHTML = `
-                <h3 class="dashboard_upcoming_title">Upcoming Events</h3>
-                <p>Upcoming events (within 30 days)</p>
-            `;
+                    <h3 class="dashboard_upcoming_title">Upcoming Events</h3>
+                    <p>Upcoming events (within 30 days)</p>
+                `;
 
                 if (events.length === 0) {
                     eventContainer.innerHTML += `<p>No events found.</p>`;
                     return;
                 }
 
-                // 3. Get the 'index' of each event
                 events.forEach((event, index) => {
                     const date = new Date(event.date).toLocaleDateString('en-US');
 
-                    // --- Start Time Formatting (with null check) ---
+                    // Format start time
                     let startTime = 'N/A';
                     if (event.start_time) {
                         const [sh, sm] = event.start_time.split(':');
@@ -151,7 +154,8 @@
                             hour12: true
                         });
                     }
-                    // --- End Time Formatting (with null check) ---
+
+                    // Format end time
                     let endTime = 'N/A';
                     if (event.end_time) {
                         const [eh, em] = event.end_time.split(':');
@@ -167,28 +171,32 @@
                     const departmentTag = event.department === 'OFFICES' ? event.office_name : event
                         .department;
 
+                    // Handle target_year_levels
+                    let yearLevelsText = 'No specific year levels targeted for this event.';
+                    if (Array.isArray(event.target_year_levels) && event.target_year_levels.length >
+                        0) {
+                        yearLevelsText = event.target_year_levels.join(', ');
+                    }
+
                     eventContainer.innerHTML += `
-                    <div class="dashboard_event_card">
-                        <div class="dashboard_event_title">${event.title}</div>
-                        <div class="dashboard_event_details">
-                            📅 ${date} &nbsp;&nbsp; 🕓 ${startTime} - ${endTime}
-                            &nbsp;&nbsp; 📍 ${event.location || 'N/A'}
+                        <div class="dashboard_event_card">
+                            <div class="dashboard_event_title">${event.title}</div>
+                            <div class="dashboard_event_details">
+                                📅 ${date} &nbsp;&nbsp; 🕓 ${startTime} - ${endTime} &nbsp;&nbsp; 📍 ${event.location || 'N/A'}
+                            </div>
+                            <div class="dashboard_event_details">👥 ${yearLevelsText}</div>
+                            <div class="dashboard_event_details">${event.description || 'No description provided.'}</div>
+                            <div class="dashboard_event_details">${event.school_year || 'N/A'}</div>
+                            <div class="dashboard_event_tags">
+                                <span class="dashboard_tag dashboard_tag_admin">${departmentTag}</span>
+                                <span class="dashboard_tag dashboard_tag_upcoming">upcoming</span>
+                            </div>
+                            <button class="dashboard_view_btn" data-index="${index}"
+                                style="padding:10px 22px; background:#e8ecf5; border:none; border-radius:10px; font-size:1rem; cursor:pointer; font-weight:600; color:#36415d; margin-top:10px;">
+                                👁️ View Details
+                            </button>
                         </div>
-                        <div class="dashboard_event_details">${event.description || 'No description provided.'}</div>
-                        <div class="dashboard_event_details">${event.school_year}</div>
-                        <div class="dashboard_event_tags">
-                            <span class="dashboard_tag dashboard_tag_admin">${departmentTag}</span>
-                            <span class="dashboard_tag dashboard_tag_upcoming">upcoming</span>
-                        </div>
-                        
-                        <button class="dashboard_view_btn" 
-                            data-index="${index}"
-                            style="padding:10px 22px; background:#e8ecf5; border:none; border-radius:10px; font-size:1rem; cursor:pointer; font-weight:600; color:#36415d; margin-top:10px;"
-                            onmouseover="this.style.background='#d4d9e6'" onmouseout="this.style.background='#e8ecf5'">
-                            👁️ View Details
-                        </button>
-                    </div>
-                `;
+                    `;
                 });
             };
 
@@ -196,28 +204,20 @@
                 fetch(`/usermanagement/dashboard/search?query=${encodeURIComponent(query)}`)
                     .then(res => res.json())
                     .then(data => {
-                        // 2. Store the fetched events
                         currentFetchedEvents = data.events;
                         renderEvents(currentFetchedEvents);
                     })
                     .catch(err => console.error(err));
             };
 
-            // Initial fetch - Note: This will re-render your events, but it standardizes behavior.
-            // The original Blade-rendered events will be replaced by JS-rendered ones.
-            // This is fine and makes the code simpler.
             fetchEvents();
 
-            // Search as you type
             searchInput.addEventListener('input', () => fetchEvents(searchInput.value.trim()));
-
-            // Clear search
             clearButton.addEventListener('click', () => {
                 searchInput.value = '';
                 fetchEvents();
             });
 
-            // --- 4. Update Event Listener ---
             const modal = document.getElementById('userDetailsModalOverlay');
             const modalContent = document.getElementById('userDetailsContent');
             const closeBtn = document.getElementById('userDetailsCloseBtn');
@@ -225,15 +225,11 @@
             document.addEventListener('click', (e) => {
                 if (e.target.classList.contains('dashboard_view_btn')) {
                     const index = e.target.dataset.index;
-
                     let details = 'No additional details.';
 
-                    // Check if index exists (from JS-rendered button)
                     if (index !== undefined && currentFetchedEvents[index]) {
                         details = currentFetchedEvents[index].more_details || details;
-                    }
-                    // Fallback for Blade-rendered buttons (though fetchEvents() will replace them)
-                    else if (e.target.dataset.details) {
+                    } else if (e.target.dataset.details) {
                         details = e.target.dataset.details;
                     }
 
