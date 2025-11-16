@@ -103,43 +103,35 @@ class EventController extends Controller
     }
 
     //SEND THE MAIL WHEN CREATING AN EVENT
-    private function sendEmailsForEvent(Event $event)
+    private function sendEmailsForEvent(Event $event, bool $isUpdate = false, $oldEvent = null)
     {
-        // ❌ RULE: OFFICES should NOT get emails
         if ($event->department === 'OFFICES') {
             return;
         }
 
-        // department of the editor
         $dept = $event->department;
-
-        // year levels targeted
         $yearLevels = $event->target_year_levels;
 
-        // If no year levels selected → send to everyone in same department
         if (empty($yearLevels)) {
             $students = User::where('role', 'Viewer')
-                ->where('department', $dept)
-                ->get();
+                            ->where('department', $dept)
+                            ->get();
         } else {
-            // Normalize year levels for comparison
             $normalizedYearLevels = array_map(function ($lvl) {
                 return strtolower(str_replace(' ', '', $lvl));
             }, $yearLevels);
 
-            // Send to students in same department + correct year level
             $students = User::where('role', 'Viewer')
-                ->where('department', $dept)
-                ->get()
-                ->filter(function ($student) use ($normalizedYearLevels) {
-                    $studentYearLevel = strtolower(str_replace(' ', '', $student->yearlevel ?? ''));
-                    return in_array($studentYearLevel, $normalizedYearLevels);
-                });
+                            ->where('department', $dept)
+                            ->get()
+                            ->filter(function ($student) use ($normalizedYearLevels) {
+                                $studentYearLevel = strtolower(str_replace(' ', '', $student->yearlevel ?? ''));
+                                return in_array($studentYearLevel, $normalizedYearLevels);
+                            });
         }
 
-        // Send the email
         foreach ($students as $student) {
-            Mail::to($student->email)->send(new EventNotificationMail($event, $student));
+            Mail::to($student->email)->send(new EventNotificationMail($event, $student, $isUpdate, $oldEvent));
         }
     }
 
@@ -231,6 +223,8 @@ class EventController extends Controller
                 ]);
         }
 
+        $oldEvent = $event->replicate();
+
         // No conflict, update the event
         $event->update([
             'title' => $validated['title'],
@@ -243,7 +237,10 @@ class EventController extends Controller
             'target_year_levels' => $validated['target_year_levels'] ?? [],
         ]);
 
-        return redirect()->route('Editor.index')->with('success', 'Event updated successfully!');
+        // Send updated notification
+        $this->sendEmailsForEvent($event, true, $oldEvent);
+
+        return redirect()->route('Editor.index')->with('success', 'Event Updated and Emails sent Successfully!');
     }
 
     // =========================================================================
