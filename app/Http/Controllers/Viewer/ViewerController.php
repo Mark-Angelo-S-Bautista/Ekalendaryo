@@ -36,13 +36,22 @@ class ViewerController extends Controller
             // ============================================================
             if (strtolower($title) === 'faculty') {
 
-                // Faculty sees ONLY:
-                // - events where event.department == user's department
-                // - OR OFFICES events
-                // BUT must NOT see events where target_users == "Department Heads"
+                // Convert target_department to array if needed
+                $targetDepartments = is_string($ev->target_department)
+                    ? json_decode($ev->target_department, true) ?? []
+                    : $ev->target_department;
+
+                // Faculty can see events if:
+                // 1. Event department matches faculty's department
+                // OR
+                // 2. Event is from OFFICES and targets faculty's department
+                // AND
+                // 3. Event does NOT target "Department Heads"
                 if (
-                    ($ev->department === $dept || $ev->department === 'OFFICES') &&
-                    strtolower($ev->target_users) !== 'department heads'
+                    strtolower($ev->target_users) !== 'department heads' && (
+                        $ev->department === $dept ||
+                        ($ev->department === 'OFFICES' && is_array($targetDepartments) && in_array($dept, $targetDepartments))
+                    )
                 ) {
                     return true;
                 }
