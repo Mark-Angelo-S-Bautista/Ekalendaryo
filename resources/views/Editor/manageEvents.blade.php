@@ -120,7 +120,7 @@
                                     <select id="targetUsers" name="target_users" class="form-control">
                                         <option value="">-- Select Users --</option>
                                         <option value="Faculty">Faculty</option>
-                                        <option value="Faculty">Department Heads</option>
+                                        <option value="Department Heads">Department Heads</option>
                                         <option value="Students">Students</option>
                                     </select>
                                 </div>
