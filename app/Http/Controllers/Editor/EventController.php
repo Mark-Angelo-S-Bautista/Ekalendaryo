@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Editor;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Event;
+use App\Models\User;
+use App\Mail\EventNotificationMail;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
@@ -79,7 +82,7 @@ class EventController extends Controller
         }
 
         // ✅ Create event (with more_details)
-        Event::create([
+        $event = Event::create([
             'user_id' => auth()->id(),
             'title' => $validated['title'],
             'description' => $validated['description'] ?? null,
@@ -93,7 +96,51 @@ class EventController extends Controller
             'department' => auth()->user()->department,
         ]);
 
-        return redirect()->back()->with('success', 'Event created successfully!');
+        // Send notifications
+        $this->sendEmailsForEvent($event);
+
+        return redirect()->back()->with('success', 'Event created and emails sent successfully!');
+    }
+
+    //SEND THE MAIL WHEN CREATING AN EVENT
+    private function sendEmailsForEvent(Event $event)
+    {
+        // ❌ RULE: OFFICES should NOT get emails
+        if ($event->department === 'OFFICES') {
+            return;
+        }
+
+        // department of the editor
+        $dept = $event->department;
+
+        // year levels targeted
+        $yearLevels = $event->target_year_levels;
+
+        // If no year levels selected → send to everyone in same department
+        if (empty($yearLevels)) {
+            $students = User::where('role', 'Viewer')
+                ->where('department', $dept)
+                ->get();
+        } else {
+            // Normalize year levels for comparison
+            $normalizedYearLevels = array_map(function ($lvl) {
+                return strtolower(str_replace(' ', '', $lvl));
+            }, $yearLevels);
+
+            // Send to students in same department + correct year level
+            $students = User::where('role', 'Viewer')
+                ->where('department', $dept)
+                ->get()
+                ->filter(function ($student) use ($normalizedYearLevels) {
+                    $studentYearLevel = strtolower(str_replace(' ', '', $student->yearlevel ?? ''));
+                    return in_array($studentYearLevel, $normalizedYearLevels);
+                });
+        }
+
+        // Send the email
+        foreach ($students as $student) {
+            Mail::to($student->email)->send(new EventNotificationMail($event, $student));
+        }
     }
 
     // =========================================================================
