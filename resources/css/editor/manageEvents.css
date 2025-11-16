@@ -354,3 +354,17 @@ button {
     text-align: left;
     font-size: 14px;
 }
+.checkbox-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    /* 4 per row */
+    gap: 8px 15px;
+    margin-top: 10px;
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 0;
+}

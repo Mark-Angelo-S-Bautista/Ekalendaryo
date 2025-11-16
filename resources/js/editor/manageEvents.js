@@ -1,3 +1,50 @@
+// TARGET DEPARTMENT AND TARGET USERS ON THE OFFICES
+document.addEventListener("DOMContentLoaded", () => {
+    const targetUsersSelect = document.getElementById("targetUsers");
+    const yearLevelsContainer = document.getElementById(
+        "targetYearLevelsContainer"
+    );
+
+    function toggleYearLevels() {
+        if (targetUsersSelect.value === "Students") {
+            yearLevelsContainer.style.display = "block";
+        } else {
+            yearLevelsContainer.style.display = "none";
+
+            // Uncheck all checkboxes when hidden
+            yearLevelsContainer
+                .querySelectorAll('input[type="checkbox"]')
+                .forEach((cb) => (cb.checked = false));
+        }
+    }
+
+    // Run on change
+    targetUsersSelect.addEventListener("change", toggleYearLevels);
+
+    // Initial toggle in case the form is pre-filled
+    toggleYearLevels();
+
+    // Existing select all logic
+    const selectAllCheckbox = document.getElementById("select_all_create");
+    const yearCheckboxes = document.querySelectorAll(".syear");
+
+    selectAllCheckbox.addEventListener("change", () => {
+        yearCheckboxes.forEach(
+            (cb) => (cb.checked = selectAllCheckbox.checked)
+        );
+    });
+
+    yearCheckboxes.forEach((cb) => {
+        cb.addEventListener("change", () => {
+            if (![...yearCheckboxes].every((cb) => cb.checked)) {
+                selectAllCheckbox.checked = false;
+            } else {
+                selectAllCheckbox.checked = true;
+            }
+        });
+    });
+});
+
 document.addEventListener("DOMContentLoaded", () => {
     const viewButtons = document.querySelectorAll(".btn-view-details");
     const modal = document.getElementById("viewDetailsModal");

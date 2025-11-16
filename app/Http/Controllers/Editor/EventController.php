@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Event;
 use App\Models\User;
+use App\Models\Department;
 use App\Mail\EventNotificationMail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Auth;
@@ -49,6 +50,8 @@ class EventController extends Controller
             ],
             'location' => 'required|string|max:50',
             'target_year_levels' => 'nullable|array',
+            'target_department'   => 'nullable|array',
+            'target_users'        => 'nullable|string',
             'other_location' => 'nullable|string|max:50|required_if:location,Other',
         ]);
 
@@ -93,11 +96,14 @@ class EventController extends Controller
             'location' => $location,
             'school_year' => 'SY.2025-2026',
             'target_year_levels' => $validated['target_year_levels'] ?? [],
+            'target_department' => $validated['target_department'] ?? [],
+            'target_users' => $request->target_users,           // string
             'department' => auth()->user()->department,
         ]);
 
         // Send notifications
         $this->sendEmailsForEvent($event);
+
 
         return redirect()->back()->with('success', 'Event created and emails sent successfully!');
     }
@@ -148,7 +154,10 @@ class EventController extends Controller
                         ->orderBy('date', 'asc')
                         ->get();
 
-        return view('Editor.manageEvents', compact('events'));
+        // ✅ Get all departments
+        $departments = Department::all();
+
+        return view('Editor.manageEvents', compact('events', 'departments'));
     }
 
     // =========================================================================

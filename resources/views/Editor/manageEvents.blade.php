@@ -99,39 +99,100 @@
                                 }
                             </script>
 
-                            <div class="form-group">
-                                <label>Target Year Levels</label>
-                                <p class="note">Select which year levels of students will receive notifications for
-                                    this
-                                    event</p>
+                            @if (auth()->user()->department === 'OFFICES')
+                                <div class="form-group">
+                                    <label for="targetDepartment">Target Department</label>
 
-                                <div class="checkbox_select">
-                                    <div class="checkbox-inline">
-                                        <input type="checkbox" id="select_all_create">
-                                        <label for="select_all_create">Select All Year Levels</label>
+                                    <div class="checkbox-grid">
+                                        <!-- Dynamic departments -->
+                                        @foreach ($departments as $dept)
+                                            <label class="checkbox-item">
+                                                <input type="checkbox" class="dept-checkbox" name="target_department[]"
+                                                    value="{{ $dept->department_name }}">
+                                                <span>{{ $dept->department_name }}</span>
+                                            </label>
+                                        @endforeach
                                     </div>
                                 </div>
 
-                                <div class="checkbox-group">
-                                    <div class="checkbox-inline">
-                                        <input type="checkbox" name="target_year_levels[]" value="1st Year"
-                                            class="syear"> 1st Year
+                                <div class="form-group">
+                                    <label for="targetUsers">Target Users</label>
+                                    <select id="targetUsers" name="target_users" class="form-control">
+                                        <option value="">-- Select Users --</option>
+                                        <option value="Faculty">Faculty</option>
+                                        <option value="Faculty">Department Heads</option>
+                                        <option value="Students">Students</option>
+                                    </select>
+                                </div>
+
+                                <!-- Target Year Levels checkboxes -->
+                                <div class="form-group" id="targetYearLevelsContainer">
+                                    <label>Target Year Levels</label>
+                                    <p class="note">Select which year levels of students will receive notifications
+                                        for this event</p>
+
+                                    <div class="checkbox_select">
+                                        <div class="checkbox-inline">
+                                            <input type="checkbox" id="select_all_create">
+                                            <label for="select_all_create">Select All Year Levels</label>
+                                        </div>
                                     </div>
-                                    <div class="checkbox-inline">
-                                        <input type="checkbox" name="target_year_levels[]" value="2nd Year"
-                                            class="syear"> 2nd Year
-                                    </div>
-                                    <div class="checkbox-inline">
-                                        <input type="checkbox" name="target_year_levels[]" value="3rd Year"
-                                            class="syear"> 3rd Year
-                                    </div>
-                                    <div class="checkbox-inline">
-                                        <input type="checkbox" name="target_year_levels[]" value="4th Year"
-                                            class="syear"> 4th Year
+
+                                    <div class="checkbox-group">
+                                        <div class="checkbox-inline">
+                                            <input type="checkbox" name="target_year_levels[]" value="1st Year"
+                                                class="syear"> 1st Year
+                                        </div>
+                                        <div class="checkbox-inline">
+                                            <input type="checkbox" name="target_year_levels[]" value="2nd Year"
+                                                class="syear"> 2nd Year
+                                        </div>
+                                        <div class="checkbox-inline">
+                                            <input type="checkbox" name="target_year_levels[]" value="3rd Year"
+                                                class="syear"> 3rd Year
+                                        </div>
+                                        <div class="checkbox-inline">
+                                            <input type="checkbox" name="target_year_levels[]" value="4th Year"
+                                                class="syear"> 4th Year
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                            @endif
 
+                            @if (auth()->user()->department !== 'OFFICES')
+                                <!-- Target Year Levels checkboxes -->
+                                <div class="form-group" id="targetYearLevelsContainer">
+                                    <label>Target Year Levels</label>
+                                    <p class="note">Select which year levels of students will receive notifications
+                                        for this event</p>
+
+                                    <div class="checkbox_select">
+                                        <div class="checkbox-inline">
+                                            <input type="checkbox" id="select_all_create">
+                                            <label for="select_all_create">Select All Year Levels</label>
+                                        </div>
+                                    </div>
+
+                                    <div class="checkbox-group">
+                                        <div class="checkbox-inline">
+                                            <input type="checkbox" name="target_year_levels[]" value="1st Year"
+                                                class="syear"> 1st Year
+                                        </div>
+                                        <div class="checkbox-inline">
+                                            <input type="checkbox" name="target_year_levels[]" value="2nd Year"
+                                                class="syear"> 2nd Year
+                                        </div>
+                                        <div class="checkbox-inline">
+                                            <input type="checkbox" name="target_year_levels[]" value="3rd Year"
+                                                class="syear"> 3rd Year
+                                        </div>
+                                        <div class="checkbox-inline">
+                                            <input type="checkbox" name="target_year_levels[]" value="4th Year"
+                                                class="syear"> 4th Year
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
                             <div class="button-group">
                                 <button type="button" class="btn-cancel" id="closeModalBtn">Cancel</button>
                                 <button type="submit" class="btn-create">Create Event</button>
@@ -238,6 +299,8 @@
                         </script>
                     </div>
                 </div>
+
+
                 <div class="modal-overlay" id="detailsModalOverlay" style="display:none;">
                     <div class="modal"
                         style="width: 600px; max-width: 90%; height: 80%; display: flex; flex-direction: column;">

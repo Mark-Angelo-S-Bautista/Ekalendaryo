@@ -18,11 +18,14 @@ class Event extends Model
         'location',
         'school_year',
         'target_year_levels',
+        'target_department',
+        'target_users',
         'department',
     ];
 
     protected $casts = [
         'target_year_levels' => 'array',
+        'target_department' => 'array',
     ];
 
     public function user()
