@@ -59,7 +59,7 @@
     @if (!empty($event->target_year_levels))
         <p><strong>Target Year Levels:</strong> {{ implode(', ', $event->target_year_levels) }}</p>
     @else
-        <p><strong>Target Year Levels:</strong> All students in your department</p>
+        <p><strong>Target Participant:</strong> {{ $event->target_users }}</p>
     @endif
 
     @if (!empty($event->more_details))

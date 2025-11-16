@@ -102,7 +102,11 @@ class EventController extends Controller
         ]);
 
         // Send notifications
-        $this->sendEmailsForEvent($event);
+        if ($event->department === 'OFFICES') {
+            $this->sendEmailsForOfficesEvent($event);
+        } else {
+            $this->sendEmailsForEvent($event);
+        }
 
 
         return redirect()->back()->with('success', 'Event created and emails sent successfully!');
@@ -111,35 +115,92 @@ class EventController extends Controller
     //SEND THE MAIL WHEN CREATING AN EVENT
     private function sendEmailsForEvent(Event $event, bool $isUpdate = false, $oldEvent = null, bool $isCancelled = false)
     {
-        if ($event->department === 'OFFICES') {
-            return;
-        }
-
         $dept = $event->department;
-        $yearLevels = $event->target_year_levels;
+        $yearLevels = $event->target_year_levels ?? [];
 
-        if (empty($yearLevels)) {
-            $students = User::where('role', 'Viewer')
-                            ->where('department', $dept)
+        // ------------------------------
+        // STUDENTS (role: Viewer)
+        // ------------------------------
+        $students = User::where('department', $dept)
+                        ->where('role', 'Viewer')
+                        ->get()
+                        ->filter(function ($student) use ($yearLevels) {
+                            if (empty($yearLevels)) return true; // All students if no specific year levels
+                            $studentYearLevel = strtolower(str_replace(' ', '', $student->yearlevel ?? ''));
+                            $normalizedYearLevels = array_map(fn($lvl) => strtolower(str_replace(' ', '', $lvl)), $yearLevels);
+                            return in_array($studentYearLevel, $normalizedYearLevels);
+                        });
+
+        // ------------------------------
+        // FACULTY & DEPARTMENT HEADS (by title)
+        // ------------------------------
+        $facultyAndHeads = User::where('department', $dept)
+                            ->whereIn('title', ['Faculty', 'Department Head'])
                             ->get();
-        } else {
-            $normalizedYearLevels = array_map(function ($lvl) {
-                return strtolower(str_replace(' ', '', $lvl));
-            }, $yearLevels);
 
-            $students = User::where('role', 'Viewer')
-                            ->where('department', $dept)
-                            ->get()
-                            ->filter(function ($student) use ($normalizedYearLevels) {
-                                $studentYearLevel = strtolower(str_replace(' ', '', $student->yearlevel ?? ''));
-                                return in_array($studentYearLevel, $normalizedYearLevels);
-                            });
-        }
+        // ------------------------------
+        // MERGE ALL RECIPIENTS
+        // ------------------------------
+        $recipients = $students->merge($facultyAndHeads);
 
-        foreach ($students as $student) {
-            Mail::to($student->email)->send(new EventNotificationMail($event, $student, $isUpdate, $oldEvent, $isCancelled));
+        // ------------------------------
+        // SEND EMAILS
+        // ------------------------------
+        foreach ($recipients as $user) {
+            Mail::to($user->email)->send(
+                new EventNotificationMail($event, $user, $isUpdate, $oldEvent, $isCancelled)
+            );
         }
     }
+
+    /**
+     * Send emails for OFFICES-created events based on target fields.
+     */
+    private function sendEmailsForOfficesEvent(Event $event, bool $isUpdate = false, $oldEvent = null, bool $isCancelled = false)
+    {
+        // Start with all users
+        $users = User::query();
+
+        // Filter by target_users (from event)
+        switch ($event->target_users) {
+            case 'Students':
+                $users->where('title', 'Viewer'); // assuming students have role Viewer
+                break;
+            case 'Faculty':
+                $users->where('title', 'Faculty');
+                break;
+            case 'Department Heads':
+                $users->where('title', 'Department Head');
+                break;
+            default:
+                // If no target_users is specified, no filtering by role
+                break;
+        }
+
+        // Filter by target_department if set and not "All"
+        if (!empty($event->target_department) && !in_array('All', $event->target_department)) {
+            $users->whereIn('department', $event->target_department);
+        }
+
+        // Get users from database
+        $users = $users->get();
+
+        // Filter Students further by year levels if applicable
+        if ($event->target_users === 'Students' && !empty($event->target_year_levels)) {
+            $normalizedYearLevels = array_map(fn($lvl) => strtolower(str_replace(' ', '', $lvl)), $event->target_year_levels);
+
+            $users = $users->filter(function ($user) use ($normalizedYearLevels) {
+                $userYearLevel = strtolower(str_replace(' ', '', $user->yearlevel ?? ''));
+                return in_array($userYearLevel, $normalizedYearLevels);
+            });
+        }
+
+        // Send emails
+        foreach ($users as $user) {
+            Mail::to($user->email)->send(new EventNotificationMail($event, $user, $isUpdate, $oldEvent, $isCancelled));
+        }
+    }
+
 
     // =========================================================================
     // MODIFIED: STRICT User-ID filtering applied.
@@ -172,7 +233,9 @@ class EventController extends Controller
                     ->where('user_id', $userId)
                     ->firstOrFail(); // Throws 404 if not found or not owned
 
-        return view('Editor.editEvents', compact('event'));
+        $departments = Department::all();
+
+        return view('Editor.editEvents', compact('event', 'departments'));
     }
 
     // =========================================================================
@@ -198,6 +261,8 @@ class EventController extends Controller
             'end_time' => 'required',
             'location' => 'required|string|max:255',
             'target_year_levels' => 'nullable|array',
+            'target_department' => 'nullable|array',
+            'target_users' => 'nullable|string',
             'other_location' => 'nullable|string|max:255', // Added back 'other_location' validation
         ]);
 
@@ -244,10 +309,16 @@ class EventController extends Controller
             'end_time' => $validated['end_time'],
             'location' => $location,
             'target_year_levels' => $validated['target_year_levels'] ?? [],
+            'target_department' => $request->target_department ?? [],
+            'target_users' => $request->target_users ?? null,
         ]);
 
         // Send updated notification
-        $this->sendEmailsForEvent($event, true, $oldEvent);
+        if ($event->department === 'OFFICES') {
+            $this->sendEmailsForOfficesEvent($event, true, $oldEvent);
+        } else {
+            $this->sendEmailsForEvent($event, true, $oldEvent);
+        }
 
         return redirect()->route('Editor.index')->with('success', 'Event Updated and Emails sent Successfully!');
     }
@@ -265,7 +336,12 @@ class EventController extends Controller
                     ->firstOrFail();
         
         // Send cancellation emails
-        $this->sendEmailsForEvent($event, false, null, true);
+        if ($event->department === 'OFFICES'){
+            $this->sendEmailsForOfficesEvent($event, false, null, true);
+        }else{
+            $this->sendEmailsForEvent($event, false, null, true);
+        }
+        
 
         $event->delete();
 
