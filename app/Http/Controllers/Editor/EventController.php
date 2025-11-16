@@ -103,7 +103,7 @@ class EventController extends Controller
     }
 
     //SEND THE MAIL WHEN CREATING AN EVENT
-    private function sendEmailsForEvent(Event $event, bool $isUpdate = false, $oldEvent = null)
+    private function sendEmailsForEvent(Event $event, bool $isUpdate = false, $oldEvent = null, bool $isCancelled = false)
     {
         if ($event->department === 'OFFICES') {
             return;
@@ -131,7 +131,7 @@ class EventController extends Controller
         }
 
         foreach ($students as $student) {
-            Mail::to($student->email)->send(new EventNotificationMail($event, $student, $isUpdate, $oldEvent));
+            Mail::to($student->email)->send(new EventNotificationMail($event, $student, $isUpdate, $oldEvent, $isCancelled));
         }
     }
 
@@ -254,10 +254,13 @@ class EventController extends Controller
         $event = Event::where('id', $id)
                     ->where('user_id', $userId)
                     ->firstOrFail();
+        
+        // Send cancellation emails
+        $this->sendEmailsForEvent($event, false, null, true);
 
         $event->delete();
 
-        return redirect()->back()->with('success', 'Event deleted successfully!');
+        return redirect()->back()->with('success', 'Event Deleted and Email Sent Successfully!');
     }
 
     // =========================================================================

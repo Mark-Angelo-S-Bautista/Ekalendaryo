@@ -9,10 +9,15 @@
 <body>
     <h2>Hello {{ $student->name }},</h2>
 
-    @if ($isUpdate)
-        <p><strong>Notice:</strong> This event has been <span style="color: yellow;">UPDATED</span>.</p>
+    @if ($isCancelled)
+        <p><strong style="color: blue;">NOTICE:</strong> This event has been <span style="color: red;">CANCELLED</span>.
+        </p>
+    @elseif ($isUpdate)
+        <p><strong style="color: blue;">NOTICE:</strong> This event has been <span style="color: yellow;">UPDATED</span>.
+        </p>
     @else
-        <p>You have a new event from your department:</p>
+        <p><strong style="color: blue;">NOTICE:</strong> <span style="color: green;">You have a New Event Posted.</span>
+        </p>
     @endif
 
     <h3>{{ $event->title }}

@@ -18,19 +18,28 @@ class EventNotificationMail extends Mailable
     public $event;
     public $student;
     public $isUpdate;
-    public $oldEvent; // old event data
+    public $oldEvent;
+    public $isCancelled;
 
-    public function __construct(Event $event, User $student, bool $isUpdate = false, $oldEvent = null)
+    public function __construct(Event $event, User $student, bool $isUpdate = false, $oldEvent = null, bool $isCancelled = false)
     {
         $this->event = $event;
         $this->student = $student;
         $this->isUpdate = $isUpdate;
         $this->oldEvent = $oldEvent;
+        $this->isCancelled = $isCancelled;
     }
 
     public function build()
     {
-        $subject = $this->isUpdate ? 'Event Updated Notification' : 'New Event Notification';
+        $subject = 'Event Notification';
+
+        if ($this->isCancelled) {
+            $subject = 'Event Cancelled';
+        } elseif ($this->isUpdate) {
+            $subject = 'Event Updated';
+        }
+
         return $this->subject($subject)
                     ->view('Mails.event_notification');
     }
