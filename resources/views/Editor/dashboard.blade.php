@@ -54,7 +54,7 @@
                                 {{ $yearLevel . ',' }}
                             @endforeach
                         @else
-                            <p>No specific year levels targeted for this event.</p>
+                            {{ $event->target_users }}
                         @endif
                     </div>
 

@@ -14,51 +14,54 @@ class EditorController extends Controller
     {
         $user = Auth::user();
         $dept = $user->department;
-        $title = $user->title; // use title for Department Head logic
-        $userId = $user->id;
-
         $now = Carbon::now();
+        $limitDate = $now->copy()->addDays(30);
 
-        $eventsQuery = Event::query();
+        // Fetch all events within 30 days
+        $events = Event::whereBetween('date', [$now->toDateString(), $limitDate->toDateString()])
+            ->orWhere(function ($q) use ($now) {
+                // Include events happening today but not finished
+                $q->where('date', $now->toDateString())
+                ->where('end_time', '>=', $now->format('H:i:s'));
+            })
+            ->orderBy('date', 'asc')
+            ->get();
 
-        // --- ACCESS LOGIC ---
-        if ($dept === 'OFFICES') {
-            // OFFICE users only see the events they created
-            $eventsQuery->where('user_id', $userId);
-        } elseif ($title === 'Department Head') {
-            // Department Heads only see the events they created
-            $eventsQuery->where('user_id', $userId);
-        } else {
-            // Other users see their department events + all OFFICE events
-            $eventsQuery->with('user')
-                ->where(function ($q) use ($dept) {
-                    $q->where('department', $dept)
-                    ->orWhere('department', 'OFFICES');
-                });
-        }
+        // Filter events according to department logic
+        $upcomingEvents = $events->filter(function ($event) use ($dept) {
+            if ($event->department === $dept) {
+                return true; // Show events in the same department
+            }
 
-        // --- HIDE PAST EVENTS ---
-        $eventsQuery->where(function ($q) use ($now) {
-            $q->where('date', '>', $now->toDateString()) // future events
-            ->orWhere(function ($q2) use ($now) {
-                $q2->where('date', $now->toDateString()) // today
-                    ->where('end_time', '>=', $now->format('H:i:s')); // not finished
-            });
+            if ($event->department === 'OFFICES') {
+                // Decode target_department
+                $targetDepartments = $event->target_department;
+                if (is_string($targetDepartments)) {
+                    $targetDepartments = json_decode($targetDepartments, true) ?? [];
+                }
+                if (!is_array($targetDepartments)) {
+                    $targetDepartments = [];
+                }
+
+                return in_array($dept, $targetDepartments); // Show if user's department is targeted
+            }
+
+            return false; // Hide everything else
         });
 
-        // Fetch events
-        $events = $eventsQuery->orderBy('date', 'asc')->get();
-
-        // Transform for modal compatibility
-        $events->transform(function ($event) {
-            $raw = $event->more_details ?? 'No additional details.';
-            $event->more_details_attr = str_replace(["\r\n", "\n"], '\\n', trim($raw));
+        // Transform for frontend if needed
+        $upcomingEvents->transform(function ($event) {
+            $event->formatted_start_time = Carbon::parse($event->start_time)->format('g:i A');
+            $event->formatted_end_time = Carbon::parse($event->end_time)->format('g:i A');
             return $event;
         });
 
-        $myEventsCount = $events->count();
+        $totalEvents = $upcomingEvents->count();
 
-        return view('Editor.dashboard', compact('myEventsCount', 'events', 'title'));
+        $events = $upcomingEvents; // alias for Blade
+        $myEventsCount = $upcomingEvents->count();
+
+        return view('Editor.dashboard', compact('user', 'events', 'myEventsCount'));
     }
 
     public function calendar()
