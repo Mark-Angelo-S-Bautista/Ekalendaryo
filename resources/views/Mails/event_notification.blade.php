@@ -10,7 +10,7 @@
     <h2>Hello {{ $student->name }},</h2>
 
     @if ($isUpdate)
-        <p><strong>Notice:</strong> This event has been <span style="color: yellow;">updated</span>.</p>
+        <p><strong>Notice:</strong> This event has been <span style="color: yellow;">UPDATED</span>.</p>
     @else
         <p>You have a new event from your department:</p>
     @endif
