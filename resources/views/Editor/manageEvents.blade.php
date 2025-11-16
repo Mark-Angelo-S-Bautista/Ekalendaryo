@@ -354,7 +354,7 @@
                                     @if (is_array($event->target_year_levels) && count($event->target_year_levels) > 0)
                                         {{ implode(', ', $event->target_year_levels) }}
                                     @else
-                                        No specific year levels targeted for this event.
+                                        {{ $event->target_users }}
                                     @endif
                                 </span>
 
