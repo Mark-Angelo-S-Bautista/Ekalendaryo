@@ -37,7 +37,7 @@
                                 {{ $yearLevel . ',' }}
                             @endforeach
                         @else
-                            <p>No specific year levels targeted for this event.</p>
+                            {{ $event->target_users }}
                         @endif
                     </div>
                     <div class="dashboard_event_details">{{ $event->description ?? 'No description provided.' }}</div>

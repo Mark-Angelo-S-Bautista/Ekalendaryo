@@ -164,7 +164,7 @@ class EventController extends Controller
         // Filter by target_users (from event)
         switch ($event->target_users) {
             case 'Students':
-                $users->where('title', 'Viewer'); // assuming students have role Viewer
+                $users->where('title', 'Student');
                 break;
             case 'Faculty':
                 $users->where('title', 'Faculty');

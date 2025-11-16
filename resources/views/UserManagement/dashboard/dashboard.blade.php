@@ -35,6 +35,7 @@
         <!-- Upcoming Events -->
         <section class="dashboard_upcoming_card">
             <h3 class="dashboard_upcoming_title">Upcoming Events</h3>
+            <p>For the next 30 days</p>
 
             @forelse ($upcomingEvents as $event)
                 <div class="dashboard_event_card">
@@ -48,9 +49,11 @@
                     <div class="dashboard_event_details">
                         👥
                         @php
-                            $yearLevelsText = is_array($event->target_year_levels)
-                                ? implode(', ', $event->target_year_levels)
-                                : 'No specific year levels targeted for this event.';
+                            if (!empty($event->target_year_levels)) {
+                                $yearLevelsText = implode(', ', $event->target_year_levels);
+                            } else {
+                                $yearLevelsText = $event->target_users ?? 'No target group';
+                            }
                         @endphp
                         {{ $yearLevelsText }}
                     </div>
@@ -130,6 +133,7 @@
             const renderEvents = (events) => {
                 eventContainer.innerHTML = `
                     <h3 class="dashboard_upcoming_title">Upcoming Events</h3>
+                    <p>For the next 30 days</p>
                 `;
 
                 if (events.length === 0) {
@@ -170,7 +174,8 @@
                         .department;
 
                     // Handle target_year_levels
-                    let yearLevelsText = 'No specific year levels targeted for this event.';
+                    let yearLevelsText = event.target_users || 'No target group';
+
                     if (Array.isArray(event.target_year_levels) && event.target_year_levels.length >
                         0) {
                         yearLevelsText = event.target_year_levels.join(', ');

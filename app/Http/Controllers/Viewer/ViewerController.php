@@ -11,72 +11,131 @@ use Illuminate\Support\Facades\Log;
 class ViewerController extends Controller
 {
     public function dashboard()
-{
-    $user = Auth::user();
-    $officeusers = User::all();
-    $dept = $user->department;
-    $title = $user->title;
-    $yearLevel = $user->yearlevel ?? null; // e.g., "1stYear"
+    {
+        $user = Auth::user();
+        $officeusers = User::all();
+        $dept = $user->department;
+        $title = $user->title;
+        $yearLevel = $user->yearlevel ?? null;
 
-    $now = now();
+        $now = now();
 
-    // Fetch events from user's department or OFFICES
-    $events = Event::whereIn('department', [$dept, 'OFFICES'])
-        ->orderBy('date', 'asc')
-        ->get();
+        // Start by getting all events (department filtering will happen later)
+        $events = Event::orderBy('date', 'asc')->get();
 
-    $events = $events->filter(function ($ev) use ($now, $yearLevel, $title, $dept) {
+        $events = $events->filter(function ($ev) use ($now, $yearLevel, $title, $dept) {
 
-        // --- Hide past events ---
-        $eventDateTime = \Carbon\Carbon::parse($ev->date . ' ' . $ev->start_time);
-        if ($eventDateTime->lt($now)) {
+            // --- Hide past events ---
+            $eventDateTime = \Carbon\Carbon::parse($ev->date . ' ' . $ev->start_time);
+            if ($eventDateTime->lt($now)) {
+                return false;
+            }
+
+            // ============================================================
+            // FACULTY LOGIC
+            // ============================================================
+            if (strtolower($title) === 'faculty') {
+
+                // Faculty sees ONLY:
+                // - events where event.department == user's department
+                // - OR OFFICES events
+                // BUT must NOT see events where target_users == "Department Heads"
+                if (
+                    ($ev->department === $dept || $ev->department === 'OFFICES') &&
+                    strtolower($ev->target_users) !== 'department heads'
+                ) {
+                    return true;
+                }
+
+                return false;
+            }
+
+            // ============================================================
+            // STUDENT LOGIC
+            // ============================================================
+
+            // Normalize user year level early
+            $userYearLevelNormalized = null;
+            if (!empty($yearLevel)) {
+                $userYearLevelNormalized = strtolower(str_replace(' ', '', $yearLevel));
+            }
+
+            // -----------------------------
+            // Helper: Check Year Level Match
+            // -----------------------------
+            $matchesYearLevel = function($ev) use ($userYearLevelNormalized) {
+
+                // Convert JSON string to array if needed
+                $targetYearLevels = is_string($ev->target_year_levels)
+                    ? json_decode($ev->target_year_levels, true) ?? []
+                    : $ev->target_year_levels;
+
+                // If event has no year-level restrictions → allow all students
+                if (empty($targetYearLevels)) {
+                    return true;
+                }
+
+                // If user has no year level → cannot qualify
+                if (empty($userYearLevelNormalized)) {
+                    return false;
+                }
+
+                // Normalize target list
+                $normalizedTargets = array_map(fn($lvl) => strtolower(str_replace(' ', '', $lvl)), $targetYearLevels);
+
+                return in_array($userYearLevelNormalized, $normalizedTargets);
+            };
+
+            // ===================================================================
+            // RULE 1: Student can see events from **their own department**
+            // ===================================================================
+            if ($ev->department === $dept) {
+                return $matchesYearLevel($ev);
+            }
+
+            // ===================================================================
+            // RULE 2: Student can see events from **OFFICES** targeting their department
+            //         - event.target_department contains user's department
+            //         - AND event.target_users == "Students"
+            //         - AND year level matches
+            // ===================================================================
+            $targetDepartments = is_string($ev->target_department)
+                ? json_decode($ev->target_department, true) ?? []
+                : $ev->target_department;
+
+            if (
+                $ev->department === 'OFFICES' &&
+                is_array($targetDepartments) &&
+                in_array($dept, $targetDepartments) &&
+                strtolower($ev->target_users) === 'students'
+            ) {
+                return $matchesYearLevel($ev);
+            }
+
+            // ===================================================================
+            // RULE 3: Future-proof: any event targeting student's department
+            //         + target_users == Students
+            // ===================================================================
+            if (
+                is_array($targetDepartments) &&
+                in_array($dept, $targetDepartments) &&
+                strtolower($ev->target_users) === 'students'
+            ) {
+                return $matchesYearLevel($ev);
+            }
+
+            // ===================================================================
+            // Otherwise: student cannot see the event
+            // ===================================================================
             return false;
-        }
 
-        // --- If Faculty ---
-        if (strtolower($title) === 'faculty') {
-            // Show all events from their department or OFFICES events
-            return $ev->department === $dept || $ev->department === 'OFFICES';
-        }
+        })->values();
 
-        // --- If Student ---
-        // First check: event must be from their department or OFFICES
-        if ($ev->department !== $dept && $ev->department !== 'OFFICES') {
-            return false;
-        }
 
-        // Second check: verify student's year level is in target_year_levels
-        $targetYearLevels = $ev->target_year_levels;
-        if (is_string($targetYearLevels)) {
-            $targetYearLevels = json_decode($targetYearLevels, true) ?? [];
-        }
+        $myEventsCount = $events->count();
 
-        // If target_year_levels is empty or null, show the event to all students
-        if (empty($targetYearLevels)) {
-            return true;
-        }
-
-        // Normalize: remove spaces and lowercase for matching
-        $targetYearLevelsNormalized = array_map(function ($lvl) {
-            return strtolower(str_replace(' ', '', $lvl)); // "1st Year" -> "1styear"
-        }, $targetYearLevels);
-
-        // If student has no year level, don't show the event
-        if (empty($yearLevel)) {
-            return false;
-        }
-
-        $userYearLevelNormalized = strtolower(str_replace(' ', '', $yearLevel)); // "1stYear" -> "1styear"
-
-        // Show event only if user's year level is in target_year_levels
-        return in_array($userYearLevelNormalized, $targetYearLevelsNormalized);
-
-    })->values();
-
-    $myEventsCount = $events->count();
-
-    return view('Viewer.dashboard', compact('myEventsCount', 'events', 'title', 'officeusers'));
-}
+        return view('Viewer.dashboard', compact('myEventsCount', 'events', 'title', 'officeusers'));
+    }
 
 
     public function calendar()
