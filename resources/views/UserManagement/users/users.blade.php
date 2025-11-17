@@ -115,69 +115,6 @@
             </table>
         </div>
 
-        {{-- Pagination Links --}}
-        <div class="pagination-container">
-            @if ($users->onFirstPage())
-                <span class="pagination-item disabled">← Previous</span>
-            @else
-                <a href="{{ $users->previousPageUrl() }}" class="pagination-item">← Previous</a>
-            @endif
-
-            @foreach ($users->getUrlRange(1, $users->lastPage()) as $page => $url)
-                @if ($page == $users->currentPage())
-                    <span class="pagination-item active">{{ $page }}</span>
-                @else
-                    <a href="{{ $url }}" class="pagination-item">{{ $page }}</a>
-                @endif
-            @endforeach
-
-            @if ($users->hasMorePages())
-                <a href="{{ $users->nextPageUrl() }}" class="pagination-item">Next →</a>
-            @else
-                <span class="pagination-item disabled">Next →</span>
-            @endif
-        </div>
-
-        <style>
-            .pagination-container {
-                display: flex;
-                justify-content: center;
-                gap: 5px;
-                margin-top: 30px;
-                margin-bottom: 30px;
-            }
-
-            .pagination-item {
-                display: inline-block;
-                padding: 10px 12px;
-                border: 1px solid #d1f0d4;
-                border-radius: 4px;
-                color: #1e392a;
-                text-decoration: none;
-                font-size: 13px;
-                transition: all 0.3s ease;
-                cursor: pointer;
-            }
-
-            .pagination-item:hover {
-                background-color: #d1f0d4;
-                color: #1e392a;
-            }
-
-            .pagination-item.active {
-                background-color: #1e392a;
-                color: white;
-                border-color: #1e392a;
-            }
-
-            .pagination-item.disabled {
-                color: #ccc;
-                border-color: #e0e0e0;
-                cursor: not-allowed;
-                background-color: #f5f5f5;
-            }
-        </style>
-
         {{-- The rest of the modals (User Modal, Add Department Modal, Add User Modal, Import Users Modal) remain unchanged as their structure seems correct for their functions. --}}
 
         <div class="users_modal" id="users_modal">
