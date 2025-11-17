@@ -102,7 +102,7 @@ addDeptForm?.addEventListener("submit", async function (e) {
                             "_token"
                         )}">
                         <input type="hidden" name="_method" value="DELETE">
-                        <button type="submit" class="delete-dept-btn">🗑️</button>
+                        
                     </form>
                 `;
                 existingDeptList.appendChild(li);

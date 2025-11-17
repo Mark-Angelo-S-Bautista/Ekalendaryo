@@ -68,7 +68,7 @@ Route::middleware(['auth', 'backhistory'])->group(function () {
         Route::get('/users/search', [UserManagementController::class, 'search'])->name('search');
         Route::post('/adduser', [UserManagementController::class, 'adduser'])->name('adduser');
         Route::post('/addDepartment', [UserManagementController::class, 'addDepartment'])->name('adddepartment');
-        Route::delete('/deletedepartment/{id}', [UserManagementController::class, 'deleteDepartment'])->name('deletedepartment');
+        // Route::delete('/deletedepartment/{id}', [UserManagementController::class, 'deleteDepartment'])->name('deletedepartment');
         // Show edit form
         Route::get('/edituser/{id}', [UserController::class, 'edit'])->name('edit');
         // Handle update

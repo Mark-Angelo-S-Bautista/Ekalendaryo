@@ -25,12 +25,12 @@
         </section> --}}
 
         <!-- Stats -->
-        <section class="dashboard_stats">
+        {{-- <section class="dashboard_stats">
             <div class="dashboard_stat_box dashboard_clickable" id="dashboard_department_box">
                 <h3>Total Events</h3>
                 <p>{{ $myEventsCount }}</p>
             </div>
-        </section>
+        </section> --}}
 
         <!-- Upcoming Events -->
         <section class="dashboard_upcoming_card">

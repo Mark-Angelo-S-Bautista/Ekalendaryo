@@ -212,11 +212,11 @@ class UserManagementController extends Controller
         ]);
     }
 
-    public function deleteDepartment($id)
-    {
-        Department::findOrFail($id)->delete();
-        return back()->with('success', 'Department deleted successfully!');
-    }
+    // public function deleteDepartment($id)
+    // {
+    //     Department::findOrFail($id)->delete();
+    //     return back()->with('success', 'Department deleted successfully!');
+    // }
 
     public function activity_log()
     {

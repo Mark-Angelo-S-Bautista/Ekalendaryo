@@ -9,13 +9,13 @@
             </div>
         </section>
 
-        <!-- Search -->
+        {{-- <!-- Search -->
         <section class="dashboard_search_card">
             <div class="dashboard_search_box">
                 <input type="text" id="eventSearch" placeholder="Search events..." class="dashboard_search_input">
                 <button class="dashboard_clear_btn">Clear</button>
             </div>
-        </section>
+        </section> --}}
 
         <!-- Upcoming Events -->
         <section class="dashboard_upcoming_card">
