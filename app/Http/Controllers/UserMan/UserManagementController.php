@@ -156,7 +156,7 @@ class UserManagementController extends Controller
         $users = User::when($query, function ($q) use ($query) {
             $q->where('name', 'like', "%{$query}%")
             ->orWhere('email', 'like', "%{$query}%");
-        })->get();
+        })->paginate(4);
 
         // ----------------------------------------------------------------------
         // ✅ FIX: Count users by TITLE instead of ROLE to match dashboard cards
