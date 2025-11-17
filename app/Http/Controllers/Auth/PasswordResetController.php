@@ -12,36 +12,82 @@ use App\Models\User;
 
 class PasswordResetController extends Controller
 {
-    public function sendResetLink(Request $request)
+    public function requestOtp(Request $request)
     {
-        // ✅ 1. Validate inputs
         $request->validate([
-            'userId' => ['required', 'string'],
-            'email' => ['required', 'email'],
+            'userId' => ['required', 'string']
         ]);
 
-        // ✅ 2. Check if user exists with given ID and email
-        $user = User::where('userId', $request->userId)
-                    ->where('email', $request->email)
-                    ->first();
+        // Find user by ID number
+        $user = User::where('userId', $request->userId)->first();
 
         if (!$user) {
-            return back()->withErrors(['userId' => 'No account found matching these credentials.']);
+            return back()->withErrors(['userId' => 'User ID not found.']);
         }
 
-        // ✅ 3. Generate a new random password
-        $newPassword = Str::random(10);
+        // Generate 6-digit OTP
+        $otp = rand(100000, 999999);
 
-        // ✅ 4. Hash and update the password in the database
+        // Save OTP + expiration (5 minutes)
         $user->update([
-            'password' => Hash::make($newPassword),
+            'reset_otp' => $otp,
+            'reset_otp_expires_at' => now()->addMinutes(5)
         ]);
 
+        // Send email
         Mail::to($user->email)->send(
-            new \App\Mail\NewPassword($user, $newPassword)
+            new \App\Mail\SendOtpMail($user, $otp)
         );
 
-        // ✅ 6. Redirect back with a success message
-        return redirect()->route('Auth.login')->with('success', 'A new password has been sent to your email.');
+        // Redirect to OTP verification page
+        return redirect()->route('password.otp.verify')
+                ->with('success', 'An OTP has been sent to your email.');
+    }
+
+    public function verifyOtp(Request $request)
+    {
+        $request->validate([
+            'otp' => ['required', 'digits:6']
+        ]);
+
+        // Find user with matching OTP and not expired
+        $user = User::where('reset_otp', $request->otp)
+            ->where('reset_otp_expires_at', '>', now())
+            ->first();
+
+        if (!$user) {
+            return back()->withErrors(['otp' => 'Invalid or expired OTP.']);
+        }
+
+        // Store user ID in session temporarily
+        session(['otp_user' => $user->id]);
+
+        return redirect()->route('password.change');
+    }
+
+    public function changePassword(Request $request)
+    {
+        $request->validate([
+            'password' => ['required', 'confirmed', 'min:6']
+        ]);
+
+        $userId = session('otp_user');
+
+        if (!$userId) {
+            return redirect()->route('Auth.login')->withErrors(['error' => 'Session expired.']);
+        }
+
+        $user = User::find($userId);
+
+        $user->update([
+            'password' => Hash::make($request->password),
+            'reset_otp' => null,
+            'reset_otp_expires_at' => null
+        ]);
+
+        // Clear session
+        session()->forget('otp_user');
+
+        return redirect()->route('Auth.login')->with('success', 'Password successfully updated. You may now log in.');
     }
 }

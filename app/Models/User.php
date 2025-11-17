@@ -28,6 +28,8 @@ class User extends Authenticatable
         'section',
         'role',
         'password',
+        'reset_otp',
+        'reset_otp_expires_at'
     ];
 
     /**

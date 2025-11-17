@@ -23,6 +23,8 @@ return new class extends Migration
             $table->string('section')->nullable();
             $table->string('role');
             $table->string('password');
+            $table->string('reset_otp')->nullable();
+            $table->dateTime('reset_otp_expires_at')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

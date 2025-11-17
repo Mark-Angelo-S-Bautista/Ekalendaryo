@@ -15,8 +15,22 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [LoginController::class, 'index'])->name('Auth.login');
 Route::post('/', [LoginController::class, 'store'])->name('login');
 Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
-Route::post('/password-reset', [PasswordResetController::class, 'sendResetLink'])
-    ->name('password.reset.request');
+Route::post('/password/otp-request', [PasswordResetController::class, 'requestOtp'])
+    ->name('password.otp.request');
+
+Route::get('/password/otp-verify', function () {
+    return view('Auth.verify_otp');
+})->name('password.otp.verify.page');
+
+Route::post('/password/otp-verify', [PasswordResetController::class, 'verifyOtp'])
+    ->name('password.otp.verify');
+
+Route::get('/password/change', function () {
+    return view('Auth.change_password');
+})->name('password.change');
+
+Route::post('/password/change', [PasswordResetController::class, 'changePassword'])
+    ->name('password.change');
 
 
 Route::middleware(['auth', 'backhistory'])->group(function () {

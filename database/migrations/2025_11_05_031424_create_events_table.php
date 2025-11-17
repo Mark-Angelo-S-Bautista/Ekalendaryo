@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('title');
             $table->text('description')->nullable();
+            $table->text('more_details')->nullable();
             $table->date('date');
             $table->time('start_time');
             $table->time('end_time');
@@ -23,6 +24,8 @@ return new class extends Migration
             $table->string('school_year')->default('SY.2025-2026');
             $table->string('department');
             $table->json('target_year_levels')->nullable();
+            $table->json('target_department')->nullable();
+            $table->string('target_users')->nullable();
             $table->timestamps();
         });
     }
