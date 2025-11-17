@@ -35,13 +35,15 @@
             {{-- Event Title --}}
             <div class="form-group">
                 <label>Event title</label>
-                <input type="text" name="title" value="{{ $event->title }}" required>
+                <input type="text" id="eventTitle" name="title" value="{{ old('title', $event->title) }}"
+                    placeholder="Event title">
             </div>
 
             {{-- Event Description --}}
             <div class="form-group">
                 <label>Event description</label>
-                <textarea name="description">{{ $event->description }}</textarea>
+                <input type="text" id="eventDescription" name="description"
+                    value="{{ old('description', $event->description) }}" placeholder="Event Description">
             </div>
 
             {{-- More Details --}}
@@ -54,67 +56,102 @@
                     value="{{ old('more_details', $event->more_details) }}">
             </div>
 
+
+            <input type="hidden" id="moreDetailsInput" name="more_details"
+                value="{{ old('more_details', $event->more_details) }}">
+
             {{-- Date --}}
             <div class="form-group">
                 <label>Date</label>
-                <input type="date" name="date" value="{{ $event->date }}" required min="{{ date('Y-m-d') }}">
+                <input type="date" id="eventDate" name="date" value="{{ old('date', $event->date) }}"
+                    min="{{ date('Y-m-d', strtotime('+1 day')) }}">
             </div>
 
             {{-- Start Time --}}
             <div class="form-group">
                 <label>Start Time</label>
-                <input type="time" name="start_time" value="{{ $event->start_time }}" required>
+                <input type="time" id="startTime" name="start_time"
+                    value="{{ old('start_time', $event->start_time) }}" min="07:00" max="17:00">
             </div>
 
             {{-- End Time --}}
             <div class="form-group">
                 <label>End Time</label>
-                <input type="time" name="end_time" value="{{ $event->end_time }}" required>
+                <input type="time" id="endTime" name="end_time" value="{{ old('end_time', $event->end_time) }}"
+                    min="07:00" max="17:00">
             </div>
 
-            {{-- Event Location --}}
+            {{-- Location --}}
             <div class="form-group">
                 <label for="eventLocation">Event Location</label>
+
                 @php
-                    $locations = ['Covered Court', 'Activity Center', 'Library', 'Audio Visual Room', 'Auditorium'];
-                    $isOther = !in_array($event->location, $locations);
+                    $presetLocations = [
+                        'Covered Court',
+                        'Activity Center',
+                        'Library',
+                        'Audio Visual Room',
+                        'Auditorium',
+                    ];
+                    $isOther = !in_array($event->location, $presetLocations);
                 @endphp
-                <select id="eventLocation" name="location" required onchange="toggleOtherLocation()"
-                    class="form-control">
+
+                <select id="eventLocation" name="location" onchange="toggleOtherLocation()" class="form-control">
                     <option value="">-- Select a location --</option>
-                    @foreach ($locations as $location)
-                        <option value="{{ $location }}" {{ $event->location === $location ? 'selected' : '' }}>
-                            {{ $location }}
+
+                    @foreach ($presetLocations as $loc)
+                        <option value="{{ $loc }}" {{ $event->location === $loc ? 'selected' : '' }}>
+                            {{ $loc }}
                         </option>
                     @endforeach
+
                     <option value="Other" {{ $isOther ? 'selected' : '' }}>Other</option>
                 </select>
+
+                {{-- If user used "Other", show input --}}
                 <input type="text" id="otherLocation" name="other_location" placeholder="Please specify location"
-                    class="form-control" style="{{ $isOther ? '' : 'display: none;' }} margin-top: 10px;"
+                    class="form-control" style="{{ $isOther ? '' : 'display:none;' }} margin-top:10px;"
                     value="{{ $isOther ? $event->location : '' }}">
             </div>
 
-            {{-- Target Departments --}}
-            @if (auth()->user()->department === 'OFFICES')
+            {{-- TARGET DEPARTMENTS AND USERS — SAME LOGIC AS CREATE FORM --}}
+            @if (auth()->user()->title === 'Offices' || auth()->user()->title === 'Department Head')
                 <div class="form-group">
                     <label for="targetDepartment">Target Department</label>
-                    <div class="checkbox-grid">
-                        {{-- "All Departments" --}}
-                        <label class="checkbox-item">
-                            <input type="checkbox" id="selectAllDepartments">
-                            <span>All Departments</span>
-                        </label>
 
-                        {{-- Dynamic Departments --}}
-                        @foreach ($departments as $dept)
-                            <label class="checkbox-item">
-                                <input type="checkbox" class="dept-checkbox" name="target_department[]"
-                                    value="{{ $dept->department_name }}"
-                                    {{ is_array($event->target_department) && in_array($dept->department_name, $event->target_department) ? 'checked' : '' }}>
-                                <span>{{ $dept->department_name }}</span>
-                            </label>
-                        @endforeach
-                    </div>
+                    @php
+                        $user = Auth::user();
+                        $userTitle = $user->title;
+                        $userDepartment = $user->department_name ?? $user->department;
+                        $selectedDepartments = $event->target_department ?? [];
+                        if (is_string($selectedDepartments)) {
+                            $selectedDepartments = json_decode($selectedDepartments, true) ?? [];
+                        }
+                    @endphp
+
+                    {{-- Department Head sees only their department (fixed) --}}
+                    @if ($userTitle === 'Department Head')
+                        <input type="hidden" name="target_department[]" value="{{ $userDepartment }}">
+                        <p style="color:#6c757d; margin-top:5px;">
+                            Targeting is set to your department:
+                            <strong>{{ $userDepartment }}</strong> (Fixed)
+                        </p>
+
+                        {{-- Offices sees all except OFFICES --}}
+                    @else
+                        <div class="checkbox-grid">
+                            @foreach ($departments as $dept)
+                                @if ($dept->department_name !== 'OFFICES')
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" class="dept-checkbox" name="target_department[]"
+                                            value="{{ $dept->department_name }}"
+                                            {{ in_array($dept->department_name, $selectedDepartments) ? 'checked' : '' }}>
+                                        <span>{{ $dept->department_name }}</span>
+                                    </label>
+                                @endif
+                            @endforeach
+                        </div>
+                    @endif
                 </div>
 
                 {{-- Target Users --}}
@@ -124,35 +161,46 @@
                         <option value="">-- Select Users --</option>
                         <option value="Faculty" {{ $event->target_users === 'Faculty' ? 'selected' : '' }}>Faculty
                         </option>
-                        <option value="Department Heads"
-                            {{ $event->target_users === 'Department Heads' ? 'selected' : '' }}>Department Heads
-                        </option>
+
+                        @if ($userTitle === 'Offices')
+                            <option value="Department Heads"
+                                {{ $event->target_users === 'Department Heads' ? 'selected' : '' }}>
+                                Department Heads
+                            </option>
+                        @endif
+
                         <option value="Students" {{ $event->target_users === 'Students' ? 'selected' : '' }}>Students
                         </option>
                     </select>
                 </div>
+            @endif
 
-                {{-- Target Year Levels (only visible if Students is selected) --}}
+            {{-- Target Year Levels --}}
+            @if (auth()->user()->title === 'Offices' || auth()->user()->title === 'Department Head')
+                @php
+                    $levels = $event->target_year_levels;
+                    if (is_string($levels)) {
+                        $levels = json_decode($levels, true) ?? [];
+                    }
+                @endphp
+
                 <div class="form-group" id="targetYearLevelsContainer"
                     style="{{ $event->target_users !== 'Students' ? 'display:none;' : '' }}">
                     <label>Target Year Levels</label>
-                    <p class="note">Select which year levels of students will receive notifications for this event</p>
-                    <div class="checkbox-group">
-                        @php
-                            $currentLevels = $event->target_year_levels;
-                            if (is_array($currentLevels)) {
-                                $selectedLevels = $currentLevels;
-                            } elseif (is_string($currentLevels)) {
-                                $selectedLevels = json_decode($currentLevels, true) ?? [];
-                            } else {
-                                $selectedLevels = [];
-                            }
-                        @endphp
+                    <p class="note">Select which year levels of students will receive notifications</p>
 
+                    <div class="checkbox_select">
+                        <div class="checkbox-inline">
+                            <input type="checkbox" id="select_all_edit">
+                            <label for="select_all_edit">Select All Year Levels</label>
+                        </div>
+                    </div>
+
+                    <div class="checkbox-group">
                         @foreach (['1st Year', '2nd Year', '3rd Year', '4th Year'] as $year)
                             <div class="checkbox-inline">
                                 <input type="checkbox" name="target_year_levels[]" value="{{ $year }}"
-                                    {{ in_array($year, $selectedLevels) ? 'checked' : '' }}>
+                                    class="syear" {{ in_array($year, $levels) ? 'checked' : '' }}>
                                 {{ $year }}
                             </div>
                         @endforeach
@@ -160,37 +208,10 @@
                 </div>
             @endif
 
-            @if (auth()->user()->department !== 'OFFICES')
-                {{-- Target Year Levels (only show if event has year levels set) --}}
-                <div class="form-group" id="targetYearLevelsContainer"
-                    style="{{ empty($event->target_year_levels) ? 'display:none;' : '' }}">
-                    <label>Target Year Levels</label>
-                    <p class="note">Select which year levels of students will receive notifications for this event</p>
-                    <div class="checkbox-group">
-                        @php
-                            $currentLevels = $event->target_year_levels;
-                            if (is_array($currentLevels)) {
-                                $selectedLevels = $currentLevels;
-                            } elseif (is_string($currentLevels)) {
-                                $selectedLevels = json_decode($currentLevels, true) ?? [];
-                            } else {
-                                $selectedLevels = [];
-                            }
-                        @endphp
-
-                        @foreach (['1st Year', '2nd Year', '3rd Year', '4th Year'] as $year)
-                            <div class="checkbox-inline">
-                                <input type="checkbox" name="target_year_levels[]" value="{{ $year }}"
-                                    {{ in_array($year, $selectedLevels) ? 'checked' : '' }}>
-                                {{ $year }}
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-            @endif
-
-            <button type="submit" class="btn-update">Update Event</button>
-            <a href="{{ route('Editor.index') }}" class="btn-cancel">Cancel</a>
+            <div class="button-group">
+                <button type="submit" class="btn-update">Update Event</button>
+                <a href="{{ route('Editor.index') }}" class="btn-cancel">Cancel</a>
+            </div>
         </form>
     </div>
 
@@ -260,6 +281,42 @@
                 hiddenInput.value = textarea.value;
                 modal.style.display = "none";
             });
+        });
+    </script>
+
+    <script>
+        function toggleOtherLocation() {
+            const select = document.getElementById('eventLocation');
+            const otherInput = document.getElementById('otherLocation');
+            if (select.value === 'Other') {
+                otherInput.style.display = 'block';
+                otherInput.required = true;
+            } else {
+                otherInput.style.display = 'none';
+                otherInput.required = false;
+                otherInput.value = '';
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const targetUsers = document.getElementById("targetUsers");
+            const yearLevels = document.getElementById("targetYearLevelsContainer");
+
+            if (targetUsers) {
+                targetUsers.addEventListener("change", function() {
+                    yearLevels.style.display = (this.value === "Students") ? "block" : "none";
+                });
+            }
+
+            // Select all year levels
+            const selectAll = document.getElementById("select_all_edit");
+            const yearChecks = document.querySelectorAll(".syear");
+
+            if (selectAll) {
+                selectAll.addEventListener("change", function() {
+                    yearChecks.forEach(cb => cb.checked = this.checked);
+                });
+            }
         });
     </script>
 

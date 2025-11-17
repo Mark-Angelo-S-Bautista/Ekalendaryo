@@ -115,42 +115,42 @@ class EventController extends Controller
     //SEND THE MAIL WHEN CREATING AN EVENT
     private function sendEmailsForEvent(Event $event, bool $isUpdate = false, $oldEvent = null, bool $isCancelled = false)
     {
+        // -----------------------------------------------------
+        // FIX #1: Decide which event data to use for filtering
+        // -----------------------------------------------------
+        $eventData = ($isCancelled && $oldEvent) ? $oldEvent : $event;
+
         // 1. Normalize Target Data
-        $targetDepartments = (array) ($event->target_department ?? []);
-        if (is_string($event->target_department)) {
-            $targetDepartments = array_map('trim', explode(',', $event->target_department));
+        $targetDepartments = (array) ($eventData->target_department ?? []);
+        if (is_string($eventData->target_department)) {
+            $targetDepartments = array_map('trim', explode(',', $eventData->target_department));
         }
         $targetDepartments = array_filter($targetDepartments);
 
-        $targetRoles = (array) ($event->target_users ?? []);
-        if (is_string($event->target_users)) {
-            $targetRoles = array_map('trim', explode(',', $event->target_users));
+        $targetRoles = (array) ($eventData->target_users ?? []);
+        if (is_string($eventData->target_users)) {
+            $targetRoles = array_map('trim', explode(',', $eventData->target_users));
         }
         $targetRoles = array_filter($targetRoles);
 
-        $targetYearLevels = $event->target_year_levels ?? []; // Array of year levels or empty array
+        $targetYearLevels = $eventData->target_year_levels ?? [];
 
         $rolesToInclude = [];
         $includeStudents = false;
-        
-        // --- 2. Determine Role/Title Criteria based on target_users ---
 
-        // Always include Department Heads, as they are part of the 'Faculty' scope
-        $rolesToInclude[] = 'Department Head'; 
-        
+        // --- 2. Determine Role/Title Criteria ---
+        $rolesToInclude[] = 'Department Head';
+
         $isFacultyTargeted = in_array('Faculty', $targetRoles);
-        $isStudentsTargeted = in_array('Viewer', $targetRoles) || in_array('Students', $targetRoles); // Assuming 'Students' maps to 'Viewer' role/title
+        $isStudentsTargeted = in_array('Viewer', $targetRoles) || in_array('Students', $targetRoles);
 
         if ($isFacultyTargeted) {
-            // Rule: If target_users is Faculty, send to Faculty and Department Head
             $rolesToInclude[] = 'Faculty';
         } elseif ($isStudentsTargeted) {
-            // Rule: If target_users is Students (Viewer), send to Viewer (Students) and Faculty
             $rolesToInclude[] = 'Student';
             $rolesToInclude[] = 'Faculty';
             $includeStudents = true;
         } else {
-            // If neither Faculty nor Students are targeted, include other explicitly named roles
             foreach ($targetRoles as $role) {
                 if (!in_array($role, ['Faculty', 'Viewer', 'Students', 'Department Head'])) {
                     $rolesToInclude[] = $role;
@@ -158,58 +158,56 @@ class EventController extends Controller
             }
         }
 
-        $query = User::query();
-        
-        // Filter by the collected unique titles/roles
-        $query->whereIn('title', array_unique($rolesToInclude));
+        // Query construction
+        $query = User::query()->whereIn('title', array_unique($rolesToInclude));
 
-        // --- 3. Filter by Target Departments (if specified) ---
+        // Department Filter (use eventData instead of event)
         if (!empty($targetDepartments) && !in_array('ALL', array_map('strtoupper', $targetDepartments))) {
-            $query->where(function ($q) use ($targetDepartments, $event) {
+            $query->where(function ($q) use ($targetDepartments, $eventData) {
                 $q->whereIn('department', $targetDepartments)
-                // Keep users from the event's creation department as a broad measure
-                ->orWhere('department', $event->department); 
+                ->orWhere('department', $eventData->department);
             });
         }
 
-        // --- 4. Execute Query and Apply Year Level Filtering (Post-Query) ---
         $users = $query->get();
 
         $recipients = $users->filter(function ($user) use ($targetYearLevels, $includeStudents) {
-            // All non-Viewer roles (Faculty, Department Head, etc.) are included if they passed steps 2 & 3.
-            if (strtolower($user->title) !== 'viewer') {
-                return true; 
+
+            if (strtolower($user->role) !== 'viewer') {
+                return true;
             }
 
-            // --- Logic for Students (Viewers) ---
-            
-            // If students were not included in the initial query logic (Step 2).
+            if (strtolower($user->role) !== 'faculty') {
+                return true;
+            }
+
             if (!$includeStudents) {
                 return false;
             }
 
-            // If 'Viewer' was targeted AND targetYearLevels is empty, include all students.
             if (empty($targetYearLevels)) {
                 return true;
             }
 
-            // Apply specific Year Level filtering for students.
-            $studentYearLevel = strtolower(str_replace(' ', '', $user->yearlevel ?? ''));
-            $normalizedYearLevels = array_map(fn($lvl) => strtolower(str_replace(' ', '', $lvl)), $targetYearLevels);
-            
-            return in_array($studentYearLevel, $normalizedYearLevels);
+            $studentYear = strtolower(str_replace(' ', '', $user->yearlevel ?? ''));
+            $allowedLevels = array_map(fn($lvl) => strtolower(str_replace(' ', '', $lvl)), $targetYearLevels);
+
+            return in_array($studentYear, $allowedLevels);
         });
 
-        // Ensure no duplicates based on email address
         $recipients = $recipients->unique('email');
 
-        // ------------------------------
-        // 5. SEND EMAILS
-        // ------------------------------
+        // -----------------------------------------------------
+        // FIX #2: Use the proper event object when sending mail
+        // -----------------------------------------------------
+        $eventToSend = $isCancelled && $oldEvent ? $oldEvent : $event;
+
         foreach ($recipients as $user) {
-            Mail::to($user->email)->send(
-                new EventNotificationMail($event, $user, $isUpdate, $oldEvent, $isCancelled)
-            );
+            if (!empty($user->email)) {
+                Mail::to($user->email)->send(
+                    new EventNotificationMail($eventToSend, $user, $isUpdate, $oldEvent, $isCancelled)
+                );
+            }
         }
     }
 
