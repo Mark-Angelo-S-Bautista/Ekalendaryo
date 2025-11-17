@@ -80,7 +80,7 @@
                             </div>
 
                             <button class="dashboard_view_btn" data-id="{{ $event->id }}"
-                                data-details="{{ e($event->more_details_attr ?? 'No additional details.') }}"
+                                data-details="{{ e($event->more_details ?? 'No additional details.') }}"
                                 style="padding:10px 22px; background:#e8ecf5; border:none; border-radius:10px; font-size:1rem; cursor:pointer; font-weight:600; color:#36415d; margin-top:10px;">
                                 👁️ View Details
                             </button>
