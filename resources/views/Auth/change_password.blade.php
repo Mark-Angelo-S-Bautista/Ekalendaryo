@@ -10,12 +10,17 @@
             <form action="{{ route('password.change') }}" method="POST">
                 @csrf
 
-                <div class="modal-input">
-                    <input type="password" name="password" placeholder="New Password" required>
+                <!-- PASSWORD FIELD -->
+                <div class="modal-input password-wrapper">
+                    <input type="password" id="password" name="password" placeholder="New Password" required>
+                    <span class="toggle-eye" onclick="togglePassword('password', this)">👁️</span>
                 </div>
 
-                <div class="modal-input">
-                    <input type="password" name="password_confirmation" placeholder="Confirm Password" required>
+                <!-- CONFIRM PASSWORD FIELD -->
+                <div class="modal-input password-wrapper">
+                    <input type="password" id="password_confirmation" name="password_confirmation"
+                        placeholder="Confirm Password" required>
+                    <span class="toggle-eye" onclick="togglePassword('password_confirmation', this)">👁️</span>
                 </div>
 
                 <div class="modal-buttons">
@@ -25,14 +30,48 @@
             </form>
         </div>
     </div>
+
+    {{-- Fix back-forward browser cache --}}
     <script>
-        // This function checks if the page is being loaded from the browser's bfcache.
         window.addEventListener('pageshow', function(event) {
-            // persisted == true means the page was loaded from the bfcache
             if (event.persisted) {
-                // Force a hard reload, which forces the browser to make a fresh server request.
                 window.location.reload();
             }
         });
+
+        // Toggle show/hide password
+        function togglePassword(fieldId, iconElement) {
+            const input = document.getElementById(fieldId);
+
+            if (input.type === "password") {
+                input.type = "text";
+                iconElement.textContent = "🙈"; // Change icon
+            } else {
+                input.type = "password";
+                iconElement.textContent = "👁️"; // Change back to eye
+            }
+        }
     </script>
+
+    <style>
+        .password-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .password-wrapper input {
+            width: 100%;
+            padding-right: 40px;
+            /* Space for eye icon */
+        }
+
+        .toggle-eye {
+            position: absolute;
+            right: 10px;
+            cursor: pointer;
+            font-size: 18px;
+            user-select: none;
+        }
+    </style>
 </x-loginLayout>

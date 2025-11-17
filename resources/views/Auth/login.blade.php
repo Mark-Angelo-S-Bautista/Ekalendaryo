@@ -13,10 +13,15 @@
                 @csrf
                 <div class="form-group">
                     <input type="text" id="userId" name="userId" placeholder="Enter your ID Number" required>
+
                     <div class="password-wrapper">
                         <input type="password" id="password" name="password" placeholder="Enter your Password"
                             required>
-                        <i id="password-toggle" class="fas fa-eye password-toggle"></i>
+
+                        <!-- 👁️ Emoji Toggle -->
+                        <span id="password-toggle" class="password-toggle" style="cursor: pointer; user-select:none;">
+                            👁️
+                        </span>
                     </div>
                 </div>
                 @error('userId')
@@ -36,6 +41,19 @@
             if (event.persisted) {
                 // Force a hard reload, which forces the browser to make a fresh server request.
                 window.location.reload();
+            }
+        });
+
+        const passwordInput = document.getElementById("password");
+        const toggleBtn = document.getElementById("password-toggle");
+
+        toggleBtn.addEventListener("click", function() {
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+                toggleBtn.textContent = "👁️‍🗨️"; // open eye
+            } else {
+                passwordInput.type = "password";
+                toggleBtn.textContent = "👁️"; // closed eye
             }
         });
     </script>
