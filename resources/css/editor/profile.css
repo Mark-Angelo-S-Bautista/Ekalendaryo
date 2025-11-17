@@ -27,6 +27,7 @@ h1 {
     margin-bottom: 20px;
     font-size: 1.5rem;
     font-weight: 700;
+    padding-left: 50px;
 }
 
 .btn {
@@ -64,6 +65,8 @@ h1 {
 }
 .section {
     margin-bottom: 25px;
+    padding-left: 50px;
+    padding-right: 50px;
 }
 .card {
     background: var(--panel);
@@ -71,6 +74,7 @@ h1 {
     border-radius: var(--radius);
     padding: 18px;
     margin-bottom: 15px;
+    background-color: white;
 }
 
 .row {

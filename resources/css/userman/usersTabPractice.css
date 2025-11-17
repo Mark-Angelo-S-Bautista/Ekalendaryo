@@ -102,6 +102,7 @@
     align-items: center;
     justify-content: flex-start;
     margin-bottom: 0.8em;
+    padding-left: 50px;
 }
 
 .users_add_department {
@@ -179,11 +180,15 @@ input[type="text"] {
     padding: 0.8em;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     font-size: 13px;
+    margin-left: 50px;
+    margin-right: 50px;
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
+    padding-left: 50px;
+    padding-right: 50px;
 }
 
 th,
@@ -494,6 +499,7 @@ th {
 .title {
     font-size: 1.2em;
     font-weight: 600;
+    padding-left: 50px;
 }
 
 .users_header_buttons {
@@ -611,6 +617,7 @@ th {
     gap: 0.5em;
     font-size: 13px;
     width: 100%; /* make search bar container full width */
+    padding-left: 50px;
 }
 
 input[type="text"] {
@@ -655,7 +662,7 @@ input[type="text"] {
     cursor: pointer;
 }
 
-.users_table {
+/* .users_table {
     background-color: white;
     border-radius: 8px;
     border: 1px solid #d1f0d4;
@@ -667,7 +674,7 @@ input[type="text"] {
 table {
     width: 100%;
     border-collapse: collapse;
-}
+} */
 
 th,
 td {

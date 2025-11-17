@@ -33,20 +33,22 @@
                         <p style="font-weight:600; margin-bottom:8px;">Academic Information</p>
                         <div class="employment-row">
                             <div>
-                                <span style="font-weight:300;">Student ID:</span>
+                                <span style="font-weight:300;">User ID:</span>
                                 <span style="margin-left:90px;">MA12345678</span>
                                 <span style="margin-left:250px; font-weight:300;">Department:</span>
                                 <span style="margin-left:50px;"><span class="badge">BSIS/ACT</span></span>
                             </div>
                         </div>
-                        <div class="employment-row">
-                            <div>
-                                <span style="font-weight:300;">Section:</span>
-                                <span style="margin-left:110px;">Section A</span>
-                                <span style="margin-left:280px; font-weight:300;">Year:</span>
-                                <span style="margin-left:110px;"><span class="badge">2</span></span>
+                        @if ($user === 'Student')
+                            <div class="employment-row">
+                                <div>
+                                    <span style="font-weight:300;">Section:</span>
+                                    <span style="margin-left:110px;">Section A</span>
+                                    <span style="margin-left:280px; font-weight:300;">Year:</span>
+                                    <span style="margin-left:110px;"><span class="badge">2</span></span>
+                                </div>
                             </div>
-                        </div>
+                        @endif
                     </div>
 
 

@@ -194,7 +194,8 @@ class ViewerController extends Controller
 
     public function profile()
     {
-        return view('Viewer.profile');
+        $user = User::all();
+        return view('Viewer.profile', ['user' => $user]);
     }
 
     public function destroy(Request $request)

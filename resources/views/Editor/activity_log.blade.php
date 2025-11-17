@@ -28,7 +28,7 @@
                     <span>🔔 System Activity Tracking</span>
                 </div>
 
-                <div class="activity-card" data-status="created">
+                <div class="activity-card-created" data-status="created">
                     <div class="activity-card-header">
                         <div style="display:flex;align-items:center;gap:10px;">
                             <div class="icon">➕</div>
@@ -53,7 +53,7 @@
                     </div>
                 </div>
 
-                <div class="activity-card" data-status="edited">
+                <div class="activity-card-edited" data-status="edited">
                     <div class="activity-card-header">
                         <div style="display:flex;align-items:center;gap:10px;">
                             <div class="icon">✏️</div>
@@ -78,7 +78,7 @@
                     </div>
                 </div>
 
-                <div class="activity-card" data-status="deleted">
+                <div class="activity-card-deleted" data-status="deleted">
                     <div class="activity-card-header">
                         <div style="display:flex;align-items:center;gap:10px;">
                             <div class="icon">🗑️</div>

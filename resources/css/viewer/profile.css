@@ -71,6 +71,7 @@ h1 {
     border-radius: var(--radius);
     padding: 18px;
     margin-bottom: 15px;
+    background-color: white;
 }
 .employment-row {
     text-align: center;

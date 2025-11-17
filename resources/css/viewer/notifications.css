@@ -176,3 +176,6 @@ body {
 .logout-btn .icon {
     font-style: normal; /* so it doesn’t go italic */
 }
+p {
+    margin: 0px;
+}

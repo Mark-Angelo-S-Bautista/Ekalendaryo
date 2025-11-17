@@ -63,8 +63,24 @@ body {
     margin-bottom: 20px;
 }
 
-.activity-card {
-    background-color: #dfffde;
+.activity-card-deleted {
+    background-color: lightcoral;
+    border-radius: 10px;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.activity-card-edited {
+    background-color: lightgoldenrodyellow;
+    border-radius: 10px;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.activity-card-created {
+    background-color: #c7f7c8;
     border-radius: 10px;
     padding: 15px 20px;
     margin-bottom: 20px;
@@ -79,7 +95,7 @@ body {
 
 .activity-card-header .icon {
     font-size: 20px;
-    background-color: #c7f7c8;
+    background-color: white;
     border-radius: 50%;
     padding: 5px 10px;
     margin-right: 10px;
@@ -96,7 +112,7 @@ body {
 }
 
 .activity-card-header .status {
-    background-color: #b2f0b4;
+    background-color: white;
     color: #075e2f;
     padding: 2px 8px;
     border-radius: 12px;
