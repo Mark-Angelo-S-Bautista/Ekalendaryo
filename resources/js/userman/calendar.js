@@ -155,7 +155,7 @@ document.addEventListener("DOMContentLoaded", () => {
         modalTitle.textContent = formatDate(date);
 
         const dayEvents = formattedEvents.filter((ev) => ev.date === date);
-        const startHour = 8,
+        const startHour = 7,
             endHour = 18,
             slotInterval = 30;
         let timeSlotsHTML = "";

@@ -215,10 +215,10 @@ document.addEventListener("DOMContentLoaded", function () {
                     // Reset the form immediately
                     form.reset();
 
-                    // After 3 seconds, close modal and refresh the page
+                    // After 1 second, close modal and refresh the page
                     setTimeout(() => {
                         closeAddUserModal(); // Close modal
-                        location.reload(); // Refresh page
+                        location.reload(); // Refresh page to see new user
                     }, 1000);
                 }
             });
@@ -251,7 +251,7 @@ const updateAddUserForm = () => {
 
     const selectedTitle = titleDropdown.value;
 
-    // --- Logic for Year Level and Section ---
+    // --- Logic for Year Level and Section (Only for Student) ---
     if (selectedTitle === "Student") {
         yearLevelFieldAdd.style.display = "block";
         sectionFieldAdd.style.display = "block";
@@ -260,7 +260,7 @@ const updateAddUserForm = () => {
         sectionFieldAdd.style.display = "none";
     }
 
-    // --- Logic for Office Name ---
+    // --- Logic for Office Name (Only for Offices) ---
     if (selectedTitle === "Offices") {
         officeNameField.style.display = "block";
     } else {
@@ -283,6 +283,10 @@ if (titleDropdown) {
 // ==========================
 document.addEventListener("DOMContentLoaded", function () {
     const form = document.getElementById("editUserForm");
+
+    // Check if we are on the edit page (form exists)
+    if (!form) return;
+
     const titleInput = form.querySelector('input[name="title"]');
     const yearLevelGroup = form
         .querySelector('select[name="yearlevel"]')
@@ -294,11 +298,12 @@ document.addEventListener("DOMContentLoaded", function () {
     // Function to toggle fields based on title
     function toggleFieldsByTitle() {
         const title = titleInput.value.trim();
-        if (title === "Offices" || title === "Department Head") {
+        // Hide year level and section if title is not Student (assuming only Student needs these)
+        if (title !== "Student") {
             yearLevelGroup.style.display = "none";
             sectionGroup.style.display = "none";
         } else {
-            yearLevelGroup.style.display = "";
+            yearLevelGroup.style.display = ""; // or 'block' depending on your CSS
             sectionGroup.style.display = "";
         }
     }
@@ -369,6 +374,72 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
+// ===========================================
+// ✅ FIX: --- TABLE FILTERING BY CARD ---
+// ===========================================
+document.addEventListener("DOMContentLoaded", function () {
+    const cards = document.querySelectorAll(".users_card");
+    const tableRows = document.querySelectorAll("#userTable tbody tr");
+
+    const filterTable = (role) => {
+        tableRows.forEach((row) => {
+            const rowTitleCell = row.querySelector(
+                "td:first-child span:first-child"
+            );
+            if (!rowTitleCell) return; // Skip if title span doesn't exist
+
+            // The inner text of the first bold span should contain the Title or Office Name
+            const rowTitleText = rowTitleCell.textContent.trim();
+
+            // Special handling for the 'All Users' card
+            if (role === "All Users") {
+                row.style.display = ""; // Show all rows
+                return;
+            }
+
+            // Determine if the row matches the selected filter role (Title/Department)
+            let matches = false;
+
+            if (
+                role === "Offices" &&
+                rowTitleText !== "Student" &&
+                rowTitleText !== "Faculty" &&
+                rowTitleText !== "Department Head"
+            ) {
+                // If the card is 'Offices', and the row title is NOT Student, Faculty, or Dept Head, assume it's an Office
+                // NOTE: This relies on your existing logic of offices having an office_name and not a standard title.
+                // The easiest way is to check the Department column if it equals 'OFFICES'
+                const rowDeptCell = row.querySelector("td:nth-child(3)");
+                if (
+                    rowDeptCell &&
+                    rowDeptCell.textContent.trim() === "OFFICES"
+                ) {
+                    matches = true;
+                }
+            } else if (rowTitleText === role) {
+                // For Student, Faculty, Department Head, check against the Title
+                matches = true;
+            }
+
+            row.style.display = matches ? "" : "none";
+        });
+    };
+
+    cards.forEach((card) => {
+        card.addEventListener("click", function () {
+            // 1. Get the filter role from the data attribute
+            const selectedRole = this.getAttribute("data-role");
+
+            // 2. Update active state on cards
+            cards.forEach((c) => c.classList.remove("active"));
+            this.classList.add("active");
+
+            // 3. Filter the table rows
+            filterTable(selectedRole);
+        });
+    });
+});
+
 // --- Import Modal Script ---
 const importModal = document.getElementById("import_modal");
 const openImportBtn = document.getElementById("openImportModal");
@@ -425,6 +496,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 4000);
     }
 });
+
+// --- Dynamic Form Visibility Logic for Add User Modal ---
 document.addEventListener("DOMContentLoaded", () => {
     const titleSelect = document.getElementById("title");
     const officeField = document.getElementById("office_name_field");
@@ -453,9 +526,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    // Run on page load in case old value is set
-    toggleFields();
+    if (titleSelect && officeField && departmentField && departmentSelect) {
+        // Run on page load in case old value is set
+        toggleFields();
 
-    // Run whenever the title changes
-    titleSelect.addEventListener("change", toggleFields);
+        // Run whenever the title changes
+        titleSelect.addEventListener("change", toggleFields);
+    }
 });

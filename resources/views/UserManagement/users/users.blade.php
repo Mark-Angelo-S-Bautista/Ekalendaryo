@@ -5,7 +5,8 @@
     <head>
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Document</title>
+        <title>User Management</title>
+        {{-- Ensure you have the correct file paths --}}
         @vite(['resources/css/userman/usersTabPractice.css', 'resources/js/userman/usersTabPractice.js'])
     </head>
 
@@ -19,22 +20,34 @@
                 </div>
             </div>
 
+            {{-- 
+                ✅ FIX: Updated cards to use the new Title-based counts from the controller:
+                $studentCount, $facultyCount, $deptHeadCount, $officesCount
+            --}}
             <div class="users_cards">
                 <div class="users_card active" data-role="All Users">
                     <h2>{{ $totalUsers }}</h2>
                     <p>All Users</p>
                 </div>
+                {{-- Department Head Card --}}
                 <div class="users_card" data-role="Department Head">
-                    <h2>{{ $userManagementCount }}</h2>
-                    <p>User Management</p>
+                    <h2>{{ $deptHeadCount }}</h2>
+                    <p>Department Head</p>
                 </div>
-                <div class="users_card" data-role="Student Government Adviser">
-                    <h2>{{ $editorCount }}</h2>
-                    <p>Editor</p>
+                {{-- Faculty Card (formerly Editor) --}}
+                <div class="users_card" data-role="Faculty">
+                    <h2>{{ $facultyCount }}</h2>
+                    <p>Faculty</p>
                 </div>
-                <div class="users_card" data-role="Sports and Cultural Adviser">
-                    <h2>{{ $viewerCount }}</h2>
-                    <p>Viewer</p>
+                {{-- Student Card (formerly Viewer) --}}
+                <div class="users_card" data-role="Student">
+                    <h2>{{ $studentCount }}</h2>
+                    <p>Student</p>
+                </div>
+                {{-- Offices Card (Added as a replacement for the 4th card, assuming $officesCount exists) --}}
+                <div class="users_card" data-role="Offices">
+                    <h2>{{ $officesCount }}</h2>
+                    <p>Offices</p>
                 </div>
             </div>
         </div>
@@ -60,7 +73,7 @@
             <table id="userTable">
                 <thead>
                     <tr>
-                        <th>Name</th>
+                        <th>Name / Title</th>
                         <th>Email</th>
                         <th>Department</th>
                         <th>Role</th>
@@ -71,11 +84,12 @@
                     @foreach ($users as $user)
                         <tr>
                             <td>
+                                {{-- Display Title/Office Name on top, User Name below --}}
                                 <span style="display:block; font-weight:bold;">
                                     @if ($user->department === 'OFFICES')
-                                        {{ $user->office_name }}
+                                        {{ $user->office_name ?? 'N/A' }} {{-- Use office_name for offices --}}
                                     @else
-                                        {{ $user->title }}
+                                        {{ $user->title ?? 'N/A' }} {{-- Use title for others --}}
                                     @endif
                                 </span>
                                 <span>{{ $user->name }}</span>
@@ -101,7 +115,8 @@
             </table>
         </div>
 
-        <!-- Modal -->
+        {{-- The rest of the modals (User Modal, Add Department Modal, Add User Modal, Import Users Modal) remain unchanged as their structure seems correct for their functions. --}}
+
         <div class="users_modal" id="users_modal">
             <div class="users_modal_content">
                 <div class="users_modal_header">
@@ -114,7 +129,6 @@
         </div>
 
 
-        <!-- Add Department Modal -->
         <div class="adddept_modal" id="adddept_overlay">
             <div class="adddept_modal_content">
                 <div class="adddept_modal_header">
@@ -164,7 +178,6 @@
 
 
 
-        <!-- Add User Modal -->
         <div class="adduser_overlay" id="adduser_overlay">
             <div class="adduser_modal">
                 <h2>Add New User</h2>
@@ -280,7 +293,6 @@
             </div>
         </div>
 
-        <!-- Import Users Modal -->
         <form action="{{ route('UserManagement.import') }}" method="POST" enctype="multipart/form-data">
             @csrf
             <div class="import_modal" id="import_modal">
@@ -303,7 +315,6 @@
                                 style="display:none;">
                         </div>
 
-                        <!-- Error container -->
                         <div id="import_errors_container" style="color:red; margin-top:10px;"></div>
                     </div>
 
@@ -363,6 +374,27 @@
                         html += "</ul>";
                         errorContainer.innerHTML = html;
                     }
+                }
+
+                // --- Add User Modal logic (if it was defined in JS) ---
+                const titleSelect = document.getElementById('title');
+                const officeNameField = document.getElementById('office_name_field');
+                const departmentField = document.getElementById('department_field');
+
+                if (titleSelect) {
+                    titleSelect.addEventListener('change', function() {
+                        const selectedTitle = this.value;
+                        if (selectedTitle === 'Offices') {
+                            officeNameField.style.display = 'block';
+                            departmentField.style.display = 'none';
+                        } else if (selectedTitle === 'Student') {
+                            officeNameField.style.display = 'none';
+                            departmentField.style.display = 'block';
+                        } else {
+                            officeNameField.style.display = 'none';
+                            departmentField.style.display = 'none';
+                        }
+                    });
                 }
             });
         </script>

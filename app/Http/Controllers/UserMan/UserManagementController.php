@@ -155,22 +155,32 @@ class UserManagementController extends Controller
         // Fetch users based on search query if exists
         $users = User::when($query, function ($q) use ($query) {
             $q->where('name', 'like', "%{$query}%")
-              ->orWhere('email', 'like', "%{$query}%");
+            ->orWhere('email', 'like', "%{$query}%");
         })->get();
 
-        // Count users by role
+        // ----------------------------------------------------------------------
+        // ✅ FIX: Count users by TITLE instead of ROLE to match dashboard cards
+        // ----------------------------------------------------------------------
         $totalUsers = User::count();
-        $userManagementCount = User::where('role', 'UserManagement')->count();
-        $editorCount = User::where('role', 'Editor')->count();
-        $viewerCount = User::where('role', 'Viewer')->count();
+        
+        // Count users by specific titles/departments
+        $studentCount = User::where('title', 'Student')->count();
+        $facultyCount = User::where('title', 'Faculty')->count();
+        $deptHeadCount = User::where('title', 'Department Head')->count();
+        
+        // Count 'Offices' users (assuming 'Offices' is identified by department name or title)
+        // We use where('department', 'OFFICES') based on your previous Blade logic
+        $officesCount = User::where('department', 'OFFICES')->count(); 
 
-        $departments = Department::all(); // ✅ fetch all departments
+        // Fetch all departments
+        $departments = Department::all(); 
 
         return view('UserManagement.users.users', compact(
             'totalUsers',
-            'userManagementCount',
-            'editorCount',
-            'viewerCount',
+            'studentCount',      // New variable for Student card
+            'facultyCount',      // New variable for Faculty card
+            'deptHeadCount',     // New variable for Department Head card
+            'officesCount',      // New variable for Offices card
             'users',
             'query',
             'departments'
