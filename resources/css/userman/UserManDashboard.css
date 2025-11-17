@@ -207,12 +207,51 @@ body {
     margin-bottom: 10px;
 }
 
+/* --- GRID LAYOUT (4 Items Per Row) --- */
+.dashboard_events_grid {
+    display: grid;
+    /* Forces 4 columns of equal width */
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    column-gap: 20px;
+    row-gap: 30px;
+    margin-top: 20px;
+}
+
+/* Make sure the cards fill the height if description lengths vary */
 .dashboard_event_card {
-    border: 1px solid #cde6cd;
-    border-radius: 10px;
-    padding: 0.9rem 1rem;
-    margin-bottom: 0.8rem;
-    background-color: #ffffff;
+    background: #fff;
+    border-radius: 12px;
+    padding: 5px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    height: 100%; /* Ensures cards in the same row are equal height */
+}
+
+.dashboard_event_details {
+    font-size: 0.85rem;
+    color: #444;
+    margin: 4px 0;
+}
+
+/* RESPONSIVENESS: Adjust columns for smaller screens */
+@media (max-width: 1200px) {
+    .dashboard_events_grid {
+        grid-template-columns: repeat(3, 1fr); /* 3 per row on laptops */
+    }
+}
+
+@media (max-width: 900px) {
+    .dashboard_events_grid {
+        grid-template-columns: repeat(2, 1fr); /* 2 per row on tablets */
+    }
+}
+
+@media (max-width: 600px) {
+    .dashboard_events_grid {
+        grid-template-columns: 1fr; /* 1 per row on mobile */
+    }
 }
 
 .dashboard_event_card:hover {

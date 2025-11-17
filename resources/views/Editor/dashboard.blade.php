@@ -35,53 +35,59 @@
         <!-- Upcoming Events -->
         <section class="dashboard_upcoming_card">
             <h3 class="dashboard_upcoming_title">Upcoming Events</h3>
+            <p>Next 30 days</p>
 
-            @forelse ($events as $event)
-                <div class="dashboard_event_card">
-                    <div class="dashboard_event_title">{{ $event->title }}</div>
-
-                    <div class="dashboard_event_details">
-                        📅 {{ \Carbon\Carbon::parse($event->date)->format('n/j/Y') }}
-                        &nbsp;&nbsp; 🕓 {{ \Carbon\Carbon::parse($event->start_time)->format('g:i A') }}
-                        - {{ \Carbon\Carbon::parse($event->end_time)->format('g:i A') }}
-                        &nbsp;&nbsp; 📍 {{ $event->location }}
-                    </div>
-
-                    <div class="dashboard_event_details">
-                        👥
-                        @if (is_array($event->target_year_levels) && count($event->target_year_levels) > 0)
-                            @foreach ($event->target_year_levels as $yearLevel)
-                                {{ $yearLevel . ',' }}
-                            @endforeach
-                        @else
-                            {{ $event->target_users }}
-                        @endif
-                    </div>
-
-                    <div class="dashboard_event_details">{{ $event->description ?? 'No description provided.' }}</div>
-                    <div class="dashboard_event_details">{{ $event->school_year }}</div>
-
-                    <div class="dashboard_event_tags">
-                        <span class="dashboard_tag dashboard_tag_admin">
-                            @if ($event->department === 'OFFICES')
-                                {{ $event->user->office_name ?? 'Office' }}
-                            @else
-                                {{ $event->department }}
-                            @endif
-                        </span>
-
-                        <span class="dashboard_tag dashboard_tag_upcoming">upcoming</span>
-                    </div>
-                    <!-- VIEW DETAILS BUTTON (use prepared, escaped attribute) -->
-                    <button class="dashboard_view_btn" data-id="{{ $event->id }}"
-                        data-details="{{ e($event->more_details_attr ?? 'No additional details.') }}"
-                        style="padding:10px 22px; background:#e8ecf5; border:none; border-radius:10px; font-size:1rem; cursor:pointer; font-weight:600; color:#36415d; margin-top:10px;">
-                        👁️ View Details
-                    </button>
-                </div>
-            @empty
+            @if ($events->isEmpty())
                 <p>No upcoming events found.</p>
-            @endforelse
+            @else
+                <div class="dashboard_events_grid">
+                    @foreach ($events as $event)
+                        <div class="dashboard_event_card">
+                            <div class="dashboard_event_title">{{ $event->title }}</div>
+
+                            <div class="dashboard_event_details">
+                                📅 {{ \Carbon\Carbon::parse($event->date)->format('n/j/Y') }}
+                                &nbsp;&nbsp; 🕓 {{ \Carbon\Carbon::parse($event->start_time)->format('g:i A') }}
+                                - {{ \Carbon\Carbon::parse($event->end_time)->format('g:i A') }}
+                                &nbsp;&nbsp; 📍 {{ $event->location }}
+                            </div>
+
+                            <div class="dashboard_event_details">
+                                👥
+                                @if (is_array($event->target_year_levels) && count($event->target_year_levels) > 0)
+                                    @foreach ($event->target_year_levels as $yearLevel)
+                                        {{ $yearLevel . ',' }}
+                                    @endforeach
+                                @else
+                                    {{ $event->target_users }}
+                                @endif
+                            </div>
+
+                            <div class="dashboard_event_details">
+                                {{ $event->description ?? 'No description provided.' }}</div>
+                            <div class="dashboard_event_details">{{ $event->school_year }}</div>
+
+                            <div class="dashboard_event_tags">
+                                <span class="dashboard_tag dashboard_tag_admin">
+                                    @if ($event->department === 'OFFICES')
+                                        {{ $event->user->office_name ?? 'Office' }}
+                                    @else
+                                        {{ $event->department }}
+                                    @endif
+                                </span>
+
+                                <span class="dashboard_tag dashboard_tag_upcoming">upcoming</span>
+                            </div>
+
+                            <button class="dashboard_view_btn" data-id="{{ $event->id }}"
+                                data-details="{{ e($event->more_details_attr ?? 'No additional details.') }}"
+                                style="padding:10px 22px; background:#e8ecf5; border:none; border-radius:10px; font-size:1rem; cursor:pointer; font-weight:600; color:#36415d; margin-top:10px;">
+                                👁️ View Details
+                            </button>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
         </section>
     </div>
     <script>

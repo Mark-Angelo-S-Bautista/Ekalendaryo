@@ -170,17 +170,52 @@ body {
     margin-bottom: 10px;
 }
 
+/* --- NEW GRID SYSTEM --- */
+.dashboard_events_grid {
+    display: grid;
+    /* Forces 4 columns */
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    column-gap: 20px;
+    row-gap: 30px;
+    margin-top: 20px;
+}
+
 .dashboard_event_card {
     border: 1px solid #cde6cd;
     border-radius: 10px;
-    padding: 0.9rem 1rem;
-    margin-bottom: 0.8rem;
+    padding: 5px;
     background-color: #ffffff;
+    /* Flex properties to make cards equal height */
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    margin-bottom: 0; /* Removed margin since grid handles gap */
 }
 
 .dashboard_event_card:hover {
     background-color: #f5fbf5;
 }
+
+/* RESPONSIVE QUERIES */
+@media (max-width: 1200px) {
+    .dashboard_events_grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 900px) {
+    .dashboard_events_grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .dashboard_events_grid {
+        grid-template-columns: 1fr;
+    }
+}
+/* ----------------------- */
 
 .dashboard_event_title {
     font-weight: 600;
@@ -196,7 +231,9 @@ body {
 .dashboard_event_tags {
     display: flex;
     gap: 6px;
-    margin-top: 6px;
+    /* Pushes the tags and button to the bottom of the card */
+    margin-top: auto;
+    margin-bottom: 10px;
 }
 
 .dashboard_tag {
