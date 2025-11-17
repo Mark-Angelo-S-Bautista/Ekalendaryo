@@ -35,7 +35,7 @@
         <!-- Upcoming Events -->
         <section class="dashboard_upcoming_card">
             <h3 class="dashboard_upcoming_title">Upcoming Events</h3>
-            <p>Next 30 days</p>
+            <p>For the next 30 days</p>
 
             @if ($events->isEmpty())
                 <p>No upcoming events found.</p>
