@@ -115,36 +115,96 @@ class EventController extends Controller
     //SEND THE MAIL WHEN CREATING AN EVENT
     private function sendEmailsForEvent(Event $event, bool $isUpdate = false, $oldEvent = null, bool $isCancelled = false)
     {
-        $dept = $event->department;
-        $yearLevels = $event->target_year_levels ?? [];
+        // 1. Normalize Target Data
+        $targetDepartments = (array) ($event->target_department ?? []);
+        if (is_string($event->target_department)) {
+            $targetDepartments = array_map('trim', explode(',', $event->target_department));
+        }
+        $targetDepartments = array_filter($targetDepartments);
+
+        $targetRoles = (array) ($event->target_users ?? []);
+        if (is_string($event->target_users)) {
+            $targetRoles = array_map('trim', explode(',', $event->target_users));
+        }
+        $targetRoles = array_filter($targetRoles);
+
+        $targetYearLevels = $event->target_year_levels ?? []; // Array of year levels or empty array
+
+        $rolesToInclude = [];
+        $includeStudents = false;
+        
+        // --- 2. Determine Role/Title Criteria based on target_users ---
+
+        // Always include Department Heads, as they are part of the 'Faculty' scope
+        $rolesToInclude[] = 'Department Head'; 
+        
+        $isFacultyTargeted = in_array('Faculty', $targetRoles);
+        $isStudentsTargeted = in_array('Viewer', $targetRoles) || in_array('Students', $targetRoles); // Assuming 'Students' maps to 'Viewer' role/title
+
+        if ($isFacultyTargeted) {
+            // Rule: If target_users is Faculty, send to Faculty and Department Head
+            $rolesToInclude[] = 'Faculty';
+        } elseif ($isStudentsTargeted) {
+            // Rule: If target_users is Students (Viewer), send to Viewer (Students) and Faculty
+            $rolesToInclude[] = 'Student';
+            $rolesToInclude[] = 'Faculty';
+            $includeStudents = true;
+        } else {
+            // If neither Faculty nor Students are targeted, include other explicitly named roles
+            foreach ($targetRoles as $role) {
+                if (!in_array($role, ['Faculty', 'Viewer', 'Students', 'Department Head'])) {
+                    $rolesToInclude[] = $role;
+                }
+            }
+        }
+
+        $query = User::query();
+        
+        // Filter by the collected unique titles/roles
+        $query->whereIn('title', array_unique($rolesToInclude));
+
+        // --- 3. Filter by Target Departments (if specified) ---
+        if (!empty($targetDepartments) && !in_array('ALL', array_map('strtoupper', $targetDepartments))) {
+            $query->where(function ($q) use ($targetDepartments, $event) {
+                $q->whereIn('department', $targetDepartments)
+                // Keep users from the event's creation department as a broad measure
+                ->orWhere('department', $event->department); 
+            });
+        }
+
+        // --- 4. Execute Query and Apply Year Level Filtering (Post-Query) ---
+        $users = $query->get();
+
+        $recipients = $users->filter(function ($user) use ($targetYearLevels, $includeStudents) {
+            // All non-Viewer roles (Faculty, Department Head, etc.) are included if they passed steps 2 & 3.
+            if (strtolower($user->title) !== 'viewer') {
+                return true; 
+            }
+
+            // --- Logic for Students (Viewers) ---
+            
+            // If students were not included in the initial query logic (Step 2).
+            if (!$includeStudents) {
+                return false;
+            }
+
+            // If 'Viewer' was targeted AND targetYearLevels is empty, include all students.
+            if (empty($targetYearLevels)) {
+                return true;
+            }
+
+            // Apply specific Year Level filtering for students.
+            $studentYearLevel = strtolower(str_replace(' ', '', $user->yearlevel ?? ''));
+            $normalizedYearLevels = array_map(fn($lvl) => strtolower(str_replace(' ', '', $lvl)), $targetYearLevels);
+            
+            return in_array($studentYearLevel, $normalizedYearLevels);
+        });
+
+        // Ensure no duplicates based on email address
+        $recipients = $recipients->unique('email');
 
         // ------------------------------
-        // STUDENTS (role: Viewer)
-        // ------------------------------
-        $students = User::where('department', $dept)
-                        ->where('role', 'Viewer')
-                        ->get()
-                        ->filter(function ($student) use ($yearLevels) {
-                            if (empty($yearLevels)) return true; // All students if no specific year levels
-                            $studentYearLevel = strtolower(str_replace(' ', '', $student->yearlevel ?? ''));
-                            $normalizedYearLevels = array_map(fn($lvl) => strtolower(str_replace(' ', '', $lvl)), $yearLevels);
-                            return in_array($studentYearLevel, $normalizedYearLevels);
-                        });
-
-        // ------------------------------
-        // FACULTY & DEPARTMENT HEADS (by title)
-        // ------------------------------
-        $facultyAndHeads = User::where('department', $dept)
-                            ->whereIn('title', ['Faculty', 'Department Head'])
-                            ->get();
-
-        // ------------------------------
-        // MERGE ALL RECIPIENTS
-        // ------------------------------
-        $recipients = $students->merge($facultyAndHeads);
-
-        // ------------------------------
-        // SEND EMAILS
+        // 5. SEND EMAILS
         // ------------------------------
         foreach ($recipients as $user) {
             Mail::to($user->email)->send(

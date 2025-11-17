@@ -99,19 +99,57 @@
                                 }
                             </script>
 
-                            @if (auth()->user()->department === 'OFFICES')
+                            @if (auth()->user()->title === 'Offices' || 'Department Head')
                                 <div class="form-group">
                                     <label for="targetDepartment">Target Department</label>
 
-                                    <div class="checkbox-grid">
-                                        <!-- Dynamic departments -->
-                                        @foreach ($departments as $dept)
-                                            <label class="checkbox-item">
-                                                <input type="checkbox" class="dept-checkbox" name="target_department[]"
-                                                    value="{{ $dept->department_name }}">
-                                                <span>{{ $dept->department_name }}</span>
-                                            </label>
-                                        @endforeach
+                                    @php
+                                        // Get the authenticated user's data for comparison
+$user = Auth::user();
+$userTitle = $user->title ?? null;
+// Assuming the user's department name is stored in 'department_name' or falls back to 'department'
+                                        $userDepartment = $user->department_name ?? ($user->department ?? null);
+                                    @endphp
+
+                                    <div class="form-group">
+
+
+                                        @if ($userTitle === 'Department Head')
+                                            {{-- 🔑 FIX: If the user is Department Head, render a hidden field with their department as the value. --}}
+                                            <input type="hidden" name="target_department[]"
+                                                value="{{ $userDepartment }}">
+                                            <p style="color: #6c757d; margin-top: 5px;">
+                                                Targeting is set to your department:
+                                                <strong>{{ $userDepartment }}</strong> (Fixed)
+                                            </p>
+                                        @else
+                                            {{-- If the user is NOT a Department Head (e.g., OFFICES or other), show the standard checkbox grid --}}
+                                            <div class="checkbox-grid">
+                                                @foreach ($departments as $dept)
+                                                    @php
+                                                        $departmentName = $dept->department_name;
+                                                        $shouldRender = true; // Assume true unless excluded
+
+                                                        if ($userTitle === 'Offices') {
+                                                            // If user title is OFFICES, show all departments EXCEPT 'OFFICES'
+                                                            if ($departmentName === 'OFFICES') {
+                                                                $shouldRender = false;
+                                                            }
+                                                        }
+                                                        // For other titles, you can add more specific rules here if needed.
+                                                    @endphp
+
+                                                    @if ($shouldRender)
+                                                        <label class="checkbox-item">
+                                                            <input type="checkbox" class="dept-checkbox"
+                                                                name="target_department[]"
+                                                                value="{{ $departmentName }}">
+                                                            <span>{{ $departmentName }}</span>
+                                                        </label>
+                                                    @endif
+                                                @endforeach
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
 
@@ -120,13 +158,15 @@
                                     <select id="targetUsers" name="target_users" class="form-control">
                                         <option value="">-- Select Users --</option>
                                         <option value="Faculty">Faculty</option>
-                                        <option value="Department Heads">Department Heads</option>
+                                        @if (auth()->user()->title === 'Offices')
+                                            <option value="Department Heads">Department Heads</option>
+                                        @endif
                                         <option value="Students">Students</option>
                                     </select>
                                 </div>
 
                                 <!-- Target Year Levels checkboxes -->
-                                <div class="form-group" id="targetYearLevelsContainer">
+                                {{-- <div class="form-group" id="targetYearLevelsContainer">
                                     <label>Target Year Levels</label>
                                     <p class="note">Select which year levels of students will receive notifications
                                         for this event</p>
@@ -156,10 +196,10 @@
                                                 class="syear"> 4th Year
                                         </div>
                                     </div>
-                                </div>
+                                </div> --}}
                             @endif
 
-                            @if (auth()->user()->department !== 'OFFICES')
+                            @if (auth()->user()->title !== 'Offices' || 'Department Head')
                                 <!-- Target Year Levels checkboxes -->
                                 <div class="form-group" id="targetYearLevelsContainer">
                                     <label>Target Year Levels</label>
