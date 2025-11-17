@@ -32,7 +32,7 @@ class ViewerController extends Controller
             }
 
             // ============================================================
-            // FACULTY LOGIC
+            // FACULTY LOGIC (Retained for completeness, assuming 'Faculty' title)
             // ============================================================
             if (strtolower($title) === 'faculty') {
 
@@ -40,6 +40,9 @@ class ViewerController extends Controller
                 $targetDepartments = is_string($ev->target_department)
                     ? json_decode($ev->target_department, true) ?? []
                     : $ev->target_department;
+                
+                // Normalize target_users for case-insensitive comparison
+                $targetUsers = strtolower($ev->target_users ?? '');
 
                 // Faculty can see events if:
                 // 1. Event department matches faculty's department
@@ -48,7 +51,7 @@ class ViewerController extends Controller
                 // AND
                 // 3. Event does NOT target "Department Heads"
                 if (
-                    strtolower($ev->target_users) !== 'department heads' && (
+                    $targetUsers !== 'department heads' && (
                         $ev->department === $dept ||
                         ($ev->department === 'OFFICES' && is_array($targetDepartments) && in_array($dept, $targetDepartments))
                     )
@@ -60,83 +63,106 @@ class ViewerController extends Controller
             }
 
             // ============================================================
-            // STUDENT LOGIC
+            // STUDENT LOGIC (assuming 'Viewer' title)
             // ============================================================
+            if (strtolower($title) === 'viewer' || strtolower($title) === 'student') { 
 
-            // Normalize user year level early
-            $userYearLevelNormalized = null;
-            if (!empty($yearLevel)) {
-                $userYearLevelNormalized = strtolower(str_replace(' ', '', $yearLevel));
-            }
-
-            // -----------------------------
-            // Helper: Check Year Level Match
-            // -----------------------------
-            $matchesYearLevel = function($ev) use ($userYearLevelNormalized) {
-
-                // Convert JSON string to array if needed
-                $targetYearLevels = is_string($ev->target_year_levels)
-                    ? json_decode($ev->target_year_levels, true) ?? []
-                    : $ev->target_year_levels;
-
-                // If event has no year-level restrictions → allow all students
-                if (empty($targetYearLevels)) {
-                    return true;
+                // 🔑 NEW LOGIC: Prevent Students from seeing events targeted at Faculty/Department Heads
+                $targetUsersNormalized = strtolower($ev->target_users ?? '');
+                
+                if (str_contains($targetUsersNormalized, 'faculty') || str_contains($targetUsersNormalized, 'department head')) {
+                    return false; // Student is immediately filtered out
+                }
+                
+                // Normalize user year level early
+                $userYearLevelNormalized = null;
+                if (!empty($yearLevel)) {
+                    $userYearLevelNormalized = strtolower(str_replace(' ', '', $yearLevel));
                 }
 
-                // If user has no year level → cannot qualify
-                if (empty($userYearLevelNormalized)) {
-                    return false;
+                // -----------------------------
+                // Helper: Check Year Level Match
+                // -----------------------------
+                $matchesYearLevel = function ($ev) use ($userYearLevelNormalized) {
+
+                    // Convert JSON string to array if needed
+                    $targetYearLevels = is_string($ev->target_year_levels)
+                        ? json_decode($ev->target_year_levels, true) ?? []
+                        : $ev->target_year_levels;
+
+                    // If event has no year-level restrictions → allow all students
+                    if (empty($targetYearLevels)) {
+                        return true;
+                    }
+
+                    // If user has no year level → cannot qualify
+                    if (empty($userYearLevelNormalized)) {
+                        return false;
+                    }
+
+                    // Normalize target list
+                    $normalizedTargets = array_map(fn($lvl) => strtolower(str_replace(' ', '', $lvl)), $targetYearLevels);
+
+                    return in_array($userYearLevelNormalized, $normalizedTargets);
+                };
+
+                // ===================================================================
+                // RULE 1: Student can see events from **their own department**
+                // ===================================================================
+                if ($ev->department === $dept) {
+                    return $matchesYearLevel($ev);
                 }
 
-                // Normalize target list
-                $normalizedTargets = array_map(fn($lvl) => strtolower(str_replace(' ', '', $lvl)), $targetYearLevels);
+                // ===================================================================
+                // RULE 2: Student can see events from **OFFICES** targeting their department
+                //         - event.target_department contains user's department
+                //         - AND event.target_users == "Students" (or is empty, depending on final requirements)
+                //         - AND year level matches
+                // ===================================================================
+                $targetDepartments = is_string($ev->target_department)
+                    ? json_decode($ev->target_department, true) ?? []
+                    : $ev->target_department;
+                
+                $targetUsersCheck = strtolower($ev->target_users ?? '');
 
-                return in_array($userYearLevelNormalized, $normalizedTargets);
-            };
+                if (
+                    $ev->department === 'OFFICES' &&
+                    is_array($targetDepartments) &&
+                    in_array($dept, $targetDepartments) &&
+                    ($targetUsersCheck === 'students' || empty($targetUsersCheck)) // Allow if specifically for students OR if generic/empty target
+                ) {
+                    return $matchesYearLevel($ev);
+                }
 
-            // ===================================================================
-            // RULE 1: Student can see events from **their own department**
-            // ===================================================================
-            if ($ev->department === $dept) {
-                return $matchesYearLevel($ev);
+                // ===================================================================
+                // RULE 3: Future-proof: any event targeting student's department
+                //         + target_users == Students
+                // ===================================================================
+                if (
+                    is_array($targetDepartments) &&
+                    in_array($dept, $targetDepartments) &&
+                    $targetUsersCheck === 'students'
+                ) {
+                    return $matchesYearLevel($ev);
+                }
+
+                // ===================================================================
+                // Otherwise: student cannot see the event
+                // ===================================================================
+                return false;
             }
+            
+            // ============================================================
+            // DEFAULT/OTHER USERS LOGIC (e.g., Department Head, Admin, etc.)
+            // ============================================================
+            // If the user is neither Faculty nor Student, include specific logic here.
+            // For now, we assume if they are a Department Head or Admin, they see everything or have specific rules.
+            // If no rules match above, we return true as a temporary default for non-specified roles, 
+            // or strictly false if only the above two roles are supported.
+            
+            // To be safe, let's include all remaining events for non-student/non-faculty users (like Department Head/Admin)
+            return true; 
 
-            // ===================================================================
-            // RULE 2: Student can see events from **OFFICES** targeting their department
-            //         - event.target_department contains user's department
-            //         - AND event.target_users == "Students"
-            //         - AND year level matches
-            // ===================================================================
-            $targetDepartments = is_string($ev->target_department)
-                ? json_decode($ev->target_department, true) ?? []
-                : $ev->target_department;
-
-            if (
-                $ev->department === 'OFFICES' &&
-                is_array($targetDepartments) &&
-                in_array($dept, $targetDepartments) &&
-                strtolower($ev->target_users) === 'students'
-            ) {
-                return $matchesYearLevel($ev);
-            }
-
-            // ===================================================================
-            // RULE 3: Future-proof: any event targeting student's department
-            //         + target_users == Students
-            // ===================================================================
-            if (
-                is_array($targetDepartments) &&
-                in_array($dept, $targetDepartments) &&
-                strtolower($ev->target_users) === 'students'
-            ) {
-                return $matchesYearLevel($ev);
-            }
-
-            // ===================================================================
-            // Otherwise: student cannot see the event
-            // ===================================================================
-            return false;
 
         })->values();
 
