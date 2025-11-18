@@ -225,7 +225,7 @@ class EventController extends Controller
                 $users->where('title', 'Student');
                 break;
             case 'Faculty':
-                $users->where('title', 'Faculty');
+                $users->whereIn('title', ['Faculty', 'Department Head']);
                 break;
             case 'Department Heads':
                 $users->where('title', 'Department Head');
