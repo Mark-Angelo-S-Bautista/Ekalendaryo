@@ -47,10 +47,6 @@
                 <div class="calendar_event-filter">
                     <select id="calendar_eventFilter">
                         <option value="all">All Events</option>
-                        <option value="department">Department Events</option>
-                        <option value="studentgov">Student Government</option>
-                        <option value="sports">Sports Events</option>
-                        <option value="admin">Admin Events</option>
                     </select>
                 </div>
             </div>

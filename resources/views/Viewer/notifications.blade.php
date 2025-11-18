@@ -38,7 +38,7 @@
                             <p>📍 BPC Court</p>
                             <p>🕒 17:45</p>
                             <p>👤 By admin</p>
-                            <p>🗓️ 11/2/2025, 5:45:47 PM</p>
+                            <p>🗓️ 11/2/2025</p>
                         </div>
                     </div>
                     <span class="status created-status">created</span>
@@ -54,7 +54,7 @@
                             <p>📍 COURT</p>
                             <p>🕒 15:55</p>
                             <p>👤 By admin</p>
-                            <p>🗓️ 11/2/2025, 3:56:00 PM</p>
+                            <p>🗓️ 11/2/2025</p>
                         </div>
                     </div>
                     <span class="status created-status">created</span>
