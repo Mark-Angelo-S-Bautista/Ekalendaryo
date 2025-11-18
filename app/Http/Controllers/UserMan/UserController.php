@@ -115,27 +115,41 @@ class UserController extends Controller
 
     public function import(Request $request)
     {
+        // Validate CSV file
         $request->validate([
-            'csv_file' => 'required|mimes:csv,txt',
+            'csv_file' => 'required|file|mimes:csv,txt', // ensure it's a file
         ]);
 
         $file = $request->file('csv_file');
+
+        // Use fopen in 'r' mode to avoid encoding issues
         $csv = Reader::createFromPath($file->getRealPath(), 'r');
-        $csv->setHeaderOffset(0);
+        $csv->setHeaderOffset(0); // first row is header
 
         $defaultPassword = 'password';
         $records = $csv->getRecords();
         $importErrors = [];
 
         foreach ($records as $index => $record) {
-            $rowNumber = $index + 1; // CSV header is row 1
+            $rowNumber = $index + 1; // row 2 because row 1 is header
             $errors = [];
 
-            // Check for duplicates
-            if (User::where('userId', $record['userId'])->exists()) {
+            // Trim whitespace from all fields
+            $record = array_map('trim', $record);
+
+            // Required fields
+            if (empty($record['userId'])) {
+                $errors[] = 'userId is required';
+            }
+            if (empty($record['email'])) {
+                $errors[] = 'email is required';
+            }
+
+            // Check for duplicates in database
+            if (!empty($record['userId']) && User::where('userId', $record['userId'])->exists()) {
                 $errors[] = "Duplicate userId: {$record['userId']}";
             }
-            if (User::where('email', $record['email'])->exists()) {
+            if (!empty($record['email']) && User::where('email', $record['email'])->exists()) {
                 $errors[] = "Duplicate email: {$record['email']}";
             }
 
@@ -145,13 +159,13 @@ class UserController extends Controller
                     'errors' => $errors,
                     'data' => $record,
                 ];
-                continue; // skip inserting this row
+                continue; // skip this row
             }
 
-            // Create user
+            // Insert user
             User::create([
                 'userId' => $record['userId'],
-                'name' => $record['name'],
+                'name' => $record['name'] ?? null,
                 'title' => $record['title'] ?? null,
                 'email' => $record['email'],
                 'department' => $record['department'] ?? null,

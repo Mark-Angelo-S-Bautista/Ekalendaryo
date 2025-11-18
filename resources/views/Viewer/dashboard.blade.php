@@ -57,11 +57,18 @@
                                 </span>
                                 <span class="dashboard_tag dashboard_tag_upcoming">upcoming</span>
                             </div>
-                            <button class="dashboard_view_btn"
-                                data-details="{{ e($event->more_details ?? 'No additional details.') }}"
-                                style="padding:10px 22px; background:#e8ecf5; border:none; border-radius:10px; font-size:1rem; cursor:pointer; font-weight:600; color:#36415d; margin-top:10px;">
-                                👁️ View Details
-                            </button>
+                            <div>
+                                <button class="dashboard_view_btn"
+                                    data-details="{{ e($event->more_details ?? 'No additional details.') }}"
+                                    style="margin-right: 110px; padding:10px 22px; background:#e8ecf5; border:none; border-radius:10px; font-size:1rem; cursor:pointer; font-weight:600; color:#36415d; margin-top:10px;">
+                                    👁️ View Details
+                                </button>
+                                <button class="dashboard_attend_btn" onclick="toggleAttendance(this)"
+                                    style="padding:10px 22px; background:#ffffff; border:1px solid #36415d; border-radius:10px; font-size:1rem; cursor:pointer; font-weight:600; color:#36415d; margin-top:10px; margin-left: 5px; transition: all 0.3s ease;">
+                                    ✋ Attend
+                                </button>
+                            </div>
+
                         </div>
                     @endforeach
                 </div>
@@ -80,6 +87,29 @@
         </div>
     </div>
 
+    <script>
+        function toggleAttendance(btn) {
+            // Toggle the 'active' class
+            btn.classList.toggle('attending-active');
+
+            // Check if active and change text/style
+            if (btn.classList.contains('attending-active')) {
+                btn.innerHTML = "✅ Attending";
+                btn.style.backgroundColor = "#4CAF50"; // Green color
+                btn.style.color = "#ffffff";
+                btn.style.border = "1px solid #4CAF50";
+            } else {
+                btn.innerHTML = "✋ Attend";
+                btn.style.backgroundColor = "#ffffff"; // Back to white
+                btn.style.color = "#36415d";
+                btn.style.border = "1px solid #36415d";
+            }
+
+            // OPTIONAL: Add AJAX here to save to database
+            // const eventId = btn.getAttribute('data-event-id');
+            // fetch('/events/attend/' + eventId)...
+        }
+    </script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const modal = document.getElementById('viewerDetailsModalOverlay');

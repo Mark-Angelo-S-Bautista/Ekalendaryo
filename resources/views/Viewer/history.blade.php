@@ -83,21 +83,6 @@
                         <span>💬 2 feedback</span>
                     </div>
                 </div>
-
-                <div class="event-card" data-type="Feedback" data-title="Student1 Feedback Example">
-                    <button class="feedback-btn">💬 Feedback</button>
-                    <div class="event-header">
-                        <h3>Feedback by student1</h3>
-                        <span class="tag bsis-act">BSIS-ACT</span>
-                        <span class="status">submitted</span>
-                    </div>
-                    <p class="event-details">"This is an example of previous feedback text."</p>
-                    <div class="event-meta">
-                        <span>👤 student1</span>
-                        <span>🕒 11/6/2025, 7:06:02 AM</span>
-                        <span>💬 1 feedback</span>
-                    </div>
-                </div>
             </div>
 
             <div class="footer-box">

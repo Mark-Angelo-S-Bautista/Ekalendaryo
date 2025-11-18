@@ -428,3 +428,12 @@ body {
 .viewer-modal-close-btn:hover {
     background: #d4d9e6;
 }
+.dashboard_attend_btn:hover {
+    background-color: #f0f0f0;
+}
+/* Specific style when the button is in 'Attending' state (handled by JS inline styles mostly, but good for backup) */
+.attending-active {
+    background-color: #4caf50 !important;
+    color: white !important;
+    border-color: #4caf50 !important;
+}
