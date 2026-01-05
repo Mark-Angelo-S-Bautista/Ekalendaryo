@@ -260,6 +260,8 @@ class UserManagementController extends Controller
 
     public function archive()
     {
+        
+
         return view('UserManagement.archive.archive');
     }
 
