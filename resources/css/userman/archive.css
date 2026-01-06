@@ -211,3 +211,69 @@ select {
 .logout-btn .icon {
     font-style: normal; /* so it doesn’t go italic */
 }
+.dropdown-container {
+    margin-top: 10px;
+    max-height: 300px;
+    overflow-y: auto;
+    border-top: 1px solid #ccc;
+    padding-top: 10px;
+}
+
+.dropdown-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border-bottom: 1px solid #eee;
+    cursor: default;
+    background: #f9f9f9;
+    margin-bottom: 4px;
+    border-radius: 5px;
+}
+
+.dropdown-item:hover {
+    background: #e8f0fe;
+}
+.records-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+.records-table thead {
+    background-color: #2b5eff;
+    color: white;
+}
+
+.records-table th,
+.records-table td {
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.records-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.records-table tr:hover {
+    background-color: #e8f0fe;
+}
+
+.modal-pagination {
+    margin-top: 10px;
+    text-align: right;
+}
+
+.modal-pagination nav a {
+    padding: 5px 10px;
+    margin: 0 2px;
+    background: #2b5eff;
+    color: white;
+    border-radius: 5px;
+    text-decoration: none;
+}
+
+.modal-pagination nav a:hover {
+    background: #1f42c4;
+}

@@ -76,6 +76,8 @@ Route::middleware(['auth', 'backhistory'])->group(function () {
         Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('delete');
         //Insert users using CSV file
         Route::post('/users', [UserController::class, 'import'])->name('import');
+        //Change School Year
+        Route::post('/dashboard', [UserManagementController::class, 'changeSchoolYear']);
 
         Route::get('/activity_log', [UserManagementController::class, 'activity_log'])->name('activity_log');
         Route::get('/history', [UserManagementController::class, 'history'])->name('history');

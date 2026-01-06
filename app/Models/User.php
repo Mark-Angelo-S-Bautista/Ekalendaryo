@@ -28,6 +28,11 @@ class User extends Authenticatable
         'section',
         'role',
         'password',
+        'status',
+        'school_year_id',
+        'is_deleted',
+        'deleted_at',
+        'deleted_school_year',
         'reset_otp',
         'reset_otp_expires_at'
     ];
@@ -58,5 +63,10 @@ class User extends Authenticatable
     public function isStudent()
     {
         return $this->role === 'STUDENT';
+    }
+
+    public function schoolYear()
+    {
+        return $this->belongsTo(SchoolYear::class);
     }
 }

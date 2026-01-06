@@ -12,7 +12,12 @@
                 </p>
                 <p class="dashboard_school_year">Current School Year: SY.2025-2026</p>
             </div>
-            <button class="dashboard_change_year_btn">Change School Year</button>
+            <form action="{{ url('/usermanagement/dashboard') }}" method="POST">
+                @csrf
+                <button type="submit" class="dashboard_change_year_btn">
+                    Change School Year
+                </button>
+            </form>
         </section>
 
         <section class="dashboard_search_card">
@@ -267,4 +272,25 @@
             }
         });
     </script>
+    @if (session('success'))
+        <div id="toast"
+            style="position: fixed; top: 20px; right: 20px; background: #28a745; color: white; padding: 12px 22px; border-radius: 8px; z-index: 9999; opacity: 0; transition: opacity 0.5s;">
+            {{ session('success') }}
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const toast = document.getElementById('toast');
+                if (toast) {
+                    // Show the toast
+                    toast.style.opacity = '1';
+
+                    // Hide after 3 seconds
+                    setTimeout(() => {
+                        toast.style.opacity = '0';
+                    }, 3000);
+                }
+            });
+        </script>
+    @endif
 </x-usermanLayout>

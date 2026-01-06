@@ -5,9 +5,12 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Event;
+use App\Models\SchoolYear;
 use App\Models\Department;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 class UserManagementController extends Controller
 {
@@ -260,9 +263,70 @@ class UserManagementController extends Controller
 
     public function archive()
     {
-        
+        $inactiveUsers = User::where('status', '!=', 'active')->get();
 
-        return view('UserManagement.archive.archive');
+        $graduatedStudents = $inactiveUsers->where('status', 'graduated');
+        $recentlyDeleted = $inactiveUsers->whereIn('status', ['dropped', 'fired']);
+
+        // Function to paginate a collection manually
+        $paginate = function (Collection $items, $perPage = 10, $page = null) {
+            $page = $page ?: (LengthAwarePaginator::resolveCurrentPage() ?: 1);
+            $itemsForPage = $items->slice(($page - 1) * $perPage, $perPage)->values();
+            return new LengthAwarePaginator($itemsForPage, $items->count(), $perPage, $page, [
+                'path' => LengthAwarePaginator::resolveCurrentPath()
+            ]);
+        };
+
+        $graduatedStudentsPaginated = $paginate($graduatedStudents);
+        $recentlyDeletedPaginated = $paginate($recentlyDeleted);
+
+        return view('UserManagement.archive.archive', [
+            'graduatedStudents' => $graduatedStudentsPaginated,
+            'recentlyDeleted' => $recentlyDeletedPaginated
+        ]);
+    }
+
+    public function changeSchoolYear()
+    {
+        $currentSY = SchoolYear::where('is_active', 1)->firstOrFail();
+
+        // 2025-2026 → 2026-2027
+        [$start, $end] = explode('-', $currentSY->school_year);
+        $nextSY = ($start + 1) . '-' . ($end + 1);
+
+        // Deactivate current SY
+        $currentSY->update(['is_active' => 0]);
+
+        // Create new SY
+        $newSY = SchoolYear::create([
+            'school_year' => $nextSY,
+            'is_active' => 1
+        ]);
+
+        // Graduate 4th year students in one query
+        $graduatedCount = User::where('title', 'Student')
+            ->where('yearlevel', '4thYear')
+            ->where('status', 'active')
+            ->update([
+                'status' => 'graduated',
+                'school_year_id' => $newSY->id
+            ]);
+
+        // Promote 1st-3rd year students in one query using CASE
+        $promotedCount = User::where('title', 'Student')
+            ->where('status', 'active')
+            ->whereIn('yearlevel', ['1stYear', '2ndYear', '3rdYear'])
+            ->update([
+                'yearlevel' => \DB::raw("CASE 
+                    WHEN yearlevel = '1stYear' THEN '2ndYear'
+                    WHEN yearlevel = '2ndYear' THEN '3rdYear'
+                    WHEN yearlevel = '3rdYear' THEN '4thYear'
+                    ELSE yearlevel
+                END"),
+                'school_year_id' => $newSY->id
+            ]);
+
+        return redirect()->back()->with('success', 'School year changed successfully!');
     }
 
     public function destroy(Request $request)

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Department;
+use App\Models\SchoolYear;
 use Illuminate\Support\Facades\Hash;
 use League\Csv\Reader;
 use Illuminate\Support\Facades\Validator;
@@ -108,7 +109,14 @@ class UserController extends Controller
     public function destroy($id)
     {
         $user = User::findOrFail($id);
-        $user->delete();
+        $activeSY = SchoolYear::where('is_active', 1)->firstOrFail();
+
+        $user->update([
+            'status' => $user->title === 'Student' ? 'dropped' : 'fired',
+            'is_deleted' => 1,
+            'deleted_at' => now(),
+            'deleted_school_year' => $activeSY->school_year
+        ]);
 
         return redirect()->route('UserManagement.users')->with('success', 'User deleted successfully!');
     }

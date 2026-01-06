@@ -45,90 +45,104 @@
                 <span class="close-btn" onclick="closeModal('studentsModal')">&times;</span>
                 <div class="modal-header">
                     <span class="icon">🎓</span>
-                    Student Records - SY.2024-2025
+                    Student Records
                 </div>
-                <p>3 of 3 student records</p>
+                <p>{{ $graduatedStudents->total() }} student(s) records</p>
 
-                <label for="studentFilter">Filter by Department: </label>
-                <select id="studentFilter" onchange="filterStudents()">
-                    <option value="all">All Departments</option>
-                    <option value="BSAIS">BSAIS</option>
-                    <option value="BSIS-ACT">BSIS-ACT</option>
-                    <option value="BSOM">BSOM</option>
-                </select>
+                @if ($graduatedStudents->count() > 0)
+                    <table class="records-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th>Department</th>
+                                <th>School Year</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($graduatedStudents as $index => $student)
+                                <tr>
+                                    <td>{{ $graduatedStudents->firstItem() + $index }}</td>
+                                    <td>{{ $student->name }}</td>
+                                    <td>{{ $student->department }}</td>
+                                    <td>{{ $student->schoolYear->school_year ?? 'N/A' }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
 
-                <div id="studentList">
-                    <div class="student" data-dept="BSAIS">
-                        <h4>Jessica Brown</h4>
-                        <p>ID: BSAIS2024002 | Dept: BSAIS</p>
+                    <!-- Pagination Links -->
+                    <div class="modal-pagination">
+                        {{ $graduatedStudents->links() }}
                     </div>
-
-                    <div class="student" data-dept="BSIS-ACT">
-                        <h4>John Williams</h4>
-                        <p>ID: BSIS2024001 | Dept: BSIS-ACT</p>
-                    </div>
-
-                    <div class="student" data-dept="BSOM">
-                        <h4>Michael Davis</h4>
-                        <p>ID: BSOM2024003 | Dept: BSOM</p>
-                    </div>
-                </div>
+                @else
+                    <p>No graduated student records found.</p>
+                @endif
             </div>
         </div>
 
-        <!-- ✅ Recently Deleted Modal -->
+        <!-- Recently Deleted Modal -->
         <div id="deletedModal" class="modal">
             <div class="modal-content">
                 <span class="close-btn" onclick="closeModal('deletedModal')">&times;</span>
                 <div class="modal-header">
                     <span class="icon">🗑️</span>
-                    Recently Deleted - User Records
+                    Recently Deleted Users
                 </div>
-                <p>3 of 3 deleted user records</p>
+                <p>{{ $recentlyDeleted->total() }} user(s) records</p>
 
-                <div class="search-bar">
-                    <input type="text" id="deletedSearch" placeholder="🔍 Search deleted users..."
-                        onkeyup="searchDeleted()">
-                </div>
+                @if ($recentlyDeleted->count() > 0)
+                    <table class="records-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th>Department</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($recentlyDeleted as $index => $user)
+                                <tr>
+                                    <td>{{ $recentlyDeleted->firstItem() + $index }}</td>
+                                    <td>{{ $user->name }}</td>
+                                    <td>{{ $user->department }}</td>
+                                    <td>{{ ucfirst($user->status) }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
 
-                <div class="filter-container">
-                    <label for="userType">Filter by:</label>
-                    <select id="userType" onchange="toggleUserType()">
-                        <option value="all" selected>All Records</option>
-                        <option value="student">Student Records</option>
-                        <option value="faculty">Faculty Records</option>
-                    </select>
-
-                    <select id="deptFilter" onchange="filterDeleted()" style="display:none;">
-                        <option value="all">All Departments</option>
-                        <option value="BSAIS">BSAIS</option>
-                        <option value="BSIS-ACT">BSIS-ACT</option>
-                        <option value="BSOM">BSOM</option>
-                    </select>
-                </div>
-
-                <div id="deletedList" class="eventlist_">
-                    <div class="deleted-user" data-type="student" data-dept="BSAIS">
-                        <button class="restore-btn" onclick="restoreItem(this)">Restore</button>
-                        <h4>Jessica Brown</h4>
-                        <p>ID: BSAIS2024002 | Dept: BSAIS | Email: former2@school.edu</p>
+                    <!-- Pagination Links -->
+                    <div class="modal-pagination">
+                        {{ $recentlyDeleted->links() }}
                     </div>
-
-                    <div class="deleted-user" data-type="student" data-dept="BSIS-ACT">
-                        <button class="restore-btn" onclick="restoreItem(this)">Restore</button>
-                        <h4>John Williams</h4>
-                        <p>ID: BSIS2024001 | Dept: BSIS-ACT | Email: former1@school.edu</p>
-                    </div>
-
-                    <div class="deleted-user" data-type="faculty" data-dept="CS">
-                        <button class="restore-btn" onclick="restoreItem(this)">Restore</button>
-                        <h4>Prof. Sarah Johnson</h4>
-                        <p>ID: FAC2024001 | Dept: Computer Science | Email: sjohnson@school.edu</p>
-                    </div>
-                </div>
+                @else
+                    <p>No deleted user records found.</p>
+                @endif
             </div>
         </div>
     </body>
+
+    <script>
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) modal.style.display = "flex";
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) modal.style.display = "none";
+        }
+
+        // Optional: close modal when clicking outside
+        window.onclick = function(event) {
+            ["studentsModal", "deletedModal"].forEach((modalId) => {
+                const modal = document.getElementById(modalId);
+                if (event.target === modal) modal.style.display = "none";
+            });
+        };
+    </script>
 
     </html>
 </x-usermanLayout>
