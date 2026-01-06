@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Event;
 use App\Models\User;
 use App\Models\Department;
+use App\Models\ActivityLog;
 use App\Mail\EventNotificationMail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Auth;
@@ -107,6 +108,21 @@ class EventController extends Controller
         } else {
             $this->sendEmailsForEvent($event);
         }
+
+        ActivityLog::create([
+            'user_id' => Auth::id(),
+            'action_type' => 'created', // or 'edited' / 'deleted'
+            'model_type' => 'Event',    // or 'User'
+            'model_id' => $event->id,   // the affected model
+            'description' => [
+                'title' => $event->title,
+                'event_date' => $event->date,
+                'start_time' => $event->start_time,
+                'end_time' => $event->end_time,
+                'location' => $event->location,
+                'event_description' => $event->description,
+            ],
+        ]);
 
 
         return redirect()->back()->with('success', 'Event created and emails sent successfully!');
@@ -378,6 +394,39 @@ class EventController extends Controller
             $this->sendEmailsForEvent($event, true, $oldEvent);
         }
 
+        ActivityLog::create([
+            'user_id' => Auth::id(),
+            'action_type' => 'edited',
+            'model_type' => 'Event',
+            'model_id' => $event->id,
+            'description' => [
+                'title' => [
+                    'old' => $oldEvent->title,
+                    'new' => $event->title,
+                ],
+                'event_date' => [
+                    'old' => $oldEvent->date,
+                    'new' => $event->date,
+                ],
+                'start_time' => [
+                    'old' => $oldEvent->start_time,
+                    'new' => $event->start_time,
+                ],
+                'end_time' => [
+                    'old' => $oldEvent->end_time,
+                    'new' => $event->end_time,
+                ],
+                'location' => [
+                    'old' => $oldEvent->location,
+                    'new' => $event->location,
+                ],
+                'event_description' => [
+                    'old' => $oldEvent->description,
+                    'new' => $event->description,
+                ],
+            ],
+        ]);
+
         return redirect()->route('Editor.index')->with('success', 'Event Updated and Emails sent Successfully!');
     }
 
@@ -402,6 +451,21 @@ class EventController extends Controller
         
 
         $event->delete();
+
+        ActivityLog::create([
+            'user_id' => Auth::id(),
+            'action_type' => 'deleted', // or 'edited' / 'deleted'
+            'model_type' => 'Event',    // or 'User'
+            'model_id' => $event->id,   // the affected model
+            'description' => [
+                'title' => $event->title,
+                'event_date' => $event->date,
+                'start_time' => $event->start_time,
+                'end_time' => $event->end_time,
+                'location' => $event->location,
+                'event_description' => $event->description,
+            ],
+        ]);
 
         return redirect()->back()->with('success', 'Event Deleted and Email Sent Successfully!');
     }

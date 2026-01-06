@@ -10,100 +10,115 @@
     </head>
 
     <body>
-        <div class="content">
-            <div class="content-header">
-                <h2>Activity Log</h2>
-                <div class="filter-dropdown">
-                    <select id="filterSelect" onchange="filterActivities()">
-                        <option value="all">All</option>
-                        <option value="created">Created</option>
-                        <option value="edited">Edited</option>
-                        <option value="deleted">Deleted</option>
-                    </select>
-                </div>
+        <div class="activity-section">
+            <div class="activity-header">
+                <span>🔔 System Activity Tracking</span>
             </div>
 
-            <div class="activity-section">
-                <div class="activity-header">
-                    <span>🔔 System Activity Tracking</span>
-                </div>
-
-                <div class="activity-card-created" data-status="created">
+            @forelse($logs as $log)
+                <div class="activity-card-{{ $log->action_type }}" data-status="{{ $log->action_type }}">
                     <div class="activity-card-header">
                         <div style="display:flex;align-items:center;gap:10px;">
-                            <div class="icon">➕</div>
+                            <div class="icon">
+                                @if ($log->action_type === 'created')
+                                    ➕
+                                @elseif($log->action_type === 'edited')
+                                    ✏️
+                                @elseif($log->action_type === 'deleted')
+                                    🗑️
+                                @endif
+                            </div>
                             <div class="info">
-                                <h4>Event Created</h4>
-                                <p>Event: dsadasdasdad</p>
-                                <p>By: admin</p>
+                                @php
+                                    $title = $log->description['title'] ?? null;
+                                @endphp
+                                <h4>
+                                    {{ ucfirst($log->action_type) }} Event:
+                                    @if (is_array($title) && ($title['old'] ?? '') !== ($title['new'] ?? ''))
+                                        <del>{{ $title['old'] ?? 'Untitled' }}</del> → {{ $title['new'] ?? 'Untitled' }}
+                                    @else
+                                        {{ is_array($title) ? $title['new'] ?? 'Untitled' : $title ?? 'Untitled' }}
+                                    @endif
+                                </h4>
                             </div>
                         </div>
-                        <span class="status">created</span>
+                        <span class="status">{{ $log->action_type }}</span>
                     </div>
+
                     <div class="activity-meta">
-                        <p>📅 Event Date: 2025-11-06</p>
-                        <p>⏰ Event Time: 17:45</p>
-                        <p>📍 Location: BPC Court</p>
-                        <p>👤 Event Type: admin</p>
-                        <p class="performed">Action performed: 11/2/2025, 5:45:47 PM</p>
+                        <p class="performed">
+                            Action performed:
+                            {{ $log->created_at->timezone('Asia/Manila')->format('m/d/Y, g:i A') }}
+                        </p>
+
+                        @if ($log->model_type === 'Event')
+                            @php
+                                $event_date = $log->description['event_date'] ?? null;
+                                $start_time = $log->description['start_time'] ?? null;
+                                $end_time = $log->description['end_time'] ?? null;
+                                $location = $log->description['location'] ?? null;
+                            @endphp
+
+                            <p>📅 Event Date:</p>
+                            <p>
+                                @if (is_array($event_date) && ($event_date['old'] ?? '') !== ($event_date['new'] ?? ''))
+                                    <del>{{ $event_date['old'] ?? 'N/A' }}</del> → {{ $event_date['new'] ?? 'N/A' }}
+                                @else
+                                    {{ is_array($event_date) ? $event_date['new'] ?? 'N/A' : $event_date ?? 'N/A' }}
+                                @endif
+                            </p>
+
+                            <p>⏰ Time:</p>
+                            <p>
+                                @php
+                                    $start_changed =
+                                        is_array($start_time) &&
+                                        ($start_time['old'] ?? '') !== ($start_time['new'] ?? '');
+                                    $end_changed =
+                                        is_array($end_time) && ($end_time['old'] ?? '') !== ($end_time['new'] ?? '');
+                                @endphp
+
+                                @if ($start_changed || $end_changed)
+                                    <del>
+                                        {{ $start_changed ? $start_time['old'] ?? 'N/A' : $start_time['new'] ?? 'N/A' }}
+                                        –
+                                        {{ $end_changed ? $end_time['old'] ?? 'N/A' : $end_time['new'] ?? 'N/A' }}
+                                    </del>
+                                    →
+                                    {{ $start_time['new'] ?? ($start_time ?? 'N/A') }} –
+                                    {{ $end_time['new'] ?? ($end_time ?? 'N/A') }}
+                                @else
+                                    {{ $start_time['new'] ?? ($start_time ?? 'N/A') }} –
+                                    {{ $end_time['new'] ?? ($end_time ?? 'N/A') }}
+                                @endif
+                            </p>
+
+                            <p>📍 Location:</p>
+                            <p>
+                                @if (is_array($location) && ($location['old'] ?? '') !== ($location['new'] ?? ''))
+                                    <del>{{ $location['old'] ?? 'N/A' }}</del> → {{ $location['new'] ?? 'N/A' }}
+                                @else
+                                    {{ is_array($location) ? $location['new'] ?? 'N/A' : $location ?? 'N/A' }}
+                                @endif
+                            </p>
+                        @endif
                     </div>
+
                     <div class="activity-details">
-                        <strong>Event Details:</strong>
-                        <p>Description: adadadasdad</p>
+                        <strong>Description:</strong>
+                        @php
+                            $desc = $log->description['event_description'] ?? null;
+                        @endphp
+                        @if (is_array($desc) && ($desc['old'] ?? '') !== ($desc['new'] ?? ''))
+                            <p><del>{{ $desc['old'] ?? 'N/A' }}</del> → {{ $desc['new'] ?? 'N/A' }}</p>
+                        @else
+                            <p>{{ is_array($desc) ? $desc['new'] ?? 'N/A' : $desc ?? 'N/A' }}</p>
+                        @endif
                     </div>
                 </div>
-
-                <div class="activity-card-edited" data-status="edited">
-                    <div class="activity-card-header">
-                        <div style="display:flex;align-items:center;gap:10px;">
-                            <div class="icon">✏️</div>
-                            <div class="info">
-                                <h4>Event Edited</h4>
-                                <p>Event: Meeting Schedule</p>
-                                <p>By: admin</p>
-                            </div>
-                        </div>
-                        <span class="status">edited</span>
-                    </div>
-                    <div class="activity-meta">
-                        <p>📅 Event Date: 2025-11-07</p>
-                        <p>⏰ Event Time: 09:00</p>
-                        <p>📍 Location: Office Room</p>
-                        <p>👤 Event Type: admin</p>
-                        <p class="performed">Action performed: 11/7/2025, 9:00:00 AM</p>
-                    </div>
-                    <div class="activity-details">
-                        <strong>Event Details:</strong>
-                        <p>Description: Edited description sample</p>
-                    </div>
-                </div>
-
-                <div class="activity-card-deleted" data-status="deleted">
-                    <div class="activity-card-header">
-                        <div style="display:flex;align-items:center;gap:10px;">
-                            <div class="icon">🗑️</div>
-                            <div class="info">
-                                <h4>Event Deleted</h4>
-                                <p>Event: Old Event</p>
-                                <p>By: admin</p>
-                            </div>
-                        </div>
-                        <span class="status">deleted</span>
-                    </div>
-                    <div class="activity-meta">
-                        <p>📅 Event Date: 2025-11-02</p>
-                        <p>⏰ Event Time: 12:00</p>
-                        <p>📍 Location: Auditorium</p>
-                        <p>👤 Event Type: admin</p>
-                        <p class="performed">Action performed: 11/2/2025, 12:00:00 PM</p>
-                    </div>
-                    <div class="activity-details">
-                        <strong>Event Details:</strong>
-                        <p>Description: This event was removed.</p>
-                    </div>
-                </div>
-
-            </div>
+            @empty
+                <p>No activity found.</p>
+            @endforelse
         </div>
     </body>
 

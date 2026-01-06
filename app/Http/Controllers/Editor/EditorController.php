@@ -5,6 +5,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Event;
+use App\Models\ActivityLog;
 use Carbon\Carbon;
 use App\Models\User;
 
@@ -101,7 +102,14 @@ class EditorController extends Controller
 
     public function activity_log()
     {
-        return view('Editor.activity_log');
+        $userId = Auth::id();
+
+        // Fetch logs for current editor, latest first
+        $logs = ActivityLog::where('user_id', $userId)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('Editor.activity_log', compact('logs'));
     }
 
     public function history()
