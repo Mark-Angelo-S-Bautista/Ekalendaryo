@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Editor;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 use App\Models\Event;
+use Illuminate\Support\Facades\Hash;
 use App\Models\ActivityLog;
 use Carbon\Carbon;
 use App\Models\User;
@@ -158,7 +160,73 @@ class EditorController extends Controller
 
     public function profile()
     {
-        return view('Editor.profile');
+        $user = Auth::user();
+        return view('Editor.profile', compact('user'));
+    }
+
+    // Update name or userId
+    public function updateProfile(Request $request)
+    {
+        $user = Auth::user();
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'userId' => 'required|string|max:50|unique:users,userId,' . $user->id,
+        ]);
+
+        $user->update([
+            'name' => $request->name,
+            'userId' => $request->userId,
+        ]);
+
+        return back()->with('success', 'Profile updated successfully.');
+    }
+
+    // Update email with verification
+    public function updateEmail(Request $request)
+    {
+        $user = Auth::user();
+
+        $request->validate([
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'password' => 'required',
+        ]);
+
+        if (!Hash::check($request->password, $user->password)) {
+            return back()->withErrors(['password' => 'Incorrect password.']);
+        }
+
+        $user->email = $request->email;
+        $user->email_verified_at = null; // mark email as unverified
+        $user->save();
+
+        // Send email verification
+        $user->sendEmailVerificationNotification();
+
+        return back()->with('success', 'Email updated. Please verify your new email.');
+    }
+
+    // Update password
+    public function updatePassword(Request $request)
+    {
+        if (!Hash::check($request->current_password, auth()->user()->password)) {
+            return response()->json([
+                'errors' => [
+                    'current_password' => ['The current password is incorrect.'],
+                ]
+            ], 422);
+        }
+
+        $request->validate([
+            'new_password' => 'required|min:8|confirmed',
+        ]);
+
+        auth()->user()->update([
+            'password' => bcrypt($request->new_password),
+        ]);
+
+        return response()->json([
+            'message' => 'Password updated successfully',
+        ]);
     }
 
     public function destroy(Request $request)

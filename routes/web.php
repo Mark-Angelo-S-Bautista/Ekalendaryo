@@ -46,6 +46,9 @@ Route::middleware(['auth', 'backhistory'])->group(function () {
         Route::get('/event/{event}/feedback', [EditorController::class, 'getFeedback']);
         Route::get('/archive', [EditorController::class, 'archive'])->name('archive');
         Route::get('/profile', [EditorController::class, 'profile'])->name('profile');
+        Route::post('/profile/update', [EditorController::class, 'updateProfile'])->name('editor.profile.update');
+        Route::post('/profile/update-email', [EditorController::class, 'updateEmail'])->name('editor.profile.updateEmail');
+        Route::post('/profile/update-password', [EditorController::class, 'updatePassword'])->name('editor.profile.updatePassword');
         Route::post('/logout', [EditorController::class, 'destroy'])->name('logout');
 
         //Insert event into Database
