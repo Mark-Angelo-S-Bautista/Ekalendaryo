@@ -114,7 +114,41 @@ class EditorController extends Controller
 
     public function history()
     {
-        return view('Editor.history');
+        $userId = Auth::id();
+
+        $today = Carbon::today('Asia/Manila');
+
+        // Auto-update status based on date ONLY
+        Event::whereDate('date', '>', $today)
+            ->update(['status' => 'upcoming']);
+
+        Event::whereDate('date', '=', $today)
+            ->update(['status' => 'ongoing']);
+
+        Event::whereDate('date', '<', $today)
+            ->update(['status' => 'completed']);
+
+        // Fetch completed events only
+        $eventStatus = Event::where('status', 'completed')
+            ->orderBy('date', 'desc')
+            ->get();
+
+        $events = Event::where('user_id', $userId)
+            ->where('status', 'completed')
+            ->whereDate('date', '<', Carbon::today())
+            ->orderBy('date', 'desc')
+            ->paginate(3);
+
+        return view('Editor.history', compact('events', 'eventStatus'));
+    }
+
+    public function getFeedback(Event $event)
+    {
+       // Paginate feedbacks, e.g., 5 per page
+        $feedbacks = $event->feedbacks()->with('user')->orderBy('created_at', 'desc')->paginate(2);
+
+        // Return a Blade view for modal content
+        return view('Editor.partials.feedback_modal_content', compact('feedbacks'))->render();
     }
 
     public function archive()

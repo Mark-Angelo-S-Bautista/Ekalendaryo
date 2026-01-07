@@ -153,3 +153,171 @@ h2 {
 .logout-btn .icon {
     font-style: normal; /* so it doesn’t go italic */
 }
+/* =========================
+   SIMPLE PAGINATION (NO SVG)
+   ========================= */
+
+.simple-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    margin: 30px 0;
+}
+
+.simple-pagination a,
+.simple-pagination span {
+    min-width: 36px;
+    height: 36px;
+    padding: 0 12px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 6px;
+    border: 1px solid #ddd;
+
+    font-size: 14px;
+    text-decoration: none;
+    background: #fff;
+    color: #333;
+}
+
+.simple-pagination a:hover {
+    background: #f1f1f1;
+}
+
+.simple-pagination .active {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: #fff;
+    font-weight: 600;
+}
+
+.simple-pagination .disabled {
+    color: #aaa;
+    background: #f9f9f9;
+    cursor: not-allowed;
+}
+
+/* Feedback Button */
+.feedback-btn {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 6px;
+    background-color: #17a2b8;
+    color: white;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.feedback-btn:hover {
+    background-color: #138496;
+    transform: scale(1.05);
+}
+
+/* Feedback modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+    animation: fadeIn 0.3s;
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 10% auto;
+    padding: 25px;
+    border-radius: 12px;
+    width: 60%;
+    max-height: 70vh;
+    overflow-y: auto;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    position: relative;
+    animation: slideIn 0.3s;
+}
+
+.close-btn {
+    position: absolute;
+    top: 12px;
+    right: 15px;
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.close-btn:hover {
+    color: #007bff;
+}
+
+#feedbackList {
+    margin-top: 20px;
+}
+
+.feedback-item {
+    border-bottom: 1px solid #eee;
+    padding: 10px 0;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+/* Pagination buttons */
+.feedback-pagination button {
+    background-color: #007bff; /* blue */
+    color: #fff;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: 0.2s;
+}
+
+/* Hover effect */
+.feedback-pagination button:hover:not(:disabled) {
+    background-color: #0056b3;
+}
+
+/* Disabled button */
+.feedback-pagination button:disabled {
+    background-color: #c0c0c0;
+    cursor: not-allowed;
+}
+
+/* Optional: current page indicator */
+.feedback-pagination span.current-page {
+    font-weight: bold;
+    color: #333;
+    padding: 0 6px;
+}

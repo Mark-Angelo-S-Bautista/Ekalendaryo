@@ -43,6 +43,7 @@ Route::middleware(['auth', 'backhistory'])->group(function () {
         // Route::get('/ManageEvents', [EditorController::class, 'manageEvents'])->name('manageEvents');
         Route::get('/activity_log', [EditorController::class, 'activity_log'])->name('activity_log');
         Route::get('/history', [EditorController::class, 'history'])->name('history');
+        Route::get('/event/{event}/feedback', [EditorController::class, 'getFeedback']);
         Route::get('/archive', [EditorController::class, 'archive'])->name('archive');
         Route::get('/profile', [EditorController::class, 'profile'])->name('profile');
         Route::post('/logout', [EditorController::class, 'destroy'])->name('logout');
