@@ -107,7 +107,7 @@ class EditorController extends Controller
         // Fetch logs for current editor, latest first
         $logs = ActivityLog::where('user_id', $userId)
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(3);
 
         return view('Editor.activity_log', compact('logs'));
     }

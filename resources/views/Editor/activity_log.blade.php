@@ -119,6 +119,9 @@
             @empty
                 <p>No activity found.</p>
             @endforelse
+            <div class="pagination-wrapper">
+                {{ $logs->links('vendor.pagination.simple') }}
+            </div>
         </div>
     </body>
 
