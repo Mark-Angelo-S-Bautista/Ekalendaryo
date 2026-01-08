@@ -40,13 +40,65 @@ const btnChangeEmail = document.getElementById("btnChangeEmail");
 const emailForm = document.getElementById("emailForm");
 const cancelEmail = document.getElementById("cancelEmail");
 
+const newEmailError = document.getElementById("newEmailError");
+const emailPasswordError = document.getElementById("emailPasswordError");
+
 if (btnChangeEmail && emailForm && cancelEmail) {
     btnChangeEmail.addEventListener("click", () =>
         emailForm.classList.remove("hidden")
     );
-    cancelEmail.addEventListener("click", () =>
-        emailForm.classList.add("hidden")
-    );
+
+    cancelEmail.addEventListener("click", () => {
+        emailForm.classList.add("hidden");
+        emailForm.reset();
+        newEmailError.innerText = "";
+        emailPasswordError.innerText = "";
+    });
+}
+
+// -- AJAX Email Update --
+if (emailForm) {
+    emailForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        // Clear previous errors
+        newEmailError.innerText = "";
+        emailPasswordError.innerText = "";
+
+        const formData = new FormData(emailForm);
+
+        fetch(emailForm.action, {
+            method: "POST",
+            headers: {
+                "X-CSRF-TOKEN": document.querySelector(
+                    'meta[name="csrf-token"]'
+                ).content,
+                Accept: "application/json",
+            },
+            body: formData,
+        })
+            .then(async (response) => {
+                const data = await response.json();
+
+                if (!response.ok) {
+                    if (data.errors?.new_email) {
+                        newEmailError.innerText = data.errors.new_email[0];
+                    }
+                    if (data.errors?.current_password) {
+                        emailPasswordError.innerText =
+                            data.errors.current_password[0];
+                    }
+                    return;
+                }
+
+                showToast(data.message);
+                emailForm.reset();
+                emailForm.classList.add("hidden");
+            })
+            .catch(() => {
+                showToast("Something went wrong.");
+            });
+    });
 }
 
 // -- Password Form Toggle --

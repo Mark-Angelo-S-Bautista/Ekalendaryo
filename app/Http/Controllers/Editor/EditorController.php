@@ -9,6 +9,9 @@ use Illuminate\Validation\ValidationException;
 use App\Models\Event;
 use Illuminate\Support\Facades\Hash;
 use App\Models\ActivityLog;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
+use App\Mail\VerifyNewEmail;
 use Carbon\Carbon;
 use App\Models\User;
 
@@ -185,25 +188,54 @@ class EditorController extends Controller
     // Update email with verification
     public function updateEmail(Request $request)
     {
-        $user = Auth::user();
-
+        // Validate email first
         $request->validate([
-            'email' => 'required|email|unique:users,email,' . $user->id,
-            'password' => 'required',
+            'new_email' => 'required|email|unique:users,email',
+            'current_password' => 'required',
         ]);
 
-        if (!Hash::check($request->password, $user->password)) {
-            return back()->withErrors(['password' => 'Incorrect password.']);
+        // Check password
+        if (!Hash::check($request->current_password, auth()->user()->password)) {
+            return response()->json([
+                'errors' => [
+                    'current_password' => ['The current password is incorrect.'],
+                ]
+            ], 422);
         }
 
-        $user->email = $request->email;
-        $user->email_verified_at = null; // mark email as unverified
-        $user->save();
+        // Generate token
+        $token = Str::random(64);
 
-        // Send email verification
-        $user->sendEmailVerificationNotification();
+        // Save pending email
+        auth()->user()->update([
+            'pending_email' => $request->new_email,
+            'email_change_token' => $token,
+        ]);
 
-        return back()->with('success', 'Email updated. Please verify your new email.');
+        // Send verification email
+        Mail::to($request->new_email)->send(
+            new VerifyNewEmail($token)
+        );
+
+        return response()->json([
+            'message' => 'Verification email sent to your new email address.',
+        ]);
+    }
+
+    public function verifyNewEmail($token)
+    {
+        $user = User::where('email_change_token', $token)->firstOrFail();
+
+        $user->update([
+            'email' => $user->pending_email,
+            'pending_email' => null,
+            'email_change_token' => null,
+            'email_verified_at' => now(),
+        ]);
+
+        return redirect()
+            ->route('Editor.profile')
+            ->with('success', 'Your email has been updated successfully.');
     }
 
     // Update password

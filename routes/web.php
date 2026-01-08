@@ -32,6 +32,8 @@ Route::get('/password/change', function () {
 Route::post('/password/change', [PasswordResetController::class, 'changePassword'])
     ->name('password.change');
 
+Route::get('/profile/verify-email-change/{token}',[EditorController::class, 'verifyNewEmail'])->name('profile.verifyNewEmail');
+
 
 Route::middleware(['auth', 'backhistory'])->group(function () {
     // --- A. EDITOR ROUTES (Requires 'auth' + 'role.editor') ---
@@ -49,6 +51,7 @@ Route::middleware(['auth', 'backhistory'])->group(function () {
         Route::post('/profile/update', [EditorController::class, 'updateProfile'])->name('editor.profile.update');
         Route::post('/profile/update-email', [EditorController::class, 'updateEmail'])->name('editor.profile.updateEmail');
         Route::post('/profile/update-password', [EditorController::class, 'updatePassword'])->name('editor.profile.updatePassword');
+        Route::post('/profile/update-email',[EditorController::class, 'updateEmail'])->name('profile.updateEmail');
         Route::post('/logout', [EditorController::class, 'destroy'])->name('logout');
 
         //Insert event into Database

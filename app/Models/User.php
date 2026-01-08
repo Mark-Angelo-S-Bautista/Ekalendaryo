@@ -34,7 +34,9 @@ class User extends Authenticatable
         'deleted_at',
         'deleted_school_year',
         'reset_otp',
-        'reset_otp_expires_at'
+        'reset_otp_expires_at',
+        'pending_email',
+        'email_change_token'
     ];
 
     /**

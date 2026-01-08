@@ -65,27 +65,42 @@
 
             {{-- EMAIL --}}
             <div class="card">
-                <h4>📧 Email Address</h4>
+                <h4>📧 Email</h4>
+
                 <div class="inner-panel">
                     <div>
-                        <strong>Current Email</strong>
-                        <div class="muted">{{ $user->email }}</div>
+                        <strong>Email</strong>
+                        <div class="muted">{{ Auth::user()->email }}</div>
                     </div>
-                    <button type="button" class="btn btn-outline" id="btnChangeEmail">Change Email</button>
+                    <button type="button" class="btn btn-outline" id="btnChangeEmail">
+                        Change Email
+                    </button>
                 </div>
 
-                <form method="POST" action="{{ route('Editor.editor.profile.updateEmail') }}" class="expandable hidden"
+                <form method="POST" action="{{ route('Editor.profile.updateEmail') }}" class="expandable hidden"
                     id="emailForm">
                     @csrf
-                    <input type="email" name="email" placeholder="New email address">
-                    <input type="email" name="email_confirmation" placeholder="Confirm new email">
+
                     <div class="password-wrapper">
-                        <input type="password" name="password" id="emailPwd" placeholder="Current password to confirm">
-                        <button class="eye-btn" type="button" onclick="togglePassword('emailPwd', this)">👁</button>
+                        <input type="email" name="new_email" id="newEmail" placeholder="New email" required>
                     </div>
+                    <div id="newEmailError" class="error-message"></div>
+
+                    <div class="password-wrapper">
+                        <input type="password" name="current_password" id="emailCurrentPwd"
+                            placeholder="Current password" required>
+                        <button type="button" class="eye-btn"
+                            onclick="togglePassword('emailCurrentPwd', this)">👁</button>
+                    </div>
+                    <div id="emailPasswordError" class="error-message"></div>
+
                     <div class="actions">
-                        <button type="button" class="btn btn-outline" id="cancelEmail">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Update Email</button>
+                        <button type="button" class="btn btn-outline" id="cancelEmail">
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            Update Email
+                        </button>
                     </div>
                 </form>
             </div>
