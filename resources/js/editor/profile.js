@@ -50,40 +50,37 @@ if (btnChangeEmail && emailForm && cancelEmail) {
 }
 
 // -- Password Form Toggle --
-const btnChangePassword = document.getElementById("btnChangePassword");
-const passwordForm = document.getElementById("passwordForm");
-const cancelPassword = document.getElementById("cancelPassword");
-const passwordErrors = document.getElementById("passwordErrors");
+document.addEventListener("DOMContentLoaded", () => {
+    const btnChangePassword = document.getElementById("btnChangePassword");
+    const passwordForm = document.getElementById("passwordForm");
+    const cancelPassword = document.getElementById("cancelPassword");
 
-if (btnChangePassword && passwordForm && cancelPassword) {
-    btnChangePassword.addEventListener("click", () =>
-        passwordForm.classList.remove("hidden")
+    const currentPasswordError = document.getElementById(
+        "currentPasswordError"
     );
-    cancelPassword.addEventListener("click", () => {
-        passwordForm.classList.add("hidden");
-        if (passwordErrors) passwordErrors.innerHTML = "";
-        passwordForm.reset();
+    const confirmPasswordError = document.getElementById(
+        "confirmPasswordError"
+    );
+
+    if (!passwordForm) return;
+
+    // Show form
+    btnChangePassword?.addEventListener("click", () => {
+        passwordForm.classList.remove("hidden");
     });
-}
 
-// -- Toggle Password Visibility --
-function togglePassword(inputId, btn) {
-    const input = document.getElementById(inputId);
-    if (input) {
-        input.type = input.type === "password" ? "text" : "password";
-    }
-}
+    // Cancel
+    cancelPassword?.addEventListener("click", () => {
+        passwordForm.reset();
+        passwordForm.classList.add("hidden");
+        clearErrors();
+    });
 
-const currentPasswordError = document.getElementById("currentPasswordError");
+    // Submit via AJAX
+    passwordForm.addEventListener("submit", (e) => {
+        e.preventDefault(); // 🚫 NO PAGE RELOAD
 
-if (passwordForm) {
-    passwordForm.addEventListener("submit", function (e) {
-        e.preventDefault(); // stop page reload
-
-        // clear previous error
-        if (currentPasswordError) {
-            currentPasswordError.innerText = "";
-        }
+        clearErrors();
 
         const formData = new FormData(passwordForm);
 
@@ -100,20 +97,24 @@ if (passwordForm) {
             .then(async (response) => {
                 const data = await response.json();
 
-                // ❌ Validation error (wrong current password)
                 if (!response.ok) {
-                    if (data.errors && data.errors.current_password) {
+                    // Current password error
+                    if (data.errors?.current_password) {
                         currentPasswordError.innerText =
                             data.errors.current_password[0];
-                        return;
                     }
 
-                    currentPasswordError.innerText = "Password update failed.";
+                    // Confirm password mismatch
+                    if (data.errors?.new_password) {
+                        confirmPasswordError.innerText =
+                            data.errors.new_password[0];
+                    }
+
                     return;
                 }
 
                 // ✅ Success
-                showToast("Password updated successfully");
+                showToast(data.message);
                 passwordForm.reset();
                 passwordForm.classList.add("hidden");
             })
@@ -122,6 +123,19 @@ if (passwordForm) {
                     "Something went wrong. Please try again.";
             });
     });
+
+    function clearErrors() {
+        currentPasswordError.innerText = "";
+        confirmPasswordError.innerText = "";
+    }
+});
+
+// Toggle password visibility
+function togglePassword(id) {
+    const input = document.getElementById(id);
+    if (input) {
+        input.type = input.type === "password" ? "text" : "password";
+    }
 }
 
 // -- Toast Notification Function --

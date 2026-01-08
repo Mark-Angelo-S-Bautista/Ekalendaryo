@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Editor;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Validator;
 use Illuminate\Validation\ValidationException;
 use App\Models\Event;
 use Illuminate\Support\Facades\Hash;
@@ -208,18 +209,28 @@ class EditorController extends Controller
     // Update password
     public function updatePassword(Request $request)
     {
+        // Validate inputs FIRST (except current password check)
+        $validator = \Validator::make($request->all(), [
+            'current_password' => 'required',
+            'new_password' => 'required|min:8|confirmed',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        // Check current password
         if (!Hash::check($request->current_password, auth()->user()->password)) {
             return response()->json([
                 'errors' => [
-                    'current_password' => ['The current password is incorrect.'],
+                    'current_password' => ['The current password is incorrect.']
                 ]
             ], 422);
         }
 
-        $request->validate([
-            'new_password' => 'required|min:8|confirmed',
-        ]);
-
+        // Update password
         auth()->user()->update([
             'password' => bcrypt($request->new_password),
         ]);

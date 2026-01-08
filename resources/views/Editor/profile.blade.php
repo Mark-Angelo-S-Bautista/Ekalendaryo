@@ -5,6 +5,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
         <title>eKalendaryo — Profile</title>
         @vite(['resources/css/editor/profile.css', 'resources/js/editor/profile.js'])
     </head>
@@ -95,7 +96,6 @@
                 <div class="inner-panel">
                     <div>
                         <strong>Password</strong>
-                        <div class="muted">Last updated: {{ $user->password_last_updated ?? 'Never recorded' }}</div>
                     </div>
                     <button type="button" class="btn btn-outline" id="btnChangePassword">Change Password</button>
                 </div>
@@ -103,34 +103,32 @@
                 <form method="POST" action="{{ route('Editor.editor.profile.updatePassword') }}"
                     class="expandable hidden" id="passwordForm">
                     @csrf
-                    <div class="password-wrapper">
-                        <input type="password" name="current_password" id="currentPwd" placeholder="Current password"
-                            required>
-                        <button class="eye-btn" type="button" onclick="togglePassword('currentPwd', this)">👁</button>
-                    </div>
 
-                    <!-- Error message for current password -->
+                    {{-- Current Password --}}
+                    <div class="password-wrapper">
+                        <input type="password" name="current_password" id="currentPwd" placeholder="Current password">
+                        <button type="button" class="eye-btn" onclick="togglePassword('currentPwd')">👁</button>
+                    </div>
                     <div id="currentPasswordError" class="error-message"></div>
 
+                    {{-- New Password --}}
                     <div class="password-wrapper">
-                        <input type="password" name="new_password" id="newPwd" placeholder="New password" required>
-                        <button class="eye-btn" type="button" onclick="togglePassword('newPwd', this)">👁</button>
+                        <input type="password" name="new_password" id="newPwd" placeholder="New password">
+                        <button type="button" class="eye-btn" onclick="togglePassword('newPwd')">👁</button>
                     </div>
 
+                    {{-- Confirm Password --}}
                     <div class="password-wrapper">
                         <input type="password" name="new_password_confirmation" id="confirmPwd"
-                            placeholder="Confirm new password" required>
-                        <button class="eye-btn" type="button"
-                            onclick="togglePassword('confirmPwd', this)">👁</button>
+                            placeholder="Confirm new password">
+                        <button type="button" class="eye-btn" onclick="togglePassword('confirmPwd')">👁</button>
                     </div>
+                    <div id="confirmPasswordError" class="error-message"></div>
 
                     <div class="actions">
                         <button type="button" class="btn btn-outline" id="cancelPassword">Cancel</button>
                         <button type="submit" class="btn btn-primary">Update Password</button>
                     </div>
-
-                    {{-- place for errors --}}
-                    <div id="passwordErrors" class="error-message"></div>
                 </form>
             </div>
         </div>
