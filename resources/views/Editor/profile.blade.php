@@ -89,8 +89,9 @@
                     <div class="password-wrapper">
                         <input type="password" name="current_password" id="emailCurrentPwd"
                             placeholder="Current password" required>
-                        <button type="button" class="eye-btn"
-                            onclick="togglePassword('emailCurrentPwd', this)">👁</button>
+                        <button type="button" class="eye-btn" data-toggle-password>
+                            👁
+                        </button>
                     </div>
                     <div id="emailPasswordError" class="error-message"></div>
 
@@ -122,21 +123,27 @@
                     {{-- Current Password --}}
                     <div class="password-wrapper">
                         <input type="password" name="current_password" id="currentPwd" placeholder="Current password">
-                        <button type="button" class="eye-btn" onclick="togglePassword('currentPwd')">👁</button>
+                        <button type="button" class="eye-btn" data-toggle-password>
+                            👁
+                        </button>
                     </div>
                     <div id="currentPasswordError" class="error-message"></div>
 
                     {{-- New Password --}}
                     <div class="password-wrapper">
                         <input type="password" name="new_password" id="newPwd" placeholder="New password">
-                        <button type="button" class="eye-btn" onclick="togglePassword('newPwd')">👁</button>
+                        <button type="button" class="eye-btn" data-toggle-password>
+                            👁
+                        </button>
                     </div>
 
                     {{-- Confirm Password --}}
                     <div class="password-wrapper">
                         <input type="password" name="new_password_confirmation" id="confirmPwd"
                             placeholder="Confirm new password">
-                        <button type="button" class="eye-btn" onclick="togglePassword('confirmPwd')">👁</button>
+                        <button type="button" class="eye-btn" data-toggle-password>
+                            👁
+                        </button>
                     </div>
                     <div id="confirmPasswordError" class="error-message"></div>
 

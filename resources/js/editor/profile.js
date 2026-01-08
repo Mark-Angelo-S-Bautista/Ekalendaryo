@@ -182,13 +182,29 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
-// Toggle password visibility
-function togglePassword(id) {
-    const input = document.getElementById(id);
-    if (input) {
-        input.type = input.type === "password" ? "text" : "password";
+// ==============================
+// Toggle Password Visibility (Eye Icon)
+// ==============================
+document.addEventListener("click", function (e) {
+    const btn = e.target.closest("[data-toggle-password]");
+    if (!btn) return;
+
+    const wrapper = btn.closest(".password-wrapper");
+    if (!wrapper) return;
+
+    const input = wrapper.querySelector(
+        "input[type='password'], input[type='text']"
+    );
+    if (!input) return;
+
+    if (input.type === "password") {
+        input.type = "text";
+        btn.textContent = "👁️‍🗨️";
+    } else {
+        input.type = "password";
+        btn.textContent = "👁";
     }
-}
+});
 
 // -- Toast Notification Function --
 function showToast(message) {
