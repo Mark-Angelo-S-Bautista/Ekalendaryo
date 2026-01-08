@@ -42,17 +42,33 @@
                 </form>
 
                 <div class="employment">
-                    <p style="font-weight:600; margin-bottom:8px;">Employment Information</p>
+                    <p style="font-weight:600; margin-bottom:8px;">
+                        Employment Information
+                    </p>
+
                     <div class="employment-row">
                         <div>
                             <span style="font-weight:300;">Title</span>
-                            <span style="margin-left:90px;">Department Head</span>
+                            <span style="margin-left:90px;">
+                                @if ($user->title === 'Offices')
+                                    {{ $user->office_name ?? 'Not specified' }}
+                                @else
+                                    {{ $user->title ?? 'Not specified' }}
+                                @endif
+                            </span>
                         </div>
                     </div>
+
                     <div class="employment-row">
                         <div>
                             <span style="font-weight:300;">Department:</span>
-                            <span style="margin-left:100px;">BSIS-ACT</span>
+                            <span style="margin-left:100px;">
+                                @if ($user->department === 'OFFICES')
+                                    {{ $user->office_name ?? 'Not specified' }}
+                                @else
+                                    {{ $user->department ?? 'Not specified' }}
+                                @endif
+                            </span>
                         </div>
                     </div>
                 </div>
