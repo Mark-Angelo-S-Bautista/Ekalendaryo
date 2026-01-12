@@ -3,126 +3,177 @@
     <html lang="en">
 
     <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
         <title>eKalendaryo — Profile</title>
         @vite(['resources/css/viewer/profile.css', 'resources/js/viewer/profile.js'])
-
     </head>
 
     <body>
-        <div class="profile_container">
-            <h1>Profile</h1>
-            <div class="top-right">
-                <button id="editProfile" class="btn btn-primary">✏ Edit Profile</button>
-                <button id="saveProfile" class="btn btn-primary hidden">💾 Save Changes</button>
-            </div>
+        <h1>Profile</h1>
 
-            <div class="section">
-                <h3>Personal Information</h3>
-                <div class="card">
+        {{-- Edit buttons for personal info --}}
+        <div class="top-right">
+            <button id="editProfile" class="btn btn-primary">✏ Edit Profile</button>
+            <button id="saveProfile" class="btn btn-primary hidden">💾 Save Changes</button>
+        </div>
+
+        {{-- Personal Information --}}
+        <div class="section">
+            <h3>Personal Information</h3>
+            <div class="card">
+                <form method="POST" action="{{ route('Viewer.profile.update') }}" id="profileForm">
+                    @csrf
                     <div class="row">
-                        <div class="input-box"><input type="text" id="adminName" value="SMIS Administrator" disabled>
+                        <div class="input-box">
+                            <input type="text" name="name" id="adminName" value="{{ old('name', $user->name) }}"
+                                disabled>
                         </div>
-                        <div class="input-box" style="max-width:200px"><input type="text" id="adminRole"
-                                value="SMIS" disabled></div>
-                    </div>
-
-
-                    <div class="employment">
-                        <p style="font-weight:600; margin-bottom:8px;">Academic Information</p>
-                        <div class="employment-row">
-                            <div>
-                                <span style="font-weight:300;">User ID:</span>
-                                <span style="margin-left:90px;">MA12345678</span>
-                                <span style="margin-left:250px; font-weight:300;">Department:</span>
-                                <span style="margin-left:50px;"><span class="badge">BSIS/ACT</span></span>
-                            </div>
+                        <div class="input-box" style="max-width:200px">
+                            <input type="text" name="userId" id="UserId"
+                                value="{{ old('userId', $user->userId) }}" disabled>
                         </div>
-                        @if ($user === 'Student')
-                            <div class="employment-row">
-                                <div>
-                                    <span style="font-weight:300;">Section:</span>
-                                    <span style="margin-left:110px;">Section A</span>
-                                    <span style="margin-left:280px; font-weight:300;">Year:</span>
-                                    <span style="margin-left:110px;"><span class="badge">2</span></span>
-                                </div>
-                            </div>
-                        @endif
                     </div>
-
-
                     <div class="actions hidden" id="editActions">
-                        <button class="btn btn-outline" id="cancelEdit">Cancel</button>
-                        <button class="btn btn-primary" id="saveEdit">Save Changes</button>
+                        <button type="button" class="btn btn-outline" id="cancelEdit">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
                     </div>
-                </div>
-            </div>
+                </form>
 
-            <div class="section">
-                <h3>Security Settings</h3>
+                <div class="employment">
+                    <p style="font-weight:600; margin-bottom:8px;">
+                        Employment Information
+                    </p>
 
-                <!-- EMAIL -->
-                <div class="card">
-                    <h4>📧 Email Address</h4>
-                    <div class="inner-panel">
+                    <div class="employment-row">
                         <div>
-                            <strong>Current Email</strong>
-                            <div class="muted">smis@school.edu</div>
-                        </div>
-                        <button class="btn btn-outline" id="btnChangeEmail">Change Email</button>
-                    </div>
-
-                    <div class="expandable hidden" id="emailForm">
-                        <input type="email" placeholder="New email address">
-                        <input type="email" placeholder="Confirm new email">
-                        <div class="password-wrapper">
-                            <input type="password" id="emailPwd" placeholder="Current password to confirm">
-                            <button class="eye-btn" type="button"
-                                onclick="togglePassword('emailPwd', this)">👁</button>
-                        </div>
-                        <div class="actions">
-                            <button class="btn btn-outline" id="cancelEmail">Cancel</button>
-                            <button class="btn btn-primary">Update Email</button>
+                            <span style="font-weight:300;">Title</span>
+                            <span style="margin-left:90px;">
+                                @if ($user->title === 'Offices')
+                                    {{ $user->office_name ?? 'Not specified' }}
+                                @else
+                                    {{ $user->title ?? 'Not specified' }}
+                                @endif
+                            </span>
                         </div>
                     </div>
-                </div>
 
-                <!-- PASSWORD -->
-                <div class="card">
-                    <h4>🔐 Password</h4>
-                    <div class="inner-panel">
+                    <div class="employment-row">
                         <div>
-                            <strong>Password</strong>
-                            <div class="muted">Last updated: Never recorded</div>
-                        </div>
-                        <button class="btn btn-outline" id="btnChangePassword">Change Password</button>
-                    </div>
-
-                    <div class="expandable hidden" id="passwordForm">
-                        <div class="password-wrapper">
-                            <input type="password" id="currentPwd" placeholder="Current password">
-                            <button class="eye-btn" type="button"
-                                onclick="togglePassword('currentPwd', this)">👁</button>
-                        </div>
-                        <div class="password-wrapper">
-                            <input type="password" id="newPwd" placeholder="New password">
-                            <button class="eye-btn" type="button" onclick="togglePassword('newPwd', this)">👁</button>
-                        </div>
-                        <div class="password-wrapper">
-                            <input type="password" id="confirmPwd" placeholder="Confirm new password">
-                            <button class="eye-btn" type="button"
-                                onclick="togglePassword('confirmPwd', this)">👁</button>
-                        </div>
-                        <div class="actions">
-                            <button class="btn btn-outline" id="cancelPassword">Cancel</button>
-                            <button class="btn btn-primary">Update Password</button>
+                            <span style="font-weight:300;">Department:</span>
+                            <span style="margin-left:100px;">
+                                @if ($user->department === 'OFFICES')
+                                    {{ $user->office_name ?? 'Not specified' }}
+                                @else
+                                    {{ $user->department ?? 'Not specified' }}
+                                @endif
+                            </span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
+        {{-- Security Settings --}}
+        <div class="section">
+            <h3>Security Settings</h3>
+
+            {{-- EMAIL --}}
+            <div class="card">
+                <h4>📧 Email</h4>
+
+                <div class="inner-panel">
+                    <div>
+                        <strong>Email</strong>
+                        <div class="muted">{{ Auth::user()->email }}</div>
+                    </div>
+                    <button type="button" class="btn btn-outline" id="btnChangeEmail">
+                        Change Email
+                    </button>
+                </div>
+
+                <form method="POST" action="{{ route('Viewer.profile.updateEmail') }}" class="expandable hidden"
+                    id="emailForm">
+                    @csrf
+
+                    <div class="password-wrapper">
+                        <input type="email" name="new_email" id="newEmail" placeholder="New email" required>
+                    </div>
+                    <div id="newEmailError" class="error-message"></div>
+
+                    <div class="password-wrapper">
+                        <input type="password" name="current_password" id="emailCurrentPwd"
+                            placeholder="Current password" required>
+                        <button type="button" class="eye-btn" data-toggle-password>
+                            👁
+                        </button>
+                    </div>
+                    <div id="emailPasswordError" class="error-message"></div>
+
+                    <div class="actions">
+                        <button type="button" class="btn btn-outline" id="cancelEmail">
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            Update Email
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            {{-- PASSWORD --}}
+            <div class="card">
+                <h4>🔐 Password</h4>
+                <div class="inner-panel">
+                    <div>
+                        <strong>Password</strong>
+                    </div>
+                    <button type="button" class="btn btn-outline" id="btnChangePassword">Change Password</button>
+                </div>
+
+                <form method="POST" action="{{ route('Viewer.profile.updatePassword') }}" class="expandable hidden"
+                    id="passwordForm">
+                    @csrf
+
+                    {{-- Current Password --}}
+                    <div class="password-wrapper">
+                        <input type="password" name="current_password" id="currentPwd" placeholder="Current password">
+                        <button type="button" class="eye-btn" data-toggle-password>
+                            👁
+                        </button>
+                    </div>
+                    <div id="currentPasswordError" class="error-message"></div>
+
+                    {{-- New Password --}}
+                    <div class="password-wrapper">
+                        <input type="password" name="new_password" id="newPwd" placeholder="New password">
+                        <button type="button" class="eye-btn" data-toggle-password>
+                            👁
+                        </button>
+                    </div>
+
+                    {{-- Confirm Password --}}
+                    <div class="password-wrapper">
+                        <input type="password" name="new_password_confirmation" id="confirmPwd"
+                            placeholder="Confirm new password">
+                        <button type="button" class="eye-btn" data-toggle-password>
+                            👁
+                        </button>
+                    </div>
+                    <div id="confirmPasswordError" class="error-message"></div>
+
+                    <div class="actions">
+                        <button type="button" class="btn btn-outline" id="cancelPassword">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update Password</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </body>
+    @if (session('success'))
+        <div id="toast" class="toast">{{ session('success') }}</div>
+    @endif
 
     </html>
 </x-viewerLayout>
