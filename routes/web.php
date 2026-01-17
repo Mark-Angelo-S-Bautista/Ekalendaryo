@@ -99,6 +99,7 @@ Route::middleware(['auth', 'backhistory'])->group(function () {
         Route::get('/calendar', [ViewerController::class, 'calendar'])->name('calendar');
         Route::get('/notifications', [ViewerController::class, 'notifications'])->name('notifications');
         Route::get('/history', [ViewerController::class, 'history'])->name('history');
+        Route::post('/events/feedback', [ViewerController::class, 'storeFeedback']);
         Route::get('/profile', [ViewerController::class, 'profile'])->name('profile');
         Route::post('/profile/update', [ViewerController::class, 'updateProfile'])->name('profile.update');
         Route::post('/profile/update-email', [ViewerController::class, 'updateEmail'])->name('profile.updateEmail');

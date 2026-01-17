@@ -6,7 +6,6 @@
         <meta charset="UTF-8">
         <title>eKalendaryo - Event History</title>
         @vite(['resources/css/viewer/history.css', 'resources/js/viewer/history.js'])
-
     </head>
 
     <body>
@@ -15,120 +14,93 @@
 
             <div class="filter-bar">
                 <input type="text" id="search" placeholder="🔍 Search events...">
-                <select id="filterType">
-                    <option value="All Types" selected>All Types</option>
-                    <option value="Department">Department</option>
-                    <option value="Student Government">Student Government</option>
-                    <option value="Sports">Sports</option>
-                    <option value="Admin">Admin</option>
-                </select>
-                <button onclick="clearFilters()">Clear Filters</button>
+                <button id="clearSearch">Clear</button>
             </div>
 
             <div id="eventList">
-                <!-- (your existing event cards, unchanged) -->
-                <div class="event-card" data-type="Department" data-title="Annual Science Fair">
-                    <button class="feedback-btn">💬 Feedback</button>
-                    <div class="event-header">
-                        <h3>Annual Science Fair</h3>
-                        <span class="tag bsis-act">BSIS-ACT</span>
-                        <span class="status">completed</span>
-                    </div>
-                    <p class="event-details">Students present their science projects and research findings</p>
-                    <div class="event-meta">
-                        <span>📅 8/15/2025</span>
-                        <span>⏰ 09:00 - 15:00</span>
-                        <span>📍 Main Hall</span>
-                        <span>👤 Science Department</span>
-                        <span>🕒 SY.2025-2026</span>
-                        <span>👥 3 attendees</span>
-                        <span>💬 1 feedback</span>
-                    </div>
-                </div>
+                @forelse($events as $event)
+                    <div class="event-card" data-type="{{ $event->department }}">
+                        <div class="event-header">
+                            <h3>{{ $event->title }}</h3>
+                            <span class="tag">{{ $event->department }}</span>
+                            <span class="status completed">completed</span>
+                        </div>
 
-                <div class="event-card" data-type="Admin" data-title="Welcome Orientation">
-                    <button class="feedback-btn">💬 Feedback</button>
-                    <div class="event-header">
-                        <h3>Welcome Orientation</h3>
-                        <span class="tag admin">Admin</span>
-                        <span class="status">completed</span>
-                    </div>
-                    <p class="event-details">Orientation program for new students and faculty members</p>
-                    <div class="event-meta">
-                        <span>📅 8/1/2025</span>
-                        <span>⏰ 08:00 - 12:00</span>
-                        <span>📍 University Auditorium</span>
-                        <span>👤 Administration</span>
-                        <span>🕒 SY.2025-2026</span>
-                        <span>👥 6 attendees</span>
-                        <span>💬 0 feedback</span>
-                    </div>
-                </div>
+                        <p class="event-details">
+                            {{ $event->description ?? 'No description provided.' }}
+                        </p>
 
-                <div class="event-card" data-type="Sports" data-title="Football Championship">
-                    <button class="feedback-btn">💬 Feedback</button>
-                    <div class="event-header">
-                        <h3>Football Championship</h3>
-                        <span class="tag sports">Sports</span>
-                        <span class="status">completed</span>
+                        <div class="event-meta">
+                            <span>📅 {{ \Carbon\Carbon::parse($event->date)->format('m/d/Y') }}</span>
+                            <span>⏰ {{ $event->start_time }} - {{ $event->end_time }}</span>
+                            <span>📍 {{ $event->location }}</span>
+                            <span>👤 {{ $event->department }}</span>
+                            <span>🕒 {{ $event->school_year }}</span>
+
+                            {{-- Feedback Button --}}
+                            <span>
+                                <button
+                                    class="feedback-btn 
+                                    {{ in_array($event->id, $submittedFeedbackIds) ? 'submitted' : '' }}"
+                                    data-event-id="{{ $event->id }}" data-event-title="{{ $event->title }}"
+                                    @if (in_array($event->id, $submittedFeedbackIds)) disabled style="background-color: #22c55e;" @endif>
+                                    {{ in_array($event->id, $submittedFeedbackIds) ? '✔️ Feedback Submitted' : $event->feedback_count ?? '💬 Feedback' }}
+                                </button>
+                            </span>
+                        </div>
                     </div>
-                    <p class="event-details">Final match of the inter-university football championship</p>
-                    <div class="event-meta">
-                        <span>📅 7/20/2025</span>
-                        <span>⏰ 16:00 - 18:00</span>
-                        <span>📍 Sports Complex</span>
-                        <span>👤 Sports Department</span>
-                        <span>🕒 SY.2025-2026</span>
-                        <span>👥 3 attendees</span>
-                        <span>💬 2 feedback</span>
-                    </div>
-                </div>
+                @empty
+                    <p>No completed events yet.</p>
+                @endforelse
             </div>
 
             <div class="footer-box">
                 <span>📊</span>
-                <span>Showing 12 of 12 events</span>
+                <span>
+                    Showing {{ $events->firstItem() }} – {{ $events->lastItem() }}
+                    of {{ $events->total() }} events
+                </span>
             </div>
+
+            {{ $events->links('vendor.pagination.simple') }}
         </div>
 
-        <!-- Feedback Modal -->
-        <div class="modal-overlay" id="feedbackModal">
-            <div class="modal">
-                <button class="close-btn" id="closeModal">&times;</button>
-                <h3 id="modalTitle">Leave Feedback</h3>
-                <p>Share your thoughts and feedback about this completed event</p>
+        {{-- Feedback Modal --}}
+        <div id="feedbackModal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn">&times;</span>
 
-                <div class="modal-section" id="modalEventInfo">
-                    <span class="tag bsis-act" style="color:white;">BSIS-ACT</span>
-                    <span class="status">completed</span>
-                    <span>📅 8/15/2025</span>
-                    <span>⏰ 09:00 - 15:00</span>
-                    <span>📍 Main Hall</span>
-                </div>
+                <h3 id="feedbackEventTitle">Event Feedback</h3>
 
-                <div class="modal-section">
-                    <strong>Previous Feedback</strong>
+                {{-- Feedback Form --}}
+                <form id="feedbackForm" method="POST" action="{{ url('/viewer/events/feedback') }}">
+                    @csrf
+                    <input type="hidden" name="event_id" id="feedbackEventId">
 
-                    <!-- Feedback card added inside modal -->
-                    <div class="feedback-card">
-                        <div class="feedback-card-header">
-                            <span><strong>student1</strong></span>
-                            <small>11/6/2025, 7:06:02 AM</small>
+                    <div style="margin-bottom: 12px;">
+                        <textarea name="comment" id="comment" rows="20" placeholder="Write your feedback here..." required></textarea>
+                        <div id="charCounter" style="font-size: 0.9rem; color: gray;">
+                            0 / 1000 characters
                         </div>
-                        <p>This is an example of previous feedback text.</p>
+                        <div id="charError" style="color: red; display: none; font-size: 0.9rem;">
+                            Maximum 1000 characters reached!
+                        </div>
                     </div>
-                </div>
 
-                <div>
-                    <strong>Your Feedback</strong>
-                    <textarea rows="3"
-                        placeholder="How was the event? Share your experience, suggestions for improvement, or any other feedback..."></textarea>
-                    <button class="submit-feedback">Submit Feedback</button>
-                </div>
+                    <button type="submit" id="feedbackSubmitBtn" class="submit-feedback-btn">
+                        Submit Feedback
+                    </button>
+                </form>
             </div>
         </div>
+
+        {{-- Toast Notif --}}
+        <div id="toast" class="toast"
+            style="position: fixed; bottom: 20px; right: 20px; background-color: #22c55e; color: white; padding: 15px 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: none; z-index: 9999; font-weight: bold;">
+            Feedback submitted successfully!
+        </div>
+
     </body>
 
     </html>
-
 </x-viewerLayout>

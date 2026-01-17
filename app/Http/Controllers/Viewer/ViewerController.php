@@ -6,10 +6,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Event;
 use App\Models\User;
+use App\Models\Feedback;
 use Illuminate\Validation\Validator;
 use Illuminate\Support\Facades\Hash;
 use App\Mail\VerifyNewEmail;
 use Illuminate\Support\Facades\Mail;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
 class ViewerController extends Controller
@@ -219,7 +221,70 @@ class ViewerController extends Controller
 
     public function history()
     {
-        return view('Viewer.history');
+        $user = Auth::user();
+        $today = Carbon::today('Asia/Manila');
+
+        // Auto-update event status
+        Event::whereDate('date', '>', $today)->update(['status' => 'upcoming']);
+        Event::whereDate('date', '=', $today)->update(['status' => 'ongoing']);
+        Event::whereDate('date', '<', $today)->update(['status' => 'completed']);
+
+        // Normalize user year level
+        $userYearLevel = preg_replace('/(\d)(st|nd|rd|th)Year/', '$1$2 Year', $user->yearlevel);
+
+        // Get completed events for this user
+        $events = Event::where('status', 'completed')
+            ->where(function ($query) use ($user) {
+                $query->where('department', $user->department)
+                    ->orWhere('department', 'ALL');
+            })
+            ->where(function ($query) use ($userYearLevel) {
+                $query->whereJsonContains('target_year_levels', $userYearLevel)
+                    ->orWhereJsonContains('target_year_levels', 'ALL');
+            })
+            ->orderBy('date', 'desc')
+            ->paginate(3);
+
+        // Get IDs of events the user already submitted feedback for
+        $submittedFeedbackIds = Feedback::where('user_id', $user->id)
+            ->pluck('event_id')
+            ->toArray();
+
+        return view('Viewer.history', compact('events', 'submittedFeedbackIds'));
+    }
+
+    public function storeFeedback(Request $request)
+    {
+        $request->validate([
+            'event_id' => 'required|exists:events,id',
+            'comment' => 'required|string|max:1000',
+        ]);
+
+        $userId = auth()->id();
+        $eventId = $request->event_id;
+
+        // Check if feedback already exists
+        $existing = Feedback::where('user_id', $userId)
+                            ->where('event_id', $eventId)
+                            ->first();
+
+        if ($existing) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You have already submitted feedback for this event.'
+            ]);
+        }
+
+        Feedback::create([
+            'user_id' => $userId,
+            'event_id' => $eventId,
+            'message' => $request->comment,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Feedback submitted successfully!'
+        ]);
     }
 
     public function profile()
