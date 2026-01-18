@@ -67,7 +67,7 @@
         <div id="feedbackModal" class="modal">
             <div class="modal-content">
                 <span class="close-btn">&times;</span>
-                <h3>Event Feedback</h3>
+                <h3>💬 Event Feedback</h3>
                 <div id="feedbackList">
                     <!-- Feedback items will be loaded here via AJAX -->
                 </div>

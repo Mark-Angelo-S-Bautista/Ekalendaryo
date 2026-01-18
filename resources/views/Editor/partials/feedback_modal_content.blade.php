@@ -3,7 +3,7 @@
         @foreach ($feedbacks as $feedback)
             <div class="feedback-item">
                 <div class="feedback-header">
-                    <strong class="feedback-user">{{ trim($feedback->user->name) }}</strong>
+                    👤<strong class="feedback-user">{{ trim($feedback->user->name) }}</strong>
                     <span class="feedback-date">
                         {{ $feedback->created_at->timezone('Asia/Manila')->format('M d, Y • g:i A') }}
                     </span>
