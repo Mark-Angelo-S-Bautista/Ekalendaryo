@@ -42,7 +42,7 @@
                             <span>
                                 💬
                                 <button class="feedback-btn" data-event-id="{{ $event->id }}">
-                                    {{ $event->feedback_count ?? 0 }} feedback
+                                    {{ $event->feedbacks_count }} feedback
                                 </button>
                             </span>
                         </div>

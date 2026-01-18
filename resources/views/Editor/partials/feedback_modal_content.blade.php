@@ -1,13 +1,18 @@
 @if ($feedbacks->count())
     <ul class="feedback-list">
         @foreach ($feedbacks as $feedback)
-            <ul class="feedback-item">
-                <strong>{{ $feedback->user->name }}</strong>
-                <span class="timestamp">
-                    ({{ \Carbon\Carbon::parse($feedback->created_at)->timezone('Asia/Manila')->format('m/d/Y, g:i A') }})
-                </span>
-                <p>{{ $feedback->message }}</p>
-            </ul>
+            <div class="feedback-item">
+                <div class="feedback-header">
+                    <strong class="feedback-user">{{ trim($feedback->user->name) }}</strong>
+                    <span class="feedback-date">
+                        {{ $feedback->created_at->timezone('Asia/Manila')->format('M d, Y • g:i A') }}
+                    </span>
+                </div>
+
+                <p class="feedback-message">
+                    {{ $feedback->message }}
+                </p>
+            </div>
         @endforeach
     </ul>
 

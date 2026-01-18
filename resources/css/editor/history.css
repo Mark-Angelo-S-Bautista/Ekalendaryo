@@ -210,7 +210,9 @@ h2 {
     color: white;
     font-size: 12px;
     cursor: pointer;
-    transition: background-color 0.2s ease, transform 0.1s ease;
+    transition:
+        background-color 0.2s ease,
+        transform 0.1s ease;
 }
 
 .feedback-btn:hover {
@@ -233,7 +235,7 @@ h2 {
 }
 
 .modal-content {
-    background-color: #fff;
+    background-color: #c3eeda;
     margin: 10% auto;
     padding: 25px;
     border-radius: 12px;
@@ -265,7 +267,7 @@ h2 {
 }
 
 .feedback-item {
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid #f0fff8;
     padding: 10px 0;
     font-size: 14px;
     line-height: 1.4;
@@ -292,6 +294,14 @@ h2 {
     }
 }
 /* Pagination buttons */
+.feedback-pagination {
+    display: flex;
+    justify-content: center; /* center horizontally */
+    gap: 8px;
+    margin-top: 14px;
+    align-items: center;
+}
+
 .feedback-pagination button {
     background-color: #007bff; /* blue */
     color: #fff;
@@ -320,4 +330,25 @@ h2 {
     font-weight: bold;
     color: #333;
     padding: 0 6px;
+}
+/* Feedback modal container */
+#feedbackList {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Individual feedback item */
+.feedback-item {
+    border: 1px solid #f0fff8;
+    padding: 12px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    background-color: #f0fff8;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+.feedback-message {
+    white-space: pre-wrap; /* PRESERVES line breaks */
+    word-break: break-word;
 }

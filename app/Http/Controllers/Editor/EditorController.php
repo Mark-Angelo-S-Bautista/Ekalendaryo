@@ -139,11 +139,12 @@ class EditorController extends Controller
             ->orderBy('date', 'desc')
             ->get();
 
-        $events = Event::where('user_id', $userId)
+        $events = Event::withCount('feedbacks')
+            ->where('user_id', $userId)
             ->where('status', 'completed')
             ->whereDate('date', '<', Carbon::today())
             ->orderBy('date', 'desc')
-            ->paginate(3);
+            ->paginate(2);
 
         return view('Editor.history', compact('events', 'eventStatus'));
     }
