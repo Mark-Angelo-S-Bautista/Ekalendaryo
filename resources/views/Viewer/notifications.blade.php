@@ -7,105 +7,84 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>eKalendaryo - Notifications</title>
         @vite(['resources/css/viewer/notifications.css'])
-
     </head>
 
     <body>
 
-        <!-- Header (Outside the Container) -->
+        <!-- Page Header -->
         <div class="page-header">
             <h1>Notifications</h1>
-            <span class="notif-count">10 notifications</span>
+            <span class="notif-count">{{ $events->total() }} notifications</span>
         </div>
 
-        <!-- Notifications Container -->
+        <!-- Main Container -->
         <div class="container">
+
             <div class="notif-title">
                 <span class="bell">🔔</span>
                 <h2>All Notifications</h2>
             </div>
+
             <p class="subtitle">Event updates, changes, and your registered events</p>
 
             <div class="notif-list">
 
-                <!-- Created Event 1 -->
-                <div class="notif-card created">
-                    <div class="notif-info">
-                        <p class="notif-heading">Event Created: dsadasdasdad</p>
-                        <p class="notif-sub">A new event has been scheduled</p>
-                        <div class="notif-details">
-                            <p>📅 2025-11-06</p>
-                            <p>📍 BPC Court</p>
-                            <p>🕒 17:45</p>
-                            <p>👤 By admin</p>
-                            <p>🗓️ 11/2/2025</p>
-                        </div>
-                    </div>
-                    <span class="status created-status">created</span>
-                </div>
+                @forelse ($events as $event)
+                    @php
+                        // Normalize status for CSS matching
+                        $status = strtolower($event->status ?? 'created');
 
-                <!-- Created Event 2 -->
-                <div class="notif-card created">
-                    <div class="notif-info">
-                        <p class="notif-heading">Event Created: dsad</p>
-                        <p class="notif-sub">A new event has been scheduled</p>
-                        <div class="notif-details">
-                            <p>📅 2025-11-05</p>
-                            <p>📍 COURT</p>
-                            <p>🕒 15:55</p>
-                            <p>👤 By admin</p>
-                            <p>🗓️ 11/2/2025</p>
-                        </div>
-                    </div>
-                    <span class="status created-status">created</span>
-                </div>
+                        // Handle cancelled vs canceled mismatch
+                        if ($status === 'cancelled') {
+                            $status = 'canceled';
+                        }
+                    @endphp
 
-                <!-- Completed Event 1 -->
-                <div class="notif-card completed">
-                    <div class="notif-info">
-                        <p class="notif-heading">Completed Event: CS Department Graduation Ceremony</p>
-                        <p class="notif-sub">You attended this event</p>
-                        <div class="notif-details">
-                            <p>📅 2025-09-25</p>
-                            <p>📍 CS Auditorium</p>
-                            <p>🕒 10:00 - 14:00</p>
-                            <p>👤 By CS Department Head</p>
-                        </div>
-                    </div>
-                    <span class="status completed-status">completed</span>
-                </div>
+                    <div class="notif-card {{ $status }}">
+                        <div class="notif-info">
 
-                <!-- Completed Event 2 -->
-                <div class="notif-card completed">
-                    <div class="notif-info">
-                        <p class="notif-heading">Completed Event: Basketball Tournament</p>
-                        <p class="notif-sub">You attended this event</p>
-                        <div class="notif-details">
-                            <p>📅 2025-09-10</p>
-                            <p>📍 School Gymnasium</p>
-                            <p>🕒 15:00 - 17:00</p>
-                            <p>👤 By Sports Adviser</p>
-                        </div>
-                    </div>
-                    <span class="status completed-status">completed</span>
-                </div>
+                            <p class="notif-heading">
+                                {{ ucfirst($status) }} Event: {{ $event->title }}
+                            </p>
 
-                <!-- Completed Event 3 -->
-                <div class="notif-card completed">
-                    <div class="notif-info">
-                        <p class="notif-heading">Completed Event: Student Government Assembly</p>
-                        <p class="notif-sub">You attended this event</p>
-                        <div class="notif-details">
-                            <p>📅 2025-09-05</p>
-                            <p>📍 Main Auditorium</p>
-                            <p>🕒 10:00 - 12:00</p>
-                            <p>👤 By SG Adviser</p>
+                            <p class="notif-sub">
+                                @if ($status === 'created')
+                                    A new event has been scheduled
+                                @elseif ($status === 'updated')
+                                    Event details were updated
+                                @elseif ($status === 'completed')
+                                    This event has been completed
+                                @elseif ($status === 'canceled')
+                                    This event was canceled
+                                @endif
+                            </p>
+
+                            <div class="notif-details">
+                                <p>📅 {{ $event->date }}</p>
+                                <p>📍 {{ $event->location }}</p>
+                                <p>🕒 {{ $event->start_time }}</p>
+                                <p>👤 {{ $event->department ?? 'Admin' }}</p>
+                                <p>🗓️ {{ $event->updated_at->format('m/d/Y') }}</p>
+                            </div>
+
                         </div>
+
+                        <span class="status {{ $status }}-status">
+                            {{ $status }}
+                        </span>
                     </div>
-                    <span class="status completed-status">completed</span>
-                </div>
+
+                @empty
+                    <p class="empty">No notifications available.</p>
+                @endforelse
 
             </div>
+
+            <!-- Pagination -->
+            <div class="pagination-wrapper">
+                {{ $events->links('vendor.pagination.simple') }}
+            </div>
+
         </div>
 
     </body>

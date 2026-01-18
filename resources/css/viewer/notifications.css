@@ -6,16 +6,17 @@ body {
     padding: 0;
 }
 
-/* Top Header (outside container) */
+/* ===============================
+   Header
+=============================== */
 .page-header {
     max-width: 900px;
-    margin: 50px auto 10px auto;
+    margin: 50px auto 20px auto;
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
     padding: 0 20px;
-    margin-bottom: 20px;
 }
 
 .page-header h1 {
@@ -34,7 +35,9 @@ body {
     white-space: nowrap;
 }
 
-/* Main Container */
+/* ===============================
+   Container
+=============================== */
 .container {
     max-width: 900px;
     margin: 0 auto 50px auto;
@@ -45,7 +48,9 @@ body {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-/* Title Section */
+/* ===============================
+   Title Section
+=============================== */
 .notif-title {
     display: flex;
     align-items: center;
@@ -70,7 +75,9 @@ body {
     margin: 5px 0 20px 0;
 }
 
-/* Notification Cards */
+/* ===============================
+   Notification List
+=============================== */
 .notif-list {
     display: flex;
     flex-direction: column;
@@ -84,9 +91,12 @@ body {
     flex-wrap: wrap;
     border-radius: 12px;
     padding: 15px 20px;
-    border: 1px solid transparent;
+    border-left: 6px solid transparent;
 }
 
+/* ===============================
+   Content
+=============================== */
 .notif-info {
     flex: 1 1 75%;
 }
@@ -111,6 +121,9 @@ body {
     gap: 2px;
 }
 
+/* ===============================
+   Status Badge
+=============================== */
 .status {
     font-size: 12px;
     font-weight: bold;
@@ -121,29 +134,102 @@ body {
     margin-top: 10px;
 }
 
-/* Created Style */
-.created {
-    background-color: #f0fdf4;
-    border-color: #bbf7d0;
-}
+/* ===============================
+   STATUS COLORS
+=============================== */
 
+/* 🟢 Created / Upcoming */
+.notif-card.created {
+    background-color: #e6f9ec;
+    border-left-color: #2ecc71;
+}
 .created-status {
-    background-color: #dcfce7;
-    color: #15803d;
+    color: #2ecc71;
 }
 
-/* Completed Style */
-.completed {
-    background-color: #faf5ff;
-    border-color: #e9d5ff;
+/* 🟡 Updated */
+.notif-card.updated {
+    background-color: #fff8e1;
+    border-left-color: #f1c40f;
+}
+.updated-status {
+    color: #f1c40f;
 }
 
+/* 🔴 Canceled */
+.notif-card.canceled {
+    background-color: #fdecea;
+    border-left-color: #e74c3c;
+}
+.canceled-status {
+    color: #e74c3c;
+}
+
+/* ⚪ Completed */
+.notif-card.completed {
+    background-color: #f2f2f2;
+    border-left-color: #95a5a6;
+}
 .completed-status {
-    background-color: #ede9fe;
-    color: #6d28d9;
+    color: #7f8c8d;
 }
 
-/* Responsive */
+/* ===============================
+   Pagination
+=============================== */
+.pagination-wrapper {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.pagination-wrapper nav {
+    background: none;
+}
+
+.simple-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    margin: 30px 0;
+}
+
+.simple-pagination a,
+.simple-pagination span {
+    height: 36px;
+    padding: 0 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+    text-decoration: none;
+    background: #fff;
+    color: #333;
+}
+
+.simple-pagination a:hover {
+    background: #f1f1f1;
+}
+
+.simple-pagination .active {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: #fff;
+    font-weight: 600;
+}
+
+.simple-pagination .disabled {
+    color: #aaa;
+    background: #f9f9f9;
+    cursor: not-allowed;
+}
+
+/* ===============================
+   Responsive
+=============================== */
 @media (max-width: 600px) {
     .notif-card {
         flex-direction: column;
@@ -154,6 +240,10 @@ body {
         margin-top: 10px;
     }
 }
+
+/* ===============================
+   Misc
+=============================== */
 .logout-btn {
     display: flex;
     align-items: center;
@@ -174,8 +264,9 @@ body {
 }
 
 .logout-btn .icon {
-    font-style: normal; /* so it doesn’t go italic */
+    font-style: normal;
 }
+
 p {
-    margin: 0px;
+    margin: 0;
 }
