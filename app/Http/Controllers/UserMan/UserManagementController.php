@@ -11,6 +11,10 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Hash;
+use App\Mail\VerifyNewEmail;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class UserManagementController extends Controller
 {
@@ -148,7 +152,112 @@ class UserManagementController extends Controller
 
     public function profile()
     {
-        return view('UserManagement.profile.profile');
+        $user = Auth::user();
+        return view('UserManagement.profile.profile', compact('user'));
+    }
+
+    // Update name or userId
+    public function updateProfile(Request $request)
+    {
+        $user = Auth::user();
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'userId' => 'required|string|max:50|unique:users,userId,' . $user->id,
+        ]);
+
+        $user->update([
+            'name' => $request->name,
+            'userId' => $request->userId,
+        ]);
+
+        return back()->with('success', 'Profile updated successfully.');
+    }
+
+    // Update email with verification
+    public function updateEmail(Request $request)
+    {
+        // Validate email first
+        $request->validate([
+            'new_email' => 'required|email|unique:users,email',
+            'current_password' => 'required',
+        ]);
+
+        // Check password
+        if (!Hash::check($request->current_password, auth()->user()->password)) {
+            return response()->json([
+                'errors' => [
+                    'current_password' => ['The current password is incorrect.'],
+                ]
+            ], 422);
+        }
+
+        // Generate token
+        $token = Str::random(64);
+
+        // Save pending email
+        auth()->user()->update([
+            'pending_email' => $request->new_email,
+            'email_change_token' => $token,
+        ]);
+
+        // Send verification email
+        Mail::to($request->new_email)->send(
+            new VerifyNewEmail($token)
+        );
+
+        return response()->json([
+            'message' => 'Verification email sent to your new email address.',
+        ]);
+    }
+
+    public function verifyNewEmail($token)
+    {
+        $user = User::where('email_change_token', $token)->firstOrFail();
+
+        $user->update([
+            'email' => $user->pending_email,
+            'pending_email' => null,
+            'email_change_token' => null,
+            'email_verified_at' => now(),
+        ]);
+
+        return redirect()
+            ->route('UserManagement.profile')
+            ->with('success', 'Your email has been updated successfully.');
+    }
+
+    // Update password
+    public function updatePassword(Request $request)
+    {
+        // Validate inputs FIRST (except current password check)
+        $validator = \Validator::make($request->all(), [
+            'current_password' => 'required',
+            'new_password' => 'required|min:8|confirmed',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        // Check current password
+        if (!Hash::check($request->current_password, auth()->user()->password)) {
+            return response()->json([
+                'errors' => [
+                    'current_password' => ['The current password is incorrect.']
+                ]
+            ], 422);
+        }
+
+        // Update password
+        auth()->user()->update([
+            'password' => bcrypt($request->new_password),
+        ]);
+
+        return response()->json([
+            'message' => 'Password updated successfully',
+        ]);
     }
 
     public function users(Request $request)

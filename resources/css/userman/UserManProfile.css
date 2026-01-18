@@ -15,7 +15,7 @@
 }
 body {
     background: var(--bg);
-    margin: 0px;
+    margin: 0;
     font-family: Arial, sans-serif;
     background-color: #f3fbf4;
     color: #333;
@@ -55,7 +55,14 @@ h1 {
     right: 60px;
     top: 200px;
 }
-
+.badge {
+    background: #e3ebff;
+    color: #214b8f;
+    font-size: 12px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-weight: 500;
+}
 .section {
     margin-bottom: 25px;
     padding-left: 50px;
@@ -171,4 +178,34 @@ h1 {
 
 .logout-btn .icon {
     font-style: normal; /* so it doesn’t go italic */
+}
+.toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background-color: #4caf50;
+    color: white;
+    padding: 15px 25px;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    opacity: 0;
+    animation:
+        fadein 0.5s forwards,
+        fadeout 0.5s 3s forwards;
+}
+
+@keyframes fadein {
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeout {
+    to {
+        opacity: 0;
+    }
+}
+.error-message {
+    color: red;
 }

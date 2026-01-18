@@ -70,6 +70,10 @@ Route::middleware(['auth', 'backhistory'])->group(function () {
         Route::get('/dashboard/search', [UserController::class, 'search'])->name('search');
         Route::get('/calendar', [UserManagementController::class, 'calendar'])->name('calendar');
         Route::get('/profile', [UserManagementController::class, 'profile'])->name('profile');
+        Route::post('/profile/update', [UserManagementController::class, 'updateProfile'])->name('profile.update');
+        Route::post('/profile/update-email', [UserManagementController::class, 'updateEmail'])->name('profile.updateEmail');
+        Route::post('/profile/update-password', [UserManagementController::class, 'updatePassword'])->name('profile.updatePassword');
+        Route::post('/profile/update-email',[UserManagementController::class, 'updateEmail'])->name('profile.updateEmail');
 
         Route::get('/users', [UserManagementController::class, 'users'])->name('users');
         Route::get('/users/search', [UserManagementController::class, 'search'])->name('search');
