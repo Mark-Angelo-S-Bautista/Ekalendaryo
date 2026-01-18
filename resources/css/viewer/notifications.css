@@ -138,28 +138,19 @@ body {
    STATUS COLORS
 =============================== */
 
-/* 🟢 Created / Upcoming */
-.notif-card.created {
+/* 🟢 Upcoming */
+.notif-card.upcoming {
     background-color: #e6f9ec;
-    border-left-color: #2ecc71;
+    border-left: 6px solid #2ecc71;
 }
-.created-status {
+.upcoming-status {
     color: #2ecc71;
-}
-
-/* 🟡 Updated */
-.notif-card.updated {
-    background-color: #fff8e1;
-    border-left-color: #f1c40f;
-}
-.updated-status {
-    color: #f1c40f;
 }
 
 /* 🔴 Canceled */
 .notif-card.canceled {
     background-color: #fdecea;
-    border-left-color: #e74c3c;
+    border-left: 6px solid #e74c3c;
 }
 .canceled-status {
     color: #e74c3c;
@@ -168,7 +159,7 @@ body {
 /* ⚪ Completed */
 .notif-card.completed {
     background-color: #f2f2f2;
-    border-left-color: #95a5a6;
+    border-left: 6px solid #95a5a6;
 }
 .completed-status {
     color: #7f8c8d;

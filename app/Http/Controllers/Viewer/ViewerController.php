@@ -218,22 +218,22 @@ class ViewerController extends Controller
     {
         $user = Auth::user();
 
-        // Normalize user yearlevel: 1stYear -> 1st Year
-        $userYearLevel = preg_replace('/(\d)(st|nd|rd|th)([A-Za-z]+)/', '$1$2 $3', $user->yearlevel);
-
         $events = Event::where(function ($query) use ($user) {
 
-            // Same department OR targeted department
+            // Same department
             $query->where('department', $user->department)
-                ->orWhere('target_department', $user->department_id);
+
+                // OR targeted department
+                ->orWhereJsonContains('target_department', $user->department)
+
+                // OR targeted year levels
+                ->orWhere(function ($q) use ($user) {
+                    $q->whereNotNull('target_year_levels')
+                      ->whereJsonContains('target_year_levels', $user->yearlevel);
+                });
 
         })
-        // AND targeted year levels if they exist
-        ->where(function ($q) use ($userYearLevel) {
-            $q->whereNull('target_year_levels') // No target year levels → ok
-            ->orWhereRaw('JSON_SEARCH(target_year_levels, "one", ?) IS NOT NULL', [$userYearLevel]);
-        })
-        ->orderBy('updated_at', 'desc')
+        ->orderBy('date', 'asc')
         ->paginate(2);
 
         return view('Viewer.notifications', compact('events'));

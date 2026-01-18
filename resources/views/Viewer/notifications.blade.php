@@ -13,31 +13,34 @@
 
         <!-- Page Header -->
         <div class="page-header">
-            <h1>Notifications</h1>
+            <h1>🔔 Notifications</h1>
             <span class="notif-count">{{ $events->total() }} notifications</span>
         </div>
 
         <!-- Main Container -->
         <div class="container">
-
-            <div class="notif-title">
-                <span class="bell">🔔</span>
-                <h2>All Notifications</h2>
-            </div>
-
-            <p class="subtitle">Event updates, changes, and your registered events</p>
+            <h2 class="subtitle">Events Upcoming, Completed, and Canceled</h2>
 
             <div class="notif-list">
 
                 @forelse ($events as $event)
                     @php
-                        // Normalize status for CSS matching
-                        $status = strtolower($event->status ?? 'created');
-
-                        // Handle cancelled vs canceled mismatch
-                        if ($status === 'cancelled') {
+                        // Determine status for CSS colors
+                        // Upcoming = future events, Completed = past events, Canceled = canceled
+                        if ($event->status === 'canceled') {
                             $status = 'canceled';
+                        } elseif ($event->status === 'completed') {
+                            $status = 'completed';
+                        } else {
+                            $status = 'upcoming'; // anything else is upcoming
                         }
+
+                        // Notification description
+                        $description = match ($status) {
+                            'upcoming' => 'A new event is scheduled',
+                            'completed' => 'This event has been completed',
+                            'canceled' => 'This event was canceled',
+                        };
                     @endphp
 
                     <div class="notif-card {{ $status }}">
@@ -48,15 +51,7 @@
                             </p>
 
                             <p class="notif-sub">
-                                @if ($status === 'created')
-                                    A new event has been scheduled
-                                @elseif ($status === 'updated')
-                                    Event details were updated
-                                @elseif ($status === 'completed')
-                                    This event has been completed
-                                @elseif ($status === 'canceled')
-                                    This event was canceled
-                                @endif
+                                {{ $description }}
                             </p>
 
                             <div class="notif-details">
@@ -64,7 +59,9 @@
                                 <p>📍 {{ $event->location }}</p>
                                 <p>🕒 {{ $event->start_time }}</p>
                                 <p>👤 {{ $event->department ?? 'Admin' }}</p>
-                                <p>🗓️ {{ $event->updated_at->format('m/d/Y') }}</p>
+                                <p>🎓
+                                    {{ is_array($event->target_year_levels) ? implode(', ', $event->target_year_levels) : $event->target_year_levels }}
+                                </p>
                             </div>
 
                         </div>
