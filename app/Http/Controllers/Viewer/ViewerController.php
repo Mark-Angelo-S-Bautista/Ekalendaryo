@@ -453,4 +453,21 @@ class ViewerController extends Controller
 
         return response()->json(['events' => $events]);
     }
+
+    public function attend(Event $event)
+    {
+        $user = Auth::user();
+
+        // Make sure relationship uses your custom pivot table
+        if ($event->attendees()->where('user_id', $user->id)->exists()) {
+            return response()->json(['status' => 'already'], 200);
+        }
+
+        $event->attendees()->attach($user->id);
+
+        return response()->json([
+            'status' => 'success',
+            'attendees_count' => $event->attendees()->count()
+        ]);
+    }
 }
