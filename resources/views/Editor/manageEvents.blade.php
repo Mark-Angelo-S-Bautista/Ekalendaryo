@@ -390,7 +390,7 @@ $userTitle = $user->title ?? null;
                                     {{ \Carbon\Carbon::parse($event->end_time)->format('g:i A') }}</span>
                                 <span>📍 {{ $event->location }}</span>
                                 <span>
-                                    👥
+                                    👤
                                     @if (is_array($event->target_year_levels) && count($event->target_year_levels) > 0)
                                         {{ implode(', ', $event->target_year_levels) }}
                                     @else
@@ -398,9 +398,11 @@ $userTitle = $user->title ?? null;
                                     @endif
                                 </span>
 
+
                             </div>
 
                             <div class="actions">
+                                <span>👥 {{ $event->attendees()->count() }} attending</span>
                                 <!-- View Details Button -->
                                 <button class="btn-view-details" data-details="{{ $event->more_details }}">👁️ View
                                     Details</button>

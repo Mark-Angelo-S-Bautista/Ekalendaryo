@@ -53,7 +53,7 @@
                             </div>
 
                             <div class="dashboard_event_details">
-                                👥
+                                👤
                                 @if (is_array($event->target_year_levels) && count($event->target_year_levels) > 0)
                                     @foreach ($event->target_year_levels as $yearLevel)
                                         {{ $yearLevel . ',' }}
@@ -66,6 +66,10 @@
                             <div class="dashboard_event_details">
                                 {{ $event->description ?? 'No description provided.' }}</div>
                             <div class="dashboard_event_details">{{ $event->school_year }}</div>
+
+                            <div class="dashboard_event_details">
+                                👥 {{ $event->attendees()->count() }} attending
+                            </div>
 
                             <div class="dashboard_event_tags">
                                 <span class="dashboard_tag dashboard_tag_admin">
