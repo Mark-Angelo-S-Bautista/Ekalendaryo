@@ -438,24 +438,32 @@ class EventController extends Controller
 
         // Find event ONLY if its ID and user_id match
         $event = Event::where('id', $id)
-                    ->where('user_id', $userId)
-                    ->firstOrFail();
-        
+            ->where('user_id', $userId)
+            ->firstOrFail();
+
+        // 🔒 Prevent double cancellation
+        if ($event->status === 'cancelled') {
+            return redirect()->back()->with('error', 'This event is already cancelled.');
+        }
+
         // Send cancellation emails
-        if ($event->department === 'OFFICES'){
+        if ($event->department === 'OFFICES') {
             $this->sendEmailsForOfficesEvent($event, false, null, true);
-        }else{
+        } else {
             $this->sendEmailsForEvent($event, false, null, true);
         }
-        
 
-        $event->delete();
+        // ✅ CANCEL instead of DELETE
+        $event->update([
+            'status' => 'cancelled',
+        ]);
 
+        // Activity Log
         ActivityLog::create([
             'user_id' => Auth::id(),
-            'action_type' => 'deleted', // or 'edited' / 'deleted'
-            'model_type' => 'Event',    // or 'User'
-            'model_id' => $event->id,   // the affected model
+            'action_type' => 'cancelled', // 👈 clearer than "deleted"
+            'model_type' => 'Event',
+            'model_id' => $event->id,
             'description' => [
                 'title' => $event->title,
                 'event_date' => $event->date,
@@ -466,7 +474,7 @@ class EventController extends Controller
             ],
         ]);
 
-        return redirect()->back()->with('success', 'Event Deleted and Email Sent Successfully!');
+        return redirect()->back()->with('success', 'Event cancelled and email sent successfully.');
     }
 
     // =========================================================================

@@ -15,6 +15,7 @@ class Event extends Model
         'date',
         'start_time',
         'end_time',
+        'status',
         'location',
         'school_year',
         'target_year_levels',
