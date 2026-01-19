@@ -30,13 +30,13 @@
 
                             <div class="form-group">
                                 <label>Event title</label>
-                                <input type="text" id="eventTitle" name="title" placeholder="Event title">
+                                <input type="text" id="eventTitle" name="title" placeholder="Event title" required>
                             </div>
 
                             <div class="form-group">
                                 <label>Event description</label>
                                 <input type="text" id="eventDescription" name="description"
-                                    placeholder="Event Description">
+                                    placeholder="Event Description" required>
                             </div>
 
                             <div class="form-group">
@@ -50,24 +50,26 @@
 
                             <div class="form-group">
                                 <label>Date</label>
-                                <input type="date" id="eventDate" name="date"
-                                    min="{{ date('Y-m-d', strtotime('+1 day')) }}">
+                                <input type="date" id="eventDate" name="date" min="{{ now()->format('Y-m-d') }}"
+                                    required>
                             </div>
 
                             <div class="form-group">
                                 <label>Start Time</label>
-                                <input type="time" id="startTime" name="start_time" min="07:00" max="17:00">
+                                <input type="time" id="startTime" name="start_time" min="07:00" max="17:00"
+                                    required>
                             </div>
 
                             <div class="form-group">
                                 <label>End Time</label>
-                                <input type="time" id="endTime" name="end_time" min="07:00" max="17:00">
+                                <input type="time" id="endTime" name="end_time" min="07:00" max="17:00"
+                                    required>
                             </div>
 
                             <div class="form-group">
                                 <label for="eventLocation">Event Location</label>
                                 <select id="eventLocation" name="location" onchange="toggleOtherLocation()"
-                                    class="form-control">
+                                    class="form-control" required>
                                     <option value="">-- Select a location --</option>
                                     <option value="Covered Court">Covered Court</option>
                                     <option value="Activity Center">Activity Center</option>
@@ -80,7 +82,7 @@
                                 <!-- Input for custom location -->
                                 <input type="text" id="otherLocation" name="other_location"
                                     placeholder="Please specify location" class="form-control"
-                                    style="display: none; margin-top: 10px;">
+                                    style="display: none; margin-top: 10px;" required>
                             </div>
 
                             <script>
