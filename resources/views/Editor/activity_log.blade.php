@@ -24,7 +24,7 @@
                                     ➕
                                 @elseif($log->action_type === 'edited')
                                     ✏️
-                                @elseif($log->action_type === 'deleted')
+                                @elseif($log->action_type === 'cancelled')
                                     🗑️
                                 @endif
                             </div>
