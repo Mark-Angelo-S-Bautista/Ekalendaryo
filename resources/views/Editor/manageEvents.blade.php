@@ -374,12 +374,8 @@ $userTitle = $user->title ?? null;
                                 <h2>{{ $event->title }}</h2>
                                 <div class="tags">
                                     <span class="tag department">{{ $event->department }}</span>
-                                    <span class="tag upcoming">
-                                        @if (strtotime($event->date) > time())
-                                            upcoming
-                                        @else
-                                            past
-                                        @endif
+                                    <span class="tag {{ strtolower($event->status) }}">
+                                        {{ ucfirst($event->status) }}
                                     </span>
                                 </div>
                             </div>
@@ -405,22 +401,26 @@ $userTitle = $user->title ?? null;
 
                             <div class="actions">
                                 <span>👥 {{ $event->attendees()->count() }} attending</span>
-                                <!-- View Details Button -->
-                                <button class="btn-view-details" data-details="{{ $event->more_details }}">👁️ View
-                                    Details</button>
 
+                                <button class="btn-view-details" data-details="{{ $event->more_details }}">
+                                    👁️ View Details
+                                </button>
 
-                                <a href="{{ route('Editor.editEvent', $event->id) }}" class="edit">✏️Edit</a>
+                                @if ($event->status !== 'ongoing')
+                                    <a href="{{ route('Editor.editEvent', $event->id) }}" class="edit">✏️ Edit</a>
 
-                                <form action="{{ route('Editor.destroy', $event->id) }}" method="POST"
-                                    style="display:inline;">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="delete"
-                                        onclick="return confirm('Are you sure you want to delete this event?')">🗑️Delete</button>
-                                </form>
-
-
+                                    <form action="{{ route('Editor.destroy', $event->id) }}" method="POST"
+                                        style="display:inline;">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="delete"
+                                            onclick="return confirm('Are you sure you want to delete this event?')">
+                                            🗑️ Delete
+                                        </button>
+                                    </form>
+                                @else
+                                    <span class="status-locked">🔒 Ongoing</span>
+                                @endif
                             </div>
                         </div>
                     @endforeach

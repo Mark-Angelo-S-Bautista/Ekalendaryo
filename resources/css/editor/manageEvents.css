@@ -293,7 +293,9 @@ button {
     font-size: 14px;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.4s ease, transform 0.4s ease,
+    transition:
+        opacity 0.4s ease,
+        transform 0.4s ease,
         visibility 0s linear 0.4s;
     transform: translateY(20px);
     z-index: 1000;
@@ -336,7 +338,9 @@ button {
     border-radius: 8px;
     font-size: 15px;
     outline: none;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
 }
 
 .form-control:focus {
@@ -366,4 +370,25 @@ button {
     align-items: center;
     gap: 6px;
     padding: 4px 0;
+}
+.tag.upcoming {
+    background: #e0f2ff;
+    color: #0369a1;
+}
+
+.tag.ongoing {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.tag.completed,
+.tag.past {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.status-locked {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #b45309;
 }

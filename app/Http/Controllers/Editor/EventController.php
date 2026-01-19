@@ -283,13 +283,12 @@ class EventController extends Controller
     {
         $userId = Auth::id();
 
-        // ONLY show events where event's user_id matches the authenticated user's ID
         $events = Event::with('user')
-                        ->where('user_id', $userId)
-                        ->orderBy('date', 'asc')
-                        ->get();
+            ->where('user_id', $userId)
+            ->whereIn('status', ['upcoming', 'ongoing']) // ✅ EXCLUDE completed
+            ->orderBy('date', 'asc')
+            ->get();
 
-        // ✅ Get all departments
         $departments = Department::all();
 
         return view('Editor.manageEvents', compact('events', 'departments'));
