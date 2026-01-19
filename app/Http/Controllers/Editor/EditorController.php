@@ -10,6 +10,7 @@ use App\Models\Event;
 use Illuminate\Support\Facades\Hash;
 use App\Models\ActivityLog;
 use Illuminate\Support\Facades\Mail;
+use App\Models\SchoolYear;
 use Illuminate\Support\Str;
 use App\Mail\VerifyNewEmail;
 use Carbon\Carbon;
@@ -24,6 +25,11 @@ class EditorController extends Controller
         $now = Carbon::now();
         $limitDate = $now->copy()->addDays(30);
 
+        // Fetch the current school year from the table
+        $currentSchoolYear = SchoolYear::where('is_active', 1)->first(); // Assuming you have an 'is_current' column
+        $currentSchoolYearName = $currentSchoolYear ? $currentSchoolYear->school_year : 'N/A';
+
+
         // Fetch all events within 30 days
         $events = Event::whereBetween('date', [$now->toDateString(), $limitDate->toDateString()])
             ->orWhere(function ($q) use ($now) {
@@ -36,6 +42,10 @@ class EditorController extends Controller
 
         // Filter events according to department logic
         $upcomingEvents = $events->filter(function ($event) use ($dept) {
+            // Skip cancelled or completed events
+            if (in_array($event->status, ['completed', 'cancelled'])) {
+                return false;
+            }
             if ($event->department === $dept) {
                 return true; // Show events in the same department
             }
@@ -68,7 +78,7 @@ class EditorController extends Controller
         $events = $upcomingEvents; // alias for Blade
         $myEventsCount = $upcomingEvents->count();
 
-        return view('Editor.dashboard', compact('user', 'events', 'myEventsCount'));
+        return view('Editor.dashboard', compact('user', 'events', 'myEventsCount', 'currentSchoolYearName'));
     }
 
     public function calendar()
@@ -124,14 +134,19 @@ class EditorController extends Controller
 
         $today = Carbon::today('Asia/Manila');
 
-        // Auto-update status based on date ONLY
+        // Only update upcoming for events that are NOT cancelled
         Event::whereDate('date', '>', $today)
+            ->whereNotIn('status', ['cancelled'])
             ->update(['status' => 'upcoming']);
 
+        // Only update ongoing for events that are NOT cancelled
         Event::whereDate('date', '=', $today)
+            ->whereNotIn('status', ['cancelled'])
             ->update(['status' => 'ongoing']);
 
+        // Only update completed for events that are NOT cancelled
         Event::whereDate('date', '<', $today)
+            ->whereNotIn('status', ['cancelled'])
             ->update(['status' => 'completed']);
 
         // Fetch completed events only

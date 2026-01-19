@@ -11,7 +11,7 @@
                         {{ Auth::user()->title }}
                     @endif Dashboard
                 </p>
-                <p class="dashboard_school_year">Current School Year: SY.2025-2026</p>
+                <p class="dashboard_school_year">Current School Year: {{ $currentSchoolYearName }}</p>
             </div>
         </section>
 
@@ -80,7 +80,15 @@
                                     @endif
                                 </span>
 
-                                <span class="dashboard_tag dashboard_tag_upcoming">upcoming</span>
+                                <span
+                                    class="dashboard_tag 
+                                    @if ($event->status === 'ongoing') dashboard_tag_ongoing
+                                    @elseif($event->status === 'upcoming') dashboard_tag_upcoming
+                                    @elseif($event->status === 'cancelled') dashboard_tag_cancelled
+                                    @elseif($event->status === 'completed') dashboard_tag_completed @endif
+                                ">
+                                    {{ ucfirst($event->status) }}
+                                </span>
                             </div>
 
                             <button class="dashboard_view_btn" data-id="{{ $event->id }}"
