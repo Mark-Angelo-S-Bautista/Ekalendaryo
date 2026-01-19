@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     } else {
         console.error(
-            "❌ Could not find <script id='calendar-event-data'> element!"
+            "❌ Could not find <script id='calendar-event-data'> element!",
         );
     }
 
@@ -85,7 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const today = new Date();
         const todayStr = `${today.getFullYear()}-${String(
-            today.getMonth() + 1
+            today.getMonth() + 1,
         ).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
         for (let i = 0; i < startDay; i++) {
@@ -100,7 +100,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const date = `${currentYear}-${String(currentMonth + 1).padStart(
                 2,
-                "0"
+                "0",
             )}-${String(d).padStart(2, "0")}`;
             const num = document.createElement("div");
             num.classList.add("calendar_day-number");
@@ -181,7 +181,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 if (eventForSlot) {
                     const eventStartNum = timeStrToNumber(
-                        eventForSlot.timeStart
+                        eventForSlot.timeStart,
                     );
                     const isStartSlot =
                         Math.abs(slotTimeNum - eventStartNum) < 0.01;
@@ -245,7 +245,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div>📍 ${eventData.location}</div>
                 <div>👤 ${eventData.organizer}</div>
                 <div>🎓 ${yearLevelsString}</div>
-                <div>${eventData.sy}</div>
+                <div>SY.${eventData.sy}</div>
             </div>
             <button id="viewMoreDetailsBtn" style="margin-top:10px; padding:8px 12px; background:#007bff; color:#fff; border:none; border-radius:5px; cursor:pointer;">
                 👁️ View More Details
@@ -255,7 +255,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const detailsBtn = document.getElementById("viewMoreDetailsBtn");
         if (detailsBtn)
             detailsBtn.addEventListener("click", () =>
-                openMoreDetailsModal(eventData)
+                openMoreDetailsModal(eventData),
             );
     }
 
@@ -271,7 +271,7 @@ document.addEventListener("DOMContentLoaded", () => {
         modal.style.display = "flex";
         closeBtn.addEventListener(
             "click",
-            () => (modal.style.display = "none")
+            () => (modal.style.display = "none"),
         );
     }
 
@@ -280,7 +280,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (moreDetailsClose)
         moreDetailsClose.addEventListener(
             "click",
-            () => (moreDetailsModal.style.display = "none")
+            () => (moreDetailsModal.style.display = "none"),
         );
 
     window.addEventListener("click", (e) => {

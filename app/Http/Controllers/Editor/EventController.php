@@ -8,6 +8,7 @@ use App\Models\Event;
 use App\Models\User;
 use App\Models\Department;
 use App\Models\ActivityLog;
+use App\Models\SchoolYear;
 use App\Mail\EventNotificationMail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Auth;
@@ -22,12 +23,15 @@ class EventController extends Controller
     // =========================================================================
     public function store(Request $request)
     {
+        // ==============================
         // Validate input
+        // ==============================
         $validated = $request->validate([
             'title' => 'required|string|max:50',
             'description' => 'nullable|string|max:100',
-            'more_details' => 'nullable|string', // ✅ added field
+            'more_details' => 'nullable|string',
             'date' => 'required|date|after:today',
+
             'start_time' => [
                 'required',
                 'date_format:H:i',
@@ -37,6 +41,7 @@ class EventController extends Controller
                     }
                 },
             ],
+
             'end_time' => [
                 'required',
                 'date_format:H:i',
@@ -49,17 +54,36 @@ class EventController extends Controller
                     }
                 },
             ],
+
             'location' => 'required|string|max:50',
-            'target_year_levels' => 'nullable|array',
-            'target_department'   => 'nullable|array',
-            'target_users'        => 'nullable|string',
             'other_location' => 'nullable|string|max:50|required_if:location,Other',
+
+            'target_year_levels' => 'nullable|array',
+            'target_department'  => 'nullable|array',
+            'target_users'       => 'nullable|string',
         ]);
 
-        // Determine final location
-        $location = $request->location === 'Other' ? $request->other_location : $request->location;
+        // ==============================
+        // Get active school year (DYNAMIC)
+        // ==============================
+        $activeSchoolYear = SchoolYear::where('is_active', 1)->first();
 
+        if (!$activeSchoolYear) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['school_year' => 'No active school year is set. Please contact the administrator.']);
+        }
+
+        // ==============================
+        // Determine final location
+        // ==============================
+        $location = $validated['location'] === 'Other'
+            ? $validated['other_location']
+            : $validated['location'];
+
+        // ==============================
         // Check for schedule conflict
+        // ==============================
         $conflict = Event::where('date', $validated['date'])
             ->where('location', $location)
             ->where(function ($query) use ($validated) {
@@ -67,7 +91,7 @@ class EventController extends Controller
                     ->orWhereBetween('end_time', [$validated['start_time'], $validated['end_time']])
                     ->orWhere(function ($q) use ($validated) {
                         $q->where('start_time', '<=', $validated['start_time'])
-                            ->where('end_time', '>=', $validated['end_time']);
+                        ->where('end_time', '>=', $validated['end_time']);
                     });
             })
             ->first();
@@ -85,35 +109,48 @@ class EventController extends Controller
                 ]);
         }
 
-        // ✅ Create event (with more_details)
+        // ==============================
+        // Create Event
+        // ==============================
         $event = Event::create([
-            'user_id' => auth()->id(),
+            'user_id' => Auth::id(),
             'title' => $validated['title'],
             'description' => $validated['description'] ?? null,
-            'more_details' => $validated['more_details'] ?? null, // ✅ added field
+            'more_details' => $validated['more_details'] ?? null,
             'date' => $validated['date'],
             'start_time' => $validated['start_time'],
             'end_time' => $validated['end_time'],
             'location' => $location,
-            'school_year' => 'SY.2025-2026',
+
+            // ✅ DYNAMIC SCHOOL YEAR
+            'school_year' => $activeSchoolYear->school_year,
+
+            // JSON fields
             'target_year_levels' => $validated['target_year_levels'] ?? [],
-            'target_department' => $validated['target_department'] ?? [],
-            'target_users' => $request->target_users,           // string
-            'department' => auth()->user()->department,
+            'target_department'  => $validated['target_department'] ?? [],
+            'target_users'       => $validated['target_users'] ?? null,
+
+            'department' => Auth::user()->department,
+            'status' => 'upcoming',
         ]);
 
+        // ==============================
         // Send notifications
+        // ==============================
         if ($event->department === 'OFFICES') {
             $this->sendEmailsForOfficesEvent($event);
         } else {
             $this->sendEmailsForEvent($event);
         }
 
+        // ==============================
+        // Activity Log
+        // ==============================
         ActivityLog::create([
             'user_id' => Auth::id(),
-            'action_type' => 'created', // or 'edited' / 'deleted'
-            'model_type' => 'Event',    // or 'User'
-            'model_id' => $event->id,   // the affected model
+            'action_type' => 'created',
+            'model_type' => 'Event',
+            'model_id' => $event->id,
             'description' => [
                 'title' => $event->title,
                 'event_date' => $event->date,
@@ -124,8 +161,7 @@ class EventController extends Controller
             ],
         ]);
 
-
-        return redirect()->back()->with('success', 'Event created and emails sent successfully!');
+        return redirect()->back()->with('success', 'Event created successfully!');
     }
 
     //SEND THE MAIL WHEN CREATING AN EVENT

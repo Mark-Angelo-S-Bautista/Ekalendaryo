@@ -65,7 +65,7 @@
 
                             <div class="dashboard_event_details">
                                 {{ $event->description ?? 'No description provided.' }}</div>
-                            <div class="dashboard_event_details">{{ $event->school_year }}</div>
+                            <div class="dashboard_event_details">SY.{{ $event->school_year }}</div>
 
                             <div class="dashboard_event_details">
                                 👥 {{ $event->attendees()->count() }} attending

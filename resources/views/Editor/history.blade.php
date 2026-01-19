@@ -35,7 +35,7 @@
                             <span>⏰ {{ $event->start_time }} - {{ $event->end_time }}</span>
                             <span>📍 {{ $event->location }}</span>
                             <span>👤 {{ $event->department }}</span>
-                            <span>🕒 {{ $event->school_year }}</span>
+                            <span>🕒 SY.{{ $event->school_year }}</span>
                             <span>👥 {{ $event->attendees()->count() }} attending</span>
 
                             {{-- Feedback Button --}}
