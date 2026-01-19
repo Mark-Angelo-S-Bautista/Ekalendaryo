@@ -290,11 +290,6 @@ body {
 }
 
 .dashboard_tag_admin {
-    background-color: #8b5e34;
-    color: white;
-}
-
-.dashboard_tag_upcoming {
     background-color: #007f3d;
     color: white;
 }
@@ -544,4 +539,16 @@ body {
 
 .edit-btn:hover {
     background-color: #e0e7ff;
+}
+.dashboard_tag_upcoming {
+    background: #2b5eff;
+    color: #fff;
+}
+.dashboard_tag_ongoing {
+    background: #ffb800;
+    color: #fff;
+}
+.dashboard_tag_cancelled {
+    background: #e53935;
+    color: #fff;
 }

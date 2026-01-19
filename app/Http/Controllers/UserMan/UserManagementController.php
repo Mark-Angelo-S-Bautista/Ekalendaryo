@@ -23,7 +23,11 @@ class UserManagementController extends Controller
         $user = Auth::user();
         $office_name = $user->office_name;
 
-        // Fetch all events once
+        // Fetch the current school year
+        $currentSchoolYear = SchoolYear::where('is_active', 1)->first();
+        $currentSchoolYearName = $currentSchoolYear ? $currentSchoolYear->school_year : 'N/A';
+
+        // Fetch all events
         $events = Event::all();
 
         // Fetch departments
@@ -39,10 +43,15 @@ class UserManagementController extends Controller
         $upcomingEvents = $events
             ->filter(function ($event) use ($now) {
 
+                // --- EXCLUDE CANCELLED & COMPLETED EVENTS ---
+                if (in_array($event->status, ['cancelled', 'completed'])) {
+                    return false;
+                }
+
                 // Combine date + start_time → proper datetime comparison
                 $eventDateTime = \Carbon\Carbon::parse($event->date . ' ' . $event->start_time);
 
-                // Must NOT be past
+                // Must NOT be in the past
                 if ($eventDateTime->lessThan($now)) {
                     return false;
                 }
@@ -82,6 +91,7 @@ class UserManagementController extends Controller
             'departmentCounts' => $finalDeptCounts,
             'upcomingEvents' => $upcomingEventsPreview,
             'office_name' => $office_name,
+            'currentSchoolYearName' => $currentSchoolYearName
         ]);
     }
 

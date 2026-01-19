@@ -206,10 +206,20 @@ class ViewerController extends Controller
         $user = Auth::user();
         $today = Carbon::today('Asia/Manila');
 
-        // Auto-update event status
-        Event::whereDate('date', '>', $today)->update(['status' => 'upcoming']);
-        Event::whereDate('date', '=', $today)->update(['status' => 'ongoing']);
-        Event::whereDate('date', '<', $today)->update(['status' => 'completed']);
+        // Only update upcoming for events that are NOT cancelled
+        Event::whereDate('date', '>', $today)
+            ->whereNotIn('status', ['cancelled'])
+            ->update(['status' => 'upcoming']);
+
+        // Only update ongoing for events that are NOT cancelled
+        Event::whereDate('date', '=', $today)
+            ->whereNotIn('status', ['cancelled'])
+            ->update(['status' => 'ongoing']);
+
+        // Only update completed for events that are NOT cancelled
+        Event::whereDate('date', '<', $today)
+            ->whereNotIn('status', ['cancelled'])
+            ->update(['status' => 'completed']);
 
         // Normalize user year level
         $userYearLevel = preg_replace('/(\d)(st|nd|rd|th)Year/', '$1$2 Year', $user->yearlevel);

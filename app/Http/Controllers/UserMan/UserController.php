@@ -194,12 +194,12 @@ class UserController extends Controller
     public function search(Request $request)
     {
         $query = $request->get('query', '');
-
         $now = now();
         $limitDate = $now->copy()->addDays(30);
 
         // Eager load the user to get office_name
         $events = Event::with('user')
+            // Filter by search query first
             ->when($query, function ($q) use ($query) {
                 $q->where(function ($inner) use ($query) {
                     $inner->where('title', 'like', "%{$query}%")
@@ -207,6 +207,7 @@ class UserController extends Controller
                         ->orWhere('description', 'like', "%{$query}%");
                 });
             })
+            ->whereNotIn('status', ['completed', 'cancelled']) // <-- exclude cancelled/completed
             ->get()
             ->filter(function ($event) use ($now, $limitDate) {
                 $eventDateTime = \Carbon\Carbon::parse($event->date . ' ' . $event->start_time);

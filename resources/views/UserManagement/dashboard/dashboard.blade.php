@@ -1,5 +1,6 @@
 <x-usermanLayout>
     <div class="dashboard_container">
+        <!-- Welcome Card -->
         <section class="dashboard_welcome_card">
             <div>
                 <h2>Welcome back, {{ Auth::user()->name ?? 'User' }}!</h2>
@@ -10,7 +11,7 @@
                         {{ Auth::user()->title }}
                     @endif Dashboard
                 </p>
-                <p class="dashboard_school_year">Current School Year: SY.2025-2026</p>
+                <p class="dashboard_school_year">Current School Year: {{ $currentSchoolYearName }}</p>
             </div>
             <form action="{{ url('/usermanagement/dashboard') }}" method="POST">
                 @csrf
@@ -20,6 +21,7 @@
             </form>
         </section>
 
+        <!-- Search Box -->
         <section class="dashboard_search_card">
             <div class="dashboard_search_box">
                 <input type="text" id="eventSearch" placeholder="Search events..." class="dashboard_search_input">
@@ -27,6 +29,7 @@
             </div>
         </section>
 
+        <!-- Stats -->
         <section class="dashboard_stats">
             <div class="dashboard_stat_box dashboard_clickable" id="dashboard_department_box">
                 <h3>Total Departments and Offices Events</h3>
@@ -34,60 +37,17 @@
             </div>
         </section>
 
+        <!-- Upcoming Events -->
         <section class="dashboard_upcoming_card">
             <h3 class="dashboard_upcoming_title">Upcoming Events</h3>
             <p>For the next 30 days</p>
-
             <div id="eventsWrapper">
-                @if ($upcomingEvents->isEmpty())
-                    <p>No upcoming events.</p>
-                @else
-                    <div class="dashboard_events_grid">
-                        @foreach ($upcomingEvents as $event)
-                            <div class="dashboard_event_card">
-                                <div class="dashboard_event_title">{{ $event->title }}</div>
-                                <div class="dashboard_event_details">
-                                    📅 {{ \Carbon\Carbon::parse($event->date)->format('n/j/Y') }}
-                                    &nbsp;&nbsp; 🕓 {{ \Carbon\Carbon::parse($event->start_time)->format('g:i A') }} -
-                                    {{ \Carbon\Carbon::parse($event->end_time)->format('g:i A') }}
-                                    &nbsp;&nbsp; 📍 {{ $event->location }}
-                                </div>
-                                <div class="dashboard_event_details">
-                                    👥
-                                    @php
-                                        if (!empty($event->target_year_levels)) {
-                                            $yearLevelsText = implode(', ', $event->target_year_levels);
-                                        } else {
-                                            $yearLevelsText = $event->target_users ?? 'No target group';
-                                        }
-                                    @endphp
-                                    {{ $yearLevelsText }}
-                                </div>
-                                <div class="dashboard_event_details">
-                                    {{ $event->description ?? 'No description provided.' }}</div>
-                                <div class="dashboard_event_details">{{ $event->school_year }}</div>
-                                <div class="dashboard_event_tags">
-                                    <span class="dashboard_tag dashboard_tag_admin">
-                                        @if ($event->department === 'OFFICES')
-                                            {{ $event->office_name }}
-                                        @else
-                                            {{ $event->department }}
-                                        @endif
-                                    </span>
-                                    <span class="dashboard_tag dashboard_tag_upcoming">upcoming</span>
-                                </div>
-
-                                <button class="dashboard_view_btn" data-details='@json($event->more_details ?? 'No additional details.')'>
-                                    👁️ View Details
-                                </button>
-                            </div>
-                        @endforeach
-                    </div>
-                @endif
+                <p>Loading events...</p>
             </div>
         </section>
     </div>
 
+    <!-- Department Modal -->
     <div class="dashboard_modal" id="dashboard_department_modal">
         <div class="dashboard_modal_content">
             <div class="dashboard_modal_header">
@@ -108,6 +68,7 @@
         </div>
     </div>
 
+    <!-- Event Details Modal -->
     <div id="userDetailsModalOverlay"
         style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.65); z-index:9999; justify-content:center; align-items:center; padding:20px;">
         <div
@@ -130,60 +91,68 @@
             const searchInput = document.getElementById('eventSearch');
             const eventsWrapper = document.getElementById('eventsWrapper');
             const clearButton = document.querySelector('.dashboard_clear_btn');
-
             let currentFetchedEvents = [];
 
-            // Function to build HTML string for all events
+            const statusMap = {
+                upcoming: {
+                    text: 'Upcoming',
+                    class: 'dashboard_tag_upcoming'
+                },
+                ongoing: {
+                    text: 'Ongoing',
+                    class: 'dashboard_tag_ongoing'
+                },
+                completed: {
+                    text: 'Completed',
+                    class: 'dashboard_tag_completed'
+                },
+                cancelled: {
+                    text: 'Cancelled',
+                    class: 'dashboard_tag_cancelled'
+                }
+            };
+
             const renderEvents = (events) => {
-                if (events.length === 0) {
-                    eventsWrapper.innerHTML = `<p>No events found.</p>`;
+                if (!events.length) {
+                    eventsWrapper.innerHTML = `<p>No upcoming events.</p>`;
                     return;
                 }
 
-                // 1. Start the GRID Container
                 let htmlContent = `<div class="dashboard_events_grid">`;
-
-                // 2. Loop through events and create CARDS
                 events.forEach((event, index) => {
                     const date = new Date(event.date).toLocaleDateString('en-US');
 
-                    // Format start time
-                    let startTime = 'N/A';
-                    if (event.start_time) {
-                        const [sh, sm] = event.start_time.split(':');
-                        const sTime = new Date();
-                        sTime.setHours(sh, sm, 0);
-                        startTime = sTime.toLocaleTimeString('en-US', {
+                    const formatTime = t => {
+                        if (!t) return 'N/A';
+                        const [h, m] = t.split(':');
+                        const dt = new Date();
+                        dt.setHours(h, m, 0);
+                        return dt.toLocaleTimeString('en-US', {
                             hour: 'numeric',
                             minute: '2-digit',
                             hour12: true
                         });
-                    }
-
-                    // Format end time
-                    let endTime = 'N/A';
-                    if (event.end_time) {
-                        const [eh, em] = event.end_time.split(':');
-                        const eTime = new Date();
-                        eTime.setHours(eh, em, 0);
-                        endTime = eTime.toLocaleTimeString('en-US', {
-                            hour: 'numeric',
-                            minute: '2-digit',
-                            hour12: true
-                        });
-                    }
+                    };
+                    const startTime = formatTime(event.start_time);
+                    const endTime = formatTime(event.end_time);
 
                     const departmentTag = event.department === 'OFFICES' ? event.office_name : event
                         .department;
 
-                    // Handle target_year_levels
-                    let yearLevelsText = event.target_users || 'No target group';
+                    let yearLevelsText = 'No target group';
                     if (Array.isArray(event.target_year_levels) && event.target_year_levels.length >
                         0) {
                         yearLevelsText = event.target_year_levels.join(', ');
+                    } else if (event.target_users) {
+                        yearLevelsText = event.target_users;
                     }
 
-                    // Add the card to the html string
+                    // Determine dynamic status tag
+                    const status = statusMap[event.status] || {
+                        text: event.status,
+                        class: 'dashboard_tag_upcoming'
+                    };
+
                     htmlContent += `
                         <div class="dashboard_event_card">
                             <div class="dashboard_event_title">${event.title}</div>
@@ -195,7 +164,7 @@
                             <div class="dashboard_event_details">${event.school_year || 'N/A'}</div>
                             <div class="dashboard_event_tags">
                                 <span class="dashboard_tag dashboard_tag_admin">${departmentTag}</span>
-                                <span class="dashboard_tag dashboard_tag_upcoming">upcoming</span>
+                                <span class="dashboard_tag ${status.class}">${status.text}</span>
                             </div>
                             <button class="dashboard_view_btn" data-index="${index}"
                                 style="padding:10px 22px; background:#e8ecf5; border:none; border-radius:10px; font-size:1rem; cursor:pointer; font-weight:600; color:#36415d; margin-top:10px;">
@@ -204,11 +173,7 @@
                         </div>
                     `;
                 });
-
-                // 3. Close the GRID Container
                 htmlContent += `</div>`;
-
-                // 4. Inject into DOM
                 eventsWrapper.innerHTML = htmlContent;
             };
 
@@ -216,13 +181,15 @@
                 fetch(`/usermanagement/dashboard/search?query=${encodeURIComponent(query)}`)
                     .then(res => res.json())
                     .then(data => {
-                        currentFetchedEvents = data.events;
+                        // Only include events that are NOT cancelled or completed for the main dashboard
+                        currentFetchedEvents = data.events.filter(e => !['completed', 'cancelled'].includes(
+                            e.status));
                         renderEvents(currentFetchedEvents);
                     })
                     .catch(err => console.error(err));
             };
 
-            // Initial Fetch
+            // Initial fetch
             fetchEvents();
 
             searchInput.addEventListener('input', () => fetchEvents(searchInput.value.trim()));
@@ -231,7 +198,7 @@
                 fetchEvents();
             });
 
-            // Modal Logic
+            // Event Details Modal
             const modal = document.getElementById('userDetailsModalOverlay');
             const modalContent = document.getElementById('userDetailsContent');
             const closeBtn = document.getElementById('userDetailsCloseBtn');
@@ -239,15 +206,7 @@
             document.addEventListener('click', (e) => {
                 if (e.target.classList.contains('dashboard_view_btn')) {
                     const index = e.target.dataset.index;
-                    let details = 'No additional details.';
-
-                    // Check if data came from JS Fetch (index) or PHP Render (data-details)
-                    if (index !== undefined && currentFetchedEvents[index]) {
-                        details = currentFetchedEvents[index].more_details || details;
-                    } else if (e.target.dataset.details) {
-                        details = e.target.dataset.details;
-                    }
-
+                    const details = currentFetchedEvents[index]?.more_details || 'No additional details.';
                     modalContent.innerHTML = details;
                     modal.style.display = 'flex';
                 }
@@ -258,7 +217,7 @@
                 if (e.target === modal) modal.style.display = 'none';
             });
 
-            // Department Modal Logic
+            // Department Modal
             const deptBox = document.getElementById('dashboard_department_box');
             const deptModal = document.getElementById('dashboard_department_modal');
             const deptClose = document.getElementById('dashboard_close_modal');
@@ -266,12 +225,13 @@
             if (deptBox && deptModal) {
                 deptBox.addEventListener('click', () => deptModal.style.display = 'flex');
                 deptClose.addEventListener('click', () => deptModal.style.display = 'none');
-                deptModal.addEventListener('click', (e) => {
+                deptModal.addEventListener('click', e => {
                     if (e.target === deptModal) deptModal.style.display = 'none';
                 });
             }
         });
     </script>
+
     @if (session('success'))
         <div id="toast"
             style="position: fixed; top: 20px; right: 20px; background: #28a745; color: white; padding: 12px 22px; border-radius: 8px; z-index: 9999; opacity: 0; transition: opacity 0.5s;">
@@ -282,10 +242,7 @@
             document.addEventListener('DOMContentLoaded', () => {
                 const toast = document.getElementById('toast');
                 if (toast) {
-                    // Show the toast
                     toast.style.opacity = '1';
-
-                    // Hide after 3 seconds
                     setTimeout(() => {
                         toast.style.opacity = '0';
                     }, 3000);
