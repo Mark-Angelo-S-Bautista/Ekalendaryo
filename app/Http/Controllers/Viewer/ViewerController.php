@@ -182,21 +182,23 @@ class ViewerController extends Controller
 
         $events = Event::where(function ($query) use ($user) {
 
-            // Same department
-            $query->where('department', $user->department)
+                // Same department
+                $query->where('department', $user->department)
 
-                // OR targeted department
-                ->orWhereJsonContains('target_department', $user->department)
+                    // OR targeted department
+                    ->orWhereJsonContains('target_department', $user->department)
 
-                // OR targeted year levels
-                ->orWhere(function ($q) use ($user) {
-                    $q->whereNotNull('target_year_levels')
-                      ->whereJsonContains('target_year_levels', $user->yearlevel);
-                });
+                    // OR targeted year levels
+                    ->orWhere(function ($q) use ($user) {
+                        $q->whereNotNull('target_year_levels')
+                        ->whereJsonContains('target_year_levels', $user->yearlevel);
+                    });
 
-        })
-        ->orderBy('date', 'asc')
-        ->paginate(2);
+            })
+            // Order by most recently updated first, fallback to created_at
+            ->orderBy('created_at', 'desc')
+            ->orderBy('updated_at', 'asc')
+            ->paginate(3); // Adjust pagination as needed
 
         return view('Viewer.notifications', compact('events'));
     }

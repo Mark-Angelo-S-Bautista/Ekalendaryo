@@ -25,21 +25,12 @@
 
                 @forelse ($events as $event)
                     @php
-                        // Determine status for CSS colors
-                        // Upcoming = future events, Completed = past events, Canceled = canceled
-                        if ($event->status === 'canceled') {
-                            $status = 'canceled';
-                        } elseif ($event->status === 'completed') {
-                            $status = 'completed';
-                        } else {
-                            $status = 'upcoming'; // anything else is upcoming
-                        }
-
-                        // Notification description
-                        $description = match ($status) {
-                            'upcoming' => 'A new event is scheduled',
-                            'completed' => 'This event has been completed',
-                            'canceled' => 'This event was canceled',
+                        // Determine dynamic status
+                        $status = match ($event->status) {
+                            'cancelled' => 'cancelled',
+                            'completed' => 'completed',
+                            'ongoing' => 'ongoing',
+                            default => 'upcoming',
                         };
                     @endphp
 
@@ -51,7 +42,19 @@
                             </p>
 
                             <p class="notif-sub">
-                                {{ $description }}
+                                @switch($status)
+                                    @case('upcoming')
+                                        A new event is scheduled
+                                    @break
+
+                                    @case('completed')
+                                        This event has been completed
+                                    @break
+
+                                    @case('canceled')
+                                        This event was canceled
+                                    @break
+                                @endswitch
                             </p>
 
                             <div class="notif-details">
@@ -66,25 +69,26 @@
 
                         </div>
 
+                        <!-- Dynamic Status Tag -->
                         <span class="status {{ $status }}-status">
                             {{ $status }}
                         </span>
                     </div>
 
-                @empty
-                    <p class="empty">No notifications available.</p>
-                @endforelse
+                    @empty
+                        <p class="empty">No notifications available.</p>
+                    @endforelse
+
+                </div>
+
+                <!-- Pagination -->
+                <div class="pagination-wrapper">
+                    {{ $events->links('vendor.pagination.simple') }}
+                </div>
 
             </div>
 
-            <!-- Pagination -->
-            <div class="pagination-wrapper">
-                {{ $events->links('vendor.pagination.simple') }}
-            </div>
+        </body>
 
-        </div>
-
-    </body>
-
-    </html>
-</x-viewerLayout>
+        </html>
+    </x-viewerLayout>

@@ -148,7 +148,7 @@ body {
 }
 
 /* 🔴 Canceled */
-.notif-card.canceled {
+.notif-card.cancelled {
     background-color: #fdecea;
     border-left: 6px solid #e74c3c;
 }
@@ -163,6 +163,15 @@ body {
 }
 .completed-status {
     color: #7f8c8d;
+}
+
+/* 🔴 Ongoing */
+.notif-card.ongoing {
+    background-color: #fff5dc;
+    border-left: 6px solid #ffb800;
+}
+.canceled-status {
+    color: #ffb800;
 }
 
 /* ===============================
