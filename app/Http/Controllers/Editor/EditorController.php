@@ -176,7 +176,45 @@ class EditorController extends Controller
 
     public function archive()
     {
-        return view('Editor.archive');
+        // Get the current active school year
+        $currentSY = SchoolYear::where('is_active', 1)->first();
+        $currentSchoolYear = $currentSY ? $currentSY->school_year : 'Unknown';
+
+        $userId = Auth::id(); // Get current logged-in user
+
+        // Get cancelled events for current SY created by this user only
+        $deletedEvents = Event::where('status', 'cancelled')
+            ->where('school_year', $currentSchoolYear)
+            ->where('user_id', $userId) // Only events created by this user
+            ->with('attendees') // eager load attendees for counting
+            ->orderBy('date', 'desc')
+            ->paginate(2); // change 5 to whatever per-page limit you want
+
+        // Parse target_year_levels into a readable string
+        $deletedEvents->transform(function ($event) {
+            if (!empty($event->target_year_levels)) {
+                if (is_array($event->target_year_levels)) {
+                    // Already an array from DB
+                    $event->target_year_levels_str = implode(', ', $event->target_year_levels);
+                } elseif (is_string($event->target_year_levels)) {
+                    // Stored as JSON string
+                    $parsed = json_decode($event->target_year_levels, true);
+                    $event->target_year_levels_str = is_array($parsed) ? implode(', ', $parsed) : 'All year levels';
+                } else {
+                    $event->target_year_levels_str = 'All year levels';
+                }
+            } else {
+                $event->target_year_levels_str = 'All year levels';
+            }
+            return $event;
+        });
+
+        // Get total events for summary (also filtered by user)
+        $totalEvents = Event::where('school_year', $currentSchoolYear)
+            ->where('user_id', $userId)
+            ->count();
+
+        return view('Editor.archive', compact('deletedEvents', 'totalEvents', 'currentSchoolYear'));
     }
 
     public function profile()

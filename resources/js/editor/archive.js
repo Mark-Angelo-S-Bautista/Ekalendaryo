@@ -1,30 +1,21 @@
-function openModal(id) {
-    document.getElementById(id).style.display = "flex";
-}
+// Ensure the DOM is fully loaded
+document.addEventListener("DOMContentLoaded", () => {
+    // Open a modal by ID
+    window.openModal = function (id) {
+        const modal = document.getElementById(id);
+        if (modal) modal.style.display = "flex";
+    };
 
-function closeModal(id) {
-    document.getElementById(id).style.display = "none";
-}
+    // Close a modal by ID
+    window.closeModal = function (id) {
+        const modal = document.getElementById(id);
+        if (modal) modal.style.display = "none";
+    };
 
-function filterEvents() {
-    const filter = document.getElementById("eventFilter").value;
-    document.querySelectorAll("#eventList .event").forEach((ev) => {
-        ev.style.display =
-            filter === "all" || ev.dataset.type === filter ? "block" : "none";
+    // Close modal when clicking outside modal content
+    window.addEventListener("click", (e) => {
+        document.querySelectorAll(".modal").forEach((modal) => {
+            if (e.target === modal) modal.style.display = "none";
+        });
     });
-}
-
-function filterStudents() {
-    const filter = document.getElementById("studentFilter").value;
-    document.querySelectorAll("#studentList .student").forEach((stu) => {
-        stu.style.display =
-            filter === "all" || stu.dataset.dept === filter ? "block" : "none";
-    });
-}
-
-/* ✅ Restore button function */
-function restoreItem(button) {
-    const item = button.closest(".event");
-    alert(`Restored: ${item.querySelector("h4").innerText}`);
-    item.remove();
-}
+});
