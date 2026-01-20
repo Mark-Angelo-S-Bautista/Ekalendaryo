@@ -286,16 +286,15 @@ class UserManagementController extends Controller
         // ----------------------------------------------------------------------
         // ✅ FIX: Count users by TITLE instead of ROLE to match dashboard cards
         // ----------------------------------------------------------------------
-        $totalUsers = User::count();
+        $totalUsers = User::where('status', 'active')->count(); // Only active users
+    
+        // Count users by specific titles/departments (only active users)
+        $studentCount = User::where('status', 'active')->where('title', 'Student')->count();
+        $facultyCount = User::where('status', 'active')->where('title', 'Faculty')->count();
+        $deptHeadCount = User::where('status', 'active')->where('title', 'Department Head')->count();
         
-        // Count users by specific titles/departments
-        $studentCount = User::where('title', 'Student')->count();
-        $facultyCount = User::where('title', 'Faculty')->count();
-        $deptHeadCount = User::where('title', 'Department Head')->count();
-        
-        // Count 'Offices' users (assuming 'Offices' is identified by department name or title)
-        // We use where('department', 'OFFICES') based on your previous Blade logic
-        $officesCount = User::where('department', 'OFFICES')->count(); 
+        // Count 'Offices' users (only active users)
+        $officesCount = User::where('status', 'active')->where('department', 'OFFICES')->count(); 
 
         // Fetch all departments
         $departments = Department::all(); 

@@ -13,7 +13,7 @@
     <body>
         <div class="container">
             <div class="users_header">
-                <div class="title">User Management</div>
+                <div class="title">Users Management</div>
                 <div class="users_header_buttons">
                     <button id="openImportModal" class="users_btn">📥 Import Users</button>
                     <button class="users_btn add" id="openAddUser" onclick="openAddUserModal()">＋ Add User</button>
