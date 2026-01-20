@@ -30,6 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
         organizer: ev.organizer,
         targetYearLevels: ev.targetYearLevels,
         more_details: ev.more_details || "No additional details provided.",
+        status: ev.status, // Already lowercase from DB
     }));
 
     console.log("=== Formatted Events ===", formattedEvents);
@@ -49,6 +50,11 @@ document.addEventListener("DOMContentLoaded", () => {
         bsca: "#DAA520",
         default: "#28a745",
     };
+
+    // Helper to normalize status (optional but safe)
+    function normalizeStatus(status) {
+        return status ? status.toString().trim().toLowerCase() : "";
+    }
 
     // 🗓️ Render Calendar
     function renderCalendar() {
@@ -84,9 +90,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         const today = new Date();
-        const todayStr = `${today.getFullYear()}-${String(
-            today.getMonth() + 1,
-        ).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+        const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
         for (let i = 0; i < startDay; i++) {
             const empty = document.createElement("div");
@@ -98,10 +102,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const dayEl = document.createElement("div");
             dayEl.classList.add("calendar_day");
 
-            const date = `${currentYear}-${String(currentMonth + 1).padStart(
-                2,
-                "0",
-            )}-${String(d).padStart(2, "0")}`;
+            const date = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
             const num = document.createElement("div");
             num.classList.add("calendar_day-number");
             num.textContent = d;
@@ -113,18 +114,24 @@ document.addEventListener("DOMContentLoaded", () => {
             const filterVal = eventFilter.value;
 
             filtered.forEach((ev) => {
+                // 🚫 DO NOT RENDER CANCELLED EVENTS
+                if (normalizeStatus(ev.status) === "cancelled") return;
+
                 if (filterVal === "all" || filterVal === ev.type) {
                     const e = document.createElement("div");
                     e.classList.add("calendar_event", `calendar_${ev.type}`);
                     e.textContent = ev.title;
+
                     const deptKey = ev.type.toLowerCase();
                     e.style.backgroundColor =
                         departmentColors[deptKey] || departmentColors.default;
                     e.style.color = "#fff";
+
                     e.addEventListener("click", (event) => {
                         event.stopPropagation();
                         openEventDetail(ev);
                     });
+
                     dayEl.appendChild(e);
                 }
             });
@@ -161,7 +168,6 @@ document.addEventListener("DOMContentLoaded", () => {
         let timeSlotsHTML = "";
         const renderedEvents = new Set();
 
-        // Helper function to convert "HH:MM" to 12-hour format
         function formatTime12Hour(hour, min) {
             const period = hour >= 12 ? "PM" : "AM";
             let hour12 = hour % 12;
@@ -172,7 +178,7 @@ document.addEventListener("DOMContentLoaded", () => {
         for (let hour = startHour; hour < endHour; hour++) {
             for (let min = 0; min < 60; min += slotInterval) {
                 const slotTimeNum = hour + min / 60;
-                const timeLabel = formatTime12Hour(hour, min); // <-- use 12-hour format
+                const timeLabel = formatTime12Hour(hour, min);
                 const eventForSlot = dayEvents.find((ev) => {
                     const startNum = timeStrToNumber(ev.timeStart);
                     const endNum = timeStrToNumber(ev.timeEnd);
@@ -230,15 +236,20 @@ document.addEventListener("DOMContentLoaded", () => {
             yearLevelsString = "Not specified (All year levels)";
         }
 
+        // ✅ DYNAMIC STATUS BADGE
+        const status = normalizeStatus(eventData.status);
+
         modalBody.innerHTML = `
         <div class="calendar_event-detail">
             <div class="calendar_badges">
                 <div class="calendar_event-title">${eventData.title}</div>
-                <span class="calendar_badge upcoming">upcoming</span>
+                <span class="calendar_badge ${status}">
+                    ${status.toUpperCase()}
+                </span>
             </div>
-            <div class="calendar_event-description">${
-                eventData.description || "No description provided."
-            }</div>
+            <div class="calendar_event-description">
+                ${eventData.description || "No description provided."}
+            </div>
             <div class="calendar_event-info">
                 <div>📅 ${formatShortDate(eventData.date)}</div>
                 <div>⏰ ${eventData.timeStart} - ${eventData.timeEnd}</div>
@@ -267,7 +278,7 @@ document.addEventListener("DOMContentLoaded", () => {
         content.innerHTML = `
         <h2>${eventData.title}</h2>
         <p>${eventData.moreDetails || "No additional details."}</p>
-    `;
+        `;
         modal.style.display = "flex";
         closeBtn.addEventListener(
             "click",
@@ -300,6 +311,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             renderCalendar();
         });
+
     document
         .getElementById("calendar_nextMonth")
         .addEventListener("click", () => {
@@ -315,10 +327,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function formatDate(dateStr) {
         const d = new Date(dateStr + "T00:00:00");
-        return `${d.toLocaleString("default", {
-            month: "long",
-        })} ${d.getDate()}, ${d.getFullYear()}`;
+        return `${d.toLocaleString("default", { month: "long" })} ${d.getDate()}, ${d.getFullYear()}`;
     }
+
     function formatShortDate(dateStr) {
         const d = new Date(dateStr + "T00:00:00");
         return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`;

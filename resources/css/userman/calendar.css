@@ -163,27 +163,6 @@ body {
     color: #064420;
 }
 
-.calendar_badges {
-    display: flex;
-    gap: 6px;
-    margin: 6px 0;
-}
-
-.calendar_badge {
-    font-size: 12px;
-    padding: 3px 8px;
-    border-radius: 4px;
-    color: #fff;
-    text-transform: capitalize;
-}
-
-.calendar_badge.admin {
-    background: #a05a00;
-}
-.calendar_badge.upcoming {
-    background: #2d6a4f;
-}
-
 .calendar_event-description {
     font-size: 14px;
     color: #333;
@@ -258,3 +237,36 @@ body {
     color: #333;
     padding-top: 40px;
 }
+.calendar_badges {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+}
+
+.calendar_badge {
+    display: inline-block;
+    font-size: 12px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    color: #fff;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.calendar_badge.upcoming {
+    background-color: #007bff;
+} /* Blue */
+.calendar_badge.ongoing {
+    background-color: #ffb800;
+} /* Green */
+.calendar_badge.completed {
+    background-color: #6c757d;
+} /* Gray */
+.calendar_badge.cancelled {
+    background-color: #dc3545;
+} /* Red */
+.calendar_badge.unknown {
+    background-color: #343a40;
+} /* Dark Gray */

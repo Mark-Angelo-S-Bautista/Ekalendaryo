@@ -165,6 +165,7 @@ class ViewerController extends Controller
                 'moreDetails' => $event->more_details ?? 'No additional details.', // <-- Add this
                 'timeStart' => $event->start_time,
                 'timeEnd' => $event->end_time,
+                'status' => $event->status,
                 'location' => $event->location,
                 'sy' => $event->school_year,
                 'type' => strtolower(str_replace(['/', ' '], '_', $event->department ?? 'general')),
