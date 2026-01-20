@@ -275,10 +275,13 @@ class UserManagementController extends Controller
         $query = $request->input('query'); // get the text from the search bar
 
         // Fetch users based on search query if exists
-        $users = User::when($query, function ($q) use ($query) {
-            $q->where('name', 'like', "%{$query}%")
-            ->orWhere('email', 'like', "%{$query}%");
-        })->get();
+        $users = User::where('status', 'active') // Only active users
+            ->when($query, function ($q) use ($query) {
+                $q->where('name', 'like', "%{$query}%")
+                    ->orWhere('email', 'like', "%{$query}%");
+            })
+            ->orderBy('name', 'asc') // ✅ Sort alphabetically by name
+            ->get();
 
         // ----------------------------------------------------------------------
         // ✅ FIX: Count users by TITLE instead of ROLE to match dashboard cards

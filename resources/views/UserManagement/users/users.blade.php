@@ -69,7 +69,7 @@
             </form>
         </div>
 
-        <div class="users_table">
+        <div class="users_table scrollable">
             <table id="userTable">
                 <thead>
                     <tr>
@@ -84,12 +84,11 @@
                     @foreach ($users as $user)
                         <tr>
                             <td>
-                                {{-- Display Title/Office Name on top, User Name below --}}
                                 <span style="display:block; font-weight:bold;">
                                     @if ($user->department === 'OFFICES')
-                                        {{ $user->office_name ?? 'N/A' }} {{-- Use office_name for offices --}}
+                                        {{ $user->office_name ?? 'N/A' }}
                                     @else
-                                        {{ $user->title ?? 'N/A' }} {{-- Use title for others --}}
+                                        {{ $user->title ?? 'N/A' }}
                                     @endif
                                 </span>
                                 <span>{{ $user->name }}</span>

@@ -982,7 +982,9 @@ th {
     font-size: 14px;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.4s ease, transform 0.4s ease,
+    transition:
+        opacity 0.4s ease,
+        transform 0.4s ease,
         visibility 0s linear 0.4s;
     transform: translateY(20px);
     z-index: 1000;
@@ -1196,7 +1198,9 @@ th {
     font-size: 14px;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.4s ease, transform 0.4s ease,
+    transition:
+        opacity 0.4s ease,
+        transform 0.4s ease,
         visibility 0s linear 0.4s;
     transform: translateY(20px);
     z-index: 1000;
@@ -1267,7 +1271,9 @@ th {
     cursor: pointer;
     color: #c0392b;
     font-size: 18px;
-    transition: transform 0.2s ease, color 0.2s ease;
+    transition:
+        transform 0.2s ease,
+        color 0.2s ease;
 }
 
 .delete-dept-btn:hover {
@@ -1496,4 +1502,33 @@ th {
         font-size: 12px;
         min-width: 36px;
     }
+}
+.users_table.scrollable {
+    max-height: 400px; /* adjust height as needed */
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+/* Optional: keep table header fixed */
+.users_table.scrollable thead th {
+    position: sticky;
+    top: 0;
+    background-color: #f8f8f8; /* header background */
+    z-index: 10;
+    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Optional: style scrollbars for better look */
+.users_table.scrollable::-webkit-scrollbar {
+    width: 8px;
+}
+
+.users_table.scrollable::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+.users_table.scrollable::-webkit-scrollbar-track {
+    background-color: #f0f0f0;
 }
