@@ -86,6 +86,7 @@ class EventController extends Controller
         // ==============================
         $conflict = Event::where('date', $validated['date'])
             ->where('location', $location)
+            ->where('status', '!=', 'cancelled') // ✅ ignore cancelled events
             ->where(function ($query) use ($validated) {
                 $query->whereBetween('start_time', [$validated['start_time'], $validated['end_time']])
                     ->orWhereBetween('end_time', [$validated['start_time'], $validated['end_time']])
@@ -385,12 +386,13 @@ class EventController extends Controller
         $conflict = Event::where('id', '!=', $event->id)
             ->where('date', $validated['date'])
             ->where('location', $location)
+            ->where('status', '!=', 'cancelled') // ✅ ignore cancelled events
             ->where(function ($query) use ($validated) {
                 $query->whereBetween('start_time', [$validated['start_time'], $validated['end_time']])
                     ->orWhereBetween('end_time', [$validated['start_time'], $validated['end_time']])
                     ->orWhere(function ($q) use ($validated) {
                         $q->where('start_time', '<=', $validated['start_time'])
-                            ->where('end_time', '>=', $validated['end_time']);
+                        ->where('end_time', '>=', $validated['end_time']);
                     });
             })
             ->first();
@@ -529,6 +531,7 @@ class EventController extends Controller
 
         $conflict = Event::where('date', $request->date)
             ->where('location', $request->location)
+            ->where('status', '!=', 'cancelled') // ✅ Ignore cancelled events
             ->where(function ($query) use ($request) {
                 $query->whereBetween('start_time', [$request->start_time, $request->end_time])
                     ->orWhereBetween('end_time', [$request->start_time, $request->end_time])
