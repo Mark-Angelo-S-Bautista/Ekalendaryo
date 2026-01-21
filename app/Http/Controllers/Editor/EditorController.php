@@ -43,7 +43,7 @@ class EditorController extends Controller
         // Filter events according to department logic
         $upcomingEvents = $events->filter(function ($event) use ($dept) {
             // Skip cancelled or completed events
-            if (in_array($event->status, ['completed', 'cancelled'])) {
+            if (in_array($event->computed_status, ['completed', 'cancelled'])) {
                 return false;
             }
             if ($event->department === $dept) {
@@ -105,7 +105,7 @@ class EditorController extends Controller
                 'moreDetails' => $event->more_details ?? 'No additional details.', // <-- Add this
                 'timeStart' => $event->start_time,
                 'timeEnd' => $event->end_time,
-                'status' => $event->status,
+                'status' => $event->computed_status,
                 'location' => $event->location,
                 'sy' => $event->school_year,
                 'type' => strtolower(str_replace(['/', ' '], '_', $event->department ?? 'general')),
@@ -133,36 +133,33 @@ class EditorController extends Controller
     {
         $userId = Auth::id();
 
-        $today = Carbon::today('Asia/Manila');
-
-        // Only update upcoming for events that are NOT cancelled
-        Event::whereDate('date', '>', $today)
-            ->whereNotIn('status', ['cancelled'])
-            ->update(['status' => 'upcoming']);
-
-        // Only update ongoing for events that are NOT cancelled
-        Event::whereDate('date', '=', $today)
-            ->whereNotIn('status', ['cancelled'])
-            ->update(['status' => 'ongoing']);
-
-        // Only update completed for events that are NOT cancelled
-        Event::whereDate('date', '<', $today)
-            ->whereNotIn('status', ['cancelled'])
-            ->update(['status' => 'completed']);
-
-        // Fetch completed events only
-        $eventStatus = Event::where('status', 'completed')
-            ->orderBy('date', 'desc')
-            ->get();
-
+        // Get all events created by this user
         $events = Event::withCount('feedbacks')
             ->where('user_id', $userId)
-            ->where('status', 'completed')
-            ->whereDate('date', '<', Carbon::today())
             ->orderBy('date', 'desc')
-            ->paginate(2);
+            ->get()
+            ->filter(function ($event) {
+                return $event->computed_status === 'completed';
+            });
 
-        return view('Editor.history', compact('events', 'eventStatus'));
+        // Manual pagination (because computed_status is not a DB column)
+        $perPage = 2;
+        $currentPage = request()->get('page', 1);
+
+        $paginatedEvents = new \Illuminate\Pagination\LengthAwarePaginator(
+            $events->forPage($currentPage, $perPage)->values(),
+            $events->count(),
+            $perPage,
+            $currentPage,
+            [
+                'path' => request()->url(),
+                'query' => request()->query(),
+            ]
+        );
+
+        return view('Editor.history', [
+            'events' => $paginatedEvents,
+        ]);
     }
 
     public function getFeedback(Event $event)
@@ -379,16 +376,17 @@ class EditorController extends Controller
         // --- Add this data transformation ---
         // This makes sure your JavaScript gets the correct tag name and time formats
         $events->transform(function ($event) {
-            // Create the tag name
             if ($event->department === 'OFFICES' && $event->user) {
                 $event->tag_name = $event->user->title;
             } else {
                 $event->tag_name = $event->department;
             }
 
-            // Pre-format the time
             $event->formatted_start_time = Carbon::parse($event->start_time)->format('g:i A');
             $event->formatted_end_time = Carbon::parse($event->end_time)->format('g:i A');
+
+            // ✅ FIX
+            $event->status = $event->computed_status;
 
             return $event;
         });

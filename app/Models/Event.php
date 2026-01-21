@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
+
 
 
 class Event extends Model
@@ -42,5 +44,25 @@ class Event extends Model
     public function attendees()
     {
         return $this->belongsToMany(User::class, 'event_attendees', 'event_id', 'user_id')->withTimestamps();
+    }
+
+    public function getComputedStatusAttribute()
+    {
+        // Cancelled should ALWAYS win
+        if ($this->status === 'cancelled') {
+            return 'cancelled';
+        }
+
+        $today = Carbon::today('Asia/Manila')->toDateString();
+
+        if ($this->date > $today) {
+            return 'upcoming';
+        }
+
+        if ($this->date == $today) {
+            return 'ongoing';
+        }
+
+        return 'completed';
     }
 }

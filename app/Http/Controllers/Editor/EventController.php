@@ -321,9 +321,11 @@ class EventController extends Controller
 
         $events = Event::with('user')
             ->where('user_id', $userId)
-            ->whereIn('status', ['upcoming', 'ongoing']) // ✅ EXCLUDE completed
             ->orderBy('date', 'asc')
-            ->get();
+            ->get()
+            ->filter(function ($event) {
+                return in_array($event->computed_status, ['upcoming', 'ongoing']);
+            });
 
         $departments = Department::all();
 

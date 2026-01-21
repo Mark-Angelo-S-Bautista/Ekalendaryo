@@ -165,7 +165,7 @@ class ViewerController extends Controller
                 'moreDetails' => $event->more_details ?? 'No additional details.', // <-- Add this
                 'timeStart' => $event->start_time,
                 'timeEnd' => $event->end_time,
-                'status' => $event->status,
+                'status' => $event->computed_status,
                 'location' => $event->location,
                 'sy' => $event->school_year,
                 'type' => strtolower(str_replace(['/', ' '], '_', $event->department ?? 'general')),
@@ -207,40 +207,39 @@ class ViewerController extends Controller
     public function history()
     {
         $user = Auth::user();
-        $today = Carbon::today('Asia/Manila');
-
-        // Only update upcoming for events that are NOT cancelled
-        Event::whereDate('date', '>', $today)
-            ->whereNotIn('status', ['cancelled'])
-            ->update(['status' => 'upcoming']);
-
-        // Only update ongoing for events that are NOT cancelled
-        Event::whereDate('date', '=', $today)
-            ->whereNotIn('status', ['cancelled'])
-            ->update(['status' => 'ongoing']);
-
-        // Only update completed for events that are NOT cancelled
-        Event::whereDate('date', '<', $today)
-            ->whereNotIn('status', ['cancelled'])
-            ->update(['status' => 'completed']);
 
         // Normalize user year level
         $userYearLevel = preg_replace('/(\d)(st|nd|rd|th)Year/', '$1$2 Year', $user->yearlevel);
 
-        // Get completed events for this user
-        $events = Event::where('status', 'completed')
-            ->where(function ($query) use ($user) {
-                $query->where('department', $user->department)
-                    ->orWhere('department', 'ALL');
-            })
-            ->where(function ($query) use ($userYearLevel) {
-                $query->whereJsonContains('target_year_levels', $userYearLevel)
-                    ->orWhereJsonContains('target_year_levels', 'ALL');
-            })
-            ->orderBy('date', 'desc')
-            ->paginate(3);
+        // Base query
+        $query = Event::query()
+            ->whereNotIn('status', ['cancelled']) // Ignore cancelled events
+            ->where('status', 'completed')        // Only completed events
+            ->where(function ($q) use ($user) {
+                $q->where('department', $user->department)
+                ->orWhere('department', 'ALL');
+            });
 
-        // Get IDs of events the user already submitted feedback for
+        // Paginate first
+        $events = $query->orderBy('date', 'desc')->paginate(3);
+
+        // Filter by year level in memory if needed
+        $events->getCollection()->transform(function ($event) use ($userYearLevel) {
+            $targets = is_string($event->target_year_levels)
+                ? json_decode($event->target_year_levels, true) ?? []
+                : $event->target_year_levels;
+
+            if (empty($targets) || in_array('ALL', $targets)) {
+                return $event;
+            }
+
+            return in_array($userYearLevel, $targets) ? $event : null;
+        });
+
+        // Remove nulls after filtering
+        $events->getCollection()->reject(fn($e) => $e === null);
+
+        // Feedback IDs
         $submittedFeedbackIds = Feedback::where('user_id', $user->id)
             ->pluck('event_id')
             ->toArray();
