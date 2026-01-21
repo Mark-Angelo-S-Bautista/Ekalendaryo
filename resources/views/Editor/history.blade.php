@@ -44,6 +44,17 @@
                                 <button class="feedback-btn" data-event-id="{{ $event->id }}">
                                     {{ $event->feedbacks_count }} feedback
                                 </button>
+
+                                📄
+                                @if ($event->report_path)
+                                    <a href="{{ route('Editor.downloadReport', $event->id) }}" class="report-btn">
+                                        Download Report
+                                    </a>
+                                @else
+                                    <button class="upload-report-btn" data-event-id="{{ $event->id }}">
+                                        Upload Report
+                                    </button>
+                                @endif
                             </span>
                         </div>
                     </div>
@@ -71,6 +82,24 @@
                 <div id="feedbackList">
                     <!-- Feedback items will be loaded here via AJAX -->
                 </div>
+            </div>
+        </div>
+
+        {{-- Report Upload Modal --}}
+        <div id="reportModal" class="modal">
+            <div class="modal-content report-modal">
+                <span class="close-btn" id="reportCloseBtn">&times;</span>
+                <h3>📄 Upload Event Report (PDF only)</h3>
+                <form id="reportForm" method="POST" enctype="multipart/form-data" class="report-form">
+                    @csrf
+                    <label for="reportInput" class="custom-file-upload">
+                        Choose File
+                    </label>
+                    <input type="file" name="report" id="reportInput" accept=".pdf" required>
+                    <p id="selectedFile" class="selected-file">No file selected</p>
+                    <input type="hidden" name="event_id" id="reportEventId">
+                    <button type="submit" class="upload-btn">Upload Report</button>
+                </form>
             </div>
         </div>
 

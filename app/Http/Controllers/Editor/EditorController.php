@@ -8,6 +8,7 @@ use Illuminate\Validation\Validator;
 use Illuminate\Validation\ValidationException;
 use App\Models\Event;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use App\Models\ActivityLog;
 use Illuminate\Support\Facades\Mail;
 use App\Models\SchoolYear;
@@ -211,6 +212,38 @@ class EditorController extends Controller
             ->count();
 
         return view('Editor.archive', compact('deletedEvents', 'totalEvents', 'currentSchoolYear'));
+    }
+
+    public function uploadReport(Request $request, Event $event)
+    {
+        $request->validate([
+            'report' => 'required|file|mimes:pdf|max:10240', // only PDF, max 10MB
+        ]);
+
+        $file = $request->file('report');
+
+        // Optional: generate unique filename
+        $filename = time().'_'.$file->getClientOriginalName();
+        $path = $file->storeAs('reports', $filename, 'public');
+
+        $event->update([
+            'report_path' => $path,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Report uploaded successfully! Only PDF files are allowed.',
+            'downloadUrl' => route('Editor.downloadReport', $event->id),
+        ]);
+    }
+
+    public function downloadReport(Event $event)
+    {
+        if (!$event->report_path || !\Storage::disk('public')->exists($event->report_path)) {
+            return redirect()->back()->with('error', 'Report not found.');
+        }
+
+        return response()->download(storage_path('app/public/' . $event->report_path));
     }
 
     public function profile()
