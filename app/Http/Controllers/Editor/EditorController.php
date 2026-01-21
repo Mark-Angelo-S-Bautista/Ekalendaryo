@@ -232,8 +232,22 @@ class EditorController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Report uploaded successfully! Only PDF files are allowed.',
+            'message' => 'Report uploaded successfully!',
             'downloadUrl' => route('Editor.downloadReport', $event->id),
+        ]);
+    }
+
+    public function removeReport(Event $event)
+    {
+        if ($event->report_path && Storage::disk('public')->exists($event->report_path)) {
+            Storage::disk('public')->delete($event->report_path);
+        }
+
+        $event->update(['report_path' => null]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Report removed successfully.'
         ]);
     }
 

@@ -50,6 +50,12 @@
                                     <a href="{{ route('Editor.downloadReport', $event->id) }}" class="report-btn">
                                         Download Report
                                     </a>
+
+                                    {{-- Remove Report Button --}}
+                                    <button class="remove-report-btn" data-event-id="{{ $event->id }}"
+                                        style="margin-left:10px;">
+                                        Delete Report
+                                    </button>
                                 @else
                                     <button class="upload-report-btn" data-event-id="{{ $event->id }}">
                                         Upload Report
@@ -89,16 +95,16 @@
         <div id="reportModal" class="modal">
             <div class="modal-content report-modal">
                 <span class="close-btn" id="reportCloseBtn">&times;</span>
-                <h3>📄 Upload Event Report (PDF only)</h3>
+                <h3>📄 Manage Event Report</h3>
                 <form id="reportForm" method="POST" enctype="multipart/form-data" class="report-form">
                     @csrf
                     <label for="reportInput" class="custom-file-upload">
-                        Choose File
+                        Choose PDF File
                     </label>
-                    <input type="file" name="report" id="reportInput" accept=".pdf" required>
+                    <input type="file" name="report" id="reportInput" accept=".pdf">
                     <p id="selectedFile" class="selected-file">No file selected</p>
                     <input type="hidden" name="event_id" id="reportEventId">
-                    <button type="submit" class="upload-btn">Upload Report</button>
+                    <button type="submit" class="upload-btn">Upload PDF</button>
                 </form>
             </div>
         </div>

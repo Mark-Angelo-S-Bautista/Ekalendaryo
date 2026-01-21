@@ -7,26 +7,23 @@ const eventList = document.getElementById("eventList");
 
 searchInput.addEventListener("input", function () {
     const query = this.value.toLowerCase();
-    const events = eventList.querySelectorAll(".event-card");
-
-    events.forEach((event) => {
+    eventList.querySelectorAll(".event-card").forEach((event) => {
         const title = event.querySelector("h3").textContent.toLowerCase();
         const department = event
             .querySelector(".tag")
             .textContent.toLowerCase();
-
-        if (title.includes(query) || department.includes(query)) {
-            event.style.display = "block";
-        } else {
-            event.style.display = "none";
-        }
+        event.style.display =
+            title.includes(query) || department.includes(query)
+                ? "block"
+                : "none";
     });
 });
 
 clearBtn.addEventListener("click", function () {
     searchInput.value = "";
-    const events = eventList.querySelectorAll(".event-card");
-    events.forEach((event) => (event.style.display = "block"));
+    eventList
+        .querySelectorAll(".event-card")
+        .forEach((event) => (event.style.display = "block"));
 });
 
 // ==========================
@@ -41,7 +38,7 @@ document.addEventListener("DOMContentLoaded", function () {
     document.querySelectorAll(".feedback-btn").forEach((btn) => {
         btn.addEventListener("click", function () {
             currentEventId = this.dataset.eventId;
-            loadFeedback(1); // Load first page
+            loadFeedback(1);
             modal.style.display = "block";
         });
     });
@@ -74,26 +71,15 @@ document.addEventListener("DOMContentLoaded", function () {
         const prevBtn = feedbackList.querySelector(".prev-page");
         const nextBtn = feedbackList.querySelector(".next-page");
 
-        if (prevBtn) {
+        if (prevBtn)
             prevBtn.addEventListener("click", () =>
                 loadFeedback(prevBtn.dataset.page),
             );
-        }
-
-        if (nextBtn) {
+        if (nextBtn)
             nextBtn.addEventListener("click", () =>
                 loadFeedback(nextBtn.dataset.page),
             );
-        }
     }
-});
-
-// ==========================
-// Clear Filters Button
-// ==========================
-document.getElementById("clearFilters")?.addEventListener("click", () => {
-    document.getElementById("search").value = "";
-    document.getElementById("filterType").value = "All";
 });
 
 // ==========================
@@ -106,30 +92,77 @@ const reportInput = document.getElementById("reportInput");
 const reportEventId = document.getElementById("reportEventId");
 const selectedFile = document.getElementById("selectedFile");
 
-// Open modal when upload button clicked
-document.querySelectorAll(".upload-report-btn").forEach((btn) => {
-    btn.addEventListener("click", function () {
-        reportEventId.value = this.dataset.eventId;
-        reportForm.action = `/editor/events/${this.dataset.eventId}/upload-report`;
-        reportInput.value = "";
-        selectedFile.textContent = "No file selected";
-        reportModal.style.display = "block";
-    });
-});
-
 // Show selected file name
 reportInput.addEventListener("change", function () {
-    if (this.files && this.files.length > 0) {
-        selectedFile.textContent = `Selected File: ${this.files[0].name}`;
-    } else {
-        selectedFile.textContent = "No file selected";
-    }
+    selectedFile.textContent =
+        this.files && this.files.length > 0
+            ? `Selected File: ${this.files[0].name}`
+            : "No file selected";
 });
+
+// Open modal when upload button clicked
+function attachUploadButtons() {
+    document.querySelectorAll(".upload-report-btn").forEach((btn) => {
+        btn.addEventListener("click", function () {
+            reportEventId.value = this.dataset.eventId;
+            reportForm.action = `/editor/events/${this.dataset.eventId}/upload-report`;
+            reportInput.value = "";
+            selectedFile.textContent = "No file selected";
+            reportModal.style.display = "block";
+        });
+    });
+}
+attachUploadButtons();
+
+// Remove report from event card
+function attachRemoveButtons() {
+    document.querySelectorAll(".remove-report-btn").forEach((btn) => {
+        btn.addEventListener("click", function () {
+            const eventId = this.dataset.eventId;
+            if (!confirm("Are you sure you want to remove this report?"))
+                return;
+
+            const parentSpan = this.parentNode;
+
+            fetch(`/editor/events/${eventId}/remove-report`, {
+                method: "POST",
+                headers: {
+                    "X-CSRF-TOKEN": document.querySelector(
+                        'input[name="_token"]',
+                    ).value,
+                    "X-Requested-With": "XMLHttpRequest",
+                },
+            })
+                .then((res) => res.json())
+                .then((data) => {
+                    if (data.success) {
+                        alert(data.message);
+
+                        // Remove only report buttons, keep feedback
+                        parentSpan
+                            .querySelectorAll(".report-btn, .remove-report-btn")
+                            .forEach((el) => el.remove());
+
+                        // Add back Upload button
+                        const uploadBtn = document.createElement("button");
+                        uploadBtn.classList.add("upload-report-btn");
+                        uploadBtn.dataset.eventId = eventId;
+                        uploadBtn.textContent = "Upload Report";
+                        uploadBtn.style.marginLeft = "10px";
+                        parentSpan.appendChild(uploadBtn);
+
+                        attachUploadButtons(); // Reattach click
+                    }
+                })
+                .catch((err) => console.error(err));
+        });
+    });
+}
+attachRemoveButtons();
 
 // AJAX form submission
 reportForm.addEventListener("submit", function (e) {
     e.preventDefault();
-
     const formData = new FormData(this);
 
     fetch(this.action, {
@@ -152,18 +185,33 @@ reportForm.addEventListener("submit", function (e) {
                 reportInput.value = "";
                 selectedFile.textContent = "No file selected";
 
-                // Replace Upload button with Download link
-                const btn = document.querySelector(
-                    `.upload-report-btn[data-event-id="${reportEventId.value}"]`,
-                );
-                if (btn) {
-                    const downloadLink = document.createElement("a");
-                    downloadLink.href = data.downloadUrl;
-                    downloadLink.textContent = "Download Report";
-                    downloadLink.classList.add("report-btn");
-                    downloadLink.style.marginLeft = "10px";
-                    btn.parentNode.replaceChild(downloadLink, btn);
-                }
+                // Replace only report buttons, keep feedback
+                const parentSpan = document.querySelector(
+                    `.event-card [data-event-id="${reportEventId.value}"]`,
+                ).parentNode;
+
+                parentSpan
+                    .querySelectorAll(
+                        ".report-btn, .remove-report-btn, .upload-report-btn",
+                    )
+                    .forEach((el) => el.remove());
+
+                const downloadLink = document.createElement("a");
+                downloadLink.href = data.downloadUrl;
+                downloadLink.textContent = "Download Report";
+                downloadLink.classList.add("report-btn");
+                downloadLink.style.marginLeft = "10px";
+
+                const removeBtn = document.createElement("button");
+                removeBtn.textContent = "🗑 Remove Report";
+                removeBtn.classList.add("remove-report-btn");
+                removeBtn.dataset.eventId = reportEventId.value;
+                removeBtn.style.marginLeft = "10px";
+
+                parentSpan.appendChild(downloadLink);
+                parentSpan.appendChild(removeBtn);
+
+                attachRemoveButtons(); // Reattach click
             }
         })
         .catch((err) => {

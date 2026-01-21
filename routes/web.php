@@ -47,6 +47,7 @@ Route::middleware(['auth', 'backhistory'])->group(function () {
         Route::get('/history', [EditorController::class, 'history'])->name('history');
         Route::get('/event/{event}/feedback', [EditorController::class, 'getFeedback']);
         Route::post('/events/{event}/upload-report', [EditorController::class, 'uploadReport'])->name('uploadReport');
+        Route::post('/events/{event}/remove-report', [EditorController::class, 'removeReport'])->name('removeReport');
         Route::get('/events/{event}/download-report', [EditorController::class, 'downloadReport'])->name('downloadReport');
         Route::get('/archive', [EditorController::class, 'archive'])->name('archive');
         Route::get('/profile', [EditorController::class, 'profile'])->name('profile');
