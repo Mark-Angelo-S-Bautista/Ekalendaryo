@@ -83,36 +83,35 @@ class EditorController extends Controller
 
     public function calendar()
     {
-        $events = Event::all()->map(function ($event) {
-            
-            // --- NEW SANITIZATION LOGIC START ---
-            $targetYearLevels = $event->target_year_levels;
+        // Fetch only events that are NOT cancelled
+        $events = Event::where('status', '!=', 'cancelled')
+            ->get()
+            ->map(function ($event) {
 
-            // If casting failed (likely because data is a JSON string *not* an array),
-            // we manually decode it. If that fails too, default to an empty array.
-            if (is_string($targetYearLevels)) {
-                $targetYearLevels = json_decode($targetYearLevels, true) ?? [];
-            } elseif (!is_array($targetYearLevels)) {
-                // Handle null, undefined, or any other unexpected type
-                $targetYearLevels = [];
-            }
-            // --- NEW SANITIZATION LOGIC END ---
+                // --- SANITIZE target_year_levels ---
+                $targetYearLevels = $event->target_year_levels;
 
-            return [
-                'date' => $event->date,
-                'title' => $event->title,
-                'description' => $event->description ?? 'No description provided.',
-                'moreDetails' => $event->more_details ?? 'No additional details.', // <-- Add this
-                'timeStart' => $event->start_time,
-                'timeEnd' => $event->end_time,
-                'status' => $event->computed_status,
-                'location' => $event->location,
-                'sy' => $event->school_year,
-                'type' => strtolower(str_replace(['/', ' '], '_', $event->department ?? 'general')),
-                'organizer' => $event->department ?? 'N/A',
-                'targetYearLevels' => $targetYearLevels, // Use the sanitized variable
-            ];
-        });
+                if (is_string($targetYearLevels)) {
+                    $targetYearLevels = json_decode($targetYearLevels, true) ?? [];
+                } elseif (!is_array($targetYearLevels)) {
+                    $targetYearLevels = [];
+                }
+
+                return [
+                    'date' => $event->date,
+                    'title' => $event->title,
+                    'description' => $event->description ?? 'No description provided.',
+                    'moreDetails' => $event->more_details ?? 'No additional details.',
+                    'timeStart' => $event->start_time,
+                    'timeEnd' => $event->end_time,
+                    'status' => $event->status,
+                    'location' => $event->location,
+                    'sy' => $event->school_year,
+                    'type' => strtolower(str_replace(['/', ' '], '_', $event->department ?? 'general')),
+                    'organizer' => $event->department ?? 'N/A',
+                    'targetYearLevels' => $targetYearLevels,
+                ];
+            });
 
         return view('Editor.calendar', ['events' => $events]);
     }
