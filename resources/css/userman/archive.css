@@ -277,3 +277,123 @@ select {
 .modal-pagination nav a:hover {
     background: #1f42c4;
 }
+.archive-container {
+    padding: 30px;
+}
+
+.archive-header {
+    margin-bottom: 20px;
+}
+
+.archive-header h2 {
+    font-size: 26px;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.archive-header p {
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.archive-table-wrapper {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.archive-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.archive-table thead {
+    background: #f1f5f9;
+}
+
+.archive-table th,
+.archive-table td {
+    padding: 14px 16px;
+    text-align: left;
+    font-size: 14px;
+}
+
+.archive-table th {
+    font-weight: 600;
+    color: #374151;
+}
+
+.archive-table tbody tr {
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.archive-table tbody tr:hover {
+    background: #f9fafb;
+}
+
+/* Status Badges */
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.status-graduated {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.status-dropped {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.status-fired {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.archive-pagination {
+    margin-top: 20px;
+}
+
+.empty-state {
+    text-align: center;
+    color: #9ca3af;
+    padding: 40px 0;
+}
+.archive-filters {
+    margin-bottom: 18px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.filter-group label {
+    font-size: 13px;
+    color: #374151;
+    font-weight: 600;
+}
+
+.filter-group select {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    font-size: 14px;
+    background: #ffffff;
+    cursor: pointer;
+}
+
+.filter-group select:focus {
+    outline: none;
+    border-color: #2b5eff;
+    box-shadow: 0 0 0 2px rgba(43, 94, 255, 0.15);
+}

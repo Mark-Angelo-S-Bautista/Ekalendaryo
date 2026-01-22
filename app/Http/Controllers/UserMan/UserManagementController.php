@@ -382,29 +382,24 @@ class UserManagementController extends Controller
         return view('UserManagement.calendar.calendar', ['events' => $events]);
     }
 
-    public function archive()
+    public function archive(Request $request)
     {
-        $inactiveUsers = User::where('status', '!=', 'active')->get();
+        $title = $request->get('title');
 
-        $graduatedStudents = $inactiveUsers->where('status', 'graduated');
-        $recentlyDeleted = $inactiveUsers->whereIn('status', ['dropped', 'fired']);
+        $archivedUsers = User::whereIn('status', ['dropped', 'fired', 'graduated'])
+            ->when($title, function ($q) use ($title) {
+                $q->where('title', $title);
+            })
+            ->orderBy('updated_at', 'desc')
+            ->paginate(10)
+            ->withQueryString();
 
-        // Function to paginate a collection manually
-        $paginate = function (Collection $items, $perPage = 10, $page = null) {
-            $page = $page ?: (LengthAwarePaginator::resolveCurrentPage() ?: 1);
-            $itemsForPage = $items->slice(($page - 1) * $perPage, $perPage)->values();
-            return new LengthAwarePaginator($itemsForPage, $items->count(), $perPage, $page, [
-                'path' => LengthAwarePaginator::resolveCurrentPath()
-            ]);
-        };
+        // Get unique titles for filter dropdown
+        $titles = User::whereNotNull('title')
+            ->distinct()
+            ->pluck('title');
 
-        $graduatedStudentsPaginated = $paginate($graduatedStudents);
-        $recentlyDeletedPaginated = $paginate($recentlyDeleted);
-
-        return view('UserManagement.archive.archive', [
-            'graduatedStudents' => $graduatedStudentsPaginated,
-            'recentlyDeleted' => $recentlyDeletedPaginated
-        ]);
+        return view('UserManagement.archive.archive', compact('archivedUsers', 'titles', 'title'));
     }
 
     public function changeSchoolYear()
