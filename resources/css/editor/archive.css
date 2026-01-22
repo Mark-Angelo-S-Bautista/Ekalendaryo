@@ -174,3 +174,111 @@ select {
 .logout-btn .icon {
     font-style: normal; /* so it doesn’t go italic */
 }
+.archive-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: #ffffff;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
+    font-size: 15px;
+}
+.archive-table thead {
+    background: linear-gradient(135deg, #b7db99, #b7db99);
+    color: #ffffff;
+}
+.archive-table th {
+    padding: 16px 18px;
+    text-align: left;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    font-size: 13px;
+}
+.archive-table td {
+    padding: 14px 18px;
+    border-bottom: 1px solid #eef1f7;
+    vertical-align: middle;
+    color: #2b2b2b;
+}
+.archive-table tbody tr {
+    transition:
+        background 0.25s ease,
+        transform 0.15s ease;
+}
+
+.archive-table tbody tr:hover {
+    background: #f4f7ff;
+    transform: scale(1.002);
+}
+.status {
+    display: inline-block;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.status.archived {
+    background: #e0e7ff;
+    color: #3730a3;
+}
+
+.status.cancelled {
+    background: #fee2e2;
+    color: #991b1b;
+}
+.archive-table tbody tr td[colspan] {
+    padding: 40px;
+    font-size: 15px;
+    color: #6b7280;
+}
+.pagination {
+    margin-top: 25px;
+    display: flex;
+    justify-content: center;
+}
+
+.pagination a,
+.pagination span {
+    padding: 8px 14px;
+    margin: 0 4px;
+    border-radius: 8px;
+    background: #f1f4fb;
+    color: #2b5eff;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.pagination a:hover {
+    background: #2b5eff;
+    color: #ffffff;
+}
+.report-download-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    background: #2b5eff;
+    color: #ffffff;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.report-download-btn:hover {
+    background: #1e40af;
+    transform: translateY(-1px);
+}
+
+.no-report {
+    font-size: 13px;
+    color: #9ca3af;
+    font-style: italic;
+}

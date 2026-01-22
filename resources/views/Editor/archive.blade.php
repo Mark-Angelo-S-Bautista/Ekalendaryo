@@ -5,88 +5,93 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>eKalendaryo Archive</title>
-        @vite(['resources/css/editor/archive.css', 'resources/js/editor/archive.js'])
+        <title>Archived Events</title>
+        @vite(['resources/css/editor/archive.css'])
     </head>
 
     <body>
-
         <main>
-            <h2>Archive</h2>
-            <p>Past school year events and records</p>
+            <h2>Archived Events</h2>
+            <p>All archived events from previous school years</p>
 
-            <div class="card">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <span>▾</span>
-                    <div>
-                        <strong>SY. {{ $currentSchoolYear }}</strong>
-                        <p style="margin: 0; font-size: 14px; color: gray;">
-                            {{ $totalEvents }} events
-                        </p>
-                    </div>
-                </div>
+            {{-- FILTER --}}
+            <form method="GET" style="margin: 20px 0;">
+                <label for="school_year"><strong>Filter by School Year:</strong></label>
+                <select name="school_year" id="school_year" onchange="this.form.submit()">
+                    <option value="">All School Years</option>
+                    @foreach ($schoolYears as $sy)
+                        <option value="{{ $sy }}" {{ $schoolYear == $sy ? 'selected' : '' }}>
+                            {{ $sy }}
+                        </option>
+                    @endforeach
+                </select>
+            </form>
 
-                <div class="row">
-                    <div class="subcard" onclick="openModal('eventsModal')">
-                        <h4>📅 Events Archive</h4>
-                        <p>{{ $totalEvents }} completed events from SY.{{ $currentSchoolYear }}</p>
-                    </div>
+            {{-- TABLE --}}
+            <table class="archive-table">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Location</th>
+                        <th>School Year</th>
+                        <th>Report</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
 
-                    <div class="subcard" onclick="openModal('deletedModal')">
-                        <h4>🗑️ Recently Cancelled</h4>
-                        <p>View and restore deleted items</p>
-                    </div>
-                </div>
+                <tbody>
+                    @forelse ($archivedEvents as $event)
+                        <tr>
+                            <td>{{ $event->title }}</td>
+
+                            <td>{{ \Carbon\Carbon::parse($event->date)->format('F j, Y') }}</td>
+
+                            <td>
+                                {{ \Carbon\Carbon::parse($event->start_time)->format('g:i A') }}
+                                -
+                                {{ \Carbon\Carbon::parse($event->end_time)->format('g:i A') }}
+                            </td>
+
+                            <td>{{ $event->location }}</td>
+
+                            <td>{{ $event->school_year }}</td>
+
+                            <td data-label="Report">
+                                @if ($event->report_path)
+                                    <a href="{{ route('Editor.downloadReport', $event->id) }}"
+                                        class="report-download-btn">
+                                        📄 Download
+                                    </a>
+                                @else
+                                    <span class="no-report">No Report</span>
+                                @endif
+                            </td>
+
+                            <td>
+                                @if ($event->status === 'archived')
+                                    <span class="status archived">Archived</span>
+                                @elseif ($event->status === 'cancelled')
+                                    <span class="status cancelled">Cancelled</span>
+                                @endif
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="7" style="text-align:center;">
+                                No archived or cancelled events found.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+
+            {{-- PAGINATION --}}
+            <div style="margin-top: 20px;">
+                {{ $archivedEvents->links('vendor.pagination.simple') }}
             </div>
         </main>
-
-        <!-- Recently Deleted Modal -->
-        <div id="deletedModal" class="modal">
-            <div class="modal-content">
-                <span class="close-btn" onclick="closeModal('deletedModal')">&times;</span>
-                <div class="modal-header">
-                    <span class="icon">🗑️</span>
-                    Recently Cancelled - SY.{{ $currentSchoolYear }}
-                </div>
-                <p>{{ $deletedEvents->count() }} deleted events</p>
-
-                <div id="deletedList" class="eventlist_">
-                    @forelse ($deletedEvents as $event)
-                        <div class="event">
-                            <h4>{{ $event->title }}</h4>
-                            <p>{{ $event->description ?? 'No description provided.' }}</p>
-                            <p>📍 {{ $event->location }} | ⏰
-                                {{ \Carbon\Carbon::parse($event->date)->format('F j, Y') }}
-                                ({{ \Carbon\Carbon::parse($event->start_time)->format('g:i A') }} -
-                                {{ \Carbon\Carbon::parse($event->end_time)->format('g:i A') }})
-                            </p>
-                            <p>👤 Year Level: {{ $event->target_year_levels_str }} | 🧍‍♂️
-                                {{ $event->attendees->count() ?? 0 }}
-                                attendees
-                            </p>
-                        </div>
-                        <div class="pagination">
-                            {{ $deletedEvents->links('vendor.pagination.simple') }}
-                        </div>
-                    @empty
-                        <p>No deleted events for this school year.</p>
-                    @endforelse
-                </div>
-            </div>
-        </div>
-
-        <!-- Optional: Events Archive Modal -->
-        <div id="eventsModal" class="modal">
-            <div class="modal-content">
-                <span class="close-btn" onclick="closeModal('eventsModal')">&times;</span>
-                <div class="modal-header">
-                    <span class="icon">📅</span>
-                    Events Archive - SY.{{ $currentSchoolYear }}
-                </div>
-                <p>{{ $totalEvents }} events</p>
-                <!-- You can populate archived events here if needed -->
-            </div>
-        </div>
     </body>
 
     </html>
