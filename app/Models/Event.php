@@ -32,6 +32,8 @@ class Event extends Model
         'target_department' => 'array',
     ];
 
+    protected $appends = ['computed_status'];
+
     public function user()
     {
         return $this->belongsTo(User::class);

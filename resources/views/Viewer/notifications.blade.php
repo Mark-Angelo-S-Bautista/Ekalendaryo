@@ -26,7 +26,7 @@
                 @forelse ($events as $event)
                     @php
                         // Determine dynamic status
-                        $status = match ($event->status) {
+                        $status = match ($event->computed_status) {
                             'cancelled' => 'cancelled',
                             'completed' => 'completed',
                             'ongoing' => 'ongoing',

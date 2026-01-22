@@ -62,12 +62,12 @@
                                     </span>
                                     <span
                                         class="dashboard_tag 
-                                                @if ($event->status === 'upcoming') dashboard_tag_upcoming
-                                                @elseif($event->status === 'ongoing') dashboard_tag_ongoing
-                                                @elseif($event->status === 'cancelled') dashboard_tag_cancelled
-                                                @elseif($event->status === 'completed') dashboard_tag_completed @endif
+                                                @if ($event->computed_status === 'upcoming') dashboard_tag_upcoming
+                                                @elseif($event->computed_status === 'ongoing') dashboard_tag_ongoing
+                                                @elseif($event->computed_status === 'cancelled') dashboard_tag_cancelled
+                                                @elseif($event->computed_status === 'completed') dashboard_tag_completed @endif
                                             ">
-                                        {{ ucfirst($event->status) }}
+                                        {{ ucfirst($event->computed_status) }}
                                     </span>
                                 </div>
                                 <div>

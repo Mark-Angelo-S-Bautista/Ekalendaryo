@@ -374,8 +374,8 @@ $userTitle = $user->title ?? null;
                                 <h2>{{ $event->title }}</h2>
                                 <div class="tags">
                                     <span class="tag department">{{ $event->department }}</span>
-                                    <span class="tag {{ strtolower($event->status) }}">
-                                        {{ ucfirst($event->status) }}
+                                    <span class="tag {{ strtolower($event->computed_status) }}">
+                                        {{ ucfirst($event->computed_status) }}
                                     </span>
                                 </div>
                             </div>
@@ -406,7 +406,7 @@ $userTitle = $user->title ?? null;
                                     👁️ View Details
                                 </button>
 
-                                @if ($event->status !== 'ongoing')
+                                @if ($event->computed_status !== 'ongoing')
                                     <a href="{{ route('Editor.editEvent', $event->id) }}" class="edit">✏️ Edit</a>
 
                                     <form action="{{ route('Editor.destroy', $event->id) }}" method="POST"

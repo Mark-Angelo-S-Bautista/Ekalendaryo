@@ -44,7 +44,7 @@ class UserManagementController extends Controller
             ->filter(function ($event) use ($now) {
 
                 // --- EXCLUDE CANCELLED & COMPLETED EVENTS ---
-                if (in_array($event->status, ['cancelled', 'completed'])) {
+                if (in_array($event->computed_status, ['cancelled', 'completed'])) {
                     return false;
                 }
 
@@ -370,7 +370,7 @@ class UserManagementController extends Controller
                     'moreDetails' => $event->more_details ?? 'No additional details.',
                     'timeStart' => $event->start_time,
                     'timeEnd' => $event->end_time,
-                    'status' => $event->status,
+                    'status' => $event->computed_status,
                     'location' => $event->location,
                     'sy' => $event->school_year,
                     'type' => strtolower(str_replace(['/', ' '], '_', $event->department ?? 'general')),

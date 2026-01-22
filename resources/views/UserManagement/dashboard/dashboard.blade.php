@@ -95,19 +95,19 @@
 
             const statusMap = {
                 upcoming: {
-                    text: 'Upcoming',
+                    text: 'upcoming',
                     class: 'dashboard_tag_upcoming'
                 },
                 ongoing: {
-                    text: 'Ongoing',
+                    text: 'ongoing',
                     class: 'dashboard_tag_ongoing'
                 },
                 completed: {
-                    text: 'Completed',
+                    text: 'completed',
                     class: 'dashboard_tag_completed'
                 },
                 cancelled: {
-                    text: 'Cancelled',
+                    text: 'cancelled',
                     class: 'dashboard_tag_cancelled'
                 }
             };
@@ -148,8 +148,11 @@
                     }
 
                     // Determine dynamic status tag
-                    const status = statusMap[event.status] || {
-                        text: event.status,
+                    const rawStatus = event.computed_status || event.status || 'upcoming';
+                    const normalizedStatus = String(rawStatus).toLowerCase();
+
+                    const status = statusMap[normalizedStatus] || {
+                        text: rawStatus,
                         class: 'dashboard_tag_upcoming'
                     };
 
@@ -182,8 +185,10 @@
                     .then(res => res.json())
                     .then(data => {
                         // Only include events that are NOT cancelled or completed for the main dashboard
-                        currentFetchedEvents = data.events.filter(e => !['completed', 'cancelled'].includes(
-                            e.status));
+                        currentFetchedEvents = data.events.filter(e => {
+                            const s = String(e.computed_status || e.status || '').toLowerCase();
+                            return !['completed', 'cancelled'].includes(s);
+                        });
                         renderEvents(currentFetchedEvents);
                     })
                     .catch(err => console.error(err));
