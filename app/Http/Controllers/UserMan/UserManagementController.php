@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 use App\Mail\VerifyNewEmail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
@@ -404,43 +405,69 @@ class UserManagementController extends Controller
 
     public function changeSchoolYear()
     {
-        $currentSY = SchoolYear::where('is_active', 1)->firstOrFail();
+        DB::transaction(function () {
 
-        // 2025-2026 → 2026-2027
-        [$start, $end] = explode('-', $currentSY->school_year);
-        $nextSY = ($start + 1) . '-' . ($end + 1);
+            $currentSY = SchoolYear::where('is_active', 1)->lockForUpdate()->firstOrFail();
 
-        // Deactivate current SY
-        $currentSY->update(['is_active' => 0]);
+            // 2025-2026 → 2026-2027
+            [$start, $end] = explode('-', $currentSY->school_year);
+            $nextSY = ($start + 1) . '-' . ($end + 1);
 
-        // Create new SY
-        $newSY = SchoolYear::create([
-            'school_year' => $nextSY,
-            'is_active' => 1
-        ]);
+            // --------------------------------------------------
+            // 1. ARCHIVE COMPLETED EVENTS
+            // --------------------------------------------------
+            Event::where('status', 'completed')
+                ->update(['status' => 'archived']);
 
-        // Graduate 4th year students in one query
-        $graduatedCount = User::where('title', 'Student')
-            ->where('yearlevel', '4thYear')
-            ->where('status', 'active')
-            ->update([
-                'status' => 'graduated',
-                'school_year_id' => $newSY->id
+            // --------------------------------------------------
+            // 2. CLEAR RELATED TABLES (NEW SCHOOL YEAR RESET)
+            // --------------------------------------------------
+            DB::table('activity_logs')->delete();
+            DB::table('event_attendees')->delete();
+            DB::table('feedback')->delete();
+
+            // --------------------------------------------------
+            // 3. DEACTIVATE CURRENT SCHOOL YEAR
+            // --------------------------------------------------
+            $currentSY->update(['is_active' => 0]);
+
+            // --------------------------------------------------
+            // 4. CREATE NEW SCHOOL YEAR
+            // --------------------------------------------------
+            $newSY = SchoolYear::create([
+                'school_year' => $nextSY,
+                'is_active' => 1
             ]);
 
-        // Promote 1st-3rd year students in one query using CASE
-        $promotedCount = User::where('title', 'Student')
-            ->where('status', 'active')
-            ->whereIn('yearlevel', ['1stYear', '2ndYear', '3rdYear'])
-            ->update([
-                'yearlevel' => \DB::raw("CASE 
-                    WHEN yearlevel = '1stYear' THEN '2ndYear'
-                    WHEN yearlevel = '2ndYear' THEN '3rdYear'
-                    WHEN yearlevel = '3rdYear' THEN '4thYear'
-                    ELSE yearlevel
-                END"),
-                'school_year_id' => $newSY->id
-            ]);
+            // --------------------------------------------------
+            // 5. GRADUATE 4TH YEAR STUDENTS
+            // --------------------------------------------------
+            User::where('title', 'Student')
+                ->where('yearlevel', '4thYear')
+                ->where('status', 'active')
+                ->update([
+                    'status' => 'graduated',
+                    'school_year_id' => $newSY->id
+                ]);
+
+            // --------------------------------------------------
+            // 6. PROMOTE 1ST–3RD YEAR STUDENTS
+            // --------------------------------------------------
+            User::where('title', 'Student')
+                ->where('status', 'active')
+                ->whereIn('yearlevel', ['1stYear', '2ndYear', '3rdYear'])
+                ->update([
+                    'yearlevel' => DB::raw("
+                        CASE 
+                            WHEN yearlevel = '1stYear' THEN '2ndYear'
+                            WHEN yearlevel = '2ndYear' THEN '3rdYear'
+                            WHEN yearlevel = '3rdYear' THEN '4thYear'
+                            ELSE yearlevel
+                        END
+                    "),
+                    'school_year_id' => $newSY->id
+                ]);
+        });
 
         return redirect()->back()->with('success', 'School year changed successfully!');
     }
