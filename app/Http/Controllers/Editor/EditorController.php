@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use App\Models\ActivityLog;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Pagination\LengthAwarePaginator;
 use App\Models\SchoolYear;
 use Illuminate\Support\Str;
 use App\Mail\VerifyNewEmail;
@@ -133,21 +134,21 @@ class EditorController extends Controller
     {
         $userId = Auth::id();
 
-        // Get all events created by this user
+        // Only fetch events that are actually 'completed'
         $events = Event::withCount('feedbacks')
             ->where('user_id', $userId)
+            ->where('status', 'completed') // ✅ filter by actual status column
             ->orderBy('date', 'desc')
-            ->get()
-            ->filter(function ($event) {
-                return $event->computed_status === 'completed';
-            });
+            ->get();
 
-        // Manual pagination (because computed_status is not a DB column)
+        // --------------------------------------------------
+        // Manual Pagination
+        // --------------------------------------------------
         $perPage = 2;
         $currentPage = request()->get('page', 1);
 
         $paginatedEvents = new \Illuminate\Pagination\LengthAwarePaginator(
-            $events->forPage($currentPage, $perPage)->values(),
+            $events->forPage($currentPage, $perPage),
             $events->count(),
             $perPage,
             $currentPage,
