@@ -155,6 +155,8 @@ $userTitle = $user->title ?? null;
                                     </div>
                                 </div>
 
+
+
                                 <div class="form-group">
                                     <label for="targetUsers">Target Users</label>
                                     <select id="targetUsers" name="target_users" class="form-control">
@@ -166,39 +168,6 @@ $userTitle = $user->title ?? null;
                                         <option value="Students">Students</option>
                                     </select>
                                 </div>
-
-                                <!-- Target Year Levels checkboxes -->
-                                {{-- <div class="form-group" id="targetYearLevelsContainer">
-                                    <label>Target Year Levels</label>
-                                    <p class="note">Select which year levels of students will receive notifications
-                                        for this event</p>
-
-                                    <div class="checkbox_select">
-                                        <div class="checkbox-inline">
-                                            <input type="checkbox" id="select_all_create">
-                                            <label for="select_all_create">Select All Year Levels</label>
-                                        </div>
-                                    </div>
-
-                                    <div class="checkbox-group">
-                                        <div class="checkbox-inline">
-                                            <input type="checkbox" name="target_year_levels[]" value="1st Year"
-                                                class="syear"> 1st Year
-                                        </div>
-                                        <div class="checkbox-inline">
-                                            <input type="checkbox" name="target_year_levels[]" value="2nd Year"
-                                                class="syear"> 2nd Year
-                                        </div>
-                                        <div class="checkbox-inline">
-                                            <input type="checkbox" name="target_year_levels[]" value="3rd Year"
-                                                class="syear"> 3rd Year
-                                        </div>
-                                        <div class="checkbox-inline">
-                                            <input type="checkbox" name="target_year_levels[]" value="4th Year"
-                                                class="syear"> 4th Year
-                                        </div>
-                                    </div>
-                                </div> --}}
                             @endif
 
                             @if (auth()->user()->title !== 'Offices' || 'Department Head')
@@ -234,14 +203,164 @@ $userTitle = $user->title ?? null;
                                         </div>
                                     </div>
                                 </div>
+
+                                <!-- Section Button -->
+                                <div class="form-group" style="margin-top: 10px;">
+                                    <button type="button" id="openSectionModalBtn" class="btn btn-secondary"
+                                        style="display:none;">➕ Select Section</button>
+                                </div>
+
+                                <!-- Section Modal -->
+                                <div id="sectionModalOverlay" class="custom-modal-overlay">
+                                    <div class="custom-modal">
+                                        <h3>Select Section</h3>
+
+                                        <!-- Select All -->
+                                        <div class="checkbox-select-all">
+                                            <input type="checkbox" id="selectAllSections"><strong> Select All</strong>
+                                        </div>
+
+                                        <!-- Section checkboxes -->
+                                        <div class="checkbox-grid">
+                                            @foreach ($sections as $section)
+                                                <label class="checkbox-item">
+                                                    <input type="checkbox" name="target_sections[]"
+                                                        value="{{ $section }}">
+                                                    <span>{{ $section }}</span>
+                                                </label>
+                                            @endforeach
+                                        </div>
+
+                                        <div class="modal-buttons">
+                                            <button type="button" id="closeSectionModalBtn"
+                                                class="btn-cancel">Close</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Buttons -->
+                                <div class="form-group" style="margin-top: 10px;">
+                                    <button type="button" id="openFacultyModalBtn" class="btn btn-secondary">➕
+                                        Select
+                                        Faculty</button>
+                                </div>
+
+                                <!-- Faculty Modal -->
+                                <div id="facultyModalOverlay" class="custom-modal-overlay">
+                                    <div class="custom-modal">
+                                        <h3>Select Faculty</h3>
+                                        <div class="checkbox-grid">
+                                            @foreach ($faculty as $f)
+                                                <label class="checkbox-item">
+                                                    <input type="checkbox" name="target_faculty[]" required
+                                                        value="{{ $f->id }}">
+                                                    <span>{{ $f->name }} ({{ $f->department }})</span>
+                                                </label>
+                                            @endforeach
+                                        </div>
+                                        <div class="modal-buttons">
+                                            <button type="button" id="closeFacultyModalBtn"
+                                                class="btn btn-cancel">Close</button>
+                                        </div>
+                                    </div>
+                                </div>
                             @endif
                             <div class="button-group">
                                 <button type="button" class="btn-cancel" id="closeModalBtn">Cancel</button>
                                 <button type="submit" class="btn-create">Create Event</button>
                             </div>
                         </form>
+                        <!-- JS for Faculty & Section toggling -->
+                        <script>
+                            document.addEventListener('DOMContentLoaded', () => {
+                                // ------------------------------
+                                // Year Levels Select All Logic
+                                // ------------------------------
+                                const selectAllCheckbox = document.getElementById('select_all_create');
+                                const yearCheckboxes = document.querySelectorAll('.syear');
 
+                                selectAllCheckbox.addEventListener('change', () => {
+                                    yearCheckboxes.forEach(cb => cb.checked = selectAllCheckbox.checked);
+                                });
 
+                                yearCheckboxes.forEach(cb => {
+                                    cb.addEventListener('change', () => {
+                                        if (![...yearCheckboxes].every(cb => cb.checked)) {
+                                            selectAllCheckbox.checked = false;
+                                        } else {
+                                            selectAllCheckbox.checked = true;
+                                        }
+                                    });
+                                });
+
+                                // ------------------------------
+                                // Target Users logic for Section & Faculty buttons
+                                // ------------------------------
+                                const targetUsers = document.getElementById('targetUsers');
+                                const openSectionBtn = document.getElementById('openSectionModalBtn');
+                                const openFacultyBtn = document.getElementById('openFacultyModalBtn');
+
+                                function toggleButtons() {
+                                    if (targetUsers.value === 'Students') {
+                                        openSectionBtn.style.display = 'inline-block';
+                                        openFacultyBtn.style.display = 'inline-block';
+                                    } else {
+                                        openSectionBtn.style.display = 'none';
+                                        openFacultyBtn.style.display = 'none';
+                                    }
+                                }
+
+                                targetUsers.addEventListener('change', toggleButtons);
+                                toggleButtons(); // initial check on page load
+
+                                // ------------------------------
+                                // Faculty Modal Logic
+                                // ------------------------------
+                                const facultyModal = document.getElementById('facultyModalOverlay');
+                                const closeFacultyBtn = document.getElementById('closeFacultyModalBtn');
+
+                                openFacultyBtn.addEventListener('click', () => {
+                                    facultyModal.classList.add('active');
+                                });
+                                closeFacultyBtn.addEventListener('click', () => {
+                                    facultyModal.classList.remove('active');
+                                });
+
+                                // ------------------------------
+                                // Section Modal Logic
+                                // ------------------------------
+                                const sectionModal = document.getElementById('sectionModalOverlay');
+                                const closeSectionBtn = document.getElementById('closeSectionModalBtn');
+
+                                openSectionBtn.addEventListener('click', () => {
+                                    sectionModal.classList.add('active');
+                                });
+                                closeSectionBtn.addEventListener('click', () => {
+                                    sectionModal.classList.remove('active');
+                                });
+
+                                // ------------------------------
+                                // Section Modal "Select All" Logic
+                                // ------------------------------
+                                const selectAllSections = document.getElementById('selectAllSections');
+                                const sectionCheckboxes = sectionModal.querySelectorAll('input[name="target_sections[]"]');
+
+                                selectAllSections.addEventListener('change', () => {
+                                    sectionCheckboxes.forEach(cb => cb.checked = selectAllSections.checked);
+                                });
+
+                                // Uncheck Select All if any individual section is unchecked
+                                sectionCheckboxes.forEach(cb => {
+                                    cb.addEventListener('change', () => {
+                                        if (![...sectionCheckboxes].every(cb => cb.checked)) {
+                                            selectAllSections.checked = false;
+                                        } else {
+                                            selectAllSections.checked = true;
+                                        }
+                                    });
+                                });
+                            });
+                        </script>
                         <script>
                             document.addEventListener('DOMContentLoaded', () => {
                                 const dateInput = document.getElementById('eventDate');

@@ -330,7 +330,13 @@ class EventController extends Controller
 
         $departments = Department::all();
 
-        return view('Editor.manageEvents', compact('events', 'departments'));
+        // ✅ Get all faculty
+        $faculty = User::where('title', 'Faculty')->get();
+
+        // ✅ Get distinct sections (from users table)
+        $sections = User::whereNotNull('section')->distinct('section')->pluck('section');
+
+        return view('Editor.manageEvents', compact('events', 'departments', 'faculty', 'sections'));
     }
 
     // =========================================================================
