@@ -40,9 +40,11 @@ class ViewerController extends Controller
         $events = $events->filter(function ($ev) use ($now, $yearLevel, $title, $dept) {
 
             // Hide past events based on date & start_time
-            $eventDateTime = \Carbon\Carbon::parse($ev->date . ' ' . $ev->start_time);
-            if ($eventDateTime->lt($now)) {
-                return false;
+            if ($ev->status !== 'ongoing') {
+                $eventDateTime = \Carbon\Carbon::parse($ev->date . ' ' . $ev->start_time);
+                if ($eventDateTime->lt($now)) {
+                    return false;
+                }
             }
 
             // ============================================================
@@ -205,25 +207,30 @@ class ViewerController extends Controller
 
     public function history()
     {
-        $user = Auth::user();
+        $user = auth()->user();
 
-        // Normalize user year level
-        $userYearLevel = preg_replace('/(\d)(st|nd|rd|th)Year/', '$1$2 Year', $user->yearlevel);
+        if (!$user) {
+            abort(403, 'Unauthorized access.');
+        }
 
-        // Base query
+        // Normalize user year level (students only)
+        $userYearLevel = $user->yearlevel
+            ? preg_replace('/(\d)(st|nd|rd|th)Year/', '$1$2 Year', $user->yearlevel)
+            : null;
+
         $query = Event::query()
-            ->whereNotIn('status', ['cancelled']) // Ignore cancelled events
-            ->where('status', 'completed')        // Only completed events
+            ->where('status', 'completed')
+            ->whereNotIn('status', ['cancelled'])
             ->where(function ($q) use ($user) {
                 $q->where('department', $user->department)
                 ->orWhere('department', 'ALL');
             });
 
-        // Paginate first
         $events = $query->orderBy('date', 'desc')->paginate(3);
 
-        // Filter by year level in memory if needed
         $events->getCollection()->transform(function ($event) use ($userYearLevel) {
+            if (!$userYearLevel) return $event; // faculty
+
             $targets = is_string($event->target_year_levels)
                 ? json_decode($event->target_year_levels, true) ?? []
                 : $event->target_year_levels;
@@ -235,16 +242,17 @@ class ViewerController extends Controller
             return in_array($userYearLevel, $targets) ? $event : null;
         });
 
-        // Remove nulls after filtering
-        $events->getCollection()->reject(fn($e) => $e === null);
+        $events->setCollection(
+            $events->getCollection()->filter()
+        );
 
-        // Feedback IDs
         $submittedFeedbackIds = Feedback::where('user_id', $user->id)
             ->pluck('event_id')
             ->toArray();
 
         return view('Viewer.history', compact('events', 'submittedFeedbackIds'));
     }
+
 
     public function storeFeedback(Request $request)
     {
