@@ -61,6 +61,8 @@ class EventController extends Controller
             'target_year_levels' => 'nullable|array',
             'target_department'  => 'nullable|array',
             'target_users'       => 'nullable|string',
+            'target_faculty'     => 'nullable|array',
+            'target_sections'    => 'nullable|array',
         ]);
 
         // ==============================
@@ -130,6 +132,8 @@ class EventController extends Controller
             'target_year_levels' => $validated['target_year_levels'] ?? [],
             'target_department'  => $validated['target_department'] ?? [],
             'target_users'       => $validated['target_users'] ?? null,
+            'target_faculty'     => $validated['target_faculty'] ?? [],
+            'target_sections'    => $validated['target_sections'] ?? [],
 
             'department' => Auth::user()->department,
             'status' => 'upcoming',
@@ -353,7 +357,13 @@ class EventController extends Controller
 
         $departments = Department::all();
 
-        return view('Editor.editEvents', compact('event', 'departments'));
+        // ✅ Get all faculty
+        $faculty = User::where('title', 'Faculty')->get();
+
+        // ✅ Get distinct sections (from users table)
+        $sections = User::whereNotNull('section')->distinct('section')->pluck('section');
+
+        return view('Editor.editEvents', compact('event', 'departments', 'faculty', 'sections'));
     }
 
     // =========================================================================
@@ -381,6 +391,8 @@ class EventController extends Controller
             'target_year_levels' => 'nullable|array',
             'target_department' => 'nullable|array',
             'target_users' => 'nullable|string',
+            'target_faculty' => 'nullable|array',
+            'target_sections' => 'nullable|array',
             'other_location' => 'nullable|string|max:255', // Added back 'other_location' validation
         ]);
 
@@ -430,6 +442,8 @@ class EventController extends Controller
             'target_year_levels' => $validated['target_year_levels'] ?? [],
             'target_department' => $request->target_department ?? [],
             'target_users' => $request->target_users ?? null,
+            'target_faculty' => $validated['target_faculty'] ?? [],
+            'target_sections' => $validated['target_sections'] ?? [],
         ]);
 
         // Send updated notification

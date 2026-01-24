@@ -24,12 +24,16 @@ class Event extends Model
         'target_year_levels',
         'target_department',
         'target_users',
+        'target_faculty',
+        'target_sections',
         'department',
     ];
 
     protected $casts = [
         'target_year_levels' => 'array',
         'target_department' => 'array',
+        'target_faculty' => 'array',
+        'target_sections' => 'array',
     ];
 
     protected $appends = ['computed_status'];

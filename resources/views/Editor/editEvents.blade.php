@@ -173,6 +173,18 @@
                         </option>
                     </select>
                 </div>
+            @else
+                {{-- For non-Offices/non-Department Head users, show Target Users only --}}
+                <div class="form-group">
+                    <label for="targetUsers">Target Users</label>
+                    <select id="targetUsers" name="target_users" class="form-control">
+                        <option value="">-- Select Users --</option>
+                        <option value="Faculty" {{ $event->target_users === 'Faculty' ? 'selected' : '' }}>Faculty
+                        </option>
+                        <option value="Students" {{ $event->target_users === 'Students' ? 'selected' : '' }}>Students
+                        </option>
+                    </select>
+                </div>
             @endif
 
             {{-- Target Year Levels --}}
@@ -184,8 +196,7 @@
                     }
                 @endphp
 
-                <div class="form-group" id="targetYearLevelsContainer"
-                    style="{{ $event->target_users !== 'Students' ? 'display:none;' : '' }}">
+                <div class="form-group" id="targetYearLevelsContainer" style="display:none;">
                     <label>Target Year Levels</label>
                     <p class="note">Select which year levels of students will receive notifications</p>
 
@@ -208,6 +219,79 @@
                 </div>
             @endif
 
+            {{-- Section Button (only shown when target_users is Students) --}}
+            @php
+                $selectedSections = $event->target_sections ?? [];
+                if (is_string($selectedSections)) {
+                    $selectedSections = json_decode($selectedSections, true) ?? [];
+                }
+            @endphp
+
+            <div class="form-group" style="margin-top: 10px;">
+                <button type="button" id="openSectionModalBtn" class="btn btn-secondary" style="display:none;">➕
+                    Select Section</button>
+            </div>
+
+            <!-- Section Modal -->
+            <div id="sectionModalOverlay" class="custom-modal-overlay">
+                <div class="custom-modal">
+                    <h3>Select Section</h3>
+
+                    <!-- Select All -->
+                    <div class="checkbox-select-all">
+                        <input type="checkbox" id="selectAllSections"><strong> Select All</strong>
+                    </div>
+
+                    <!-- Section checkboxes -->
+                    <div class="checkbox-grid">
+                        @foreach ($sections as $section)
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="target_sections[]" value="{{ $section }}"
+                                    {{ in_array($section, $selectedSections) ? 'checked' : '' }}>
+                                <span>{{ $section }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+
+                    <div class="modal-buttons">
+                        <button type="button" id="closeSectionModalBtn" class="btn-cancel">Close</button>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Faculty Button (only shown when target_users is Students) --}}
+            @php
+                $selectedFaculty = $event->target_faculty ?? [];
+                if (is_string($selectedFaculty)) {
+                    $selectedFaculty = json_decode($selectedFaculty, true) ?? [];
+                }
+            @endphp
+
+            <div class="form-group" style="margin-top: 10px;">
+                <button type="button" id="openFacultyModalBtn" class="btn btn-secondary" style="display:none;">➕
+                    Select
+                    Faculty</button>
+            </div>
+
+            <!-- Faculty Modal -->
+            <div id="facultyModalOverlay" class="custom-modal-overlay">
+                <div class="custom-modal">
+                    <h3>Select Faculty</h3>
+                    <div class="checkbox-grid">
+                        @foreach ($faculty as $f)
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="target_faculty[]" value="{{ $f->id }}"
+                                    {{ in_array($f->id, $selectedFaculty) ? 'checked' : '' }}>
+                                <span>{{ $f->name }} ({{ $f->department }})</span>
+                            </label>
+                        @endforeach
+                    </div>
+                    <div class="modal-buttons">
+                        <button type="button" id="closeFacultyModalBtn" class="btn-cancel">Close</button>
+                    </div>
+                </div>
+            </div>
+
             <div class="button-group">
                 <button type="submit" class="btn-update">Update Event</button>
                 <a href="{{ route('Editor.index') }}" class="btn-cancel">Cancel</a>
@@ -215,53 +299,7 @@
         </form>
     </div>
 
-    <script>
-        function toggleOtherLocation() {
-            const select = document.getElementById('eventLocation');
-            const otherInput = document.getElementById('otherLocation');
-            if (select.value === 'Other') {
-                otherInput.style.display = 'block';
-                otherInput.required = true;
-            } else {
-                otherInput.style.display = 'none';
-                otherInput.required = false;
-                otherInput.value = '';
-            }
-        }
-
-        // Show/hide Year Levels based on Target Users
-        const targetUsersSelect = document.getElementById('targetUsers');
-        const yearLevelsContainer = document.getElementById('targetYearLevelsContainer');
-        if (targetUsersSelect && yearLevelsContainer) {
-            targetUsersSelect.addEventListener('change', function() {
-                yearLevelsContainer.style.display = this.value === 'Students' ? 'block' : 'none';
-            });
-        }
-
-        // Select All Departments logic
-        const selectAllCheckbox = document.getElementById('selectAllDepartments');
-        const deptCheckboxes = document.querySelectorAll('.dept-checkbox');
-        if (selectAllCheckbox) {
-            selectAllCheckbox.addEventListener('change', function() {
-                deptCheckboxes.forEach(cb => cb.checked = this.checked);
-            });
-
-            deptCheckboxes.forEach(cb => {
-                cb.addEventListener('change', function() {
-                    if (!this.checked) {
-                        selectAllCheckbox.checked = false;
-                    } else if ([...deptCheckboxes].every(c => c.checked)) {
-                        selectAllCheckbox.checked = true;
-                    }
-                });
-            });
-
-            // Initialize select all if all are checked
-            if ([...deptCheckboxes].every(c => c.checked)) selectAllCheckbox.checked = true;
-        }
-    </script>
-
-    {{-- JS SCRIPT FOR EVENTS DETAILS MODAL --}}
+    {{-- JS SCRIPT FOR EVENTS DETAILS MODAL AND MODALS --}}
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             const openMoreBtn = document.getElementById("openMoreDetailsBtn");
@@ -271,16 +309,23 @@
             const textarea = document.getElementById("moreDetailsTextarea");
             const hiddenInput = document.getElementById("moreDetailsInput");
 
-            openMoreBtn.addEventListener("click", () => {
-                textarea.value = hiddenInput.value || "";
-                modal.style.display = "flex";
-            });
+            if (openMoreBtn) {
+                openMoreBtn.addEventListener("click", () => {
+                    textarea.value = hiddenInput.value || "";
+                    modal.style.display = "flex";
+                });
+            }
 
-            closeMoreBtn.addEventListener("click", () => modal.style.display = "none");
-            saveMoreBtn.addEventListener("click", () => {
-                hiddenInput.value = textarea.value;
-                modal.style.display = "none";
-            });
+            if (closeMoreBtn) {
+                closeMoreBtn.addEventListener("click", () => modal.style.display = "none");
+            }
+
+            if (saveMoreBtn) {
+                saveMoreBtn.addEventListener("click", () => {
+                    hiddenInput.value = textarea.value;
+                    modal.style.display = "none";
+                });
+            }
         });
     </script>
 
@@ -301,11 +346,39 @@
         document.addEventListener("DOMContentLoaded", () => {
             const targetUsers = document.getElementById("targetUsers");
             const yearLevels = document.getElementById("targetYearLevelsContainer");
+            const openSectionBtn = document.getElementById("openSectionModalBtn");
+            const openFacultyBtn = document.getElementById("openFacultyModalBtn");
+            const sectionModalOverlay = document.getElementById("sectionModalOverlay");
+            const facultyModalOverlay = document.getElementById("facultyModalOverlay");
+
+            function toggleButtons() {
+                const isStudents = targetUsers && targetUsers.value === 'Students';
+                if (isStudents) {
+                    if (openSectionBtn) openSectionBtn.style.display = 'inline-block';
+                    if (openFacultyBtn) openFacultyBtn.style.display = 'inline-block';
+                    if (sectionModalOverlay) sectionModalOverlay.style.display = 'flex';
+                    if (facultyModalOverlay) facultyModalOverlay.style.display = 'flex';
+                } else {
+                    if (openSectionBtn) openSectionBtn.style.display = 'none';
+                    if (openFacultyBtn) openFacultyBtn.style.display = 'none';
+                    if (sectionModalOverlay) sectionModalOverlay.style.display = 'none';
+                    if (facultyModalOverlay) facultyModalOverlay.style.display = 'none';
+                }
+            }
 
             if (targetUsers) {
                 targetUsers.addEventListener("change", function() {
-                    yearLevels.style.display = (this.value === "Students") ? "block" : "none";
+                    const isStudents = this.value === "Students";
+                    if (yearLevels) yearLevels.style.display = isStudents ? "block" : "none";
+                    toggleButtons();
                 });
+                toggleButtons(); // initial check on page load
+            } else {
+                // If targetUsers doesn't exist, hide the buttons and modals by default
+                if (openSectionBtn) openSectionBtn.style.display = 'none';
+                if (openFacultyBtn) openFacultyBtn.style.display = 'none';
+                if (sectionModalOverlay) sectionModalOverlay.style.display = 'none';
+                if (facultyModalOverlay) facultyModalOverlay.style.display = 'none';
             }
 
             // Select all year levels
@@ -315,6 +388,65 @@
             if (selectAll) {
                 selectAll.addEventListener("change", function() {
                     yearChecks.forEach(cb => cb.checked = this.checked);
+                });
+            }
+
+            // ==============================
+            // Faculty Modal Logic
+            // ==============================
+            const facultyModal = document.getElementById('facultyModalOverlay');
+            const closeFacultyBtn = document.getElementById('closeFacultyModalBtn');
+
+            if (openFacultyBtn) {
+                openFacultyBtn.addEventListener('click', () => {
+                    facultyModal.classList.add('active');
+                });
+            }
+
+            if (closeFacultyBtn) {
+                closeFacultyBtn.addEventListener('click', () => {
+                    facultyModal.classList.remove('active');
+                });
+            }
+
+            // ==============================
+            // Section Modal Logic
+            // ==============================
+            const sectionModal = document.getElementById('sectionModalOverlay');
+            const closeSectionBtn = document.getElementById('closeSectionModalBtn');
+
+            if (openSectionBtn) {
+                openSectionBtn.addEventListener('click', () => {
+                    sectionModal.classList.add('active');
+                });
+            }
+
+            if (closeSectionBtn) {
+                closeSectionBtn.addEventListener('click', () => {
+                    sectionModal.classList.remove('active');
+                });
+            }
+
+            // ==============================
+            // Section Modal "Select All" Logic
+            // ==============================
+            const selectAllSections = document.getElementById('selectAllSections');
+            const sectionCheckboxes = sectionModal ? sectionModal.querySelectorAll(
+                'input[name="target_sections[]"]') : [];
+
+            if (selectAllSections) {
+                selectAllSections.addEventListener('change', () => {
+                    sectionCheckboxes.forEach(cb => cb.checked = selectAllSections.checked);
+                });
+
+                sectionCheckboxes.forEach(cb => {
+                    cb.addEventListener('change', () => {
+                        if (![...sectionCheckboxes].every(cb => cb.checked)) {
+                            selectAllSections.checked = false;
+                        } else {
+                            selectAllSections.checked = true;
+                        }
+                    });
                 });
             }
         });
