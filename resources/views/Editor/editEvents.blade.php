@@ -336,11 +336,13 @@
             function toggleButtons() {
                 const isStudents = targetUsers && targetUsers.value === 'Students';
                 if (isStudents) {
+                    if (yearLevels) yearLevels.style.display = 'block';
                     if (openSectionBtn) openSectionBtn.style.display = 'inline-block';
                     if (openFacultyBtn) openFacultyBtn.style.display = 'inline-block';
                     if (sectionModalOverlay) sectionModalOverlay.style.display = 'flex';
                     if (facultyModalOverlay) facultyModalOverlay.style.display = 'flex';
                 } else {
+                    if (yearLevels) yearLevels.style.display = 'none';
                     if (openSectionBtn) openSectionBtn.style.display = 'none';
                     if (openFacultyBtn) openFacultyBtn.style.display = 'none';
                     if (sectionModalOverlay) sectionModalOverlay.style.display = 'none';
