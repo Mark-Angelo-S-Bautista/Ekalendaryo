@@ -227,11 +227,6 @@
                 }
             @endphp
 
-            <div class="form-group" style="margin-top: 10px;">
-                <button type="button" id="openSectionModalBtn" class="btn btn-secondary" style="display:none;">➕
-                    Select Section</button>
-            </div>
-
             <!-- Section Modal -->
             <div id="sectionModalOverlay" class="custom-modal-overlay">
                 <div class="custom-modal">
@@ -252,10 +247,6 @@
                             </label>
                         @endforeach
                     </div>
-
-                    <div class="modal-buttons">
-                        <button type="button" id="closeSectionModalBtn" class="btn-cancel">Close</button>
-                    </div>
                 </div>
             </div>
 
@@ -266,12 +257,6 @@
                     $selectedFaculty = json_decode($selectedFaculty, true) ?? [];
                 }
             @endphp
-
-            <div class="form-group" style="margin-top: 10px;">
-                <button type="button" id="openFacultyModalBtn" class="btn btn-secondary" style="display:none;">➕
-                    Select
-                    Faculty</button>
-            </div>
 
             <!-- Faculty Modal -->
             <div id="facultyModalOverlay" class="custom-modal-overlay">
@@ -285,9 +270,6 @@
                                 <span>{{ $f->name }} ({{ $f->department }})</span>
                             </label>
                         @endforeach
-                    </div>
-                    <div class="modal-buttons">
-                        <button type="button" id="closeFacultyModalBtn" class="btn-cancel">Close</button>
                     </div>
                 </div>
             </div>

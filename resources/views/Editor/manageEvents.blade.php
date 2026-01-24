@@ -101,7 +101,7 @@
                                 }
                             </script>
 
-                            @if (auth()->user()->title === 'Offices' || 'Department Head')
+                            @if (auth()->user()->title === 'Offices' || auth()->user()->title === 'Department Head')
                                 <div class="form-group">
                                     <label for="targetDepartment">Target Department</label>
 
@@ -252,7 +252,7 @@ $userTitle = $user->title ?? null;
                                         <div class="checkbox-grid">
                                             @foreach ($faculty as $f)
                                                 <label class="checkbox-item">
-                                                    <input type="checkbox" name="target_faculty[]" required
+                                                    <input type="checkbox" name="target_faculty[]"
                                                         value="{{ $f->id }}">
                                                     <span>{{ $f->name }} ({{ $f->department }})</span>
                                                 </label>

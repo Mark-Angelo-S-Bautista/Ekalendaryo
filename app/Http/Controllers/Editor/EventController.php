@@ -172,91 +172,77 @@ class EventController extends Controller
     //SEND THE MAIL WHEN CREATING AN EVENT
     private function sendEmailsForEvent(Event $event, bool $isUpdate = false, $oldEvent = null, bool $isCancelled = false)
     {
-        // -----------------------------------------------------
-        // FIX #1: Decide which event data to use for filtering
-        // -----------------------------------------------------
+        // =====================================================
+        // Decide which event data to use for filtering
+        // =====================================================
         $eventData = ($isCancelled && $oldEvent) ? $oldEvent : $event;
 
-        // 1. Normalize Target Data
-        $targetDepartments = (array) ($eventData->target_department ?? []);
-        if (is_string($eventData->target_department)) {
-            $targetDepartments = array_map('trim', explode(',', $eventData->target_department));
-        }
-        $targetDepartments = array_filter($targetDepartments);
+        // Extract and normalize target data
+        $targetUsers = $eventData->target_users ?? null;
+        $targetYearLevels = (array) ($eventData->target_year_levels ?? []);
+        $targetFacultyIds = (array) ($eventData->target_faculty ?? []);
+        $targetSections = (array) ($eventData->target_sections ?? []);
+        $eventCreatorDepartment = $eventData->department ?? Auth::user()->department;
 
-        $targetRoles = (array) ($eventData->target_users ?? []);
-        if (is_string($eventData->target_users)) {
-            $targetRoles = array_map('trim', explode(',', $eventData->target_users));
-        }
-        $targetRoles = array_filter($targetRoles);
+        $recipients = collect();
 
-        $targetYearLevels = $eventData->target_year_levels ?? [];
+        // =====================================================
+        // SCENARIO 1 & 3: Targeting "Students"
+        // =====================================================
+        if ($targetUsers === 'Students') {
+            // Get students from selected sections AND year levels
+            $students = User::where('title', 'Student')
+                ->whereIn('section', $targetSections)
+                ->get()
+                ->filter(function ($student) use ($targetYearLevels) {
+                    $studentYear = strtolower(str_replace(' ', '', $student->yearlevel ?? ''));
+                    $allowedLevels = array_map(fn($lvl) => strtolower(str_replace(' ', '', $lvl)), $targetYearLevels);
+                    return in_array($studentYear, $allowedLevels);
+                });
 
-        $rolesToInclude = [];
-        $includeStudents = false;
+            $recipients = $recipients->merge($students);
 
-        // --- 2. Determine Role/Title Criteria ---
-        $rolesToInclude[] = 'Department Head';
+            // Add ONLY selected faculty (if any)
+            if (!empty($targetFacultyIds)) {
+                $selectedFaculty = User::whereIn('id', $targetFacultyIds)
+                    ->where('title', 'Faculty')
+                    ->get();
+                $recipients = $recipients->merge($selectedFaculty);
+            }
 
-        $isFacultyTargeted = in_array('Faculty', $targetRoles);
-        $isStudentsTargeted = in_array('Viewer', $targetRoles) || in_array('Students', $targetRoles);
-
-        if ($isFacultyTargeted) {
-            $rolesToInclude[] = 'Faculty';
-        } elseif ($isStudentsTargeted) {
-            $rolesToInclude[] = 'Student';
-            $rolesToInclude[] = 'Faculty';
-            $includeStudents = true;
-        } else {
-            foreach ($targetRoles as $role) {
-                if (!in_array($role, ['Faculty', 'Viewer', 'Students', 'Department Head'])) {
-                    $rolesToInclude[] = $role;
-                }
+            // Add Department Head of same department
+            $deptHead = User::where('title', 'Department Head')
+                ->where('department', $eventCreatorDepartment)
+                ->first();
+            if ($deptHead) {
+                $recipients = $recipients->merge([$deptHead]);
             }
         }
+        // =====================================================
+        // SCENARIO 2: Targeting "Faculty"
+        // =====================================================
+        elseif ($targetUsers === 'Faculty') {
+            // Add ALL faculty from the same department
+            $allFaculty = User::where('title', 'Faculty')
+                ->where('department', $eventCreatorDepartment)
+                ->get();
+            $recipients = $recipients->merge($allFaculty);
 
-        // Query construction
-        $query = User::query()->whereIn('title', array_unique($rolesToInclude));
-
-        // Department Filter (use eventData instead of event)
-        if (!empty($targetDepartments) && !in_array('ALL', array_map('strtoupper', $targetDepartments))) {
-            $query->where(function ($q) use ($targetDepartments, $eventData) {
-                $q->whereIn('department', $targetDepartments)
-                ->orWhere('department', $eventData->department);
-            });
+            // Add Department Head of same department
+            $deptHead = User::where('title', 'Department Head')
+                ->where('department', $eventCreatorDepartment)
+                ->first();
+            if ($deptHead) {
+                $recipients = $recipients->merge([$deptHead]);
+            }
         }
 
-        $users = $query->get();
-
-        $recipients = $users->filter(function ($user) use ($targetYearLevels, $includeStudents) {
-
-            if (strtolower($user->role) !== 'viewer') {
-                return true;
-            }
-
-            if (strtolower($user->role) !== 'faculty') {
-                return true;
-            }
-
-            if (!$includeStudents) {
-                return false;
-            }
-
-            if (empty($targetYearLevels)) {
-                return true;
-            }
-
-            $studentYear = strtolower(str_replace(' ', '', $user->yearlevel ?? ''));
-            $allowedLevels = array_map(fn($lvl) => strtolower(str_replace(' ', '', $lvl)), $targetYearLevels);
-
-            return in_array($studentYear, $allowedLevels);
-        });
-
+        // Remove duplicates by email
         $recipients = $recipients->unique('email');
 
-        // -----------------------------------------------------
-        // FIX #2: Use the proper event object when sending mail
-        // -----------------------------------------------------
+        // =====================================================
+        // Send emails
+        // =====================================================
         $eventToSend = $isCancelled && $oldEvent ? $oldEvent : $event;
 
         foreach ($recipients as $user) {
