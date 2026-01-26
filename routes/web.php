@@ -91,7 +91,7 @@ Route::middleware(['auth', 'backhistory'])->group(function () {
         //Insert users using CSV file
         Route::post('/users', [UserController::class, 'import'])->name('import');
         //Change School Year
-        Route::post('/dashboard', [UserManagementController::class, 'changeSchoolYear']);
+        Route::post('/dashboard', [UserManagementController::class, 'changeSchoolYear'])->name('changeSchoolYear');
 
         Route::get('/activity_log', [UserManagementController::class, 'activity_log'])->name('activity_log');
         Route::get('/history', [UserManagementController::class, 'history'])->name('history');

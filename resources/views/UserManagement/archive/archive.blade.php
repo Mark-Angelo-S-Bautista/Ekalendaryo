@@ -54,7 +54,9 @@
                                 <td>
                                     {{ $user->department === 'OFFICES' ? $user->office_name ?? 'N/A' : $user->department ?? 'N/A' }}
                                 </td>
-                                <td>{{ $user->deleted_school_year }}</td>
+                                <td>
+                                    {{ $user->schoolYear?->school_year ?? 'N/A' }}
+                                </td>
                                 <td>
                                     <span class="status-badge status-{{ $user->status }}">
                                         {{ $user->yearlevel }} {{ ucfirst($user->status) }}

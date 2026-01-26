@@ -263,7 +263,7 @@
 
                     <div class="adduser_form-group">
                         <label class="adduser_label">Role</label>
-                        <select id="role" name="role" class="adduser_select">
+                        <select id="role" name="role" class="adduser_select adduser_role_static">
                             <option value="">Select a role</option>
                             <option value="Viewer" {{ old('role') == 'Viewer' ? 'selected' : '' }}>Viewer</option>
                             <option value="Editor" {{ old('role') == 'Editor' ? 'selected' : '' }}>Editor</option>
@@ -272,6 +272,15 @@
                         </select>
                         <div class="error-text" id="error-role"></div>
                     </div>
+
+                    <style>
+                        .adduser_role_static {
+                            pointer-events: none;
+                            background-color: #f5f5f5;
+                            cursor: not-allowed;
+                            opacity: 0.7;
+                        }
+                    </style>
 
                     <div class="adduser_form-group">
                         <label class="adduser_label">Default Password</label>
@@ -379,10 +388,29 @@
                 const titleSelect = document.getElementById('title');
                 const officeNameField = document.getElementById('office_name_field');
                 const departmentField = document.getElementById('department_field');
+                const roleSelect = document.getElementById('role');
+
+                // Function to set role based on title
+                const setRoleBasedOnTitle = (selectedTitle) => {
+                    if (selectedTitle === 'Student' || selectedTitle === 'Faculty') {
+                        roleSelect.value = 'Viewer';
+                    } else if (selectedTitle === 'Department Head' || selectedTitle === 'Offices') {
+                        roleSelect.value = 'Editor';
+                    } else {
+                        roleSelect.value = '';
+                    }
+                };
 
                 if (titleSelect) {
+                    // Initialize role on page load if title is already selected
+                    if (titleSelect.value) {
+                        setRoleBasedOnTitle(titleSelect.value);
+                    }
+
                     titleSelect.addEventListener('change', function() {
                         const selectedTitle = this.value;
+
+                        // Show/hide fields based on title
                         if (selectedTitle === 'Offices') {
                             officeNameField.style.display = 'block';
                             departmentField.style.display = 'none';
@@ -393,6 +421,9 @@
                             officeNameField.style.display = 'none';
                             departmentField.style.display = 'none';
                         }
+
+                        // Automatically set role based on title
+                        setRoleBasedOnTitle(selectedTitle);
                     });
                 }
             });

@@ -140,6 +140,10 @@ class UserManagementController extends Controller
             ]);
         }
 
+        // Get active school year
+        $activeSchoolYear = SchoolYear::where('is_active', 1)->first();
+        $schoolYearId = $activeSchoolYear ? $activeSchoolYear->id : null;
+
         // Create user
         User::create([
             'name' => $request->name,
@@ -152,6 +156,7 @@ class UserManagementController extends Controller
             'yearlevel' => $request->yearlevel,
             'section' => $request->section,
             'password' => bcrypt($request->password),
+            'school_year_id' => $schoolYearId,
         ]);
 
         return response()->json([
@@ -447,7 +452,7 @@ class UserManagementController extends Controller
                 ->where('status', 'active')
                 ->update([
                     'status' => 'graduated',
-                    'school_year_id' => $newSY->id
+                    'school_year_id' => $currentSY->id
                 ]);
 
             // --------------------------------------------------

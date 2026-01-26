@@ -115,7 +115,8 @@ class UserController extends Controller
             'status' => $user->title === 'Student' ? 'dropped' : 'fired',
             'is_deleted' => 1,
             'deleted_at' => now(),
-            'deleted_school_year' => $activeSY->school_year
+            'deleted_school_year' => $activeSY->school_year,
+            'school_year_id' => $activeSY->id
         ]);
 
         return redirect()->route('UserManagement.users')->with('success', 'User deleted successfully!');
@@ -133,6 +134,10 @@ class UserController extends Controller
         // Use fopen in 'r' mode to avoid encoding issues
         $csv = Reader::createFromPath($file->getRealPath(), 'r');
         $csv->setHeaderOffset(0); // first row is header
+
+        // Get active school year
+        $activeSchoolYear = SchoolYear::where('is_active', 1)->first();
+        $schoolYearId = $activeSchoolYear ? $activeSchoolYear->id : null;
 
         $defaultPassword = 'password';
         $records = $csv->getRecords();
@@ -181,6 +186,7 @@ class UserController extends Controller
                 'section' => $record['section'] ?? null,
                 'role' => $record['role'] ?? 'Viewer',
                 'password' => Hash::make($record['password'] ?? $defaultPassword),
+                'school_year_id' => $schoolYearId,
             ]);
         }
 
