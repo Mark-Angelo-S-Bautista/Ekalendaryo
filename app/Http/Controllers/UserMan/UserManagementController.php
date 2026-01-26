@@ -391,10 +391,18 @@ class UserManagementController extends Controller
     public function archive(Request $request)
     {
         $title = $request->get('title');
+        $schoolYear = $request->get('school_year');
+        $department = $request->get('department');
 
         $archivedUsers = User::whereIn('status', ['dropped', 'fired', 'graduated'])
             ->when($title, function ($q) use ($title) {
                 $q->where('title', $title);
+            })
+            ->when($schoolYear, function ($q) use ($schoolYear) {
+                $q->where('school_year_id', $schoolYear);
+            })
+            ->when($department, function ($q) use ($department) {
+                $q->where('department', $department);
             })
             ->orderBy('updated_at', 'desc')
             ->paginate(10)
@@ -405,7 +413,21 @@ class UserManagementController extends Controller
             ->distinct()
             ->pluck('title');
 
-        return view('UserManagement.archive.archive', compact('archivedUsers', 'titles', 'title'));
+        // Get unique school years for archived users
+        $schoolYears = SchoolYear::whereIn('id', 
+            User::whereIn('status', ['dropped', 'fired', 'graduated'])
+                ->whereNotNull('school_year_id')
+                ->distinct()
+                ->pluck('school_year_id')
+        )->get();
+
+        // Get unique departments for archived users
+        $departments = User::whereIn('status', ['dropped', 'fired', 'graduated'])
+            ->whereNotNull('department')
+            ->distinct()
+            ->pluck('department');
+
+        return view('UserManagement.archive.archive', compact('archivedUsers', 'titles', 'title', 'schoolYears', 'schoolYear', 'departments', 'department'));
     }
 
     public function changeSchoolYear()

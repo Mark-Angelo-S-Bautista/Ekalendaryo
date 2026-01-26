@@ -24,6 +24,30 @@
                     @endforeach
                 </select>
             </div>
+
+            <div class="filter-group">
+                <label for="school_year">Filter by School Year</label>
+                <select name="school_year" id="school_year" onchange="this.form.submit()">
+                    <option value="">All School Years</option>
+                    @foreach ($schoolYears as $sy)
+                        <option value="{{ $sy->id }}" {{ $schoolYear === (string) $sy->id ? 'selected' : '' }}>
+                            {{ $sy->school_year }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="department">Filter by Department</label>
+                <select name="department" id="department" onchange="this.form.submit()">
+                    <option value="">All Departments</option>
+                    @foreach ($departments as $dept)
+                        <option value="{{ $dept }}" {{ $department === $dept ? 'selected' : '' }}>
+                            {{ $dept }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
         </form>
 
         <div class="archive-table-wrapper">
