@@ -256,13 +256,17 @@ class EventController extends Controller
 
     /**
      * Send emails for OFFICES-created events based on target fields.
+     * Includes filtering by target_faculty and target_sections.
+     * Target faculty ALWAYS receive emails regardless of target_users.
      */
     private function sendEmailsForOfficesEvent(Event $event, bool $isUpdate = false, $oldEvent = null, bool $isCancelled = false)
     {
         // Start with all users
         $users = User::query();
 
-        // Filter by target_users (from event)
+        // =====================================================
+        // STEP 1: Filter by target_users (role-based)
+        // =====================================================
         switch ($event->target_users) {
             case 'Students':
                 $users->where('title', 'Student');
@@ -278,7 +282,9 @@ class EventController extends Controller
                 break;
         }
 
-        // Filter by target_department if set and not "All"
+        // =====================================================
+        // STEP 2: Filter by target_department if set
+        // =====================================================
         if (!empty($event->target_department) && !in_array('All', $event->target_department)) {
             $users->whereIn('department', $event->target_department);
         }
@@ -286,19 +292,59 @@ class EventController extends Controller
         // Get users from database
         $users = $users->get();
 
-        // Filter Students further by year levels if applicable
-        if ($event->target_users === 'Students' && !empty($event->target_year_levels)) {
-            $normalizedYearLevels = array_map(fn($lvl) => strtolower(str_replace(' ', '', $lvl)), $event->target_year_levels);
+        // =====================================================
+        // STEP 3: Apply collection-based filters for Students
+        // =====================================================
+        if ($event->target_users === 'Students') {
+            // Filter by target_sections if provided
+            if (!empty($event->target_sections)) {
+                $users = $users->filter(function ($user) use ($event) {
+                    return in_array($user->section ?? '', $event->target_sections);
+                });
+            }
 
-            $users = $users->filter(function ($user) use ($normalizedYearLevels) {
-                $userYearLevel = strtolower(str_replace(' ', '', $user->yearlevel ?? ''));
-                return in_array($userYearLevel, $normalizedYearLevels);
+            // Filter by target_year_levels if provided
+            if (!empty($event->target_year_levels)) {
+                $normalizedYearLevels = array_map(fn($lvl) => strtolower(str_replace(' ', '', $lvl)), $event->target_year_levels);
+
+                $users = $users->filter(function ($user) use ($normalizedYearLevels) {
+                    $userYearLevel = strtolower(str_replace(' ', '', $user->yearlevel ?? ''));
+                    return in_array($userYearLevel, $normalizedYearLevels);
+                });
+            }
+        }
+
+        // =====================================================
+        // STEP 4: Apply collection-based filters for Faculty when target_users is Faculty
+        // =====================================================
+        if ($event->target_users === 'Faculty' && !empty($event->target_faculty)) {
+            // If specific faculty are selected, include ONLY those faculty
+            $users = $users->filter(function ($user) use ($event) {
+                return in_array($user->id, $event->target_faculty);
             });
         }
 
-        // Send emails
+        // =====================================================
+        // STEP 5: ALWAYS add target_faculty regardless of target_users
+        // (Faculty coordinators/advisors should always be notified)
+        // =====================================================
+        if (!empty($event->target_faculty)) {
+            $targetedFaculty = User::whereIn('id', $event->target_faculty)
+                ->where('title', 'Faculty')
+                ->get();
+            $users = $users->merge($targetedFaculty);
+        }
+
+        // Remove duplicate users by ID
+        $users = $users->unique('id');
+
+        // =====================================================
+        // STEP 6: Send emails to final filtered users
+        // =====================================================
         foreach ($users as $user) {
-            Mail::to($user->email)->send(new EventNotificationMail($event, $user, $isUpdate, $oldEvent, $isCancelled));
+            if (!empty($user->email)) {
+                Mail::to($user->email)->send(new EventNotificationMail($event, $user, $isUpdate, $oldEvent, $isCancelled));
+            }
         }
     }
 
