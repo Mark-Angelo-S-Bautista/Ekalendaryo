@@ -190,30 +190,52 @@ class EventController extends Controller
         // SCENARIO 1 & 3: Targeting "Students"
         // =====================================================
         if ($targetUsers === 'Students') {
-            // Get students from selected sections AND year levels
+
             $students = User::where('title', 'Student')
+
+                // ✅ FIX 1: department MUST match event creator department
+                ->where('department', $eventCreatorDepartment)
+
+                // ✅ FIX 2: section MUST be selected
                 ->whereIn('section', $targetSections)
+
                 ->get()
+
+                // ✅ FIX 3: year level MUST match
                 ->filter(function ($student) use ($targetYearLevels) {
+                    if (empty($targetYearLevels)) {
+                        return true; // if no year levels specified, allow all
+                    }
+
                     $studentYear = strtolower(str_replace(' ', '', $student->yearlevel ?? ''));
-                    $allowedLevels = array_map(fn($lvl) => strtolower(str_replace(' ', '', $lvl)), $targetYearLevels);
+                    $allowedLevels = array_map(
+                        fn ($lvl) => strtolower(str_replace(' ', '', $lvl)),
+                        $targetYearLevels
+                    );
+
                     return in_array($studentYear, $allowedLevels);
                 });
 
             $recipients = $recipients->merge($students);
 
+            // =====================================================
             // Add ONLY selected faculty (if any)
+            // =====================================================
             if (!empty($targetFacultyIds)) {
                 $selectedFaculty = User::whereIn('id', $targetFacultyIds)
                     ->where('title', 'Faculty')
                     ->get();
+
                 $recipients = $recipients->merge($selectedFaculty);
             }
 
-            // Add Department Head of same department
+            // =====================================================
+            // Add Department Head of SAME department
+            // =====================================================
             $deptHead = User::where('title', 'Department Head')
                 ->where('department', $eventCreatorDepartment)
                 ->first();
+
             if ($deptHead) {
                 $recipients = $recipients->merge([$deptHead]);
             }
