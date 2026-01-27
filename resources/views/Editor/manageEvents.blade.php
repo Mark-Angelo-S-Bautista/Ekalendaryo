@@ -269,6 +269,8 @@ $userTitle = $user->title ?? null;
                                 <button type="button" class="btn-cancel" id="closeModalBtn">Cancel</button>
                                 <button type="submit" class="btn-create">Create Event</button>
                             </div>
+                            <div id="sectionFacultyValidationError"
+                                style="color: red; margin-top: 10px; font-weight: 500; display: none;"></div>
                         </form>
                         <!-- JS for Faculty & Section toggling -->
                         <script>
@@ -455,6 +457,46 @@ $userTitle = $user->title ?? null;
                                             selectAllCheckbox.checked = true;
                                         }
                                     });
+                                });
+
+                                // ------------------------------
+                                // Form Submission Validation: Section & Faculty (BOTH required)
+                                // ------------------------------
+                                const form = document.querySelector('.modal form');
+                                const validationErrorDiv = document.getElementById('sectionFacultyValidationError');
+
+                                form.addEventListener('submit', (e) => {
+                                    const targetUsers = document.getElementById('targetUsers');
+
+                                    // Only validate if target users is "Students"
+                                    if (targetUsers && targetUsers.value === 'Students') {
+                                        const sectionCheckboxes = document.querySelectorAll(
+                                            'input[name="target_sections[]"]:checked');
+                                        const facultyCheckboxes = document.querySelectorAll(
+                                            'input[name="target_faculty[]"]:checked');
+
+                                        let errorMessage = '';
+
+                                        // Check if at least one section is selected
+                                        if (sectionCheckboxes.length === 0) {
+                                            errorMessage += '⚠️ Please select at least one section.<br>';
+                                        }
+
+                                        // Check if at least one faculty is selected
+                                        if (facultyCheckboxes.length === 0) {
+                                            errorMessage += '⚠️ Please select at least one faculty member.';
+                                        }
+
+                                        // If any validation fails, prevent submission
+                                        if (errorMessage) {
+                                            e.preventDefault();
+                                            validationErrorDiv.style.display = 'block';
+                                            validationErrorDiv.innerHTML = errorMessage;
+                                            return false;
+                                        }
+                                    }
+
+                                    validationErrorDiv.style.display = 'none';
                                 });
                             });
                         </script>
