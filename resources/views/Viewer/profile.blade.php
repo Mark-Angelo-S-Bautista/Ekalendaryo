@@ -14,10 +14,10 @@
         <h1>Profile</h1>
 
         {{-- Edit buttons for personal info --}}
-        <div class="top-right">
+        {{-- <div class="top-right">
             <button id="editProfile" class="btn btn-primary">✏ Edit Profile</button>
             <button id="saveProfile" class="btn btn-primary hidden">💾 Save Changes</button>
-        </div>
+        </div> --}}
 
         {{-- Personal Information --}}
         <div class="section">
