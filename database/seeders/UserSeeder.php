@@ -34,6 +34,7 @@ class UserSeeder extends Seeder
             'department' => 'OFFICES',
             'role' => 'UserManagement',
             'password' => Hash::make('password'), // The password is 'password'
+            'status' => 'active'
         ]);
     }
 }
