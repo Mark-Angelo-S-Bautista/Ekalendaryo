@@ -10,6 +10,8 @@ use App\Models\Department;
 use App\Models\ActivityLog;
 use App\Models\SchoolYear;
 use App\Mail\EventNotificationMail;
+use App\Mail\EventReminderMail;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -262,6 +264,10 @@ class EventController extends Controller
         // Remove duplicates by email
         $recipients = $recipients->unique('email');
 
+        if (!$isUpdate && !$isCancelled) {
+            $this->scheduleEventReminders($event, $recipients);
+        }
+
         // =====================================================
         // Send emails
         // =====================================================
@@ -360,6 +366,10 @@ class EventController extends Controller
         // Remove duplicate users by ID
         $users = $users->unique('id');
 
+        if (!$isUpdate && !$isCancelled) {
+            $this->scheduleEventReminders($event, $users);
+        }
+
         // =====================================================
         // STEP 6: Send emails to final filtered users
         // =====================================================
@@ -368,6 +378,176 @@ class EventController extends Controller
                 Mail::to($user->email)->send(new EventNotificationMail($event, $user, $isUpdate, $oldEvent, $isCancelled));
             }
         }
+    }
+
+    private function scheduleEventReminders(Event $event, $recipients)
+    {
+        $eventDateTime = \Carbon\Carbon::parse($event->date);
+
+        $threeDaysBefore = $eventDateTime->copy()->subDays(3);
+        $oneDayBefore    = $eventDateTime->copy()->subDay();
+
+        foreach ($recipients as $user) {
+            if (empty($user->email)) {
+                continue;
+            }
+
+            // 3 DAYS BEFORE
+            if ($threeDaysBefore->isFuture()) {
+                Mail::to($user->email)
+                    ->later(
+                        $threeDaysBefore,
+                        new EventReminderMail($event, $user, '3-days')
+                    );
+            }
+
+            // 24 HOURS BEFORE
+            if ($oneDayBefore->isFuture()) {
+                Mail::to($user->email)
+                    ->later(
+                        $oneDayBefore,
+                        new EventReminderMail($event, $user, '24-hours')
+                    );
+            }
+        }
+    }
+
+    private function cancelEventReminders(Event $event)
+    {
+        $jobs = DB::table('jobs')->get();
+
+        foreach ($jobs as $job) {
+            $payload = json_decode($job->payload, true);
+            
+            if (!isset($payload['data']['command'])) {
+                continue;
+            }
+
+            try {
+                // Unserialize the command
+                $command = unserialize($payload['data']['command']);
+                
+                // Check if it's a SendQueuedMailable command
+                if ($command instanceof \Illuminate\Mail\SendQueuedMailable) {
+                    $mailable = $command->mailable;
+                    
+                    // Check if it's our EventReminderMail with matching event ID
+                    if ($mailable instanceof \App\Mail\EventReminderMail 
+                        && isset($mailable->eventId) 
+                        && $mailable->eventId == $event->id) {
+                        DB::table('jobs')->where('id', $job->id)->delete();
+                    }
+                }
+            } catch (\Exception $e) {
+                // Skip jobs that can't be unserialized
+                continue;
+            }
+        }
+    }
+
+    private function getRecipientsForEvent(Event $event)
+    {
+        $recipients = collect();
+
+        if ($event->department === 'OFFICES') {
+            $users = User::query();
+
+            switch ($event->target_users) {
+                case 'Students':
+                    $users->where('title', 'Student');
+                    break;
+                case 'Faculty':
+                    $users->whereIn('title', ['Faculty', 'Department Head']);
+                    break;
+                case 'Department Heads':
+                    $users->where('title', 'Department Head');
+                    break;
+            }
+
+            if (!empty($event->target_department) && !in_array('All', $event->target_department)) {
+                $users->whereIn('department', $event->target_department);
+            }
+
+            $users = $users->get();
+
+            // Apply collection-based filters for Students
+            if ($event->target_users === 'Students') {
+                if (!empty($event->target_sections)) {
+                    $users = $users->filter(fn($user) => in_array($user->section ?? '', $event->target_sections));
+                }
+
+                if (!empty($event->target_year_levels)) {
+                    $normalizedYearLevels = array_map(fn($lvl) => strtolower(str_replace(' ', '', $lvl)), $event->target_year_levels);
+
+                    $users = $users->filter(function ($user) use ($normalizedYearLevels) {
+                        $userYearLevel = strtolower(str_replace(' ', '', $user->yearlevel ?? ''));
+                        return in_array($userYearLevel, $normalizedYearLevels);
+                    });
+                }
+            }
+
+            // Always add selected faculty
+            if (!empty($event->target_faculty)) {
+                $targetedFaculty = User::whereIn('id', $event->target_faculty)
+                    ->where('title', 'Faculty')
+                    ->get();
+                $users = $users->merge($targetedFaculty);
+            }
+
+            $recipients = $users->unique('id');
+        } else {
+            // Non-OFFICES events (Students + Faculty logic)
+            $recipients = collect();
+
+            $targetUsers = $event->target_users ?? null;
+            $targetYearLevels = (array) ($event->target_year_levels ?? []);
+            $targetFacultyIds = (array) ($event->target_faculty ?? []);
+            $targetSections = (array) ($event->target_sections ?? []);
+            $eventCreatorDepartment = $event->department ?? Auth::user()->department;
+
+            if ($targetUsers === 'Students') {
+                $students = User::where('title', 'Student')
+                    ->where('department', $eventCreatorDepartment)
+                    ->whereIn('section', $targetSections)
+                    ->get()
+                    ->filter(function ($student) use ($targetYearLevels) {
+                        if (empty($targetYearLevels)) return true;
+                        $studentYear = strtolower(str_replace(' ', '', $student->yearlevel ?? ''));
+                        $allowedLevels = array_map(fn($lvl) => strtolower(str_replace(' ', '', $lvl)), $targetYearLevels);
+                        return in_array($studentYear, $allowedLevels);
+                    });
+
+                $recipients = $recipients->merge($students);
+
+                // Add selected faculty
+                if (!empty($targetFacultyIds)) {
+                    $selectedFaculty = User::whereIn('id', $targetFacultyIds)
+                        ->where('title', 'Faculty')
+                        ->get();
+                    $recipients = $recipients->merge($selectedFaculty);
+                }
+
+                // Add department head
+                $deptHead = User::where('title', 'Department Head')
+                    ->where('department', $eventCreatorDepartment)
+                    ->first();
+                if ($deptHead) $recipients = $recipients->merge([$deptHead]);
+            } elseif ($targetUsers === 'Faculty') {
+                $allFaculty = User::where('title', 'Faculty')
+                    ->where('department', $eventCreatorDepartment)
+                    ->get();
+                $recipients = $recipients->merge($allFaculty);
+
+                $deptHead = User::where('title', 'Department Head')
+                    ->where('department', $eventCreatorDepartment)
+                    ->first();
+                if ($deptHead) $recipients = $recipients->merge([$deptHead]);
+            }
+
+            $recipients = $recipients->unique('email');
+        }
+
+        return $recipients;
     }
 
 
@@ -500,7 +680,16 @@ class EventController extends Controller
             'target_sections' => $validated['target_sections'] ?? [],
         ]);
 
-        // Send updated notification
+        // Cancel old reminder jobs
+        $this->cancelEventReminders($oldEvent);
+
+        // Schedule new reminders if date changed and event is not cancelled
+        if ($event->date !== $oldEvent->date && $event->status !== 'cancelled') {
+            $recipients = $this->getRecipientsForEvent($event);
+            $this->scheduleEventReminders($event, $recipients);
+        }
+
+        // Send update notification immediately
         if ($event->department === 'OFFICES') {
             $this->sendEmailsForOfficesEvent($event, true, $oldEvent);
         } else {
@@ -554,6 +743,9 @@ class EventController extends Controller
         $event = Event::where('id', $id)
             ->where('user_id', $userId)
             ->firstOrFail();
+
+        // Cancel queued reminder emails FIRST
+        $this->cancelEventReminders($event);
 
         // 🔒 Prevent double cancellation
         if ($event->status === 'cancelled') {

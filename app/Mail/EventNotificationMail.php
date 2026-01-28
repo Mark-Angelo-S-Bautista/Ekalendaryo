@@ -11,7 +11,7 @@ use Illuminate\Queue\SerializesModels;
 use App\Models\Event;
 use App\Models\User;
 
-class EventNotificationMail extends Mailable
+class EventNotificationMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
@@ -23,6 +23,8 @@ class EventNotificationMail extends Mailable
 
     public function __construct(Event $event, User $student, bool $isUpdate = false, $oldEvent = null, bool $isCancelled = false)
     {
+        // ✅ THIS is the fix (no property conflict)
+        $this->afterCommit();
         $this->event = $event;
         $this->student = $student;
         $this->isUpdate = $isUpdate;
