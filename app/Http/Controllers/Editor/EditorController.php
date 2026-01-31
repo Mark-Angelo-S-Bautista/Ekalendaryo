@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Validator;
 use Illuminate\Validation\ValidationException;
 use App\Models\Event;
+use App\Models\Department;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use App\Models\ActivityLog;
@@ -85,12 +86,12 @@ class EditorController extends Controller
 
     public function calendar()
     {
-        // Fetch only events that are NOT cancelled
+        $departments = Department::orderBy('department_name')->get();
+
         $events = Event::where('status', '!=', 'cancelled')
             ->get()
             ->map(function ($event) {
 
-                // --- SANITIZE target_year_levels ---
                 $targetYearLevels = $event->target_year_levels;
 
                 if (is_string($targetYearLevels)) {
@@ -109,13 +110,13 @@ class EditorController extends Controller
                     'status' => $event->computed_status,
                     'location' => $event->location,
                     'sy' => $event->school_year,
-                    'type' => strtolower(str_replace(['/', ' '], '_', $event->department ?? 'general')),
-                    'organizer' => $event->department ?? 'N/A',
+                    'type' => strtolower(str_replace(['/', ' '], '_', $event->department)),
+                    'organizer' => $event->department,
                     'targetYearLevels' => $targetYearLevels,
                 ];
             });
 
-        return view('Editor.calendar', ['events' => $events]);
+        return view('Editor.calendar', compact('events', 'departments'));
     }
 
     public function activity_log()

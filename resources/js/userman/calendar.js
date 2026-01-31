@@ -98,6 +98,8 @@ document.addEventListener("DOMContentLoaded", () => {
             grid.appendChild(empty);
         }
 
+        const filterVal = eventFilter.value;
+
         for (let d = 1; d <= totalDays; d++) {
             const dayEl = document.createElement("div");
             dayEl.classList.add("calendar_day");
@@ -110,30 +112,36 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (date === todayStr) dayEl.classList.add("calendar_today");
 
-            const filtered = formattedEvents.filter((ev) => ev.date === date);
-            const filterVal = eventFilter.value;
+            // Filter events by date, status, and selected filter
+            const filtered = formattedEvents.filter((ev) => {
+                // Must match the date
+                if (ev.date !== date) return false;
 
+                // Skip cancelled events
+                if (normalizeStatus(ev.status) === "cancelled") return false;
+
+                // Apply department filter
+                if (filterVal === "all") return true;
+                return filterVal === ev.type;
+            });
+
+            // Render filtered events
             filtered.forEach((ev) => {
-                // 🚫 DO NOT RENDER CANCELLED EVENTS
-                if (normalizeStatus(ev.status) === "cancelled") return;
+                const e = document.createElement("div");
+                e.classList.add("calendar_event", `calendar_${ev.type}`);
+                e.textContent = ev.title;
 
-                if (filterVal === "all" || filterVal === ev.type) {
-                    const e = document.createElement("div");
-                    e.classList.add("calendar_event", `calendar_${ev.type}`);
-                    e.textContent = ev.title;
+                const deptKey = ev.type.toLowerCase();
+                e.style.backgroundColor =
+                    departmentColors[deptKey] || departmentColors.default;
+                e.style.color = "#fff";
 
-                    const deptKey = ev.type.toLowerCase();
-                    e.style.backgroundColor =
-                        departmentColors[deptKey] || departmentColors.default;
-                    e.style.color = "#fff";
+                e.addEventListener("click", (event) => {
+                    event.stopPropagation();
+                    openEventDetail(ev);
+                });
 
-                    e.addEventListener("click", (event) => {
-                        event.stopPropagation();
-                        openEventDetail(ev);
-                    });
-
-                    dayEl.appendChild(e);
-                }
+                dayEl.appendChild(e);
             });
 
             dayEl.addEventListener("click", () => openDayModal(date));

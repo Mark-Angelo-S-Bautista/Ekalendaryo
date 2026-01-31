@@ -355,12 +355,12 @@ class UserManagementController extends Controller
 
     public function calendar()
     {
-        // Fetch only events that are NOT cancelled
+        $departments = Department::orderBy('department_name')->get();
+
         $events = Event::where('status', '!=', 'cancelled')
             ->get()
             ->map(function ($event) {
 
-                // --- SANITIZE target_year_levels ---
                 $targetYearLevels = $event->target_year_levels;
 
                 if (is_string($targetYearLevels)) {
@@ -379,13 +379,13 @@ class UserManagementController extends Controller
                     'status' => $event->computed_status,
                     'location' => $event->location,
                     'sy' => $event->school_year,
-                    'type' => strtolower(str_replace(['/', ' '], '_', $event->department ?? 'general')),
-                    'organizer' => $event->department ?? 'N/A',
+                    'type' => strtolower(str_replace(['/', ' '], '_', $event->department)),
+                    'organizer' => $event->department,
                     'targetYearLevels' => $targetYearLevels,
                 ];
             });
 
-        return view('UserManagement.calendar.calendar', ['events' => $events]);
+        return view('UserManagement.calendar.calendar', compact('events', 'departments'));
     }
 
     public function archive(Request $request)
