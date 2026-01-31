@@ -59,7 +59,7 @@
         {{-- SEARCH BAR FEATURE --}}
         <div class="users_searchbar">
             <form action="{{ route('UserManagement.users') }}" method="GET" style="display: flex; gap: 0.5rem;">
-                <input type="text" id="search" name="query" placeholder="Search users by username or email..."
+                <input type="text" id="search" name="query" placeholder="Search users by Fullname or email..."
                     value="{{ $query ?? '' }}">
                 <button type="submit" class="search_btn">Search</button>
 
@@ -184,7 +184,7 @@
                     @csrf
 
                     <div class="adduser_form-group">
-                        <label class="adduser_label">Username</label>
+                        <label class="adduser_label">Fullname</label>
                         <input type="text" id="name" name="name" class="adduser_input"
                             value="{{ old('name') }}">
                         <div class="error-text" id="error-name"></div>
