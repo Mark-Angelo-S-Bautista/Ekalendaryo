@@ -500,6 +500,57 @@ $userTitle = $user->title ?? null;
                                 });
                             });
                         </script>
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function() {
+                                const modalOverlay = document.getElementById('attendeesModalOverlay');
+                                const modalCloseBtn = document.getElementById('closeAttendeesModal');
+                                const tbody = document.getElementById('attendeesTableBody');
+
+                                // OPEN modal
+                                document.querySelectorAll('.btn-attendees').forEach(btn => {
+                                    btn.addEventListener('click', function() {
+                                        const eventId = this.dataset.eventId;
+                                        const dataEl = document.getElementById(`attendees-data-${eventId}`);
+                                        const attendees = JSON.parse(dataEl.textContent);
+
+                                        tbody.innerHTML = '';
+
+                                        if (attendees.length === 0) {
+                                            tbody.innerHTML = `
+                                            <tr>
+                                                <td colspan="4" style="text-align:center; padding:15px;">No attendees yet.</td>
+                                            </tr>
+                                        `;
+                                        } else {
+                                            attendees.forEach(user => {
+                                                tbody.innerHTML += `
+                                                <tr>
+                                                    <td>${user.name}</td>
+                                                    <td>${user.department}</td>
+                                                    <td>${user.yearlevel}</td>
+                                                    <td>${user.section}</td>
+                                                </tr>
+                                            `;
+                                            });
+                                        }
+
+                                        modalOverlay.style.display = 'flex';
+                                    });
+                                });
+
+                                // CLOSE modal button
+                                modalCloseBtn.addEventListener('click', () => {
+                                    modalOverlay.style.display = 'none';
+                                });
+
+                                // CLOSE modal when clicking outside
+                                modalOverlay.addEventListener('click', (e) => {
+                                    if (e.target === modalOverlay) {
+                                        modalOverlay.style.display = 'none';
+                                    }
+                                });
+                            });
+                        </script>
                     </div>
                 </div>
 
@@ -561,7 +612,9 @@ $userTitle = $user->title ?? null;
                             </div>
 
                             <div class="actions">
-                                <span>👥 {{ $event->attendees()->count() }} attending</span>
+                                <button class="btn-attendees" data-event-id="{{ $event->id }}">
+                                    👥 {{ $event->attendees->count() }} attending
+                                </button>
 
                                 <button class="btn-view-details" data-details="{{ $event->more_details }}">
                                     👁️ View Details
@@ -584,6 +637,35 @@ $userTitle = $user->title ?? null;
                                 @endif
                             </div>
                         </div>
+                        @php
+                            $attendeesData = $event->attendees->map(function ($user) {
+                                // Map department
+                                $department =
+                                    $user->department === 'OFFICES'
+                                        ? $user->office_name ?? 'Office'
+                                        : $user->department;
+
+                                // Map year_level safely
+                                $year_level =
+                                    isset($user->yearlevel) && $user->yearlevel !== ''
+                                        ? $user->yearlevel // will be like 1stYear, 2ndYear
+                                        : 'N/A';
+
+                                // Map section safely
+                                $section = isset($user->section) && $user->section !== '' ? $user->section : 'N/A';
+
+                                return [
+                                    'name' => $user->name,
+                                    'department' => $department,
+                                    'yearlevel' => $year_level,
+                                    'section' => $section,
+                                ];
+                            });
+                        @endphp
+
+                        <script type="application/json" id="attendees-data-{{ $event->id }}">
+                            {!! json_encode($attendeesData) !!}
+                        </script>
                     @endforeach
                 @else
                     <p style="color:#555; text-align:center;">No events found. Create one to get started!</p>
@@ -604,6 +686,28 @@ $userTitle = $user->title ?? null;
                         <div class="button-group"
                             style="flex-shrink: 0; display: flex; justify-content: flex-end; margin-top:10px;">
                             <button type="button" class="btn-cancel" id="closeViewDetailsBtn">Close</button>
+                        </div>
+                    </div>
+                </div>
+                <!-- ATTENDEES MODAL -->
+                <div id="attendeesModalOverlay" class="attendees-modal-overlay">
+                    <div class="attendees-modal">
+                        <div class="attendees-modal-header">
+                            <h2>Event Attendees</h2>
+                            <button id="closeAttendeesModal" class="close-btn">&times;</button>
+                        </div>
+                        <div class="attendees-modal-body">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Department</th>
+                                        <th>Year Level</th>
+                                        <th>Section</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="attendeesTableBody"></tbody>
+                            </table>
                         </div>
                     </div>
                 </div>

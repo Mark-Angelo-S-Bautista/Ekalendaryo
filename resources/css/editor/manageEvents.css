@@ -107,13 +107,6 @@
     margin-left: 4px;
 }
 
-.actions button.delete {
-    color: #d32f2f;
-}
-.actions button.edit {
-    color: #444;
-}
-
 a {
     text-decoration: none;
 }
@@ -144,8 +137,49 @@ a {
     box-sizing: border-box;
     overflow: auto;
 }
-.btn-view-details {
-    padding-right: 100px;
+.btn-view-details,
+.edit,
+.delete {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 16px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #ffffff !important; /* force white text */
+    background-color: rgb(28, 125, 57) !important; /* force green */
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition:
+        background-color 0.2s,
+        transform 0.1s,
+        box-shadow 0.2s;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.btn-view-details:hover,
+.edit:hover,
+.delete:hover {
+    background-color: rgb(20, 100, 46) !important;
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+}
+
+.btn-view-details:active,
+.edit:active,
+.delete:active {
+    background-color: rgb(15, 75, 35) !important;
+    transform: translateY(0);
+    box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
+}
+
+.btn-view-details,
+.edit,
+.delete:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(28, 125, 57, 0.3);
 }
 
 .modal h2 {
@@ -437,4 +471,158 @@ button {
 /* Show modal */
 .custom-modal-overlay.active {
     display: flex;
+}
+/* Modal for Attendees */
+/* Modal overlay */
+.attendees-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+/* Modal box */
+.attendees-modal {
+    background: #fff;
+    width: 90%;
+    max-width: 700px;
+    max-height: 80%;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    animation: fadeInScale 0.3s ease-out;
+}
+
+/* Header */
+.attendees-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.attendees-modal-header h2 {
+    font-size: 1.5rem;
+    color: #2b3a67;
+}
+
+/* Close button */
+.attendees-modal-header .close-btn {
+    font-size: 1.5rem;
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: #555;
+    transition: color 0.2s;
+}
+
+.attendees-modal-header .close-btn:hover {
+    color: #2b5eff;
+}
+
+/* Body */
+.attendees-modal-body {
+    padding: 15px 20px;
+    overflow-y: auto; /* scroll if content exceeds height */
+    flex-grow: 1;
+    max-height: calc(
+        8 * 50px + 40px
+    ); /* 8 rows * approx row height + table header padding */
+}
+
+.attendees-modal-body table tr {
+    height: 50px; /* adjust if needed */
+}
+
+/* Table scroll for overflow */
+.attendees-modal-body table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+
+.attendees-modal-body th,
+.attendees-modal-body td {
+    padding: 10px 8px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+}
+
+.attendees-modal-body th {
+    background-color: #f5f5f5;
+    color: #333;
+    font-weight: 600;
+}
+
+.btn-attendees {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 16px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: white !important; /* force white text */
+    background-color: rgb(28, 125, 57) !important; /* force green */
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition:
+        background-color 0.2s,
+        transform 0.1s,
+        box-shadow 0.2s;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.btn-attendees:hover {
+    background-color: rgb(20, 100, 46) !important;
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+}
+
+.btn-attendees:active {
+    background-color: rgb(15, 75, 35) !important;
+    transform: translateY(0);
+    box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
+}
+
+.btn-attendees:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(28, 125, 57, 0.3);
+}
+
+/* Animation */
+@keyframes fadeInScale {
+    0% {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Responsive */
+@media (max-width: 500px) {
+    .attendees-modal {
+        width: 100%;
+        padding: 10px;
+    }
+
+    .attendees-modal-header h2 {
+        font-size: 1.2rem;
+    }
+
+    .attendees-modal-body th,
+    .attendees-modal-body td {
+        font-size: 0.85rem;
+        padding: 8px 5px;
+    }
 }
