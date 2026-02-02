@@ -13,12 +13,27 @@
                 </p>
                 <p class="dashboard_school_year">Current School Year: {{ $currentSchoolYearName }}</p>
             </div>
-            <form action="{{ url('/usermanagement/dashboard') }}" method="POST">
+            <form id="changeSchoolYearForm" action="{{ url('/usermanagement/dashboard') }}" method="POST">
                 @csrf
                 <button type="submit" class="dashboard_change_year_btn">
                     Change School Year
                 </button>
             </form>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', () => {
+                    const changeYearForm = document.getElementById('changeSchoolYearForm');
+
+                    changeYearForm.addEventListener('submit', (e) => {
+                        const confirmed = confirm(
+                            '⚠️ Are you sure you want to change the school year? This action may affect event visibility.'
+                        );
+                        if (!confirmed) {
+                            e.preventDefault(); // Stop form submission if user clicks "Cancel"
+                        }
+                    });
+                });
+            </script>
         </section>
 
         <!-- Search Box -->
