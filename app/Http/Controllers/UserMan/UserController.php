@@ -197,6 +197,21 @@ class UserController extends Controller
         return redirect()->back()->with('success', 'Users imported successfully!');
     }
 
+    public function downloadTemplate()
+    {
+        // Path to your template file in storage/app/public/files or public/files
+        $filePath = public_path('files/user_import_template.csv');
+
+        if (!file_exists($filePath)) {
+            abort(404, 'Template file not found.');
+        }
+
+        // Force download as CSV with correct headers
+        return response()->download($filePath, 'user_import_template.csv', [
+            'Content-Type' => 'text/csv',
+        ]);
+    }
+
     public function search(Request $request)
     {
         $query = $request->get('query', '');

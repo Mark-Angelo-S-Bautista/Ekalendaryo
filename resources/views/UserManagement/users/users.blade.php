@@ -311,8 +311,9 @@
                     </div>
 
                     <div class="import_modal_body">
-                        <a href="{{ asset('files/user_import_template.csv') }}" download
-                            class="download_template_btn">⬇ Download Template</a>
+                        <a href="{{ route('UserManagement.downloadTemplate') }}" class="download_template_btn">
+                            ⬇ Download Template
+                        </a>
                         <p style="font-size: 13px; color:#333;">
                             Download the template first, then fill it with user data
                         </p>

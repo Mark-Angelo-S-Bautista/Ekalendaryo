@@ -90,6 +90,7 @@ Route::middleware(['auth', 'backhistory'])->group(function () {
         Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('delete');
         //Insert users using CSV file
         Route::post('/users', [UserController::class, 'import'])->name('import');
+        Route::get('/users/download-template', [UserController::class, 'downloadTemplate'])->name('downloadTemplate');
         //Change School Year
         Route::post('/dashboard', [UserManagementController::class, 'changeSchoolYear'])->name('changeSchoolYear');
 
