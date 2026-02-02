@@ -336,6 +336,7 @@
         </form>
         <script>
             document.addEventListener("DOMContentLoaded", () => {
+                // Modal elements
                 const importModal = document.getElementById("import_modal");
                 const openImportBtn = document.getElementById("openImportModal");
                 const closeImportBtn = document.getElementById("import_close");
@@ -344,91 +345,68 @@
                 const fileLabel = document.getElementById("file_label");
                 const errorContainer = document.getElementById("import_errors_container");
 
-                // --- Open modal manually ---
-                if (openImportBtn) {
-                    openImportBtn.addEventListener("click", () => {
-                        if (importModal) importModal.style.display = "flex";
-                    });
-                }
+                // Open import modal
+                openImportBtn?.addEventListener("click", () => {
+                    if (importModal) importModal.style.display = "flex";
+                });
 
-                // --- Close modal ---
+                // Close import modal
                 const closeModal = () => importModal.style.display = "none";
-
-                if (closeImportBtn) closeImportBtn.addEventListener("click", closeModal);
-                if (cancelImportBtn) cancelImportBtn.addEventListener("click", closeModal);
-
+                closeImportBtn?.addEventListener("click", closeModal);
+                cancelImportBtn?.addEventListener("click", closeModal);
                 window.addEventListener("click", (e) => {
                     if (e.target === importModal) closeModal();
                 });
 
-                // --- Show selected filename ---
-                if (fileLabel && csvInput) {
-                    fileLabel.addEventListener("click", () => csvInput.click());
-                    csvInput.addEventListener("change", () => {
-                        const fileName = csvInput.files.length ? csvInput.files[0].name : "No file chosen";
-                        fileLabel.textContent = `Choose File: ${fileName}`;
-                    });
-                }
+                // Update label text when file selected (DO NOT trigger click manually)
+                csvInput?.addEventListener("change", () => {
+                    const fileName = csvInput.files.length ? csvInput.files[0].name : "No file chosen";
+                    fileLabel.textContent = `Choose File: ${fileName}`;
+                });
 
-                // --- Automatically open modal if there are import errors ---
+                // Automatically open modal if import errors exist
                 const importErrors = @json(session('importErrors') ?? []);
                 if (importErrors.length && importModal) {
                     importModal.style.display = "flex";
-
                     if (errorContainer) {
                         let html = "<h4>Rows skipped due to errors:</h4><ul>";
-                        importErrors.forEach((error) => {
-                            html += `<li>Row ${error.row}: ${error.errors.join(", ")}</li>`;
+                        importErrors.forEach(err => {
+                            html += `<li>Row ${err.row}: ${err.errors.join(", ")}</li>`;
                         });
                         html += "</ul>";
                         errorContainer.innerHTML = html;
                     }
                 }
 
-                // --- Add User Modal logic (if it was defined in JS) ---
+                // Add User Modal logic
                 const titleSelect = document.getElementById('title');
                 const officeNameField = document.getElementById('office_name_field');
                 const departmentField = document.getElementById('department_field');
                 const roleSelect = document.getElementById('role');
 
-                // Function to set role based on title
-                const setRoleBasedOnTitle = (selectedTitle) => {
-                    if (selectedTitle === 'Student' || selectedTitle === 'Faculty') {
-                        roleSelect.value = 'Viewer';
-                    } else if (selectedTitle === 'Department Head' || selectedTitle === 'Offices') {
-                        roleSelect.value = 'Editor';
-                    } else {
-                        roleSelect.value = '';
-                    }
+                const setRoleBasedOnTitle = (title) => {
+                    if (title === 'Student' || title === 'Faculty') roleSelect.value = 'Viewer';
+                    else if (title === 'Department Head' || title === 'Offices') roleSelect.value = 'Editor';
+                    else roleSelect.value = '';
                 };
 
                 if (titleSelect) {
-                    // Initialize role on page load if title is already selected
-                    if (titleSelect.value) {
-                        setRoleBasedOnTitle(titleSelect.value);
-                    }
+                    if (titleSelect.value) setRoleBasedOnTitle(titleSelect.value);
 
                     titleSelect.addEventListener('change', function() {
                         const selectedTitle = this.value;
-
-                        // Show/hide fields based on title
-                        if (selectedTitle === 'Offices') {
-                            officeNameField.style.display = 'block';
-                            departmentField.style.display = 'none';
-                        } else if (selectedTitle === 'Student') {
-                            officeNameField.style.display = 'none';
-                            departmentField.style.display = 'block';
-                        } else {
-                            officeNameField.style.display = 'none';
-                            departmentField.style.display = 'none';
-                        }
-
-                        // Automatically set role based on title
+                        officeNameField.style.display = selectedTitle === 'Offices' ? 'block' : 'none';
+                        departmentField.style.display = selectedTitle === 'Student' ? 'block' : 'none';
+                        if (selectedTitle !== 'Student' && selectedTitle !== 'Offices') departmentField.style
+                            .display = 'none';
                         setRoleBasedOnTitle(selectedTitle);
                     });
                 }
             });
         </script>
+
+
+
 
         @if (session('success'))
             <div id="toast" class="toast show">

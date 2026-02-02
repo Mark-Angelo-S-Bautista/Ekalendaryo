@@ -9,7 +9,7 @@ const addUserDeptSelect = document.getElementById("department"); // Add User mod
 
 // Utility function to get the department name input field
 const addDeptNameInput = addDeptForm?.querySelector(
-    'input[name="department_name"]'
+    'input[name="department_name"]',
 );
 const addDeptNameError = document.getElementById("error-department_name");
 
@@ -96,10 +96,10 @@ addDeptForm?.addEventListener("submit", async function (e) {
                     <form action="/UserManagement/deletedepartment/${
                         data.department.id
                     }" method="POST" style="display:inline;" onsubmit="return confirm('Delete ${
-                    data.department.department_name
-                }?')">
+                        data.department.department_name
+                    }?')">
                         <input type="hidden" name="_token" value="${formData.get(
-                            "_token"
+                            "_token",
                         )}">
                         <input type="hidden" name="_method" value="DELETE">
                         
@@ -198,7 +198,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     const errors = data.errors || {};
                     for (const field in errors) {
                         const errorDiv = document.getElementById(
-                            "error-" + field
+                            "error-" + field,
                         );
                         if (errorDiv) {
                             errorDiv.textContent = errors[field][0]; // show first error per field
@@ -336,7 +336,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 body: formData,
                 headers: {
                     "X-CSRF-TOKEN": document.querySelector(
-                        'input[name="_token"]'
+                        'input[name="_token"]',
                     ).value,
                     Accept: "application/json",
                     "X-Requested-With": "XMLHttpRequest",
@@ -348,7 +348,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 const errors = data.errors;
                 for (const [field, messages] of Object.entries(errors)) {
                     const errorField = document.getElementById(
-                        `error-${field}`
+                        `error-${field}`,
                     );
                     if (errorField) {
                         errorField.textContent = messages[0];
@@ -384,7 +384,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const filterTable = (role) => {
         tableRows.forEach((row) => {
             const rowTitleCell = row.querySelector(
-                "td:first-child span:first-child"
+                "td:first-child span:first-child",
             );
             if (!rowTitleCell) return; // Skip if title span doesn't exist
 
@@ -472,20 +472,6 @@ window.addEventListener("click", (e) => {
         if (importModal) importModal.style.display = "none";
     }
 });
-
-// Show selected filename
-if (fileLabel && csvInput) {
-    // Open file dialog when clicking the label
-    fileLabel.addEventListener("click", () => csvInput.click());
-
-    // Update label with selected file name
-    csvInput.addEventListener("change", () => {
-        const fileName = csvInput.files.length
-            ? csvInput.files[0].name
-            : "No file chosen";
-        fileLabel.textContent = `Choose File: ${fileName}`;
-    });
-}
 
 // --- Toast Notification Animation ---
 document.addEventListener("DOMContentLoaded", () => {
