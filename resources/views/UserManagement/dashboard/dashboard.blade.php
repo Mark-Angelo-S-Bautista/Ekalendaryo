@@ -199,11 +199,16 @@
                 fetch(`/usermanagement/dashboard/search?query=${encodeURIComponent(query)}`)
                     .then(res => res.json())
                     .then(data => {
-                        // Only include events that are NOT cancelled or completed for the main dashboard
-                        currentFetchedEvents = data.events.filter(e => {
-                            const s = String(e.computed_status || e.status || '').toLowerCase();
-                            return !['completed', 'cancelled'].includes(s);
+
+                        currentFetchedEvents = data.events.filter(event => {
+                            const status = String(
+                                event.computed_status || event.status || ''
+                            ).toLowerCase();
+
+                            // ✅ explicitly allow only these
+                            return status.includes('upcoming') || status.includes('ongoing');
                         });
+
                         renderEvents(currentFetchedEvents);
                     })
                     .catch(err => console.error(err));

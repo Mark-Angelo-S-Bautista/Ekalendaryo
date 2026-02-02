@@ -215,12 +215,11 @@ class UserController extends Controller
     public function search(Request $request)
     {
         $query = $request->get('query', '');
-        $now = now();
-        $limitDate = $now->copy()->addDays(30);
+        $today = now()->toDateString(); // YYYY-MM-DD
+        $limitDate = now()->addDays(30)->toDateString();
 
-        // Eager load the user to get office_name
         $events = Event::with('user')
-            // Filter by search query first
+            ->whereNotIn('status', ['completed', 'cancelled'])
             ->when($query, function ($q) use ($query) {
                 $q->where(function ($inner) use ($query) {
                     $inner->where('title', 'like', "%{$query}%")
@@ -228,18 +227,31 @@ class UserController extends Controller
                         ->orWhere('description', 'like', "%{$query}%");
                 });
             })
-            ->whereNotIn('status', ['completed', 'cancelled']) // <-- exclude cancelled/completed
             ->get()
-            ->filter(function ($event) use ($now, $limitDate) {
-                $eventDateTime = \Carbon\Carbon::parse($event->date . ' ' . $event->start_time);
-                return $eventDateTime->between($now, $limitDate);
+            ->filter(function ($event) use ($today, $limitDate) {
+
+                $eventDate = $event->date; // already YYYY-MM-DD
+
+                // ✅ ONGOING (status-based)
+                if ($event->status === 'ongoing') {
+                    return true;
+                }
+
+                // ✅ UPCOMING (date-based, next 30 days including today)
+                if (
+                    $event->status === 'upcoming' &&
+                    $eventDate >= $today &&
+                    $eventDate <= $limitDate
+                ) {
+                    return true;
+                }
+
+                return false;
             })
-            ->sortBy(function ($event) {
-                return \Carbon\Carbon::parse($event->date . ' ' . $event->start_time);
-            })
+            ->sortBy('date')
             ->values();
 
-        // Attach office_name for JS
+        // Attach office_name for frontend
         $events->transform(function ($event) {
             $event->office_name = $event->user->office_name ?? null;
             return $event;

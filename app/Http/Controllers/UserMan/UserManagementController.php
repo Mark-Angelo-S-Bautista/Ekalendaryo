@@ -24,77 +24,83 @@ class UserManagementController extends Controller
         $user = Auth::user();
         $office_name = $user->office_name;
 
-        // Fetch the current school year
+        // Current school year
         $currentSchoolYear = SchoolYear::where('is_active', 1)->first();
-        $currentSchoolYearName = $currentSchoolYear ? $currentSchoolYear->school_year : 'N/A';
+        $currentSchoolYearName = $currentSchoolYear
+            ? $currentSchoolYear->school_year
+            : 'N/A';
 
         // Fetch all events
         $events = Event::all();
 
-        // Fetch departments
+        // Departments
         $departments = Department::pluck('department_name')->toArray();
 
         $now = now();
 
         /*
         |--------------------------------------------------------------------------
-        | FILTER UPCOMING EVENTS (future + within next 30 days)
+        | FILTER UPCOMING + ONGOING EVENTS (ACTIVE EVENTS)
         |--------------------------------------------------------------------------
         */
-        $upcomingEvents = $events
-            ->filter(function ($event) use ($now) {
+        $activeEvents = $events->filter(function ($event) use ($now) {
 
-                // --- EXCLUDE CANCELLED & COMPLETED EVENTS ---
-                if (in_array($event->computed_status, ['cancelled', 'completed'])) {
-                    return false;
-                }
+            // ❌ Exclude cancelled & completed
+            if (in_array($event->computed_status, ['cancelled', 'completed'])) {
+                return false;
+            }
 
-                // Combine date + start_time → proper datetime comparison
-                $eventDateTime = \Carbon\Carbon::parse($event->date . ' ' . $event->start_time);
+            $start = \Carbon\Carbon::parse($event->date . ' ' . $event->start_time);
+            $end   = \Carbon\Carbon::parse($event->date . ' ' . $event->end_time);
 
-                // Must NOT be in the past
-                if ($eventDateTime->lessThan($now)) {
-                    return false;
-                }
+            // ✅ ONGOING: started already but not ended
+            if ($start->lessThanOrEqualTo($now) && $end->greaterThanOrEqualTo($now)) {
+                return true;
+            }
 
-                // Must be within next 30 days
-                return $eventDateTime->between($now, $now->copy()->addDays(30));
-            })
-            ->sortBy(function ($event) {
-                return \Carbon\Carbon::parse($event->date . ' ' . $event->start_time);
-            });
+            // ✅ UPCOMING: within next 30 days
+            if ($start->greaterThan($now) && $start->lessThanOrEqualTo($now->copy()->addDays(30))) {
+                return true;
+            }
+
+            return false;
+        })
+        ->sortBy(function ($event) {
+            return \Carbon\Carbon::parse($event->date . ' ' . $event->start_time);
+        });
 
         /*
         |--------------------------------------------------------------------------
-        | COUNT ONLY UPCOMING EVENTS
+        | COUNTS
         |--------------------------------------------------------------------------
         */
 
-        // TOTAL upcoming events
-        $totalEvents = $upcomingEvents->count();
+        // Total active events
+        $totalEvents = $activeEvents->count();
 
-        // COUNT per department (only upcoming)
-        $departmentCounts = $upcomingEvents
+        // Count per department
+        $departmentCounts = $activeEvents
             ->groupBy('department')
-            ->map(fn($group) => $group->count());
+            ->map(fn ($group) => $group->count());
 
-        // Ensure every department appears even if count=0
+        // Ensure all departments appear
         $finalDeptCounts = collect($departments)->mapWithKeys(function ($dept) use ($departmentCounts) {
             return [$dept => $departmentCounts[$dept] ?? 0];
         });
 
-        // Show only FIRST 2 events in Upcoming Preview Cards
-        $upcomingEventsPreview = $upcomingEvents->take(2);
+        // Preview first 2 events
+        $eventsPreview = $activeEvents->take(2);
 
         return view('UserManagement.dashboard.dashboard', [
             'user' => $user,
             'totalEvents' => $totalEvents,
             'departmentCounts' => $finalDeptCounts,
-            'upcomingEvents' => $upcomingEventsPreview,
+            'upcomingEvents' => $eventsPreview, // still OK to keep this name
             'office_name' => $office_name,
-            'currentSchoolYearName' => $currentSchoolYearName
+            'currentSchoolYearName' => $currentSchoolYearName,
         ]);
     }
+
 
     public function adduser(Request $request)
     {
