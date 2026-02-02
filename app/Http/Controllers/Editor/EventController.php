@@ -282,7 +282,13 @@ class EventController extends Controller
         foreach ($recipients as $user) {
             if (!empty($user->email)) {
                 Mail::to($user->email)->send(
-                    new EventNotificationMail($eventToSend, $user, $isUpdate, $oldEvent, $isCancelled)
+                    new EventNotificationMail(
+                        $event->id,  // ← Pass ID
+                        $user->id,   // ← Pass ID
+                        $isUpdate,
+                        $oldEvent ? $oldEvent->toArray() : null,  // ← Pass as array
+                        $isCancelled
+                    )
                 );
             }
         }
@@ -387,7 +393,15 @@ class EventController extends Controller
         // =====================================================
         foreach ($users as $user) {
             if (!empty($user->email)) {
-                Mail::to($user->email)->send(new EventNotificationMail($event, $user, $isUpdate, $oldEvent, $isCancelled));
+                Mail::to($user->email)->send(
+                    new EventNotificationMail(
+                        $event->id,  // ← Pass ID
+                        $user->id,   // ← Pass ID
+                        $isUpdate,
+                        $oldEvent ? $oldEvent->toArray() : null,  // ← Pass as array
+                        $isCancelled
+                    )
+                );
             }
         }
     }
@@ -409,7 +423,7 @@ class EventController extends Controller
                 Mail::to($user->email)
                     ->later(
                         $threeDaysBefore,
-                        new EventReminderMail($event, $user, '3-days')
+                        new EventReminderMail($event->id, $user->id, '3-days')  // ← Pass IDs
                     );
             }
 
@@ -418,7 +432,7 @@ class EventController extends Controller
                 Mail::to($user->email)
                     ->later(
                         $oneDayBefore,
-                        new EventReminderMail($event, $user, '24-hours')
+                        new EventReminderMail($event->id, $user->id, '24-hours')  // ← Pass IDs
                     );
             }
         }
@@ -674,7 +688,11 @@ class EventController extends Controller
                 ]);
         }
 
+        // To this (capture the ID BEFORE updating):
+        $originalEventId = $event->id;
+        $oldEventDate = $event->date; // Store old date
         $oldEvent = $event->replicate();
+
 
         // No conflict, update the event
         $event->update([
@@ -693,21 +711,22 @@ class EventController extends Controller
         ]);
 
         // Cancel old reminder jobs
-        $this->cancelEventReminders($oldEvent);
+        $this->cancelEventReminders($event);
 
-        // Schedule new reminders if date changed and event is not cancelled
-        if ($event->date !== $oldEvent->date && $event->status !== 'cancelled') {
+        // ✅ FIX: Always reschedule reminders after ANY update (not just date changes)
+        if ($event->status !== 'cancelled') {
             $recipients = $this->getRecipientsForEvent($event);
             $this->scheduleEventReminders($event, $recipients);
         }
 
-        // Send update notification immediately
+        // Send update notification
         if ($event->department === 'OFFICES') {
             $this->sendEmailsForOfficesEvent($event, true, $oldEvent);
         } else {
             $this->sendEmailsForEvent($event, true, $oldEvent);
         }
 
+        // Activity log...
         ActivityLog::create([
             'user_id' => Auth::id(),
             'action_type' => 'edited',

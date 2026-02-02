@@ -8,32 +8,37 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 use App\Models\Event;
 use App\Models\User;
+use Illuminate\Support\Facades\Log;
 
 class EventReminderMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
-    public $event;
-    public $user;
+    public $eventId;
+    public $userId;
     public $reminderType;
-    public $eventId; // ✅ Store event ID separately
 
-    public function __construct(Event $event, User $user, string $reminderType)
+    public function __construct($eventId, $userId, string $reminderType)
     {
         $this->afterCommit();
-        $this->event = $event;
-        $this->user = $user;
+        
+        // Store only IDs
+        $this->eventId = is_object($eventId) ? $eventId->id : $eventId;
+        $this->userId = is_object($userId) ? $userId->id : $userId;
         $this->reminderType = $reminderType;
-        $this->eventId = $event->id; // ✅ Store the ID
     }
 
     public function build()
     {
-        // ✅ Fresh check from database before sending
+        // Fetch fresh data from database
         $event = Event::find($this->eventId);
+        $user = User::find($this->userId);
         
-        if (!$event || $event->status === 'cancelled') {
-            // Return null to prevent email from being sent
+        // Don't send if event is cancelled or doesn't exist
+        if (!$event || !$user || $event->status === 'cancelled') {
+            Log::info('EventReminderMail: Skipping - Event cancelled or not found', [
+                'eventId' => $this->eventId,
+            ]);
             return null;
         }
 
@@ -42,6 +47,12 @@ class EventReminderMail extends Mailable implements ShouldQueue
                 ? 'Upcoming Event in 3 Days'
                 : 'Event Reminder: Happening Tomorrow'
         )
-        ->view('Mails.event_notification');
+        ->view('Mails.event_notification')
+        ->with([
+            'event' => $event,
+            'user' => $user,
+            'student' => $user, // for backward compatibility
+            'reminderType' => $this->reminderType,
+        ]);
     }
 }
