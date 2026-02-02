@@ -14,6 +14,7 @@ use App\Mail\VerifyNewEmail;
 use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
 use App\Models\SchoolYear;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 
 class ViewerController extends Controller

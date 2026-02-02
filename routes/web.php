@@ -33,6 +33,8 @@ Route::post('/password/change', [PasswordResetController::class, 'changePassword
     ->name('password.change');
 
 Route::get('/profile/verify-email-change/{token}',[EditorController::class, 'verifyNewEmail'])->name('profile.verifyNewEmail');
+Route::get('/profile/verify-email-change/{token}',[UserManagementController::class, 'verifyNewEmail'])->name('profile.verifyNewEmail');
+Route::get('/profile/verify-email-change/{token}',[ViewerController::class, 'verifyNewEmail'])->name('profile.verifyNewEmail');
 
 
 Route::middleware(['auth', 'backhistory'])->group(function () {
@@ -54,7 +56,6 @@ Route::middleware(['auth', 'backhistory'])->group(function () {
         Route::post('/profile/update', [EditorController::class, 'updateProfile'])->name('editor.profile.update');
         Route::post('/profile/update-email', [EditorController::class, 'updateEmail'])->name('editor.profile.updateEmail');
         Route::post('/profile/update-password', [EditorController::class, 'updatePassword'])->name('editor.profile.updatePassword');
-        Route::post('/profile/update-email',[EditorController::class, 'updateEmail'])->name('profile.updateEmail');
         Route::post('/logout', [EditorController::class, 'destroy'])->name('logout');
 
         //Insert event into Database
@@ -110,10 +111,9 @@ Route::middleware(['auth', 'backhistory'])->group(function () {
         Route::get('/history', [ViewerController::class, 'history'])->name('history');
         Route::post('/events/feedback', [ViewerController::class, 'storeFeedback']);
         Route::get('/profile', [ViewerController::class, 'profile'])->name('profile');
-        Route::post('/profile/update', [ViewerController::class, 'updateProfile'])->name('profile.update');
-        Route::post('/profile/update-email', [ViewerController::class, 'updateEmail'])->name('profile.updateEmail');
+        Route::post('/profile/update', [ViewerController::class, 'updateProfile'])->name('update');
+        Route::post('/profile/update-email', [ViewerController::class, 'updateEmail'])->name('updateEmail');
         Route::post('/profile/update-password', [ViewerController::class, 'updatePassword'])->name('profile.updatePassword');
-        Route::post('/profile/update-email',[ViewerController::class, 'updateEmail'])->name('profile.updateEmail');
         Route::post('/logout', [ViewerController::class, 'destroy'])->name('logout');
     });
 
