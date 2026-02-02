@@ -42,6 +42,6 @@ class EventReminderMail extends Mailable implements ShouldQueue
                 ? 'Upcoming Event in 3 Days'
                 : 'Event Reminder: Happening Tomorrow'
         )
-        ->view('emails.event_reminder');
+        ->view('Mails.event_notification');
     }
 }

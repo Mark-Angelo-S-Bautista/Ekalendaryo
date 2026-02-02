@@ -15,22 +15,30 @@
             </div>
         </section>
 
-        {{-- <!-- Search -->
-        <section class="dashboard_search_card">
-            <div class="dashboard_search_box">
-                <input type="text" id="eventSearch" placeholder="Search events..." class="dashboard_search_input">
-                <button class="dashboard_clear_btn">Clear</button>
+        <!-- Card Count for Upcoming Ongoing Completed and Cancelled Events -->
+        <section class="dashboard_stats_grid">
+
+            <div class="dashboard_stat_card dashboard_stat_upcoming">
+                <h4>Upcoming</h4>
+                <span>{{ $upcomingCount }}</span>
             </div>
 
-        </section> --}}
-
-        <!-- Stats -->
-        {{-- <section class="dashboard_stats">
-            <div class="dashboard_stat_box dashboard_clickable" id="dashboard_department_box">
-                <h3>Total Events</h3>
-                <p>{{ $myEventsCount }}</p>
+            <div class="dashboard_stat_card dashboard_stat_ongoing">
+                <h4>Ongoing</h4>
+                <span>{{ $ongoingCount }}</span>
             </div>
-        </section> --}}
+
+            <div class="dashboard_stat_card dashboard_stat_completed">
+                <h4>Completed</h4>
+                <span>{{ $completedCount }}</span>
+            </div>
+
+            <div class="dashboard_stat_card dashboard_stat_cancelled">
+                <h4>Cancelled</h4>
+                <span>{{ $cancelledCount }}</span>
+            </div>
+
+        </section>
 
         <!-- Upcoming Events -->
         <section class="dashboard_upcoming_card">

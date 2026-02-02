@@ -32,6 +32,21 @@ class EditorController extends Controller
         $currentSchoolYear = SchoolYear::where('is_active', 1)->first(); // Assuming you have an 'is_current' column
         $currentSchoolYearName = $currentSchoolYear ? $currentSchoolYear->school_year : 'N/A';
 
+        $upcomingCount = Event::where('user_id', $user->id)
+            ->where('status', 'upcoming')
+            ->count();
+
+        $ongoingCount = Event::where('user_id', $user->id)
+            ->where('status', 'ongoing')
+            ->count();
+
+        $completedCount = Event::where('user_id', $user->id)
+            ->where('status', 'completed')
+            ->count();
+
+        $cancelledCount = Event::where('user_id', $user->id)
+            ->where('status', 'cancelled')
+            ->count();
 
         // Fetch all events within 30 days
         $events = Event::whereBetween('date', [$now->toDateString(), $limitDate->toDateString()])
@@ -81,7 +96,15 @@ class EditorController extends Controller
         $events = $upcomingEvents; // alias for Blade
         $myEventsCount = $upcomingEvents->count();
 
-        return view('Editor.dashboard', compact('user', 'events', 'myEventsCount', 'currentSchoolYearName'));
+        return view('Editor.dashboard', compact(
+            'user', 
+            'events', 
+            'myEventsCount', 
+            'currentSchoolYearName',
+            'upcomingCount',
+            'ongoingCount',
+            'completedCount',
+            'cancelledCount'));
     }
 
     public function calendar()
