@@ -264,6 +264,12 @@ class EventController extends Controller
         // Remove duplicates by email
         $recipients = $recipients->unique('email');
 
+        // ✅ NEW: Exclude users who are Graduated, Dropped, or Fired
+        $recipients = $recipients->filter(function ($user) {
+            $status = strtolower($user->status ?? '');
+            return !in_array($status, ['graduated', 'dropped', 'fired']);
+        });
+
         if (!$isUpdate && !$isCancelled) {
             $this->scheduleEventReminders($event, $recipients);
         }
@@ -365,6 +371,12 @@ class EventController extends Controller
 
         // Remove duplicate users by ID
         $users = $users->unique('id');
+
+        // ✅ NEW: Exclude users who are Graduated, Dropped, or Fired
+        $users = $users->filter(function ($user) {
+            $status = strtolower($user->status ?? '');
+            return !in_array($status, ['graduated', 'dropped', 'fired']);
+        });
 
         if (!$isUpdate && !$isCancelled) {
             $this->scheduleEventReminders($event, $users);
