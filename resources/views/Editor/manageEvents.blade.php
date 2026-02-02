@@ -551,6 +551,27 @@ $userTitle = $user->title ?? null;
                                 });
                             });
                         </script>
+                        <script>
+                            document.addEventListener('DOMContentLoaded', () => {
+                                // ------------------------------
+                                // 1. CREATE EVENT CONFIRMATION
+                                // ------------------------------
+                                const createEventForm = document.querySelector('.modal form'); // Create Event form
+                                const createBtn = document.querySelector('.btn-create');
+
+                                if (createEventForm && createBtn) {
+                                    createEventForm.addEventListener('submit', function(e) {
+                                        const confirmed = confirm(
+                                            "Are you sure you want to create this event?  Emails will be sent to the Users");
+                                        if (!confirmed) {
+                                            e.preventDefault();
+                                            return false;
+                                        }
+                                    });
+                                }
+                            });
+                        </script>
+
                     </div>
                 </div>
 

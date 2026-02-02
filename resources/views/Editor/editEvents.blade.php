@@ -435,6 +435,25 @@
             }
         });
     </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // ------------------------------
+            // EDIT EVENT CONFIRMATION
+            // ------------------------------
+            const editEventForm = document.querySelector(
+                'form[action^="{{ route('Editor.update', $event->id) }}"]');
+            if (editEventForm) {
+                editEventForm.addEventListener('submit', function(e) {
+                    const confirmed = confirm(
+                        "Are you sure you want to update this event? Emails will be sent to the Users");
+                    if (!confirmed) {
+                        e.preventDefault();
+                        return false;
+                    }
+                });
+            }
+        });
+    </script>
 
     <!-- MORE DETAILS MODAL -->
     <div id="moreDetailsModalOverlay"

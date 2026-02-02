@@ -2,7 +2,7 @@
 document.addEventListener("DOMContentLoaded", () => {
     const targetUsersSelect = document.getElementById("targetUsers");
     const yearLevelsContainer = document.getElementById(
-        "targetYearLevelsContainer"
+        "targetYearLevelsContainer",
     );
 
     function toggleYearLevels() {
@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     selectAllCheckbox.addEventListener("change", () => {
         yearCheckboxes.forEach(
-            (cb) => (cb.checked = selectAllCheckbox.checked)
+            (cb) => (cb.checked = selectAllCheckbox.checked),
         );
     });
 
@@ -157,13 +157,13 @@ editButtons.forEach((button) => {
 
         // Populate checkboxes
         const targetYears = JSON.parse(
-            button.dataset.target_year_levels || "[]"
+            button.dataset.target_year_levels || "[]",
         );
         ["1st Year", "2nd Year", "3rd Year", "4th Year"].forEach(
             (year, index) => {
                 document.getElementById(`edit_year${index + 1}`).checked =
                     targetYears.includes(year);
-            }
+            },
         );
 
         // Set form action dynamically
