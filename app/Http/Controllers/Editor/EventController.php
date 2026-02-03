@@ -597,10 +597,26 @@ class EventController extends Controller
         // ✅ Get all faculty
         $faculty = User::where('title', 'Faculty')->get();
 
-        // ✅ Get distinct sections (from users table)
-        $sections = User::whereNotNull('section')->distinct('section')->pluck('section');
+        // ✅ Sections (filtered for non-Offices; full map for Offices)
+        $user = Auth::user();
+        $userDepartment = $user->department_name ?? ($user->department ?? null);
 
-        return view('Editor.manageEvents', compact('events', 'departments', 'faculty', 'sections'));
+        $sectionsQuery = User::whereNotNull('section')->select('section', 'department')->distinct();
+
+        $sectionsByDepartment = $sectionsQuery->get()
+            ->groupBy('department')
+            ->map(fn ($items) => $items->pluck('section')->values());
+
+        if ($user->title === 'Offices') {
+            $sections = collect();
+        } else {
+            $sections = User::whereNotNull('section')
+                ->where('department', $userDepartment)
+                ->distinct('section')
+                ->pluck('section');
+        }
+
+        return view('Editor.manageEvents', compact('events', 'departments', 'faculty', 'sections', 'sectionsByDepartment', 'userDepartment'));
     }
 
     // =========================================================================
@@ -620,10 +636,26 @@ class EventController extends Controller
         // ✅ Get all faculty
         $faculty = User::where('title', 'Faculty')->get();
 
-        // ✅ Get distinct sections (from users table)
-        $sections = User::whereNotNull('section')->distinct('section')->pluck('section');
+        // ✅ Sections (filtered for non-Offices; full map for Offices)
+        $user = Auth::user();
+        $userDepartment = $user->department_name ?? ($user->department ?? null);
 
-        return view('Editor.editEvents', compact('event', 'departments', 'faculty', 'sections'));
+        $sectionsQuery = User::whereNotNull('section')->select('section', 'department')->distinct();
+
+        $sectionsByDepartment = $sectionsQuery->get()
+            ->groupBy('department')
+            ->map(fn ($items) => $items->pluck('section')->values());
+
+        if ($user->title === 'Offices') {
+            $sections = collect();
+        } else {
+            $sections = User::whereNotNull('section')
+                ->where('department', $userDepartment)
+                ->distinct('section')
+                ->pluck('section');
+        }
+
+        return view('Editor.editEvents', compact('event', 'departments', 'faculty', 'sections', 'sectionsByDepartment', 'userDepartment'));
     }
 
     // =========================================================================

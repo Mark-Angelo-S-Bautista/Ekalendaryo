@@ -221,7 +221,7 @@ $userTitle = $user->title ?? null;
                                         </div>
 
                                         <!-- Section checkboxes -->
-                                        <div class="checkbox-grid">
+                                        <div class="checkbox-grid" id="sectionsContainer">
                                             @foreach ($sections as $section)
                                                 <label class="checkbox-item">
                                                     <input type="checkbox" name="target_sections[]"
@@ -273,6 +273,10 @@ $userTitle = $user->title ?? null;
                                 style="color: red; margin-top: 10px; font-weight: 500; display: none;"></div>
                         </form>
                         <!-- JS for Faculty & Section toggling -->
+                        <script>
+                            window.sectionsByDepartment = @json($sectionsByDepartment ?? []);
+                            window.userTitle = @json(auth()->user()->title);
+                        </script>
                         <script>
                             document.addEventListener('DOMContentLoaded', () => {
                                 // ------------------------------
@@ -342,25 +346,102 @@ $userTitle = $user->title ?? null;
                                 });
 
                                 // ------------------------------
+                                // Section list filtering (Offices)
+                                // ------------------------------
+                                const sectionsByDepartment = window.sectionsByDepartment || {};
+                                const sectionsContainer = document.getElementById('sectionsContainer');
+                                const deptCheckboxes = document.querySelectorAll('.dept-checkbox');
+
+                                function getSelectedDepartments() {
+                                    return [...deptCheckboxes]
+                                        .filter(cb => cb.checked)
+                                        .map(cb => cb.value);
+                                }
+
+                                function collectSectionsForDepartments(departments) {
+                                    if (departments.includes('All')) {
+                                        return Object.values(sectionsByDepartment).flat();
+                                    }
+
+                                    const collected = departments.flatMap(dept => sectionsByDepartment[dept] || []);
+                                    return [...new Set(collected)];
+                                }
+
+                                function renderSections(sections) {
+                                    if (!sectionsContainer) return;
+
+                                    sectionsContainer.innerHTML = '';
+
+                                    if (!sections.length) {
+                                        const emptyLabel = document.createElement('div');
+                                        emptyLabel.style.color = '#6c757d';
+                                        emptyLabel.style.fontStyle = 'italic';
+                                        emptyLabel.textContent = 'Select a target department to load sections.';
+                                        sectionsContainer.appendChild(emptyLabel);
+                                        return;
+                                    }
+
+                                    sections.forEach(section => {
+                                        const label = document.createElement('label');
+                                        label.className = 'checkbox-item';
+
+                                        const input = document.createElement('input');
+                                        input.type = 'checkbox';
+                                        input.name = 'target_sections[]';
+                                        input.value = section;
+
+                                        const span = document.createElement('span');
+                                        span.textContent = section;
+
+                                        label.appendChild(input);
+                                        label.appendChild(span);
+                                        sectionsContainer.appendChild(label);
+                                    });
+                                }
+
+                                function updateSectionsForOffices() {
+                                    if (window.userTitle !== 'Offices') return;
+                                    const selectedDepartments = getSelectedDepartments();
+                                    const sections = collectSectionsForDepartments(selectedDepartments);
+                                    renderSections(sections);
+                                    wireSectionSelectAll();
+                                }
+
+                                // ------------------------------
                                 // Section Modal "Select All" Logic
                                 // ------------------------------
                                 const selectAllSections = document.getElementById('selectAllSections');
-                                const sectionCheckboxes = sectionModal.querySelectorAll('input[name="target_sections[]"]');
 
-                                selectAllSections.addEventListener('change', () => {
-                                    sectionCheckboxes.forEach(cb => cb.checked = selectAllSections.checked);
-                                });
+                                function wireSectionSelectAll() {
+                                    const sectionCheckboxes = sectionModal ?
+                                        sectionModal.querySelectorAll('input[name="target_sections[]"]') :
+                                        [];
 
-                                // Uncheck Select All if any individual section is unchecked
-                                sectionCheckboxes.forEach(cb => {
-                                    cb.addEventListener('change', () => {
-                                        if (![...sectionCheckboxes].every(cb => cb.checked)) {
-                                            selectAllSections.checked = false;
-                                        } else {
-                                            selectAllSections.checked = true;
-                                        }
+                                    if (selectAllSections) {
+                                        selectAllSections.checked = false;
+                                        selectAllSections.onchange = null;
+                                        selectAllSections.addEventListener('change', () => {
+                                            sectionCheckboxes.forEach(cb => cb.checked = selectAllSections.checked);
+                                        });
+                                    }
+
+                                    sectionCheckboxes.forEach(cb => {
+                                        cb.addEventListener('change', () => {
+                                            if (![...sectionCheckboxes].every(cb => cb.checked)) {
+                                                if (selectAllSections) selectAllSections.checked = false;
+                                            } else {
+                                                if (selectAllSections) selectAllSections.checked = true;
+                                            }
+                                        });
                                     });
+                                }
+
+                                deptCheckboxes.forEach(cb => {
+                                    cb.addEventListener('change', updateSectionsForOffices);
                                 });
+
+                                updateSectionsForOffices();
+                                wireSectionSelectAll();
                             });
                         </script>
                         <script>
