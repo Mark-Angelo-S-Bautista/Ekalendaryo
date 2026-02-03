@@ -165,6 +165,8 @@ class EventController extends Controller
                 'end_time' => $event->end_time,
                 'location' => $event->location,
                 'event_description' => $event->description,
+                'target_sections' => $this->resolveTargetSections($event),
+                'target_faculty' => $this->resolveTargetFacultyNames($event),
             ],
         ]);
 
@@ -576,6 +578,28 @@ class EventController extends Controller
         return $recipients;
     }
 
+    private function resolveTargetSections(Event $event): array
+    {
+        $sections = $event->target_sections ?? [];
+        if (is_string($sections)) {
+            $sections = json_decode($sections, true) ?? [];
+        }
+        return is_array($sections) ? $sections : [];
+    }
+
+    private function resolveTargetFacultyNames(Event $event): array
+    {
+        $facultyIds = $event->target_faculty ?? [];
+        if (is_string($facultyIds)) {
+            $facultyIds = json_decode($facultyIds, true) ?? [];
+        }
+        if (!is_array($facultyIds) || empty($facultyIds)) {
+            return [];
+        }
+
+        return User::whereIn('id', $facultyIds)->pluck('name')->toArray();
+    }
+
 
     // =========================================================================
     // MODIFIED: STRICT User-ID filtering applied.
@@ -813,6 +837,14 @@ class EventController extends Controller
                     'old' => $oldEvent->description,
                     'new' => $event->description,
                 ],
+                'target_sections' => [
+                    'old' => $this->resolveTargetSections($oldEvent),
+                    'new' => $this->resolveTargetSections($event),
+                ],
+                'target_faculty' => [
+                    'old' => $this->resolveTargetFacultyNames($oldEvent),
+                    'new' => $this->resolveTargetFacultyNames($event),
+                ],
             ],
         ]);
 
@@ -864,6 +896,8 @@ class EventController extends Controller
                 'end_time' => $event->end_time,
                 'location' => $event->location,
                 'event_description' => $event->description,
+                'target_sections' => $this->resolveTargetSections($event),
+                'target_faculty' => $this->resolveTargetFacultyNames($event),
             ],
         ]);
 

@@ -57,6 +57,33 @@
                                 $start_time = $log->description['start_time'] ?? null;
                                 $end_time = $log->description['end_time'] ?? null;
                                 $location = $log->description['location'] ?? null;
+                                $sections = $log->description['target_sections'] ?? null;
+                                $faculty = $log->description['target_faculty'] ?? null;
+
+                                if (empty($sections) || empty($faculty)) {
+                                    $logEvent = \App\Models\Event::find($log->model_id);
+                                    if ($logEvent) {
+                                        if (empty($sections)) {
+                                            $sections = $logEvent->target_sections ?? [];
+                                        }
+                                        if (empty($faculty)) {
+                                            $facultyIds = $logEvent->target_faculty ?? [];
+                                            if (is_string($facultyIds)) {
+                                                $facultyIds = json_decode($facultyIds, true) ?? [];
+                                            }
+                                            $faculty = !empty($facultyIds)
+                                                ? \App\Models\User::whereIn('id', $facultyIds)->pluck('name')->toArray()
+                                                : [];
+                                        }
+                                    }
+                                }
+
+                                $formatList = function ($value) {
+                                    if (is_array($value)) {
+                                        return implode(', ', $value);
+                                    }
+                                    return $value ?? 'N/A';
+                                };
                             @endphp
 
                             <p>📅 Event Date:</p>
@@ -101,6 +128,34 @@
                                     {{ is_array($location) ? $location['new'] ?? 'N/A' : $location ?? 'N/A' }}
                                 @endif
                             </p>
+
+                            @if (!empty($sections))
+                                <p>🏫 Sections:</p>
+                                <p>
+                                    @if (is_array($sections) && isset($sections['old'], $sections['new']) && $sections['old'] !== $sections['new'])
+                                        <del>{{ $formatList($sections['old']) }}</del> →
+                                        {{ $formatList($sections['new']) }}
+                                    @else
+                                        {{ is_array($sections) && array_key_exists('new', $sections)
+                                            ? $formatList($sections['new'])
+                                            : $formatList($sections) }}
+                                    @endif
+                                </p>
+                            @endif
+
+                            @if (!empty($faculty))
+                                <p>👩‍🏫 Faculty:</p>
+                                <p>
+                                    @if (is_array($faculty) && isset($faculty['old'], $faculty['new']) && $faculty['old'] !== $faculty['new'])
+                                        <del>{{ $formatList($faculty['old']) }}</del> →
+                                        {{ $formatList($faculty['new']) }}
+                                    @else
+                                        {{ is_array($faculty) && array_key_exists('new', $faculty)
+                                            ? $formatList($faculty['new'])
+                                            : $formatList($faculty) }}
+                                    @endif
+                                </p>
+                            @endif
                         @endif
                     </div>
 
