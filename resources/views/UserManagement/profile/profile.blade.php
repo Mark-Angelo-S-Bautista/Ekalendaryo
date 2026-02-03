@@ -43,7 +43,7 @@
 
                 <div class="employment">
                     <p style="font-weight:600; margin-bottom:8px;">
-                        Employment Information
+                        User Information
                     </p>
 
                     <div class="employment-row">
@@ -63,7 +63,7 @@
                         <div>
                             <span style="font-weight:300;">Department:</span>
                             <span style="margin-left:100px;">
-                                @if ($user->department === 'OFFICES')
+                                @if ($user->department === 'Offices')
                                     {{ $user->office_name ?? 'Not specified' }}
                                 @else
                                     {{ $user->department ?? 'Not specified' }}

@@ -43,7 +43,7 @@
 
                 <div class="employment">
                     <p style="font-weight:600; margin-bottom:8px;">
-                        Employment Information
+                        User Information
                     </p>
 
                     <div class="employment-row">
@@ -71,6 +71,24 @@
                             </span>
                         </div>
                     </div>
+                    @if ($user->title === 'Student')
+                        <div class="employment-row">
+                            <div>
+                                <span style="font-weight:300;">Year Level:</span>
+                                <span style="margin-left:90px;">
+                                    {{ $user->yearlevel ?? 'Not specified' }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="employment-row">
+                            <div>
+                                <span style="font-weight:300;">Section:</span>
+                                <span style="margin-left:110px;">
+                                    {{ $user->section ?? 'Not specified' }}
+                                </span>
+                            </div>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

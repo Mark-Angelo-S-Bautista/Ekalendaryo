@@ -43,7 +43,7 @@
 
                 <div class="employment">
                     <p style="font-weight:600; margin-bottom:8px;">
-                        Employment Information
+                        User Information
                     </p>
 
                     <div class="employment-row">
