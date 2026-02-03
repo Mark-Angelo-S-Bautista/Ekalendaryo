@@ -162,6 +162,20 @@
                         yearLevelsText = event.target_users;
                     }
 
+                    let sectionsText = '';
+                    if (Array.isArray(event.target_sections) && event.target_sections.length > 0) {
+                        sectionsText = event.target_sections.join(', ');
+                    } else if (typeof event.target_sections === 'string') {
+                        try {
+                            const parsed = JSON.parse(event.target_sections);
+                            if (Array.isArray(parsed) && parsed.length > 0) {
+                                sectionsText = parsed.join(', ');
+                            }
+                        } catch (e) {
+                            sectionsText = event.target_sections;
+                        }
+                    }
+
                     // Determine dynamic status tag
                     const rawStatus = event.computed_status || event.status || 'upcoming';
                     const normalizedStatus = String(rawStatus).toLowerCase();
@@ -178,6 +192,7 @@
                                 📅 ${date} &nbsp;&nbsp; 🕓 ${startTime} - ${endTime} &nbsp;&nbsp; 📍 ${event.location || 'N/A'}
                             </div>
                             <div class="dashboard_event_details">👥 ${yearLevelsText}</div>
+                            ${sectionsText ? `<div class="dashboard_event_details">🏫 ${sectionsText}</div>` : ''}
                             <div class="dashboard_event_details">${event.description || 'No description provided.'}</div>
                             <div class="dashboard_event_details">${event.school_year || 'N/A'}</div>
                             <div class="dashboard_event_tags">
