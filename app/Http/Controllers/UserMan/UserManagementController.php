@@ -469,33 +469,66 @@ class UserManagementController extends Controller
             ]);
 
             // --------------------------------------------------
-            // 5. GRADUATE 4TH YEAR STUDENTS
+            // 5 & 6. GRADUATE/PROMOTE STUDENTS BASED ON DEPARTMENT MAX YEAR LEVEL
             // --------------------------------------------------
-            User::where('title', 'Student')
-                ->where('yearlevel', '4thYear')
+            // Get all active students
+            $students = User::where('title', 'Student')
                 ->where('status', 'active')
-                ->update([
-                    'status' => 'graduated',
-                    'school_year_id' => $currentSY->id
-                ]);
+                ->get();
 
-            // --------------------------------------------------
-            // 6. PROMOTE 1ST–3RD YEAR STUDENTS
-            // --------------------------------------------------
-            User::where('title', 'Student')
-                ->where('status', 'active')
-                ->whereIn('yearlevel', ['1stYear', '2ndYear', '3rdYear'])
-                ->update([
-                    'yearlevel' => DB::raw("
-                        CASE 
-                            WHEN yearlevel = '1stYear' THEN '2ndYear'
-                            WHEN yearlevel = '2ndYear' THEN '3rdYear'
-                            WHEN yearlevel = '3rdYear' THEN '4thYear'
-                            ELSE yearlevel
-                        END
-                    "),
-                    'school_year_id' => $newSY->id
-                ]);
+            // Map year levels to numeric values
+            $yearLevelMap = [
+                '1stYear' => 1,
+                '2ndYear' => 2,
+                '3rdYear' => 3,
+                '4thYear' => 4,
+                '5thYear' => 5,
+            ];
+
+            // Reverse map for promotion
+            $promotionMap = [
+                '1stYear' => '2ndYear',
+                '2ndYear' => '3rdYear',
+                '3rdYear' => '4thYear',
+                '4thYear' => '5thYear',
+            ];
+
+            foreach ($students as $student) {
+                // Get student's department's max year level
+                $department = Department::where('department_name', $student->department)->first();
+                
+                if (!$department) {
+                    continue; // Skip if department not found
+                }
+
+                $studentYearLevel = $yearLevelMap[$student->yearlevel] ?? 0;
+                
+                if ($studentYearLevel >= $department->max_year_levels) {
+                    // Student is already at or beyond max year level, graduate them
+                    $student->update([
+                        'status' => 'graduated',
+                        'school_year_id' => $currentSY->id
+                    ]);
+                } else {
+                    // Student is below max, check if promotion would exceed max
+                    $nextYear = $promotionMap[$student->yearlevel] ?? $student->yearlevel;
+                    $nextYearLevel = $yearLevelMap[$nextYear] ?? 0;
+                    
+                    if ($nextYearLevel > $department->max_year_levels) {
+                        // Promoting would exceed max year level, so graduate instead
+                        $student->update([
+                            'status' => 'graduated',
+                            'school_year_id' => $currentSY->id
+                        ]);
+                    } else {
+                        // Safe to promote, yearlevel stays within max
+                        $student->update([
+                            'yearlevel' => $nextYear,
+                            'school_year_id' => $newSY->id
+                        ]);
+                    }
+                }
+            }
         });
 
         return redirect()->back()->with('success', 'School year changed successfully!');
