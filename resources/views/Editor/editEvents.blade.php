@@ -208,7 +208,12 @@
                     }
                 @endphp
 
-                <div class="form-group" id="targetYearLevelsContainer" style="display:none;">
+                @php
+                    $showYearLevels = $event->target_users === 'Students' || !empty($levels);
+                @endphp
+                <div class="form-group" id="targetYearLevelsContainer"
+                    data-force-show="{{ $showYearLevels ? '1' : '0' }}"
+                    style="display: {{ $showYearLevels ? 'block' : 'none' }};">
                     <label>Target Year Levels</label>
                     <p class="note">Select which year levels of students will receive notifications</p>
 
@@ -219,16 +224,23 @@
                         </div>
                     </div>
 
-                    <div class="checkbox-group">
-                        @foreach (['1st Year', '2nd Year', '3rd Year', '4th Year'] as $year)
-                            <div class="checkbox-inline">
-                                <input type="checkbox" name="target_year_levels[]" value="{{ $year }}"
-                                    class="syear" {{ in_array($year, $levels) ? 'checked disabled' : '' }}>
-                                {{ $year }}
-                                @if (in_array($year, $levels))
-                                    <input type="hidden" name="target_year_levels[]" value="{{ $year }}">
-                                @endif
-                            </div>
+                    <div class="checkbox-group" id="yearLevelsContainerEdit">
+                        @php
+                            $yearOptions = ['1st Year', '2nd Year', '3rd Year', '4th Year', '5th Year'];
+                            $yearNumbers = [1, 2, 3, 4, 5];
+                        @endphp
+                        @foreach ($yearOptions as $index => $year)
+                            @if ($yearNumbers[$index] <= $userMaxYearLevels)
+                                <div class="checkbox-inline">
+                                    <input type="checkbox" name="target_year_levels[]" value="{{ $year }}"
+                                        class="syear" {{ in_array($year, $levels) ? 'checked disabled' : '' }}>
+                                    {{ $year }}
+                                    @if (in_array($year, $levels))
+                                        <input type="hidden" name="target_year_levels[]"
+                                            value="{{ $year }}">
+                                    @endif
+                                </div>
+                            @endif
                         @endforeach
                     </div>
                 </div>
@@ -342,6 +354,8 @@
         window.sectionsByDepartment = @json($sectionsByDepartment ?? []);
         window.userTitle = @json(auth()->user()->title);
         window.initialSelectedSections = @json($selectedSections ?? []);
+        window.departmentMaxYearLevels = @json($departmentMaxYearLevels ?? []);
+        window.userMaxYearLevels = @json($userMaxYearLevels ?? 4);
     </script>
     <script>
         function toggleOtherLocation() {
@@ -364,9 +378,122 @@
             const openFacultyBtn = document.getElementById("openFacultyModalBtn");
             const sectionModalOverlay = document.getElementById("sectionModalOverlay");
             const facultyModalOverlay = document.getElementById("facultyModalOverlay");
+            const deptCheckboxes = document.querySelectorAll('.dept-checkbox');
+            const yearLevelsContainerEdit = document.getElementById('yearLevelsContainerEdit');
+
+            // ==============================
+            // Dynamic Year Levels for Offices (Edit)
+            // ==============================
+            function toNumberYearLevel(value) {
+                if (typeof value === 'number') return value;
+                if (!value) return 0;
+                const match = String(value).match(/\d+/);
+                return match ? parseInt(match[0], 10) : 0;
+            }
+
+            function updateYearLevelsEdit() {
+                if (window.userTitle !== 'Offices') return;
+
+                const selectedDepts = [...deptCheckboxes]
+                    .filter(cb => cb.checked)
+                    .map(cb => cb.value);
+
+                if (selectedDepts.length === 0) {
+                    renderYearLevelsEdit(toNumberYearLevel(window.userMaxYearLevels) || 4);
+                    return;
+                }
+
+                let maxYearLevel = 0;
+                selectedDepts.forEach(dept => {
+                    const deptMaxRaw = window.departmentMaxYearLevels[dept];
+                    const deptMax = toNumberYearLevel(deptMaxRaw) || 4;
+                    maxYearLevel = Math.max(maxYearLevel, deptMax);
+                });
+
+                renderYearLevelsEdit(maxYearLevel);
+            }
+
+            function renderYearLevelsEdit(maxYear) {
+                const yearOptions = ['1st Year', '2nd Year', '3rd Year', '4th Year', '5th Year'];
+                const yearNumbers = [1, 2, 3, 4, 5];
+
+                yearLevelsContainerEdit.innerHTML = '';
+
+                yearNumbers.forEach((num, index) => {
+                    if (num <= maxYear) {
+                        const div = document.createElement('div');
+                        div.className = 'checkbox-inline';
+
+                        const input = document.createElement('input');
+                        input.type = 'checkbox';
+                        input.name = 'target_year_levels[]';
+                        input.value = yearOptions[index];
+                        input.className = 'syear';
+
+                        const label = document.createElement('label');
+                        label.textContent = yearOptions[index];
+                        label.style.display = 'inline';
+                        label.style.marginLeft = '5px';
+
+                        div.appendChild(input);
+                        div.appendChild(label);
+                        yearLevelsContainerEdit.appendChild(div);
+                    }
+                });
+
+                wireSelectAllEdit();
+            }
+
+            // ==============================
+            // Select All Year Levels Logic (Edit)
+            // ==============================
+            const selectAllEdit = document.getElementById("select_all_edit");
+
+            function wireSelectAllEdit() {
+                const yearChecks = document.querySelectorAll(".syear");
+
+                if (selectAllEdit) {
+                    selectAllEdit.checked = false;
+                    selectAllEdit.onchange = null;
+                    selectAllEdit.addEventListener("change", function() {
+                        yearChecks.forEach(cb => {
+                            if (!cb.disabled) cb.checked = this.checked;
+                        });
+                    });
+                }
+
+                yearChecks.forEach(cb => {
+                    cb.addEventListener('change', () => {
+                        const enabled = [...yearChecks].filter(cb => !cb.disabled);
+                        if (!enabled.length) {
+                            if (selectAllEdit) selectAllEdit.checked = false;
+                            return;
+                        }
+
+                        if (!enabled.every(cb => cb.checked)) {
+                            if (selectAllEdit) selectAllEdit.checked = false;
+                        } else {
+                            if (selectAllEdit) selectAllEdit.checked = true;
+                        }
+                    });
+                });
+            }
+
+            deptCheckboxes.forEach(cb => {
+                cb.addEventListener('change', updateYearLevelsEdit);
+            });
+
+            // Initial setup for year levels
+            if (window.userTitle === 'Offices') {
+                updateYearLevelsEdit();
+            } else {
+                wireSelectAllEdit();
+            }
 
             function toggleButtons() {
+                const forceShow = yearLevels && yearLevels.dataset.forceShow === '1';
                 const isStudents = targetUsers && targetUsers.value === 'Students';
+                const shouldShow = isStudents || forceShow;
                 if (isStudents) {
                     if (yearLevels) yearLevels.style.display = 'block';
                     if (openSectionBtn) openSectionBtn.style.display = 'inline-block';
@@ -374,11 +501,11 @@
                     if (sectionModalOverlay) sectionModalOverlay.style.display = 'flex';
                     if (facultyModalOverlay) facultyModalOverlay.style.display = 'flex';
                 } else {
-                    if (yearLevels) yearLevels.style.display = 'none';
-                    if (openSectionBtn) openSectionBtn.style.display = 'none';
-                    if (openFacultyBtn) openFacultyBtn.style.display = 'none';
-                    if (sectionModalOverlay) sectionModalOverlay.style.display = 'none';
-                    if (facultyModalOverlay) facultyModalOverlay.style.display = 'none';
+                    if (yearLevels) yearLevels.style.display = shouldShow ? 'block' : 'none';
+                    if (openSectionBtn) openSectionBtn.style.display = shouldShow ? 'inline-block' : 'none';
+                    if (openFacultyBtn) openFacultyBtn.style.display = shouldShow ? 'inline-block' : 'none';
+                    if (sectionModalOverlay) sectionModalOverlay.style.display = shouldShow ? 'flex' : 'none';
+                    if (facultyModalOverlay) facultyModalOverlay.style.display = shouldShow ? 'flex' : 'none';
                 }
             }
 
@@ -388,29 +515,11 @@
                     if (yearLevels) yearLevels.style.display = isStudents ? "block" : "none";
                     toggleButtons();
                 });
-                toggleButtons(); // initial check on page load
-            } else {
-                // If targetUsers doesn't exist, hide the buttons and modals by default
-                if (openSectionBtn) openSectionBtn.style.display = 'none';
-                if (openFacultyBtn) openFacultyBtn.style.display = 'none';
-                if (sectionModalOverlay) sectionModalOverlay.style.display = 'none';
-                if (facultyModalOverlay) facultyModalOverlay.style.display = 'none';
             }
 
-            // Select all year levels
-            const selectAll = document.getElementById("select_all_edit");
-            const yearChecks = document.querySelectorAll(".syear");
+            // Always call toggleButtons on initial load for all users
+            toggleButtons();
 
-            if (selectAll) {
-                selectAll.addEventListener("change", function() {
-                    yearChecks.forEach(cb => {
-                        if (!cb.disabled) cb.checked = this.checked;
-                    });
-                });
-            }
-
-            // ==============================
-            // Faculty Modal Logic
             // ==============================
             const facultyModal = document.getElementById('facultyModalOverlay');
             const closeFacultyBtn = document.getElementById('closeFacultyModalBtn');

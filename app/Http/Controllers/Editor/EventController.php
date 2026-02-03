@@ -616,7 +616,19 @@ class EventController extends Controller
                 ->pluck('section');
         }
 
-        return view('Editor.manageEvents', compact('events', 'departments', 'faculty', 'sections', 'sectionsByDepartment', 'userDepartment'));
+        // ✅ Get max_year_levels for user's department
+        $userMaxYearLevels = 4; // Default
+        if ($userDepartment && $userDepartment !== 'OFFICES') {
+            $deptData = Department::where('department_name', $userDepartment)->first();
+            if ($deptData) {
+                $userMaxYearLevels = $deptData->max_year_levels ?? 4;
+            }
+        }
+
+        // ✅ Get max_year_levels for all departments (for Offices users)
+        $departmentMaxYearLevels = $departments->pluck('max_year_levels', 'department_name')->toArray();
+
+        return view('Editor.manageEvents', compact('events', 'departments', 'faculty', 'sections', 'sectionsByDepartment', 'userDepartment', 'userMaxYearLevels', 'departmentMaxYearLevels'));
     }
 
     // =========================================================================
@@ -655,7 +667,19 @@ class EventController extends Controller
                 ->pluck('section');
         }
 
-        return view('Editor.editEvents', compact('event', 'departments', 'faculty', 'sections', 'sectionsByDepartment', 'userDepartment'));
+        // ✅ Get max_year_levels for user's department
+        $userMaxYearLevels = 4; // Default
+        if ($userDepartment && $userDepartment !== 'OFFICES') {
+            $deptData = Department::where('department_name', $userDepartment)->first();
+            if ($deptData) {
+                $userMaxYearLevels = $deptData->max_year_levels ?? 4;
+            }
+        }
+
+        // ✅ Get max_year_levels for all departments (for Offices users)
+        $departmentMaxYearLevels = $departments->pluck('max_year_levels', 'department_name')->toArray();
+
+        return view('Editor.editEvents', compact('event', 'departments', 'faculty', 'sections', 'sectionsByDepartment', 'userDepartment', 'userMaxYearLevels', 'departmentMaxYearLevels'));
     }
 
     // =========================================================================
