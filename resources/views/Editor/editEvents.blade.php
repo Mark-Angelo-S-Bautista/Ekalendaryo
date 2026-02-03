@@ -145,8 +145,12 @@
                                     <label class="checkbox-item">
                                         <input type="checkbox" class="dept-checkbox" name="target_department[]"
                                             value="{{ $dept->department_name }}"
-                                            {{ in_array($dept->department_name, $selectedDepartments) ? 'checked' : '' }}>
+                                            {{ in_array($dept->department_name, $selectedDepartments) ? 'checked disabled' : '' }}>
                                         <span>{{ $dept->department_name }}</span>
+                                        @if (in_array($dept->department_name, $selectedDepartments))
+                                            <input type="hidden" name="target_department[]"
+                                                value="{{ $dept->department_name }}">
+                                        @endif
                                     </label>
                                 @endif
                             @endforeach
@@ -157,7 +161,8 @@
                 {{-- Target Users --}}
                 <div class="form-group">
                     <label for="targetUsers">Target Users</label>
-                    <select id="targetUsers" name="target_users" class="form-control">
+                    <select id="targetUsers" name="target_users" class="form-control"
+                        {{ $event->target_users ? 'disabled' : '' }}>
                         <option value="">-- Select Users --</option>
                         <option value="Faculty" {{ $event->target_users === 'Faculty' ? 'selected' : '' }}>Faculty
                         </option>
@@ -172,18 +177,25 @@
                         <option value="Students" {{ $event->target_users === 'Students' ? 'selected' : '' }}>Students
                         </option>
                     </select>
+                    @if ($event->target_users)
+                        <input type="hidden" name="target_users" value="{{ $event->target_users }}">
+                    @endif
                 </div>
             @else
                 {{-- For non-Offices/non-Department Head users, show Target Users only --}}
                 <div class="form-group">
                     <label for="targetUsers">Target Users</label>
-                    <select id="targetUsers" name="target_users" class="form-control">
+                    <select id="targetUsers" name="target_users" class="form-control"
+                        {{ $event->target_users ? 'disabled' : '' }}>
                         <option value="">-- Select Users --</option>
                         <option value="Faculty" {{ $event->target_users === 'Faculty' ? 'selected' : '' }}>Faculty
                         </option>
                         <option value="Students" {{ $event->target_users === 'Students' ? 'selected' : '' }}>Students
                         </option>
                     </select>
+                    @if ($event->target_users)
+                        <input type="hidden" name="target_users" value="{{ $event->target_users }}">
+                    @endif
                 </div>
             @endif
 
@@ -211,8 +223,11 @@
                         @foreach (['1st Year', '2nd Year', '3rd Year', '4th Year'] as $year)
                             <div class="checkbox-inline">
                                 <input type="checkbox" name="target_year_levels[]" value="{{ $year }}"
-                                    class="syear" {{ in_array($year, $levels) ? 'checked' : '' }}>
+                                    class="syear" {{ in_array($year, $levels) ? 'checked disabled' : '' }}>
                                 {{ $year }}
+                                @if (in_array($year, $levels))
+                                    <input type="hidden" name="target_year_levels[]" value="{{ $year }}">
+                                @endif
                             </div>
                         @endforeach
                     </div>
@@ -226,6 +241,12 @@
                     $selectedSections = json_decode($selectedSections, true) ?? [];
                 }
             @endphp
+
+            <div id="lockedSectionInputs" style="display:none;">
+                @foreach ($selectedSections as $section)
+                    <input type="hidden" name="target_sections[]" value="{{ $section }}">
+                @endforeach
+            </div>
 
             <!-- Section Modal -->
             <div id="sectionModalOverlay" class="custom-modal-overlay">
@@ -242,7 +263,7 @@
                         @foreach ($sections as $section)
                             <label class="checkbox-item">
                                 <input type="checkbox" name="target_sections[]" value="{{ $section }}"
-                                    {{ in_array($section, $selectedSections) ? 'checked' : '' }}>
+                                    {{ in_array($section, $selectedSections) ? 'checked disabled' : '' }}>
                                 <span>{{ $section }}</span>
                             </label>
                         @endforeach
@@ -258,6 +279,12 @@
                 }
             @endphp
 
+            <div id="lockedFacultyInputs" style="display:none;">
+                @foreach ($selectedFaculty as $facultyId)
+                    <input type="hidden" name="target_faculty[]" value="{{ $facultyId }}">
+                @endforeach
+            </div>
+
             <!-- Faculty Modal -->
             <div id="facultyModalOverlay" class="custom-modal-overlay">
                 <div class="custom-modal">
@@ -266,7 +293,7 @@
                         @foreach ($faculty as $f)
                             <label class="checkbox-item">
                                 <input type="checkbox" name="target_faculty[]" value="{{ $f->id }}"
-                                    {{ in_array($f->id, $selectedFaculty) ? 'checked' : '' }}>
+                                    {{ in_array($f->id, $selectedFaculty) ? 'checked disabled' : '' }}>
                                 <span>{{ $f->name }} ({{ $f->department }})</span>
                             </label>
                         @endforeach
@@ -376,7 +403,9 @@
 
             if (selectAll) {
                 selectAll.addEventListener("change", function() {
-                    yearChecks.forEach(cb => cb.checked = this.checked);
+                    yearChecks.forEach(cb => {
+                        if (!cb.disabled) cb.checked = this.checked;
+                    });
                 });
             }
 
@@ -453,6 +482,8 @@
                     return;
                 }
 
+                const lockedSet = new Set(initialSelectedSections);
+
                 sections.forEach(section => {
                     const label = document.createElement('label');
                     label.className = 'checkbox-item';
@@ -461,7 +492,8 @@
                     input.type = 'checkbox';
                     input.name = 'target_sections[]';
                     input.value = section;
-                    input.checked = selected.includes(section);
+                    input.checked = lockedSet.has(section) || selected.includes(section);
+                    input.disabled = lockedSet.has(section);
 
                     const span = document.createElement('span');
                     span.textContent = section;
@@ -496,13 +528,21 @@
                     selectAllSections.checked = false;
                     selectAllSections.onchange = null;
                     selectAllSections.addEventListener('change', () => {
-                        sectionCheckboxes.forEach(cb => cb.checked = selectAllSections.checked);
+                        sectionCheckboxes.forEach(cb => {
+                            if (!cb.disabled) cb.checked = selectAllSections.checked;
+                        });
                     });
                 }
 
                 sectionCheckboxes.forEach(cb => {
                     cb.addEventListener('change', () => {
-                        if (![...sectionCheckboxes].every(cb => cb.checked)) {
+                        const enabled = [...sectionCheckboxes].filter(cb => !cb.disabled);
+                        if (!enabled.length) {
+                            if (selectAllSections) selectAllSections.checked = false;
+                            return;
+                        }
+
+                        if (!enabled.every(cb => cb.checked)) {
                             if (selectAllSections) selectAllSections.checked = false;
                         } else {
                             if (selectAllSections) selectAllSections.checked = true;
