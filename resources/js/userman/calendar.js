@@ -43,11 +43,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const eventFilter = document.getElementById("calendar_eventFilter");
 
     const departmentColors = {
-        bsis_act: "#0000FF",
-        bsom: "#FF69B4",
-        bsais: "#FFD700",
-        btvted: "#87CEFA",
-        bsca: "#DAA520",
         default: "#28a745",
     };
 
