@@ -30,13 +30,15 @@
 
                             <div class="form-group">
                                 <label>Event title</label>
-                                <input type="text" id="eventTitle" name="title" placeholder="Event title" required>
+                                <input type="text" id="eventTitle" name="title" required>
                             </div>
 
                             <div class="form-group">
-                                <label>Event description</label>
-                                <input type="text" id="eventDescription" name="description"
-                                    placeholder="Event Description" required>
+                                <label>Short Description</label>
+                                <input type="text" id="eventDescription" name="description" maxlength="155" required>
+                                <small id="eventDescriptionCounter" style="margin-top:6px; color:#6c757d;">
+                                    0/155
+                                </small>
                             </div>
 
                             <div class="form-group">
@@ -282,6 +284,32 @@ $userTitle = $user->title ?? null;
                         </script>
                         <script>
                             document.addEventListener('DOMContentLoaded', () => {
+                                const descriptionInput = document.getElementById('eventDescription');
+                                const descriptionCounter = document.getElementById('eventDescriptionCounter');
+                                const createEventForm = document.querySelector('.modal form');
+                                const maxDescriptionLength = 155;
+
+                                function updateDescriptionCounter() {
+                                    if (!descriptionInput || !descriptionCounter) return;
+                                    const currentLength = descriptionInput.value.length;
+                                    descriptionCounter.textContent = `${currentLength}/${maxDescriptionLength}`;
+                                    descriptionCounter.style.color =
+                                        currentLength > maxDescriptionLength ? '#dc3545' : '#6c757d';
+                                }
+
+                                if (descriptionInput) {
+                                    descriptionInput.addEventListener('input', updateDescriptionCounter);
+                                    updateDescriptionCounter();
+                                }
+
+                                if (createEventForm) {
+                                    createEventForm.addEventListener('submit', (e) => {
+                                        if (descriptionInput && descriptionInput.value.length > maxDescriptionLength) {
+                                            e.preventDefault();
+                                            updateDescriptionCounter();
+                                        }
+                                    });
+                                }
                                 // ==============================
                                 // Dynamic Year Levels for Offices
                                 // ==============================
@@ -764,7 +792,7 @@ $userTitle = $user->title ?? null;
                         </div>
 
                         <!-- Textarea fills most of modal -->
-                        <textarea id="detailsTextarea" placeholder="Type additional details..."
+                        <textarea id="detailsTextarea"
                             style="flex-grow: 1; width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ccc; font-size: 15px; line-height: 1.5; resize: none; outline: none;"></textarea>
 
                         <!-- Buttons -->
