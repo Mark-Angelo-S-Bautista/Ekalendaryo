@@ -37,6 +37,34 @@
                             <span>👤 {{ $event->department }}</span>
                             <span>🕒 SY.{{ $event->school_year }}</span>
                             <span>👥 {{ $event->attendees()->count() }} attending</span>
+                            @php
+                                $eventSections = $event->target_sections;
+                                if (is_string($eventSections)) {
+                                    $eventSections = json_decode($eventSections, true) ?? [];
+                                } elseif (!is_array($eventSections)) {
+                                    $eventSections = [];
+                                }
+
+                                $eventFacultyIds = $event->target_faculty;
+                                if (is_string($eventFacultyIds)) {
+                                    $eventFacultyIds = json_decode($eventFacultyIds, true) ?? [];
+                                } elseif (!is_array($eventFacultyIds)) {
+                                    $eventFacultyIds = [];
+                                }
+
+                                $eventFacultyNames = [];
+                                if (!empty($eventFacultyIds)) {
+                                    $eventFacultyNames = \App\Models\User::whereIn('id', $eventFacultyIds)
+                                        ->pluck('name')
+                                        ->toArray();
+                                }
+                            @endphp
+                            @if (!empty($eventSections))
+                                <span>🏫 {{ implode(', ', $eventSections) }}</span>
+                            @endif
+                            @if (!empty($eventFacultyNames))
+                                <span>👩‍🏫 {{ implode(', ', $eventFacultyNames) }}</span>
+                            @endif
 
                             {{-- Feedback Button --}}
                             <span>

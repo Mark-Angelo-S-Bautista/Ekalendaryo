@@ -48,6 +48,19 @@
                                         {{ $event->target_users }}
                                     @endif
                                 </div>
+                                @php
+                                    $eventSections = $event->target_sections;
+                                    if (is_string($eventSections)) {
+                                        $eventSections = json_decode($eventSections, true) ?? [];
+                                    } elseif (!is_array($eventSections)) {
+                                        $eventSections = [];
+                                    }
+                                @endphp
+                                @if (!empty($eventSections))
+                                    <div class="dashboard_event_details">
+                                        🏫 {{ implode(', ', $eventSections) }}
+                                    </div>
+                                @endif
                                 <div class="dashboard_event_details">
                                     {{ $event->description ?? 'No description provided.' }}
                                 </div>
