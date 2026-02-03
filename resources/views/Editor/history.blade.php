@@ -22,7 +22,6 @@
                     <div class="event-card" data-type="{{ $event->department }}">
                         <div class="event-header">
                             <h3>{{ $event->title }}</h3>
-                            <span class="tag">{{ $event->department }}</span>
                             <span class="status completed">completed</span>
                         </div>
 

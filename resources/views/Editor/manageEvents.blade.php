@@ -812,7 +812,6 @@ $userTitle = $user->title ?? null;
                             <div class="event-header">
                                 <h2>{{ $event->title }}</h2>
                                 <div class="tags">
-                                    <span class="tag department">{{ $event->department }}</span>
                                     <span class="tag {{ strtolower($event->computed_status) }}">
                                         {{ ucfirst($event->computed_status) }}
                                     </span>

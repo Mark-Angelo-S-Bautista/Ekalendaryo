@@ -61,10 +61,11 @@
                                         🏫 {{ implode(', ', $eventSections) }}
                                     </div>
                                 @endif
-                                <div class="dashboard_event_details">
+                                <div class="dashboard_event_details"
+                                    style="max-width:100%; white-space:normal; word-break:break-word; overflow-wrap:anywhere;">
                                     {{ $event->description ?? 'No description provided.' }}
                                 </div>
-                                <div class="dashboard_event_details">{{ $event->school_year }}</div>
+                                <div class="dashboard_event_details">SY.{{ $event->school_year }}</div>
                                 <div class="dashboard_event_tags">
                                     <span class="dashboard_tag dashboard_tag_admin">
                                         @if ($event->department === 'OFFICES')

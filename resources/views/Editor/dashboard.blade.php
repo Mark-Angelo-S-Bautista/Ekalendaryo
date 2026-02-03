@@ -71,8 +71,10 @@
                                 @endif
                             </div>
 
-                            <div class="dashboard_event_details">
-                                {{ $event->description ?? 'No description provided.' }}</div>
+                            <div class="dashboard_event_details"
+                                style="max-width:100%; white-space:normal; word-break:break-word; overflow-wrap:anywhere;">
+                                {{ $event->description ?? 'No description provided.' }}
+                            </div>
                             <div class="dashboard_event_details">SY.{{ $event->school_year }}</div>
 
                             <div class="dashboard_event_details">

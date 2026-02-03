@@ -43,7 +43,11 @@
             <div class="form-group">
                 <label>Event description</label>
                 <input type="text" id="eventDescription" name="description"
-                    value="{{ old('description', $event->description) }}" placeholder="Event Description">
+                    value="{{ old('description', $event->description) }}" placeholder="Event Description"
+                    maxlength="155">
+                <small id="eventDescriptionCounter" style="margin-top:6px; color:#6c757d;">
+                    0/155
+                </small>
             </div>
 
             {{-- More Details --}}
@@ -329,6 +333,33 @@
             const saveMoreBtn = document.getElementById("saveMoreDetailsBtn");
             const textarea = document.getElementById("moreDetailsTextarea");
             const hiddenInput = document.getElementById("moreDetailsInput");
+            const descriptionInput = document.getElementById("eventDescription");
+            const descriptionCounter = document.getElementById("eventDescriptionCounter");
+            const editEventForm = document.querySelector(
+                'form[action^="{{ route('Editor.update', $event->id) }}"]');
+            const maxDescriptionLength = 155;
+
+            function updateDescriptionCounter() {
+                if (!descriptionInput || !descriptionCounter) return;
+                const currentLength = descriptionInput.value.length;
+                descriptionCounter.textContent = `${currentLength}/${maxDescriptionLength}`;
+                descriptionCounter.style.color =
+                    currentLength > maxDescriptionLength ? '#dc3545' : '#6c757d';
+            }
+
+            if (descriptionInput) {
+                descriptionInput.addEventListener('input', updateDescriptionCounter);
+                updateDescriptionCounter();
+            }
+
+            if (editEventForm) {
+                editEventForm.addEventListener('submit', (e) => {
+                    if (descriptionInput && descriptionInput.value.length > maxDescriptionLength) {
+                        e.preventDefault();
+                        updateDescriptionCounter();
+                    }
+                });
+            }
 
             if (openMoreBtn) {
                 openMoreBtn.addEventListener("click", () => {
