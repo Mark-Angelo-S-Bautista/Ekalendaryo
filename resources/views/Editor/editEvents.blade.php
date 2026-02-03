@@ -354,6 +354,7 @@
         window.sectionsByDepartment = @json($sectionsByDepartment ?? []);
         window.userTitle = @json(auth()->user()->title);
         window.initialSelectedSections = @json($selectedSections ?? []);
+        window.initialSelectedDepartments = @json($selectedDepartments ?? []);
         window.departmentMaxYearLevels = @json($departmentMaxYearLevels ?? []);
         window.userMaxYearLevels = @json($userMaxYearLevels ?? 4);
     </script>
@@ -380,6 +381,7 @@
             const facultyModalOverlay = document.getElementById("facultyModalOverlay");
             const deptCheckboxes = document.querySelectorAll('.dept-checkbox');
             const yearLevelsContainerEdit = document.getElementById('yearLevelsContainerEdit');
+            const isOffices = String(window.userTitle || '').toLowerCase() === 'offices';
 
             // ==============================
             // Dynamic Year Levels for Offices (Edit)
@@ -559,13 +561,18 @@
             // ==============================
             const sectionsByDepartment = window.sectionsByDepartment || {};
             const sectionsContainer = document.getElementById('sectionsContainer');
-            const deptCheckboxes = document.querySelectorAll('.dept-checkbox');
             const initialSelectedSections = window.initialSelectedSections || [];
+            const initialSelectedDepartments = window.initialSelectedDepartments || [];
 
             function getSelectedDepartments() {
-                return [...deptCheckboxes]
+                const fromCheckboxes = [...deptCheckboxes]
                     .filter(cb => cb.checked)
                     .map(cb => cb.value);
+
+                const fromHidden = [...document.querySelectorAll('input[name="target_department[]"]')]
+                    .map(input => input.value);
+
+                return [...new Set([...fromCheckboxes, ...fromHidden])];
             }
 
             function collectSectionsForDepartments(departments) {
@@ -582,7 +589,9 @@
 
                 sectionsContainer.innerHTML = '';
 
-                if (!sections.length) {
+                const effectiveSections = sections.length ? sections : (selected || []);
+
+                if (!effectiveSections.length) {
                     const emptyLabel = document.createElement('div');
                     emptyLabel.style.color = '#6c757d';
                     emptyLabel.style.fontStyle = 'italic';
@@ -593,7 +602,7 @@
 
                 const lockedSet = new Set(initialSelectedSections);
 
-                sections.forEach(section => {
+                effectiveSections.forEach(section => {
                     const label = document.createElement('label');
                     label.className = 'checkbox-item';
 
@@ -614,12 +623,15 @@
             }
 
             function updateSectionsForOffices() {
-                if (window.userTitle !== 'Offices') return;
+                if (!isOffices) return;
                 const selectedDepartments = getSelectedDepartments();
+                const effectiveDepartments = selectedDepartments.length ?
+                    selectedDepartments :
+                    initialSelectedDepartments;
                 const currentSelected = [...document.querySelectorAll('input[name="target_sections[]"]:checked')]
                     .map(cb => cb.value);
                 const selected = currentSelected.length ? currentSelected : initialSelectedSections;
-                const sections = collectSectionsForDepartments(selectedDepartments);
+                const sections = collectSectionsForDepartments(effectiveDepartments);
                 renderSections(sections, selected);
                 wireSectionSelectAll();
             }
