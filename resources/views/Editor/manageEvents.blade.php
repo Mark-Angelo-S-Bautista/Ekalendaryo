@@ -700,7 +700,10 @@ $userTitle = $user->title ?? null;
                                             attendees.forEach(user => {
                                                 tbody.innerHTML += `
                                                 <tr>
-                                                    <td>${user.name}</td>
+                                                    <td>
+                                                        <strong>${user.title}</strong>
+                                                        <div>${user.name}</div>
+                                                    </td>
                                                     <td>${user.department}</td>
                                                     <td>${user.yearlevel}</td>
                                                     <td>${user.section}</td>
@@ -880,6 +883,7 @@ $userTitle = $user->title ?? null;
 
                                 return [
                                     'name' => $user->name,
+                                    'title' => $user->title,
                                     'department' => $department,
                                     'yearlevel' => $year_level,
                                     'section' => $section,
