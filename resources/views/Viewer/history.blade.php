@@ -106,6 +106,57 @@
                     <input type="hidden" name="event_id" id="feedbackEventId">
 
                     <div style="margin-bottom: 12px;">
+                        <label style="display:block; font-weight:600; margin-bottom:6px;">Overall Rating</label>
+                        <div style="display:flex; gap:8px; align-items:center; font-size:1.2rem;">
+                            @for ($i = 5; $i >= 1; $i--)
+                                <input type="radio" name="rating" id="rating-{{ $i }}"
+                                    value="{{ $i }}" style="display:none;">
+                                <label for="rating-{{ $i }}"
+                                    title="{{ $i }} star{{ $i > 1 ? 's' : '' }}"
+                                    style="cursor:pointer;">★</label>
+                            @endfor
+                        </div>
+                        <small style="color:#6b7280;">Select 1–5 stars</small>
+                    </div>
+
+                    <div style="margin-bottom: 12px;">
+                        <label style="display:block; font-weight:600; margin-bottom:6px;">General Questions</label>
+
+                        <div style="margin-bottom:8px;">
+                            <div style="font-size:0.95rem; margin-bottom:4px;">How satisfied are you with the event?
+                            </div>
+                            <label style="margin-right:10px;"><input type="radio" name="q_satisfaction"
+                                    value="Very Satisfied"> Very Satisfied</label>
+                            <label style="margin-right:10px;"><input type="radio" name="q_satisfaction"
+                                    value="Satisfied"> Satisfied</label>
+                            <label style="margin-right:10px;"><input type="radio" name="q_satisfaction"
+                                    value="Neutral"> Neutral</label>
+                            <label style="margin-right:10px;"><input type="radio" name="q_satisfaction"
+                                    value="Dissatisfied"> Dissatisfied</label>
+                        </div>
+
+                        <div style="margin-bottom:8px;">
+                            <div style="font-size:0.95rem; margin-bottom:4px;">Was the event well organized?</div>
+                            <label style="margin-right:10px;"><input type="radio" name="q_organization"
+                                    value="Yes"> Yes</label>
+                            <label style="margin-right:10px;"><input type="radio" name="q_organization"
+                                    value="Somewhat"> Somewhat</label>
+                            <label style="margin-right:10px;"><input type="radio" name="q_organization"
+                                    value="No"> No</label>
+                        </div>
+
+                        <div style="margin-bottom:8px;">
+                            <div style="font-size:0.95rem; margin-bottom:4px;">Was the event relevant to you?</div>
+                            <label style="margin-right:10px;"><input type="radio" name="q_relevance" value="Yes">
+                                Yes</label>
+                            <label style="margin-right:10px;"><input type="radio" name="q_relevance" value="Somewhat">
+                                Somewhat</label>
+                            <label style="margin-right:10px;"><input type="radio" name="q_relevance" value="No">
+                                No</label>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 12px;">
                         <textarea name="comment" id="comment" rows="20" placeholder="Write your feedback here..." required></textarea>
                         <div id="charCounter" style="font-size: 0.9rem; color: gray;">
                             0 / 1000 characters
