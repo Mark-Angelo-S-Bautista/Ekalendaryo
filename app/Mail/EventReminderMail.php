@@ -42,6 +42,38 @@ class EventReminderMail extends Mailable implements ShouldQueue
             return null;
         }
 
+        // Prepare target departments (for OFFICES events)
+        $targetDepartments = [];
+        if (strtolower((string) $event->department) === 'offices') {
+            $targetDepartments = $event->target_department;
+            if (is_string($targetDepartments)) {
+                $targetDepartments = json_decode($targetDepartments, true) ?? [];
+            }
+            if (!is_array($targetDepartments)) {
+                $targetDepartments = [];
+            }
+        }
+
+        // Prepare target sections
+        $targetSections = $event->target_sections;
+        if (is_string($targetSections)) {
+            $targetSections = json_decode($targetSections, true) ?? [];
+        }
+        if (!is_array($targetSections)) {
+            $targetSections = [];
+        }
+
+        // Prepare target faculty names
+        $targetFacultyNames = [];
+        $targetFacultyIds = $event->target_faculty;
+        if (is_string($targetFacultyIds)) {
+            $targetFacultyIds = json_decode($targetFacultyIds, true) ?? [];
+        }
+        if (is_array($targetFacultyIds) && count($targetFacultyIds) > 0) {
+            $targetFacultyIds = array_map('intval', $targetFacultyIds);
+            $targetFacultyNames = User::whereIn('id', $targetFacultyIds)->pluck('name')->toArray();
+        }
+
         return $this->subject(
             $this->reminderType === '3-days'
                 ? 'Upcoming Event in 3 Days'
@@ -53,6 +85,9 @@ class EventReminderMail extends Mailable implements ShouldQueue
             'user' => $user,
             'student' => $user, // for backward compatibility
             'reminderType' => $this->reminderType,
+            'targetDepartments' => $targetDepartments,
+            'targetSections' => $targetSections,
+            'targetFacultyNames' => $targetFacultyNames,
         ]);
     }
 }

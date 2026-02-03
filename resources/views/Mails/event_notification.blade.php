@@ -92,6 +92,32 @@
                                 <p><strong>Target Participant:</strong><br>{{ $event->target_users }}</p>
                             @endif
 
+                            @php
+                                $resolvedTargetDepartments = $targetDepartments ?? [];
+                                if (
+                                    empty($resolvedTargetDepartments) &&
+                                    strtolower((string) $event->department) === 'offices'
+                                ) {
+                                    $resolvedTargetDepartments = $event->target_department ?? [];
+                                }
+                                $resolvedTargetSections = $targetSections ?? ($event->target_sections ?? []);
+                                $resolvedTargetFacultyNames = $targetFacultyNames ?? [];
+                            @endphp
+
+                            @if (!empty($resolvedTargetDepartments))
+                                <p><strong>Target
+                                        Department:</strong><br>{{ implode(', ', $resolvedTargetDepartments) }}</p>
+                            @endif
+
+                            @if (!empty($resolvedTargetSections))
+                                <p><strong>Target Section:</strong><br>{{ implode(', ', $resolvedTargetSections) }}</p>
+                            @endif
+
+                            @if (!empty($resolvedTargetFacultyNames))
+                                <p><strong>Target Faculty:</strong><br>{{ implode(', ', $resolvedTargetFacultyNames) }}
+                                </p>
+                            @endif
+
                             @if (!empty($event->more_details))
                                 <p><strong>More Details:</strong></p>
                                 <p style="white-space: pre-line;">

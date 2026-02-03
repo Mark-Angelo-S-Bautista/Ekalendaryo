@@ -65,6 +65,38 @@ class EventNotificationMail extends Mailable implements ShouldQueue
             $subject = 'Event Updated';
         }
 
+        // Prepare target departments (for OFFICES events)
+        $targetDepartments = [];
+        if (strtolower((string) $event->department) === 'offices') {
+            $targetDepartments = $event->target_department;
+            if (is_string($targetDepartments)) {
+                $targetDepartments = json_decode($targetDepartments, true) ?? [];
+            }
+            if (!is_array($targetDepartments)) {
+                $targetDepartments = [];
+            }
+        }
+
+        // Prepare target sections
+        $targetSections = $event->target_sections;
+        if (is_string($targetSections)) {
+            $targetSections = json_decode($targetSections, true) ?? [];
+        }
+        if (!is_array($targetSections)) {
+            $targetSections = [];
+        }
+
+        // Prepare target faculty names
+        $targetFacultyNames = [];
+        $targetFacultyIds = $event->target_faculty;
+        if (is_string($targetFacultyIds)) {
+            $targetFacultyIds = json_decode($targetFacultyIds, true) ?? [];
+        }
+        if (is_array($targetFacultyIds) && count($targetFacultyIds) > 0) {
+            $targetFacultyIds = array_map('intval', $targetFacultyIds);
+            $targetFacultyNames = User::whereIn('id', $targetFacultyIds)->pluck('name')->toArray();
+        }
+
         return $this->subject($subject)
                     ->view('Mails.event_notification')
                     ->with([
@@ -73,6 +105,9 @@ class EventNotificationMail extends Mailable implements ShouldQueue
                         'isUpdate' => $this->isUpdate,
                         'oldEvent' => $oldEvent,
                         'isCancelled' => $this->isCancelled,
+                        'targetDepartments' => $targetDepartments,
+                        'targetSections' => $targetSections,
+                        'targetFacultyNames' => $targetFacultyNames,
                     ]);
     }
 }
