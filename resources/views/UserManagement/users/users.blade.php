@@ -142,6 +142,19 @@
                     <input type="text" id="department_name" name="department_name"
                         placeholder="e.g. BSIT, BSA, etc.">
 
+                    <label for="max_year_levels">Maximum Year Level</label>
+                    <select id="max_year_levels" name="max_year_levels"
+                        style="width: 100%; padding: 8px 10px; border: 1px solid #27ae60; border-radius: 6px; margin-bottom: 10px; font-size: 13px; background-color: #fff; color: #333; appearance: none; background-image: url('data:image/svg+xml;utf8,<svg fill=\"%23333\" height=\"24\" viewBox=\"0 0 24 24\" width=\"24\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M7 10l5 5 5-5z\"/></svg>'); background-repeat: no-repeat; background-position: right 8px center; background-size: 20px; padding-right: 35px; cursor: pointer; transition: 0.2s ease;"
+                        onmouseover="this.style.borderColor='#229954'; this.style.backgroundColor='#f9f9f9';"
+                        onmouseout="this.style.borderColor='#27ae60'; this.style.backgroundColor='#fff';"
+                        onfocus="this.style.borderColor='#27ae60'; this.style.boxShadow='0 0 0 3px rgba(39, 174, 96, 0.1)';"
+                        onblur="this.style.boxShadow='none';">
+                        <option value="1stYear">1st Year</option>
+                        <option value="2ndYear">2nd Year</option>
+                        <option value="3rdYear">3rd Year</option>
+                        <option value="4thYear">4th Year</option>
+                    </select>
+
                     <div id="addDeptMessage" class="adddept_message"></div> {{-- Placeholder for error/success messages --}}
 
                     <div class="adddept_actions">

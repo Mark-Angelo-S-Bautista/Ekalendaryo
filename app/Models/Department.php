@@ -8,5 +8,6 @@ class Department extends Model
 {
     protected $fillable = [
         'department_name',
+        'max_year_levels',
     ];
 }

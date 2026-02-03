@@ -325,9 +325,10 @@ class UserManagementController extends Controller
 
     public function addDepartment(Request $request)
     {
-        // Validate only the department_name
+        // Validate the department_name and max_year_levels
         $validator = Validator::make($request->all(), [
             'department_name' => 'required|string|max:255|unique:departments,department_name',
+            'max_year_levels' => 'nullable|string|in:1stYear,2ndYear,3rdYear,4thYear',
         ]);
 
         if ($validator->fails()) {
@@ -339,6 +340,7 @@ class UserManagementController extends Controller
 
         $department = Department::create([
             'department_name' => $request->department_name,
+            'max_year_levels' => $request->max_year_levels ?? null,
         ]);
 
         return response()->json([
@@ -347,12 +349,6 @@ class UserManagementController extends Controller
             'department' => $department,
         ]);
     }
-
-    // public function deleteDepartment($id)
-    // {
-    //     Department::findOrFail($id)->delete();
-    //     return back()->with('success', 'Department deleted successfully!');
-    // }
 
     public function activity_log()
     {
