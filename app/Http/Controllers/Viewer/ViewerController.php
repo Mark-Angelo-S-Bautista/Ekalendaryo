@@ -16,6 +16,7 @@ use Carbon\Carbon;
 use App\Models\SchoolYear;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class ViewerController extends Controller
 {
@@ -220,37 +221,104 @@ class ViewerController extends Controller
             ? preg_replace('/(\d)(st|nd|rd|th)Year/', '$1$2 Year', $user->yearlevel)
             : null;
 
-        $query = Event::query()
+        $events = Event::query()
             ->where('status', 'completed')
             ->whereNotIn('status', ['cancelled'])
-            ->where(function ($q) use ($user) {
-                $q->where('department', $user->department)
-                ->orWhere('department', 'ALL');
-            });
+            ->orderBy('date', 'desc')
+            ->get();
 
-        $events = $query->orderBy('date', 'desc')->paginate(3);
+        $userDept = $user->department;
+        $userTitle = strtolower($user->title ?? '');
+        $userSection = $user->section ? strtolower(trim($user->section)) : null;
+        $userYearLevelNormalized = $userYearLevel
+            ? strtolower(str_replace(' ', '', $userYearLevel))
+            : null;
 
-        $events->getCollection()->transform(function ($event) use ($userYearLevel) {
-            if (!$userYearLevel) return $event; // faculty
+        $filtered = $events->filter(function ($event) use ($userDept, $userTitle, $userSection, $userYearLevelNormalized) {
+            $targetUsers = strtolower($event->target_users ?? '');
 
-            $targets = is_string($event->target_year_levels)
+            $targetDepartments = is_string($event->target_department)
+                ? json_decode($event->target_department, true) ?? []
+                : $event->target_department;
+
+            $targetYearLevels = is_string($event->target_year_levels)
                 ? json_decode($event->target_year_levels, true) ?? []
                 : $event->target_year_levels;
 
-            if (empty($targets) || in_array('ALL', $targets)) {
-                return $event;
-            }
+            $targetSections = is_string($event->target_sections)
+                ? json_decode($event->target_sections, true) ?? []
+                : $event->target_sections;
 
-            return in_array($userYearLevel, $targets) ? $event : null;
-        });
+            $matchesYearLevel = function () use ($targetYearLevels, $userYearLevelNormalized) {
+                if (empty($targetYearLevels)) return true;
+                if (empty($userYearLevelNormalized)) return false;
+                $normalizedTargets = array_map(fn($lvl) => strtolower(str_replace(' ', '', $lvl)), $targetYearLevels);
+                return in_array($userYearLevelNormalized, $normalizedTargets);
+            };
 
-        $events->setCollection(
-            $events->getCollection()->filter()
-        );
+                $matchesSection = function () use ($targetSections, $userSection) {
+                    if (empty($targetSections)) return true;
+                    if (empty($userSection)) return false;
+                    $normalizedTargets = array_map(fn($sec) => strtolower(trim($sec)), $targetSections);
+                    return in_array($userSection, $normalizedTargets);
+                };
 
-        $submittedFeedbackIds = Feedback::where('user_id', $user->id)
-            ->pluck('event_id')
-            ->toArray();
+                if ($userTitle === 'faculty') {
+                    if (
+                        $targetUsers !== 'department heads' && (
+                            $event->department === $userDept ||
+                            ($event->department === 'OFFICES' && is_array($targetDepartments) && in_array($userDept, $targetDepartments))
+                        )
+                    ) {
+                        return true;
+                    }
+                    return false;
+                }
+
+                if ($userTitle === 'viewer' || $userTitle === 'student') {
+                    if (str_contains($targetUsers, 'faculty') || str_contains($targetUsers, 'department head')) {
+                        return false;
+                    }
+
+                    $matchesTargets = $matchesYearLevel() && $matchesSection();
+
+                    if ($event->department === $userDept) {
+                        return $matchesTargets;
+                    }
+
+                    if ($event->department === 'OFFICES' &&
+                        is_array($targetDepartments) &&
+                        in_array($userDept, $targetDepartments) &&
+                        ($targetUsers === 'students' || empty($targetUsers))
+                    ) {
+                        return $matchesTargets;
+                    }
+
+                    if (is_array($targetDepartments) && in_array($userDept, $targetDepartments) && $targetUsers === 'students') {
+                        return $matchesTargets;
+                    }
+
+                    return false;
+                }
+
+                return true;
+            })->values();
+
+            $perPage = 3;
+            $currentPage = LengthAwarePaginator::resolveCurrentPage();
+            $pageItems = $filtered->forPage($currentPage, $perPage)->values();
+
+            $events = new LengthAwarePaginator(
+                $pageItems,
+                $filtered->count(),
+                $perPage,
+                $currentPage,
+                ['path' => LengthAwarePaginator::resolveCurrentPath()]
+            );
+
+            $submittedFeedbackIds = Feedback::where('user_id', $user->id)
+                ->pluck('event_id')
+                ->toArray();
 
         return view('Viewer.history', compact('events', 'submittedFeedbackIds'));
     }
