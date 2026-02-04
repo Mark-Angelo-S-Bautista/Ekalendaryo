@@ -40,7 +40,7 @@ class ViewerController extends Controller
             ->get();
 
         // Then apply your existing role and department filtering
-        $events = $events->filter(function ($ev) use ($now, $yearLevel, $title, $dept) {
+        $events = $events->filter(function ($ev) use ($now, $yearLevel, $title, $dept, $user) {
 
             // Hide past events based on date & start_time
             if ($ev->status !== 'ongoing') {
@@ -54,23 +54,16 @@ class ViewerController extends Controller
             // FACULTY LOGIC
             // ============================================================
             if (strtolower($title) === 'faculty') {
+                
+                // Check if this faculty member is specifically targeted
+                $targetFaculty = is_string($ev->target_faculty)
+                    ? json_decode($ev->target_faculty, true) ?? []
+                    : ($ev->target_faculty ?? []);
+                
+                // Faculty should ONLY see events where they are specifically targeted
+                $isFacultyTargeted = is_array($targetFaculty) && in_array($user->id, $targetFaculty);
 
-                $targetDepartments = is_string($ev->target_department)
-                    ? json_decode($ev->target_department, true) ?? []
-                    : $ev->target_department;
-
-                $targetUsers = strtolower($ev->target_users ?? '');
-
-                if (
-                    $targetUsers !== 'department heads' && (
-                        $ev->department === $dept ||
-                        ($ev->department === 'OFFICES' && is_array($targetDepartments) && in_array($dept, $targetDepartments))
-                    )
-                ) {
-                    return true;
-                }
-
-                return false;
+                return $isFacultyTargeted;
             }
 
             // ============================================================
