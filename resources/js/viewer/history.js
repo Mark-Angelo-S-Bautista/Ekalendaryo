@@ -54,6 +54,52 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    // ===== Star Rating =====
+    const ratingStars = document.querySelectorAll(
+        '#feedbackForm input[name="rating"] + label',
+    );
+
+    ratingStars.forEach((star) => {
+        star.addEventListener("mouseover", function () {
+            const rating = this.previousElementSibling.value;
+            ratingStars.forEach((s) => {
+                s.style.color =
+                    s.previousElementSibling.value <= rating
+                        ? "#ffc107"
+                        : "#e0e0e0";
+            });
+        });
+
+        star.addEventListener("mouseout", function () {
+            const checkedRadio = document.querySelector(
+                '#feedbackForm input[name="rating"]:checked',
+            );
+            if (checkedRadio) {
+                const rating = checkedRadio.value;
+                ratingStars.forEach((s) => {
+                    s.style.color =
+                        s.previousElementSibling.value <= rating
+                            ? "#ffc107"
+                            : "#e0e0e0";
+                });
+            } else {
+                ratingStars.forEach((s) => {
+                    s.style.color = "#e0e0e0";
+                });
+            }
+        });
+
+        star.addEventListener("click", function () {
+            const rating = this.previousElementSibling.value;
+            ratingStars.forEach((s) => {
+                s.style.color =
+                    s.previousElementSibling.value <= rating
+                        ? "#ffc107"
+                        : "#e0e0e0";
+            });
+        });
+    });
+
     // ===== Feedback Modal =====
     const modal = document.getElementById("feedbackModal");
     const feedbackList = document.getElementById("feedbackList");
@@ -114,12 +160,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (prevBtn) {
             prevBtn.addEventListener("click", () =>
-                loadFeedback(prevBtn.dataset.page)
+                loadFeedback(prevBtn.dataset.page),
             );
         }
         if (nextBtn) {
             nextBtn.addEventListener("click", () =>
-                loadFeedback(nextBtn.dataset.page)
+                loadFeedback(nextBtn.dataset.page),
             );
         }
     }
@@ -145,7 +191,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
                     // Change the feedback button for this event
                     const btn = document.querySelector(
-                        `.feedback-btn[data-event-id="${currentEventId}"]`
+                        `.feedback-btn[data-event-id="${currentEventId}"]`,
                     );
                     if (btn) {
                         btn.textContent = "✔️ Feedback Submitted";

@@ -101,19 +101,19 @@
                 <h3 id="feedbackEventTitle">Event Feedback</h3>
 
                 {{-- Feedback Form --}}
-                <form id="feedbackForm" method="POST" action="{{ url('/viewer/events/feedback') }}">
+                <form id="feedbackForm" method="POST" action="{{ route('Viewer.feedback.store') }}">
                     @csrf
                     <input type="hidden" name="event_id" id="feedbackEventId">
 
                     <div style="margin-bottom: 12px;">
                         <label style="display:block; font-weight:600; margin-bottom:6px;">Overall Rating</label>
-                        <div style="display:flex; gap:8px; align-items:center; font-size:1.2rem;">
-                            @for ($i = 5; $i >= 1; $i--)
+                        <div <div style="display:flex; gap:8px; align-items:center; font-size:2rem;">
+                            @for ($i = 1; $i <= 5; $i++)
                                 <input type="radio" name="rating" id="rating-{{ $i }}"
                                     value="{{ $i }}" style="display:none;">
                                 <label for="rating-{{ $i }}"
                                     title="{{ $i }} star{{ $i > 1 ? 's' : '' }}"
-                                    style="cursor:pointer;">★</label>
+                                    style="cursor:pointer; color: #e0e0e0;">★</label>
                             @endfor
                         </div>
                         <small style="color:#6b7280;">Select 1–5 stars</small>
@@ -146,7 +146,7 @@
                         </div>
 
                         <div style="margin-bottom:8px;">
-                            <div style="font-size:0.95rem; margin-bottom:4px;">Was the event relevant to you?</div>
+                            <div style="font-size:0.95rem; margin-bottom:4px;">Was the event helpfull to you?</div>
                             <label style="margin-right:10px;"><input type="radio" name="q_relevance" value="Yes">
                                 Yes</label>
                             <label style="margin-right:10px;"><input type="radio" name="q_relevance" value="Somewhat">

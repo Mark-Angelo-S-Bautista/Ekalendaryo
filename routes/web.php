@@ -7,6 +7,7 @@ use App\Http\Controllers\Editor\EditorController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\UserMan\UserController;
 use App\Http\Controllers\Viewer\ViewerController;
+use App\Http\Controllers\Viewer\FeedbackController;
 use App\Http\Controllers\UserMan\CalendarController;
 use Illuminate\Support\Facades\Route;
 
@@ -106,15 +107,14 @@ Route::middleware(['auth', 'backhistory'])->group(function () {
     // Applies the prefix 'usermanagement/' and the route name prefix 'usermanagement.'
     Route::middleware('role.viewer')->prefix('viewer')->name('Viewer.')->group(function () {
         Route::get('/dashboard', [ViewerController::class, 'dashboard'])->name('dashboard');
-        Route::post('/dashboard/{event}/attend', [ViewerController::class, 'attend'])->name('attend');
         Route::get('/calendar', [ViewerController::class, 'calendar'])->name('calendar');
         Route::get('/notifications', [ViewerController::class, 'notifications'])->name('notifications');
         Route::get('/history', [ViewerController::class, 'history'])->name('history');
-        Route::post('/events/feedback', [ViewerController::class, 'storeFeedback']);
         Route::get('/profile', [ViewerController::class, 'profile'])->name('profile');
-        Route::post('/profile/update', [ViewerController::class, 'updateProfile'])->name('update');
-        Route::post('/profile/update-email', [ViewerController::class, 'updateEmail'])->name('updateEmail');
+        Route::post('/profile/update', [ViewerController::class, 'updateProfile'])->name('profile.update');
+        Route::post('/profile/update-email', [ViewerController::class, 'updateEmail'])->name('profile.updateEmail');
         Route::post('/profile/update-password', [ViewerController::class, 'updatePassword'])->name('profile.updatePassword');
+        Route::post('/events/feedback', [FeedbackController::class, 'store'])->name('feedback.store');
         Route::post('/logout', [ViewerController::class, 'destroy'])->name('logout');
     });
 

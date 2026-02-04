@@ -14,7 +14,11 @@ class Feedback extends Model
     protected $fillable = [
         'event_id',
         'user_id',
-        'message',
+        'rating',
+        'q_satisfaction',
+        'q_organization',
+        'q_relevance',
+        'comment',
     ];
 
     public function event()

@@ -189,11 +189,14 @@ class EditorController extends Controller
 
     public function getFeedback(Event $event)
     {
-       // Paginate feedbacks, e.g., 5 per page
+        // Paginate feedbacks, e.g., 5 per page
         $feedbacks = $event->feedbacks()->with('user')->orderBy('created_at', 'desc')->paginate(2);
 
+        // Calculate average rating
+        $averageRating = $event->feedbacks()->avg('rating');
+
         // Return a Blade view for modal content
-        return view('Editor.partials.feedback_modal_content', compact('feedbacks'))->render();
+        return view('Editor.partials.feedback_modal_content', compact('feedbacks', 'averageRating'))->render();
     }
 
     public function archive(Request $request)

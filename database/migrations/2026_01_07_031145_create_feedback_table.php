@@ -14,8 +14,12 @@ return new class extends Migration
         Schema::create('feedback', function (Blueprint $table) {
             $table->id();
             $table->foreignId('event_id')->constrained()->onDelete('cascade');
-            $table->foreignId('user_id')->constrained()->onDelete('cascade'); // viewer who gave feedback
-            $table->text('message');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade'); 
+            $table->unsignedTinyInteger('rating'); 
+            $table->string('q_satisfaction');
+            $table->string('q_organization');
+            $table->string('q_relevance');
+            $table->text('comment');
             $table->timestamps();
         });
     }
