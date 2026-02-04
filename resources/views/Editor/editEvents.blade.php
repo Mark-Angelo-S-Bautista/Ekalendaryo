@@ -237,9 +237,10 @@
                             @if ($yearNumbers[$index] <= $userMaxYearLevels)
                                 <div class="checkbox-inline">
                                     <input type="checkbox" name="target_year_levels[]" value="{{ $year }}"
-                                        class="syear" {{ in_array($year, $levels) ? 'checked disabled' : '' }}>
+                                        class="syear" {{ in_array($year, $levels) ? 'checked' : '' }}
+                                        @if (auth()->user()->title === 'Offices' && in_array($year, $levels)) disabled @endif>
                                     {{ $year }}
-                                    @if (in_array($year, $levels))
+                                    @if (auth()->user()->title === 'Offices' && in_array($year, $levels))
                                         <input type="hidden" name="target_year_levels[]"
                                             value="{{ $year }}">
                                     @endif
@@ -450,6 +451,9 @@
                 const yearOptions = ['1st Year', '2nd Year', '3rd Year', '4th Year', '5th Year'];
                 const yearNumbers = [1, 2, 3, 4, 5];
 
+                // Capture existing selected year levels before clearing
+                const existingChecked = [...document.querySelectorAll('.syear:checked')].map(cb => cb.value);
+
                 yearLevelsContainerEdit.innerHTML = '';
 
                 yearNumbers.forEach((num, index) => {
@@ -462,6 +466,19 @@
                         input.name = 'target_year_levels[]';
                         input.value = yearOptions[index];
                         input.className = 'syear';
+
+                        // Check if this year level was previously selected
+                        if (existingChecked.includes(yearOptions[index])) {
+                            input.checked = true;
+                            input.disabled = true;
+
+                            // Add hidden input to preserve the value
+                            const hiddenInput = document.createElement('input');
+                            hiddenInput.type = 'hidden';
+                            hiddenInput.name = 'target_year_levels[]';
+                            hiddenInput.value = yearOptions[index];
+                            div.appendChild(hiddenInput);
+                        }
 
                         const label = document.createElement('label');
                         label.textContent = yearOptions[index];

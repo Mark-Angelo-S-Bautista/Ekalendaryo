@@ -129,6 +129,33 @@
                                 @endif
                             </p>
 
+                            @php
+                                $year_levels = $log->description['target_year_levels'] ?? null;
+                                if (empty($year_levels)) {
+                                    $logEvent = \App\Models\Event::find($log->model_id);
+                                    if ($logEvent) {
+                                        $year_levels = $logEvent->target_year_levels ?? [];
+                                    }
+                                }
+                            @endphp
+
+                            @if (!empty($year_levels))
+                                <p>👤 Year Levels:</p>
+                                <p>
+                                    @if (is_array($year_levels) &&
+                                            isset($year_levels['old'], $year_levels['new']) &&
+                                            $year_levels['old'] !== $year_levels['new']
+                                    )
+                                        <del>{{ $formatList($year_levels['old']) }}</del> →
+                                        {{ $formatList($year_levels['new']) }}
+                                    @else
+                                        {{ is_array($year_levels) && array_key_exists('new', $year_levels)
+                                            ? $formatList($year_levels['new'])
+                                            : $formatList($year_levels) }}
+                                    @endif
+                                </p>
+                            @endif
+
                             @if (!empty($sections))
                                 <p>🏫 Sections:</p>
                                 <p>

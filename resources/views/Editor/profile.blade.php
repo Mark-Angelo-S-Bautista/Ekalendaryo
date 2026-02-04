@@ -50,7 +50,7 @@
                         <div>
                             <span style="font-weight:300;">Title</span>
                             <span style="margin-left:90px;">
-                                @if ($user->title === 'Offices')
+                                @if ($user->title === 'OFFICES')
                                     {{ $user->office_name ?? 'Not specified' }}
                                 @else
                                     {{ $user->title ?? 'Not specified' }}
