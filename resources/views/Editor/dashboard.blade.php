@@ -16,8 +16,8 @@
         </section>
 
         <!-- Card Count for Upcoming Ongoing Completed and Cancelled Events -->
+        <h2 style="color: #004d25;">My Events Count</h2>
         <section class="dashboard_stats_grid">
-
             <div class="dashboard_stat_card dashboard_stat_upcoming">
                 <h4>Upcoming</h4>
                 <span>{{ $upcomingCount }}</span>
