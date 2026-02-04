@@ -23,7 +23,7 @@
         <div class="section">
             <h3>Personal Information</h3>
             <div class="card">
-                <form method="POST" action="{{ route('Viewer.update') }}" id="profileForm">
+                <form method="POST" action="{{ route('Viewer.profile.update') }}" id="profileForm">
                     @csrf
                     <div class="row">
                         <div class="input-box">
@@ -111,7 +111,7 @@
                     </button>
                 </div>
 
-                <form method="POST" action="{{ route('Viewer.updateEmail') }}" class="expandable hidden"
+                <form method="POST" action="{{ route('Viewer.profile.updateEmail') }}" class="expandable hidden"
                     id="emailForm">
                     @csrf
 

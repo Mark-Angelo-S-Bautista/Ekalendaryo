@@ -35,7 +35,8 @@ class ViewerController extends Controller
         $now = now();
 
         // Fetch events directly from DB, excluding cancelled and completed
-        $events = Event::whereNotIn('status', ['completed', 'cancelled'])
+        $events = Event::with('attendees', 'user')
+            ->whereNotIn('status', ['completed', 'cancelled'])
             ->orderBy('date', 'asc')
             ->get();
 
@@ -177,26 +178,72 @@ class ViewerController extends Controller
     public function notifications()
     {
         $user = Auth::user();
+        $userTitle = strtolower($user->title ?? '');
 
-        $events = Event::where(function ($query) use ($user) {
+        $events = Event::where(function ($query) use ($user, $userTitle) {
 
-                // Same department
-                $query->where('department', $user->department)
-
-                    // OR targeted department
-                    ->orWhereJsonContains('target_department', $user->department)
-
-                    // OR targeted year levels
-                    ->orWhere(function ($q) use ($user) {
-                        $q->whereNotNull('target_year_levels')
-                        ->whereJsonContains('target_year_levels', $user->yearlevel);
+                if ($userTitle === 'faculty') {
+                    // Faculty should see events where they are specifically targeted
+                    $query->whereRaw("JSON_CONTAINS(target_faculty, ?)", [json_encode((string)$user->id)]);
+                } elseif ($userTitle === 'student' || $userTitle === 'viewer') {
+                    // Students should see events targeting their section and year level
+                    $query->where(function($q) use ($user) {
+                        $q->where('department', $user->department)
+                          ->orWhereJsonContains('target_department', $user->department);
                     });
-
+                } else {
+                    // For other users
+                    $query->where('department', $user->department)
+                        ->orWhereJsonContains('target_department', $user->department)
+                        ->orWhere(function ($q) use ($user) {
+                            $q->whereNotNull('target_year_levels')
+                            ->whereJsonContains('target_year_levels', $user->yearlevel);
+                        });
+                }
             })
             // Order by most recently updated first, fallback to created_at
             ->orderBy('created_at', 'desc')
             ->orderBy('updated_at', 'asc')
-            ->paginate(3); // Adjust pagination as needed
+            ->get();
+
+        // Filter students by section and year level
+        if ($userTitle === 'student' || $userTitle === 'viewer') {
+            $userSection = $user->section ? strtolower(trim($user->section)) : null;
+            $userYearLevel = $user->yearlevel ? strtolower(str_replace(' ', '', $user->yearlevel)) : null;
+
+            $events = $events->filter(function($event) use ($userSection, $userYearLevel) {
+                $targetSections = is_string($event->target_sections)
+                    ? json_decode($event->target_sections, true) ?? []
+                    : ($event->target_sections ?? []);
+                
+                $targetYearLevels = is_string($event->target_year_levels)
+                    ? json_decode($event->target_year_levels, true) ?? []
+                    : ($event->target_year_levels ?? []);
+
+                // Check section match
+                $sectionMatch = empty($targetSections) || 
+                    ($userSection && in_array($userSection, array_map('strtolower', array_map('trim', $targetSections))));
+
+                // Check year level match
+                $yearLevelMatch = empty($targetYearLevels) || 
+                    ($userYearLevel && in_array($userYearLevel, array_map(function($lvl) {
+                        return strtolower(str_replace(' ', '', $lvl));
+                    }, $targetYearLevels)));
+
+                return $sectionMatch && $yearLevelMatch;
+            });
+        }
+
+        // Paginate manually
+        $perPage = 3;
+        $currentPage = LengthAwarePaginator::resolveCurrentPage();
+        $events = new LengthAwarePaginator(
+            $events->forPage($currentPage, $perPage)->values(),
+            $events->count(),
+            $perPage,
+            $currentPage,
+            ['path' => LengthAwarePaginator::resolveCurrentPath()]
+        );
 
         return view('Viewer.notifications', compact('events'));
     }
@@ -313,7 +360,13 @@ class ViewerController extends Controller
                 ->pluck('event_id')
                 ->toArray();
 
-        return view('Viewer.history', compact('events', 'submittedFeedbackIds'));
+            // Get events the user has attended
+            $attendedEventIds = \DB::table('event_attendees')
+                ->where('user_id', $user->id)
+                ->pluck('event_id')
+                ->toArray();
+
+        return view('Viewer.history', compact('events', 'submittedFeedbackIds', 'attendedEventIds'));
     }
 
 

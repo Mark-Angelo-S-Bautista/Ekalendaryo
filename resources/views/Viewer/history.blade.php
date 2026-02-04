@@ -72,12 +72,24 @@
 
                             {{-- Feedback Button --}}
                             <span>
+                                @php
+                                    $hasAttended = in_array($event->id, $attendedEventIds);
+                                    $hasSubmittedFeedback = in_array($event->id, $submittedFeedbackIds);
+                                @endphp
+
                                 <button
                                     class="feedback-btn 
-                                    {{ in_array($event->id, $submittedFeedbackIds) ? 'submitted' : '' }}"
+                                    {{ $hasSubmittedFeedback ? 'submitted' : '' }}"
                                     data-event-id="{{ $event->id }}" data-event-title="{{ $event->title }}"
-                                    @if (in_array($event->id, $submittedFeedbackIds)) disabled style="background-color: #22c55e;" @endif>
-                                    {{ in_array($event->id, $submittedFeedbackIds) ? '✔️ Feedback Submitted' : $event->feedback_count ?? '💬 Feedback' }}
+                                    @if (!$hasAttended || $hasSubmittedFeedback) disabled 
+                                        style="background-color: {{ $hasSubmittedFeedback ? '#22c55e' : '#cccccc' }}; cursor: not-allowed;" @endif>
+                                    @if ($hasSubmittedFeedback)
+                                        ✔️ Feedback Submitted
+                                    @elseif (!$hasAttended)
+                                        🔒 Feedback
+                                    @else
+                                        💬 Feedback
+                                    @endif
                                 </button>
                             </span>
                         </div>
