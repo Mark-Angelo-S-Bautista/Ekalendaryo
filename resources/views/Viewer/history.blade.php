@@ -22,7 +22,12 @@
                     <div class="event-card" data-type="{{ $event->department }}">
                         <div class="event-header">
                             <h3>{{ $event->title }}</h3>
-                            <span class="tag">{{ $event->department }}</span>
+                            @if ($event->department === 'OFFICES')
+                                <span class="tag"
+                                    style="background-color: #22c55e;">{{ $event->user->office_name ?? 'Office' }}</span>
+                            @else
+                                <span class="tag" style="background-color: #22c55e;">{{ $event->department }}</span>
+                            @endif
                             <span class="status completed">completed</span>
                         </div>
 

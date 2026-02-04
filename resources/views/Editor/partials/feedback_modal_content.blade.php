@@ -1,13 +1,14 @@
 @if ($feedbacks->count())
     <div class="feedback-summary">
         <p><strong>Total Feedbacks:</strong> {{ $feedbacks->total() }}</p>
-        <p><strong>Average Rating:</strong> {{ number_format($averageRating, 1) }} / 5</p>
+        <p><strong>Average Rating:</strong> {{ number_format($averageRating, 1) }} / 5★</p>
     </div>
     <ul class="feedback-list">
         @foreach ($feedbacks as $feedback)
             <div class="feedback-item">
                 <div class="feedback-header">
-                    👤<strong class="feedback-user">{{ trim($feedback->user->name) }}</strong>
+                    👤<strong class="feedback-user">{{ trim($feedback->user->name) }} /
+                        {{ $feedback->user->title }}</strong>
                     <span class="feedback-rating">
                         @for ($i = 1; $i <= 5; $i++)
                             <span class="{{ $i <= $feedback->rating ? 'filled' : '' }}"
