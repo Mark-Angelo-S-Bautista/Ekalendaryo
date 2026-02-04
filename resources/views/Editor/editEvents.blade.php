@@ -237,10 +237,9 @@
                             @if ($yearNumbers[$index] <= $userMaxYearLevels)
                                 <div class="checkbox-inline">
                                     <input type="checkbox" name="target_year_levels[]" value="{{ $year }}"
-                                        class="syear" {{ in_array($year, $levels) ? 'checked' : '' }}
-                                        @if (auth()->user()->title === 'Offices' && in_array($year, $levels)) disabled @endif>
+                                        class="syear" {{ in_array($year, $levels) ? 'checked disabled' : '' }}>
                                     {{ $year }}
-                                    @if (auth()->user()->title === 'Offices' && in_array($year, $levels))
+                                    @if (in_array($year, $levels))
                                         <input type="hidden" name="target_year_levels[]"
                                             value="{{ $year }}">
                                     @endif
