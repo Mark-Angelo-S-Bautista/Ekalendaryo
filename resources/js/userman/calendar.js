@@ -250,9 +250,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     ${status.toUpperCase()}
                 </span>
             </div>
-            <div class="calendar_event-description">
-                ${eventData.description || "No description provided."}
-            </div>
             <div class="calendar_event-info">
                 <div>📅 ${formatShortDate(eventData.date)}</div>
                 <div>⏰ ${eventData.timeStart} - ${eventData.timeEnd}</div>

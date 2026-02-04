@@ -191,12 +191,12 @@
                             <div class="dashboard_event_details">
                                 📅 ${date} &nbsp;&nbsp; 🕓 ${startTime} - ${endTime} &nbsp;&nbsp; 📍 ${event.location || 'N/A'}
                             </div>
-                            <div class="dashboard_event_details">👥 ${yearLevelsText}</div>
-                            ${sectionsText ? `<div class="dashboard_event_details">🏫 ${sectionsText}</div>` : ''}
+                            <div class="dashboard_event_details"><strong>Yearlevel:</strong> ${yearLevelsText}</div>
+                            ${sectionsText ? `<div class="dashboard_event_details"><strong>Section:</strong> ${sectionsText}</div>` : ''}
                             <div class="dashboard_event_details" style="max-width:100%; white-space:normal; word-break:break-word; overflow-wrap:anywhere;">
                                 ${event.description || 'No description provided.'}
                             </div>
-                            <div class="dashboard_event_details">SY.${event.school_year || 'N/A'}</div>
+                            <div class="dashboard_event_details"><strong>SY.${event.school_year || 'N/A'}</strong></div>
                             <div class="dashboard_event_tags">
                                 <span class="dashboard_tag dashboard_tag_admin">${departmentTag}</span>
                                 <span class="dashboard_tag ${status.class}">${status.text}</span>

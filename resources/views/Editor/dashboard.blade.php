@@ -52,6 +52,10 @@
                     @foreach ($events as $event)
                         <div class="dashboard_event_card">
                             <div class="dashboard_event_title">{{ $event->title }}</div>
+                            <div class="dashboard_event_details"
+                                style="max-width:100%; white-space:normal; word-break:break-word; overflow-wrap:anywhere;">
+                                {{ $event->description ?? 'No description provided.' }}
+                            </div>
 
                             <div class="dashboard_event_details">
                                 📅 {{ \Carbon\Carbon::parse($event->date)->format('n/j/Y') }}
@@ -61,7 +65,7 @@
                             </div>
 
                             <div class="dashboard_event_details">
-                                👤
+                                <strong>Yearlevel:</strong>
                                 @if (is_array($event->target_year_levels) && count($event->target_year_levels) > 0)
                                     @foreach ($event->target_year_levels as $yearLevel)
                                         {{ $yearLevel . ',' }}
@@ -70,12 +74,17 @@
                                     {{ $event->target_users }}
                                 @endif
                             </div>
-
-                            <div class="dashboard_event_details"
-                                style="max-width:100%; white-space:normal; word-break:break-word; overflow-wrap:anywhere;">
-                                {{ $event->description ?? 'No description provided.' }}
+                            <div class="dashboard_event_details">
+                                <strong>Section:</strong>
+                                @if (is_array($event->target_sections) && count($event->target_sections) > 0)
+                                    @foreach ($event->target_sections as $sections)
+                                        {{ $sections . ',' }}
+                                    @endforeach
+                                @else
+                                    {{ $event->target_users }}
+                                @endif
                             </div>
-                            <div class="dashboard_event_details">SY.{{ $event->school_year }}</div>
+                            <div class="dashboard_event_details"><strong>SY.{{ $event->school_year }}</strong></div>
 
                             <div class="dashboard_event_details">
                                 👥 {{ $event->attendees()->count() }} attending

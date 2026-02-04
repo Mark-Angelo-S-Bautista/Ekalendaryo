@@ -32,6 +32,10 @@
                         @foreach ($events as $event)
                             <div class="dashboard_event_card">
                                 <div class="dashboard_event_title">{{ $event->title }}</div>
+                                <div class="dashboard_event_details"
+                                    style="max-width:100%; white-space:normal; word-break:break-word; overflow-wrap:anywhere;">
+                                    {{ $event->description ?? 'No description provided.' }}
+                                </div>
                                 <div class="dashboard_event_details">
                                     📅 {{ \Carbon\Carbon::parse($event->date)->format('n/j/Y') }}
                                     &nbsp;&nbsp; 🕓 {{ \Carbon\Carbon::parse($event->start_time)->format('g:i A') }}
@@ -39,7 +43,7 @@
                                     &nbsp;&nbsp; 📍 {{ $event->location }}
                                 </div>
                                 <div class="dashboard_event_details">
-                                    👥
+                                    <strong>Yearlevels:</strong>
                                     @if (is_array($event->target_year_levels) && count($event->target_year_levels) > 0)
                                         @foreach ($event->target_year_levels as $yearLevel)
                                             {{ $yearLevel . ',' }}
@@ -58,14 +62,12 @@
                                 @endphp
                                 @if (!empty($eventSections))
                                     <div class="dashboard_event_details">
-                                        🏫 {{ implode(', ', $eventSections) }}
+                                        <strong>Section:</strong> {{ implode(', ', $eventSections) }}
                                     </div>
                                 @endif
-                                <div class="dashboard_event_details"
-                                    style="max-width:100%; white-space:normal; word-break:break-word; overflow-wrap:anywhere;">
-                                    {{ $event->description ?? 'No description provided.' }}
+
+                                <div class="dashboard_event_details"><strong>SY.{{ $event->school_year }}</strong>
                                 </div>
-                                <div class="dashboard_event_details">SY.{{ $event->school_year }}</div>
                                 <div class="dashboard_event_tags">
                                     <span class="dashboard_tag dashboard_tag_admin">
                                         @if ($event->department === 'OFFICES')
