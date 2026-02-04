@@ -257,7 +257,9 @@ $userTitle = $user->title ?? null;
                                                 <label class="checkbox-item">
                                                     <input type="checkbox" name="target_faculty[]"
                                                         value="{{ $f->id }}">
-                                                    <span>{{ $f->name }} ({{ $f->department }})</span>
+                                                    <span>{{ $f->name }}
+                                                        ({{ $f->department === 'OFFICES' ? $f->office_name ?? 'Office' : $f->department }})
+                                                    </span>
                                                 </label>
                                             @endforeach
                                         </div>

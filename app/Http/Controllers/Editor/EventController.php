@@ -618,8 +618,8 @@ class EventController extends Controller
 
         $departments = Department::all();
 
-        // ✅ Get all faculty
-        $faculty = User::where('title', 'Faculty')->get();
+        // ✅ Get all users except Students for faculty modal
+        $faculty = User::where('title', '!=', 'Student')->get();
 
         // ✅ Sections (filtered for non-Offices; full map for Offices)
         $user = Auth::user();
@@ -669,8 +669,8 @@ class EventController extends Controller
 
         $departments = Department::all();
 
-        // ✅ Get all faculty
-        $faculty = User::where('title', 'Faculty')->get();
+        // ✅ Get all users except Students for faculty modal
+        $faculty = User::where('title', '!=', 'Student')->get();
 
         // ✅ Sections (filtered for non-Offices; full map for Offices)
         $user = Auth::user();

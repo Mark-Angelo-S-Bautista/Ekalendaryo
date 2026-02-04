@@ -306,12 +306,14 @@
             <div id="facultyModalOverlay" class="custom-modal-overlay">
                 <div class="custom-modal">
                     <h3>Select Faculty</h3>
-                    <div class="checkbox-grid">
+                    <div class="checkbox-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                         @foreach ($faculty as $f)
                             <label class="checkbox-item">
                                 <input type="checkbox" name="target_faculty[]" value="{{ $f->id }}"
                                     {{ in_array($f->id, $selectedFaculty) ? 'checked disabled' : '' }}>
-                                <span>{{ $f->name }} ({{ $f->department }})</span>
+                                <span>{{ $f->name }}
+                                    ({{ $f->department === 'OFFICES' ? $f->office_name ?? 'Office' : $f->department }})
+                                </span>
                             </label>
                         @endforeach
                     </div>
