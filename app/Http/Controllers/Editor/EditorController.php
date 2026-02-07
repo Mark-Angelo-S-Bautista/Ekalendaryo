@@ -84,11 +84,20 @@ class EditorController extends Controller
             // Check if user is targeted by target_users
             $targetUsers = $event->target_users;
             if (!empty($targetUsers)) {
-                // Check if user's title matches target_users
-                if ($targetUsers === 'Faculty' && $user->title !== 'Student') {
-                    return true;
+                // For Department Heads: only show Faculty events if department matches
+                if ($user->title === 'Department Head') {
+                    if ($targetUsers === 'Department Heads') {
+                        return true;
+                    }
+                    if ($targetUsers === 'Faculty' && $event->department === $dept) {
+                        return true;
+                    }
+                    // Don't show other Faculty events or Student events to Dept Heads
+                    return false;
                 }
-                if ($targetUsers === 'Department Heads' && $user->title === 'Department Head') {
+                
+                // For other users (Faculty, Students, etc.)
+                if ($targetUsers === 'Faculty' && $user->title !== 'Student') {
                     return true;
                 }
                 if ($targetUsers === 'Students' && $user->title === 'Student') {
@@ -204,11 +213,23 @@ class EditorController extends Controller
 
             // Check if target_users matches user title
             $targetUsers = $event->target_users ?? '';
-            if (!empty($targetUsers) && (
-                $targetUsers === $user->title || 
-                stripos($targetUsers, $user->title) !== false
-            )) {
-                return true;
+            if (!empty($targetUsers)) {
+                // For Department Heads: only show Faculty events if department matches
+                if ($user->title === 'Department Head') {
+                    if ($targetUsers === 'Department Heads') {
+                        return true;
+                    }
+                    if ($targetUsers === 'Faculty' && $event->department === $userDept) {
+                        return true;
+                    }
+                    // Don't show other events unless directly targeted
+                    return false;
+                }
+                
+                // For other users
+                if ($targetUsers === $user->title || stripos($targetUsers, $user->title) !== false) {
+                    return true;
+                }
             }
 
             return false;
@@ -663,11 +684,23 @@ class EditorController extends Controller
 
                 // Check if target_users matches user title
                 $targetUsers = $event->target_users ?? '';
-                if (!empty($targetUsers) && (
-                    $targetUsers === $user->title || 
-                    stripos($targetUsers, $user->title) !== false
-                )) {
-                    return true;
+                if (!empty($targetUsers)) {
+                    // For Department Heads: only show Faculty events if department matches
+                    if ($user->title === 'Department Head') {
+                        if ($targetUsers === 'Department Heads') {
+                            return true;
+                        }
+                        if ($targetUsers === 'Faculty' && $event->department === $user->department) {
+                            return true;
+                        }
+                        // Don't show other events to Dept Heads unless directly targeted
+                        return false;
+                    }
+                    
+                    // For other office users
+                    if ($targetUsers === $user->title || stripos($targetUsers, $user->title) !== false) {
+                        return true;
+                    }
                 }
 
                 return false;

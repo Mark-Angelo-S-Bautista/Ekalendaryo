@@ -325,14 +325,20 @@ class ViewerController extends Controller
                 };
 
                 if ($userTitle === 'faculty') {
-                    if (
-                        $targetUsers !== 'department heads' && (
-                            $event->department === $userDept ||
-                            ($event->department === 'OFFICES' && is_array($targetDepartments) && in_array($userDept, $targetDepartments))
-                        )
-                    ) {
+                    // Check if this faculty member is specifically targeted in target_faculty
+                    $targetFaculty = is_string($event->target_faculty)
+                        ? json_decode($event->target_faculty, true) ?? []
+                        : ($event->target_faculty ?? []);
+                    
+                    if (is_array($targetFaculty) && in_array(auth()->id(), $targetFaculty)) {
                         return true;
                     }
+                    
+                    // Also check if target_users is "Faculty" and department matches
+                    if ($targetUsers === 'faculty' && $event->department === $userDept) {
+                        return true;
+                    }
+                    
                     return false;
                 }
 
