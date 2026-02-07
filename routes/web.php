@@ -31,7 +31,7 @@ Route::get('/password/change', function () {
 })->name('password.change');
 
 Route::post('/password/change', [PasswordResetController::class, 'changePassword'])
-    ->name('password.change');
+    ->name('password.changes');
 
 Route::get('/profile/verify-email-change/{token}',[EditorController::class, 'verifyNewEmail'])->name('profile.verifyNewEmail');
 Route::get('/profile/verify-email-change/{token}',[UserManagementController::class, 'verifyNewEmail'])->name('profile.verifyNewEmail');
@@ -82,7 +82,7 @@ Route::middleware(['auth', 'backhistory'])->group(function () {
         Route::post('/profile/update-email',[UserManagementController::class, 'updateEmail'])->name('profile.updateEmail');
 
         Route::get('/users', [UserManagementController::class, 'users'])->name('users');
-        Route::get('/users/search', [UserManagementController::class, 'search'])->name('search');
+        Route::get('/users/search', [UserManagementController::class, 'search'])->name('searches');
         Route::post('/adduser', [UserManagementController::class, 'adduser'])->name('adduser');
         Route::post('/addDepartment', [UserManagementController::class, 'addDepartment'])->name('adddepartment');
         // Route::delete('/deletedepartment/{id}', [UserManagementController::class, 'deleteDepartment'])->name('deletedepartment');

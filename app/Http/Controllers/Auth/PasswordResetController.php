@@ -62,7 +62,7 @@ class PasswordResetController extends Controller
         // Store user ID in session temporarily
         session(['otp_user' => $user->id]);
 
-        return redirect()->route('password.change');
+        return redirect()->route('password.changes');
     }
 
     public function changePassword(Request $request)
