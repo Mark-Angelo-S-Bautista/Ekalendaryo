@@ -732,10 +732,189 @@
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             // ------------------------------
-            // EDIT EVENT CONFIRMATION
+            // CONFLICT CHECKING FOR EDIT EVENT
             // ------------------------------
+            const dateInput = document.getElementById('eventDate');
+            const startInput = document.getElementById('startTime');
+            const endInput = document.getElementById('endTime');
+            const locationSelect = document.getElementById('eventLocation');
+            const otherInput = document.getElementById('otherLocation');
+            const updateBtn = document.querySelector('.btn-update');
             const editEventForm = document.querySelector(
                 'form[action^="{{ route('Editor.update', $event->id) }}"]');
+
+            // Create the warning divs
+            const warningDiv = document.createElement('div');
+            warningDiv.classList.add('conflict-warning');
+            warningDiv.style.color = 'red';
+            warningDiv.style.marginTop = '10px';
+            warningDiv.style.fontWeight = '500';
+            warningDiv.style.display = 'none';
+            if (editEventForm) editEventForm.appendChild(warningDiv);
+
+            const userWarningDiv = document.createElement('div');
+            userWarningDiv.classList.add('user-conflict-warning');
+            userWarningDiv.style.color = 'orange';
+            userWarningDiv.style.marginTop = '10px';
+            userWarningDiv.style.fontWeight = '500';
+            userWarningDiv.style.display = 'none';
+            if (editEventForm) editEventForm.appendChild(userWarningDiv);
+
+            // Get form fields for user conflict checking
+            const targetUsersSelect = document.getElementById('targetUsers');
+            const deptCheckboxes = document.querySelectorAll('.dept-checkbox');
+
+            function checkConflict() {
+                const date = dateInput.value;
+                const start = startInput.value;
+                const end = endInput.value;
+                const location = locationSelect.value === 'Other' ? otherInput.value.trim() : locationSelect.value;
+
+                if (!date || !start || !end || !location) {
+                    warningDiv.style.display = 'none';
+                    warningDiv.innerHTML = '';
+                    return;
+                }
+
+                fetch("{{ route('Editor.checkConflict') }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        },
+                        body: JSON.stringify({
+                            date,
+                            start_time: start,
+                            end_time: end,
+                            location,
+                            event_id: {{ $event->id }}
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.conflict) {
+                            updateBtn.disabled = true;
+                            warningDiv.style.display = 'block';
+                            warningDiv.innerHTML = `
+                            ⚠️ <b>Schedule Conflict!</b><br>
+                            Event: <b>${data.event.title}</b><br>
+                            Department: ${data.event.department}<br>
+                            Date: ${data.event.date}<br>
+                            Time: ${data.event.start_time} - ${data.event.end_time}<br>
+                            Location: ${data.event.location}
+                        `;
+                        } else {
+                            warningDiv.style.display = 'none';
+                            warningDiv.innerHTML = '';
+                            if (userWarningDiv.style.display === 'none') {
+                                updateBtn.disabled = false;
+                            }
+                        }
+                    })
+                    .catch(err => console.error('Error checking conflict:', err));
+            }
+
+            function checkUserConflict() {
+                const date = dateInput.value;
+                const start = startInput.value;
+                const end = endInput.value;
+
+                if (!date || !start || !end) {
+                    userWarningDiv.style.display = 'none';
+                    return;
+                }
+
+                const targetUsers = targetUsersSelect ? targetUsersSelect.value : '';
+                const targetDepartments = [...deptCheckboxes]
+                    .filter(cb => cb.checked)
+                    .map(cb => cb.value);
+
+                const targetYearLevels = [...document.querySelectorAll(
+                        'input[name="target_year_levels[]"]:checked')]
+                    .map(cb => cb.value);
+
+                const targetSections = [...document.querySelectorAll('input[name="target_sections[]"]:checked')]
+                    .map(cb => cb.value);
+
+                const targetFaculty = [...document.querySelectorAll('input[name="target_faculty[]"]:checked')]
+                    .map(cb => cb.value);
+
+                if (!targetUsers && targetDepartments.length === 0 && targetFaculty.length === 0) {
+                    userWarningDiv.style.display = 'none';
+                    return;
+                }
+
+                fetch("{{ route('Editor.checkUserConflict') }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        },
+                        body: JSON.stringify({
+                            date,
+                            start_time: start,
+                            end_time: end,
+                            target_users: targetUsers,
+                            target_department: targetDepartments,
+                            target_year_levels: targetYearLevels,
+                            target_sections: targetSections,
+                            target_faculty: targetFaculty,
+                            event_id: {{ $event->id }}
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.conflict) {
+                            updateBtn.disabled = true;
+                            userWarningDiv.style.display = 'block';
+                            const conflictType = data.conflict_type === 'faculty' ? 'Faculty' : 'Students';
+                            userWarningDiv.innerHTML = `
+                            ⚠️ <b>User Conflict Detected!</b><br>
+                            The following ${conflictType.toLowerCase()} are already scheduled in another event:<br>
+                            <b>${data.conflicting_users}</b><br><br>
+                            Conflicting Event: <b>${data.event.title}</b><br>
+                            Department: ${data.event.department}<br>
+                            Date: ${data.event.date}<br>
+                            Time: ${data.event.start_time} - ${data.event.end_time}<br>
+                            Location: ${data.event.location}
+                        `;
+                        } else {
+                            userWarningDiv.style.display = 'none';
+                            userWarningDiv.innerHTML = '';
+                            if (warningDiv.style.display === 'none') {
+                                updateBtn.disabled = false;
+                            }
+                        }
+                    })
+                    .catch(err => console.error('Error checking user conflict:', err));
+            }
+
+            // Listen for changes
+            [dateInput, startInput, endInput, locationSelect, otherInput].forEach(el => {
+                if (el) {
+                    el.addEventListener('change', checkConflict);
+                    el.addEventListener('input', checkConflict);
+                }
+            });
+
+            [dateInput, startInput, endInput].forEach(el => {
+                if (el) el.addEventListener('change', checkUserConflict);
+            });
+
+            if (targetUsersSelect) targetUsersSelect.addEventListener('change', checkUserConflict);
+            deptCheckboxes.forEach(cb => cb.addEventListener('change', checkUserConflict));
+
+            document.addEventListener('change', (e) => {
+                if (e.target.name === 'target_year_levels[]' ||
+                    e.target.name === 'target_sections[]' ||
+                    e.target.name === 'target_faculty[]') {
+                    checkUserConflict();
+                }
+            });
+
+            // ------------------------------
+            // EDIT EVENT CONFIRMATION
+            // ------------------------------
             if (editEventForm) {
                 editEventForm.addEventListener('submit', function(e) {
                     const confirmed = confirm(

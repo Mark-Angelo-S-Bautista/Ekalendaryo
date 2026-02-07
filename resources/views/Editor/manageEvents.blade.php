@@ -600,7 +600,7 @@ $userTitle = $user->title ?? null;
                                 const otherInput = document.getElementById('otherLocation');
                                 const createBtn = document.querySelector('.btn-create');
 
-                                // Create the warning div
+                                // Create the warning divs
                                 const warningDiv = document.createElement('div');
                                 warningDiv.classList.add('conflict-warning');
                                 warningDiv.style.color = 'red';
@@ -608,6 +608,18 @@ $userTitle = $user->title ?? null;
                                 warningDiv.style.fontWeight = '500';
                                 warningDiv.style.display = 'none';
                                 document.querySelector('.modal form').appendChild(warningDiv);
+
+                                const userWarningDiv = document.createElement('div');
+                                userWarningDiv.classList.add('user-conflict-warning');
+                                userWarningDiv.style.color = 'orange';
+                                userWarningDiv.style.marginTop = '10px';
+                                userWarningDiv.style.fontWeight = '500';
+                                userWarningDiv.style.display = 'none';
+                                document.querySelector('.modal form').appendChild(userWarningDiv);
+
+                                // Get form fields for user conflict checking
+                                const targetUsersSelect = document.getElementById('targetUsers');
+                                const deptCheckboxes = document.querySelectorAll('.dept-checkbox');
 
                                 function checkConflict() {
                                     const date = dateInput.value;
@@ -652,18 +664,117 @@ $userTitle = $user->title ?? null;
                                                 Location: ${data.event.location}
                                             `;
                                             } else {
-                                                createBtn.disabled = false;
                                                 warningDiv.style.display = 'none';
                                                 warningDiv.innerHTML = '';
+                                                // Only enable if no user conflict either
+                                                if (userWarningDiv.style.display === 'none') {
+                                                    createBtn.disabled = false;
+                                                }
                                             }
                                         })
                                         .catch(err => console.error('Error checking conflict:', err));
                                 }
 
+                                function checkUserConflict() {
+                                    const date = dateInput.value;
+                                    const start = startInput.value;
+                                    const end = endInput.value;
+
+                                    // Skip if date/time not filled
+                                    if (!date || !start || !end) {
+                                        userWarningDiv.style.display = 'none';
+                                        return;
+                                    }
+
+                                    // Collect user targeting data
+                                    const targetUsers = targetUsersSelect ? targetUsersSelect.value : '';
+                                    const targetDepartments = [...deptCheckboxes]
+                                        .filter(cb => cb.checked)
+                                        .map(cb => cb.value);
+
+                                    const targetYearLevels = [...document.querySelectorAll(
+                                            'input[name="target_year_levels[]"]:checked')]
+                                        .map(cb => cb.value);
+
+                                    const targetSections = [...document.querySelectorAll('input[name="target_sections[]"]:checked')]
+                                        .map(cb => cb.value);
+
+                                    const targetFaculty = [...document.querySelectorAll('input[name="target_faculty[]"]:checked')]
+                                        .map(cb => cb.value);
+
+                                    // Only check if we have targeting data
+                                    if (!targetUsers && targetDepartments.length === 0 && targetFaculty.length === 0) {
+                                        userWarningDiv.style.display = 'none';
+                                        return;
+                                    }
+
+                                    fetch("{{ route('Editor.checkUserConflict') }}", {
+                                            method: 'POST',
+                                            headers: {
+                                                'Content-Type': 'application/json',
+                                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                            },
+                                            body: JSON.stringify({
+                                                date,
+                                                start_time: start,
+                                                end_time: end,
+                                                target_users: targetUsers,
+                                                target_department: targetDepartments,
+                                                target_year_levels: targetYearLevels,
+                                                target_sections: targetSections,
+                                                target_faculty: targetFaculty
+                                            })
+                                        })
+                                        .then(response => response.json())
+                                        .then(data => {
+                                            if (data.conflict) {
+                                                createBtn.disabled = true;
+                                                userWarningDiv.style.display = 'block';
+                                                const conflictType = data.conflict_type === 'faculty' ? 'Faculty' : 'Students';
+                                                userWarningDiv.innerHTML = `
+                                                ⚠️ <b>User Conflict Detected!</b><br>
+                                                The following ${conflictType.toLowerCase()} are already scheduled in another event:<br>
+                                                <b>${data.conflicting_users}</b><br><br>
+                                                Conflicting Event: <b>${data.event.title}</b><br>
+                                                Department: ${data.event.department}<br>
+                                                Date: ${data.event.date}<br>
+                                                Time: ${data.event.start_time} - ${data.event.end_time}<br>
+                                                Location: ${data.event.location}
+                                            `;
+                                            } else {
+                                                userWarningDiv.style.display = 'none';
+                                                userWarningDiv.innerHTML = '';
+                                                // Only enable if no location conflict either
+                                                if (warningDiv.style.display === 'none') {
+                                                    createBtn.disabled = false;
+                                                }
+                                            }
+                                        })
+                                        .catch(err => console.error('Error checking user conflict:', err));
+                                }
+
                                 // Listen for changes in all relevant inputs
                                 [dateInput, startInput, endInput, locationSelect, otherInput].forEach(el => {
                                     el.addEventListener('change', checkConflict);
-                                    el.addEventListener('input', checkConflict); // ensures typing in 'Other' triggers check
+                                    el.addEventListener('input', checkConflict);
+                                });
+
+                                // Listen for user targeting changes
+                                if (targetUsersSelect) targetUsersSelect.addEventListener('change', checkUserConflict);
+                                deptCheckboxes.forEach(cb => cb.addEventListener('change', checkUserConflict));
+
+                                // Listen for year level, section, and faculty changes
+                                document.addEventListener('change', (e) => {
+                                    if (e.target.name === 'target_year_levels[]' ||
+                                        e.target.name === 'target_sections[]' ||
+                                        e.target.name === 'target_faculty[]') {
+                                        checkUserConflict();
+                                    }
+                                });
+
+                                // Also check when date/time changes
+                                [dateInput, startInput, endInput].forEach(el => {
+                                    el.addEventListener('change', checkUserConflict);
                                 });
                             });
                         </script>

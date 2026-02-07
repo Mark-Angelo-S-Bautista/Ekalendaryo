@@ -939,11 +939,15 @@ class EventController extends Controller
             'start_time' => 'required',
             'end_time' => 'required',
             'location' => 'required|string',
+            'event_id' => 'nullable|integer', // For edit mode - exclude current event
         ]);
 
         $conflict = Event::where('date', $request->date)
             ->where('location', $request->location)
             ->where('status', '!=', 'cancelled') // ✅ Ignore cancelled events
+            ->when($request->event_id, function($q) use ($request) {
+                $q->where('id', '!=', $request->event_id);
+            })
             ->where(function ($query) use ($request) {
                 $query->whereBetween('start_time', [$request->start_time, $request->end_time])
                     ->orWhereBetween('end_time', [$request->start_time, $request->end_time])
@@ -966,6 +970,260 @@ class EventController extends Controller
                     'department' => $conflict->department,
                 ]
             ]);
+        }
+
+        return response()->json(['conflict' => false]);
+    }
+
+    // =========================================================================
+    // Check User Conflict - Prevent users from being double-booked
+    // =========================================================================
+    public function checkUserConflict(Request $request)
+    {
+        $request->validate([
+            'date' => 'required|date',
+            'start_time' => 'required',
+            'end_time' => 'required',
+            'target_users' => 'nullable|string',
+            'target_department' => 'nullable|array',
+            'target_year_levels' => 'nullable|array',
+            'target_sections' => 'nullable|array',
+            'target_faculty' => 'nullable|array',
+            'event_id' => 'nullable|integer', // For edit mode - exclude current event
+        ]);
+
+        // Find overlapping events
+        $overlappingEvents = Event::where('date', $request->date)
+            ->where('status', '!=', 'cancelled')
+            ->when($request->event_id, function($q) use ($request) {
+                $q->where('id', '!=', $request->event_id);
+            })
+            ->where(function ($query) use ($request) {
+                $query->whereBetween('start_time', [$request->start_time, $request->end_time])
+                    ->orWhereBetween('end_time', [$request->start_time, $request->end_time])
+                    ->orWhere(function ($q) use ($request) {
+                        $q->where('start_time', '<', $request->start_time)
+                            ->where('end_time', '>', $request->end_time);
+                    });
+            })
+            ->get();
+
+        if ($overlappingEvents->isEmpty()) {
+            return response()->json(['conflict' => false]);
+        }
+
+        // Check for conflicts with each overlapping event
+        foreach ($overlappingEvents as $event) {
+            // ====================================
+            // Check Faculty Conflicts
+            // ====================================
+            if ($request->target_faculty && !empty($request->target_faculty)) {
+                $existingFaculty = is_string($event->target_faculty) 
+                    ? json_decode($event->target_faculty, true) ?? []
+                    : ($event->target_faculty ?? []);
+
+                $conflictingFaculty = array_intersect($request->target_faculty, $existingFaculty);
+                
+                if (!empty($conflictingFaculty)) {
+                    // Get faculty names for the conflicting faculty
+                    $facultyNames = \App\Models\User::whereIn('id', $conflictingFaculty)
+                        ->pluck('name')
+                        ->toArray();
+
+                    return response()->json([
+                        'conflict' => true,
+                        'conflict_type' => 'faculty',
+                        'conflicting_users' => implode(', ', $facultyNames),
+                        'event' => [
+                            'title' => $event->title,
+                            'date' => $event->date,
+                            'start_time' => $event->start_time,
+                            'end_time' => $event->end_time,
+                            'location' => $event->location,
+                            'department' => $event->department,
+                        ]
+                    ]);
+                }
+            }
+
+            // ====================================
+            // Check Student Conflicts
+            // ====================================
+            if ($request->target_users === 'Students') {
+                $existingTargetUsers = strtolower($event->target_users ?? '');
+                
+                // Only check if the existing event also targets students
+                if ($existingTargetUsers === 'students') {
+                    // Get existing event's student targeting
+                    $existingDepartments = is_string($event->target_department)
+                        ? json_decode($event->target_department, true) ?? []
+                        : ($event->target_department ?? []);
+                    
+                    // If target_department is empty, use the event's main department
+                    if (empty($existingDepartments) && !empty($event->department)) {
+                        $existingDepartments = [$event->department];
+                    }
+                    
+                    $existingYearLevels = is_string($event->target_year_levels)
+                        ? json_decode($event->target_year_levels, true) ?? []
+                        : ($event->target_year_levels ?? []);
+                    
+                    $existingSections = is_string($event->target_sections)
+                        ? json_decode($event->target_sections, true) ?? []
+                        : ($event->target_sections ?? []);
+
+                    // Normalize request arrays
+                    $requestDepartments = is_array($request->target_department) 
+                        ? $request->target_department 
+                        : [];
+                    $requestYearLevels = is_array($request->target_year_levels) 
+                        ? $request->target_year_levels 
+                        : [];
+                    $requestSections = is_array($request->target_sections) 
+                        ? $request->target_sections 
+                        : [];
+
+                    // Normalize for comparison
+                    $existingDepartmentsNorm = array_map('strtoupper', array_map('trim', $existingDepartments));
+                    $requestDepartmentsNorm = array_map('strtoupper', array_map('trim', $requestDepartments));
+
+                    $existingYearLevelsNorm = array_map(function($y) {
+                        return strtoupper(str_replace(' ', '', trim($y)));
+                    }, $existingYearLevels);
+                    $requestYearLevelsNorm = array_map(function($y) {
+                        return strtoupper(str_replace(' ', '', trim($y)));
+                    }, $requestYearLevels);
+
+                    $existingSectionsNorm = array_map(function($s) {
+                        return strtoupper(trim($s));
+                    }, $existingSections);
+                    $requestSectionsNorm = array_map(function($s) {
+                        return strtoupper(trim($s));
+                    }, $requestSections);
+
+                    // Check for department overlap
+                    // If either array is empty, assume they target all departments (conflict)
+                    $deptConflict = false;
+                    if (empty($existingDepartmentsNorm) || empty($requestDepartmentsNorm)) {
+                        $deptConflict = true; // One or both target all departments
+                    } else {
+                        $deptOverlap = array_intersect($requestDepartmentsNorm, $existingDepartmentsNorm);
+                        $deptConflict = !empty($deptOverlap);
+                    }
+                    
+                    // Must have department conflict to proceed
+                    if (!$deptConflict) {
+                        continue;
+                    }
+
+                    // Check for year level overlap
+                    // If either array is empty, assume they target all year levels (conflict)
+                    $yearLevelConflict = false;
+                    if (empty($existingYearLevelsNorm) || empty($requestYearLevelsNorm)) {
+                        $yearLevelConflict = true; // One or both target all year levels
+                    } else {
+                        $yearOverlap = array_intersect($requestYearLevelsNorm, $existingYearLevelsNorm);
+                        $yearLevelConflict = !empty($yearOverlap);
+                    }
+
+                    if (!$yearLevelConflict) {
+                        continue; // No year level conflict, check next event
+                    }
+
+                    // Check for section overlap
+                    // If either array is empty, assume they target all sections (conflict)
+                    $sectionConflict = false;
+                    if (empty($existingSectionsNorm) || empty($requestSectionsNorm)) {
+                        $sectionConflict = true; // One or both target all sections
+                    } else {
+                        $sectionOverlap = array_intersect($requestSectionsNorm, $existingSectionsNorm);
+                        $sectionConflict = !empty($sectionOverlap);
+                    }
+
+                    if (!$sectionConflict) {
+                        continue; // No section conflict, check next event
+                    }
+
+
+                    // Build conflict description using original values
+                    $conflictDesc = [];
+                    
+                    // Add conflicting departments
+                    if (!empty($requestDepartments) && !empty($existingDepartments)) {
+                        $deptOverlapOriginal = [];
+                        foreach ($requestDepartments as $rd) {
+                            foreach ($existingDepartments as $ed) {
+                                if (strtoupper(trim($rd)) === strtoupper(trim($ed))) {
+                                    $deptOverlapOriginal[] = $rd;
+                                    break;
+                                }
+                            }
+                        }
+                        if (!empty($deptOverlapOriginal)) {
+                            $conflictDesc[] = implode(', ', array_unique($deptOverlapOriginal));
+                        }
+                    } else {
+                        // If either is empty, show the non-empty one or "All Departments"
+                        if (!empty($requestDepartments)) {
+                            $conflictDesc[] = implode(', ', $requestDepartments);
+                        } elseif (!empty($existingDepartments)) {
+                            $conflictDesc[] = implode(', ', $existingDepartments);
+                        } else {
+                            $conflictDesc[] = 'All Departments';
+                        }
+                    }
+                    
+                    // Add conflicting year levels
+                    if (!empty($requestYearLevels) && !empty($existingYearLevels)) {
+                        $yearConflict = [];
+                        foreach ($requestYearLevels as $ry) {
+                            foreach ($existingYearLevels as $ey) {
+                                if (strtoupper(str_replace(' ', '', trim($ry))) === strtoupper(str_replace(' ', '', trim($ey)))) {
+                                    $yearConflict[] = $ry;
+                                    break;
+                                }
+                            }
+                        }
+                        if (!empty($yearConflict)) {
+                            $conflictDesc[] = implode(', ', array_unique($yearConflict));
+                        }
+                    } else {
+                        $conflictDesc[] = 'All Year Levels';
+                    }
+                    
+                    // Add conflicting sections
+                    if (!empty($requestSections) && !empty($existingSections)) {
+                        $sectionConflictList = [];
+                        foreach ($requestSections as $rs) {
+                            foreach ($existingSections as $es) {
+                                if (strtoupper(trim($rs)) === strtoupper(trim($es))) {
+                                    $sectionConflictList[] = $rs;
+                                    break;
+                                }
+                            }
+                        }
+                        if (!empty($sectionConflictList)) {
+                            $conflictDesc[] = 'Section ' . implode(', ', array_unique($sectionConflictList));
+                        }
+                    } else {
+                        $conflictDesc[] = 'All Sections';
+                    }
+
+                    return response()->json([
+                        'conflict' => true,
+                        'conflict_type' => 'students',
+                        'conflicting_users' => implode(' - ', $conflictDesc),
+                        'event' => [
+                            'title' => $event->title,
+                            'date' => $event->date,
+                            'start_time' => $event->start_time,
+                            'end_time' => $event->end_time,
+                            'location' => $event->location,
+                            'department' => $event->department,
+                        ]
+                    ]);
+                }
+            }
         }
 
         return response()->json(['conflict' => false]);
