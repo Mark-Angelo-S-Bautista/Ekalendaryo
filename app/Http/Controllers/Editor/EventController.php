@@ -621,7 +621,7 @@ class EventController extends Controller
             ->where('status', '!=', 'cancelled')
             ->where('date', '>=', $today)
             ->orderBy('date', 'asc')
-            ->paginate(9);
+            ->paginate(4);
 
         // Calculate event counts by status (ONLY for logged-in user's events)
         // Using database status field - filtering ONLY events created by this user

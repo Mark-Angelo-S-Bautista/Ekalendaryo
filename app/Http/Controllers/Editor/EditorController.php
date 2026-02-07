@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Editor;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Validator;
 use Illuminate\Validation\ValidationException;
 use App\Models\Event;
 use App\Models\Department;
+use App\Models\Feedback;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use App\Models\ActivityLog;
@@ -170,33 +172,92 @@ class EditorController extends Controller
     public function history()
     {
         $userId = Auth::id();
+        $user = Auth::user();
 
-        // Only fetch events that are actually 'completed'
-        $events = Event::withCount('feedbacks')
+        // Events created by the user (for report upload)
+        $createdEvents = Event::withCount('feedbacks')
             ->where('user_id', $userId)
-            ->where('status', 'completed') // ✅ filter by actual status column
+            ->where('status', 'completed')
             ->orderBy('date', 'desc')
             ->get();
 
-        // --------------------------------------------------
-        // Manual Pagination
-        // --------------------------------------------------
-        $perPage = 2;
-        $currentPage = request()->get('page', 1);
+        // Events the user was invited to (for feedback submission)
+        $invitedEvents = Event::query()
+            ->where('status', 'completed')
+            ->where('user_id', '!=', $userId) // Not created by the user
+            ->orderBy('date', 'desc')
+            ->get();
 
-        $paginatedEvents = new \Illuminate\Pagination\LengthAwarePaginator(
-            $events->forPage($currentPage, $perPage),
-            $events->count(),
+        // Filter invited events based on targeting logic
+        $userTitle = strtolower($user->title ?? '');
+        $userDept = $user->department;
+
+        $invitedEvents = $invitedEvents->filter(function($event) use ($user, $userTitle, $userDept) {
+            // Check if user is in target_faculty
+            $targetFaculty = is_string($event->target_faculty)
+                ? json_decode($event->target_faculty, true) ?? []
+                : ($event->target_faculty ?? []);
+            
+            if (is_array($targetFaculty) && in_array($user->id, $targetFaculty)) {
+                return true;
+            }
+
+            // Check if target_users matches user title
+            $targetUsers = $event->target_users ?? '';
+            if (!empty($targetUsers) && (
+                $targetUsers === $user->title || 
+                stripos($targetUsers, $user->title) !== false
+            )) {
+                return true;
+            }
+
+            return false;
+        });
+
+        // Paginate created events
+        $perPage = 2;
+        $currentPage = request()->get('created_page', 1);
+        $paginatedCreatedEvents = new LengthAwarePaginator(
+            $createdEvents->forPage($currentPage, $perPage),
+            $createdEvents->count(),
             $perPage,
             $currentPage,
             [
                 'path' => request()->url(),
                 'query' => request()->query(),
+                'pageName' => 'created_page'
             ]
         );
 
+        // Paginate invited events
+        $invitedPage = request()->get('invited_page', 1);
+        $paginatedInvitedEvents = new LengthAwarePaginator(
+            $invitedEvents->forPage($invitedPage, $perPage)->values(),
+            $invitedEvents->count(),
+            $perPage,
+            $invitedPage,
+            [
+                'path' => request()->url(),
+                'query' => request()->query(),
+                'pageName' => 'invited_page'
+            ]
+        );
+
+        // Get submitted feedback IDs and attended event IDs
+        $submittedFeedbackIds = Feedback::where('user_id', $userId)
+            ->pluck('event_id')
+            ->toArray();
+
+        $attendedEventIds = DB::table('event_attendees')
+            ->where('user_id', $userId)
+            ->pluck('event_id')
+            ->toArray();
+
         return view('Editor.history', [
-            'events' => $paginatedEvents,
+            'createdEvents' => $paginatedCreatedEvents,
+            'invitedEvents' => $paginatedInvitedEvents,
+            'submittedFeedbackIds' => $submittedFeedbackIds,
+            'attendedEventIds' => $attendedEventIds,
         ]);
     }
 
@@ -465,6 +526,48 @@ class EditorController extends Controller
         });
 
         return response()->json(['events' => $events]);
+    }
+
+    public function storeFeedback(Request $request)
+    {
+        $request->validate([
+            'event_id' => 'required|exists:events,id',
+            'rating' => 'required|integer|min:1|max:5',
+            'q_satisfaction' => 'required|string',
+            'q_organization' => 'required|string',
+            'q_relevance' => 'required|string',
+            'comment' => 'required|string|max:1000',
+        ]);
+
+        $userId = auth()->id();
+        $eventId = $request->event_id;
+
+        // Check if feedback already exists
+        $existing = Feedback::where('user_id', $userId)
+                            ->where('event_id', $eventId)
+                            ->first();
+
+        if ($existing) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You have already submitted feedback for this event.'
+            ]);
+        }
+
+        Feedback::create([
+            'user_id' => $userId,
+            'event_id' => $eventId,
+            'rating' => $request->rating,
+            'q_satisfaction' => $request->q_satisfaction,
+            'q_organization' => $request->q_organization,
+            'q_relevance' => $request->q_relevance,
+            'comment' => $request->comment,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Feedback submitted successfully!'
+        ]);
     }
 
     public function attend(Event $event)

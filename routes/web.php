@@ -49,6 +49,7 @@ Route::middleware(['auth', 'backhistory'])->group(function () {
         // Route::get('/ManageEvents', [EditorController::class, 'manageEvents'])->name('manageEvents');
         Route::get('/activity_log', [EditorController::class, 'activity_log'])->name('activity_log');
         Route::get('/history', [EditorController::class, 'history'])->name('history');
+        Route::post('/events/feedback', [EditorController::class, 'storeFeedback'])->name('feedback.store');
         Route::get('/event/{event}/feedback', [EditorController::class, 'getFeedback']);
         Route::post('/events/{event}/upload-report', [EditorController::class, 'uploadReport'])->name('uploadReport');
         Route::post('/events/{event}/remove-report', [EditorController::class, 'removeReport'])->name('removeReport');
