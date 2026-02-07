@@ -44,6 +44,7 @@ Route::middleware(['auth', 'backhistory'])->group(function () {
     Route::middleware('role.editor')->prefix('editor')->name('Editor.')->group(function () {
         Route::get('/dashboard', [EditorController::class, 'dashboard'])->name('dashboard');
         Route::get('/dashboard/search', [EditorController::class, 'search'])->name('search');
+        Route::post('/dashboard/{event}/attend', [EditorController::class, 'attend'])->name('attend');
         Route::get('/calendar', [EditorController::class, 'calendar'])->name('calendar');
         // Route::get('/ManageEvents', [EditorController::class, 'manageEvents'])->name('manageEvents');
         Route::get('/activity_log', [EditorController::class, 'activity_log'])->name('activity_log');

@@ -1,4 +1,8 @@
 <x-editorLayout>
+
+    <head>
+        <meta name="csrf-token" content="{{ csrf_token() }}">
+    </head>
     <div class="dashboard_container">
         <!-- Welcome -->
         <section class="dashboard_welcome_card">
@@ -62,7 +66,7 @@
                             <div class="dashboard_event_details"><strong>SY.{{ $event->school_year }}</strong></div>
 
                             <div class="dashboard_event_details attendees_count">
-                                👥 {{ $event->attendees()->count() }} attending
+                                👥 {{ $event->attendees->count() }} attending
                             </div>
 
                             <div class="dashboard_event_tags">
@@ -99,17 +103,17 @@
                                             margin-top:10px; 
                                             margin-left:5px; 
                                             transition: all 0.3s ease;
-                                                        @if (!empty($event->is_attending) && $event->is_attending) background:#4CAF50; 
-                                                            color:#ffffff; 
-                                                            border:1px solid #4CAF50; 
-                                                            cursor:not-allowed;
-                                                        @else
-                                                            background:#ffffff; 
-                                                            color:#36415d; 
-                                                            border:1px solid #36415d; @endif
+                                            @if ($event->attendees->contains(Auth::id())) background:#4CAF50; 
+                                                color:#ffffff; 
+                                                border:1px solid #4CAF50; 
+                                                cursor:not-allowed;
+                                            @else
+                                                background:#ffffff; 
+                                                color:#36415d; 
+                                                border:1px solid #36415d; @endif
                                         "
-                                    @if (!empty($event->is_attending) && $event->is_attending) disabled @endif>
-                                    @if (!empty($event->is_attending) && $event->is_attending)
+                                    @if ($event->attendees->contains(Auth::id())) disabled @endif>
+                                    @if ($event->attendees->contains(Auth::id()))
                                         ✅ Attending
                                     @else
                                         ✋ Attend
@@ -129,65 +133,38 @@
                     const btn = this;
                     const eventId = btn.dataset.eventId;
 
-                    // store original appearance to allow revert on error
-                    const origText = btn.innerHTML;
-                    const origBackground = btn.style.backgroundColor;
-                    const origColor = btn.style.color;
-                    const origBorder = btn.style.border;
-                    const origCursor = btn.style.cursor;
-
-                    // optimistic UI: apply attending styles immediately
-                    btn.innerHTML = "✅ Attending";
-                    btn.style.backgroundColor = "#4CAF50";
-                    btn.style.color = "#ffffff";
-                    btn.style.border = "1px solid #4CAF50";
-                    btn.style.transition = "all 0.3s ease";
-                    btn.disabled = true;
-                    btn.style.cursor = 'not-allowed';
-
                     fetch(`/editor/dashboard/${eventId}/attend`, {
                             method: 'POST',
                             headers: {
                                 'X-CSRF-TOKEN': document.querySelector(
                                     'meta[name="csrf-token"]').getAttribute('content'),
-                                'Accept': 'application/json'
+                                'Accept': 'application/json',
                             },
                         })
-                        .then(res => {
-                            if (!res.ok) return res.text().then(text => {
-                                throw new Error(text || res.status);
-                            });
-                            return res.json();
-                        })
+                        .then(res => res.json())
                         .then(data => {
                             if (data.status === 'already' || data.status === 'success') {
-                                // Update attendee count (replace whole element text)
+                                btn.innerHTML = "✅ Attending";
+                                btn.style.backgroundColor = "#4CAF50";
+                                btn.style.color = "#ffffff";
+                                btn.style.border = "1px solid #4CAF50";
+                                btn.style.transition = "all 0.3s ease";
+                                btn.disabled = true;
+                                btn.style.cursor = "not-allowed";
+
+                                // Update attendee count
                                 const countDisplay = btn.closest('.dashboard_event_card')
                                     .querySelector('.attendees_count');
                                 if (countDisplay) {
                                     countDisplay.innerText =
-                                        `${data.attendees_count} attending`;
+                                        `👥 ${data.attendees_count} attending`;
                                 }
-                                // keep optimistic UI as-is
-                            } else {
-                                // unexpected response — revert appearance so user can retry
-                                btn.innerHTML = origText;
-                                btn.style.backgroundColor = origBackground;
-                                btn.style.color = origColor;
-                                btn.style.border = origBorder;
-                                btn.disabled = false;
-                                btn.style.cursor = origCursor || 'pointer';
                             }
                         })
                         .catch(err => {
-                            console.error('Attend request failed:', err);
-                            // revert appearance on error
-                            btn.innerHTML = origText;
-                            btn.style.backgroundColor = origBackground;
-                            btn.style.color = origColor;
-                            btn.style.border = origBorder;
+                            console.error(err);
                             btn.disabled = false;
-                            btn.style.cursor = origCursor || 'pointer';
+                            btn.style.cursor = 'pointer';
                         });
                 });
             });

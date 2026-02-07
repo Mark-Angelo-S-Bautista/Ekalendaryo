@@ -49,7 +49,8 @@ class EditorController extends Controller
             ->count();
 
         // Fetch all events within 30 days
-        $events = Event::whereBetween('date', [$now->toDateString(), $limitDate->toDateString()])
+        $events = Event::with('attendees', 'user')
+            ->whereBetween('date', [$now->toDateString(), $limitDate->toDateString()])
             ->orWhere(function ($q) use ($now) {
                 // Include events happening today but not finished
                 $q->where('date', $now->toDateString())
@@ -464,5 +465,22 @@ class EditorController extends Controller
         });
 
         return response()->json(['events' => $events]);
+    }
+
+    public function attend(Event $event)
+    {
+        $user = Auth::user();
+
+        // Make sure relationship uses your custom pivot table
+        if ($event->attendees()->where('user_id', $user->id)->exists()) {
+            return response()->json(['status' => 'already'], 200);
+        }
+
+        $event->attendees()->attach($user->id);
+
+        return response()->json([
+            'status' => 'success',
+            'attendees_count' => $event->attendees()->count()
+        ]);
     }
 }
