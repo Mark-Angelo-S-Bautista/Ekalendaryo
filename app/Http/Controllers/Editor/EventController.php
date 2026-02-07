@@ -614,7 +614,27 @@ class EventController extends Controller
             ->where('status', '!=', 'cancelled')
             ->where('date', '>=', $today)
             ->orderBy('date', 'asc')
-            ->paginate(3);
+            ->paginate(9);
+
+        // Calculate event counts by status
+        $upcomingCount = Event::where('user_id', $userId)
+            ->where('status', '!=', 'cancelled')
+            ->where('date', '>', $today)
+            ->count();
+
+        $ongoingCount = Event::where('user_id', $userId)
+            ->where('status', '!=', 'cancelled')
+            ->where('date', '=', $today)
+            ->count();
+
+        $completedCount = Event::where('user_id', $userId)
+            ->where('status', '!=', 'cancelled')
+            ->where('date', '<', $today)
+            ->count();
+
+        $cancelledCount = Event::where('user_id', $userId)
+            ->where('status', 'cancelled')
+            ->count();
 
         $departments = Department::all();
 
@@ -652,7 +672,7 @@ class EventController extends Controller
         // ✅ Get max_year_levels for all departments (for Offices users)
         $departmentMaxYearLevels = $departments->pluck('max_year_levels', 'department_name')->toArray();
 
-        return view('Editor.manageEvents', compact('events', 'departments', 'faculty', 'sections', 'sectionsByDepartment', 'userDepartment', 'userMaxYearLevels', 'departmentMaxYearLevels'));
+        return view('Editor.manageEvents', compact('events', 'departments', 'faculty', 'sections', 'sectionsByDepartment', 'userDepartment', 'userMaxYearLevels', 'departmentMaxYearLevels', 'upcomingCount', 'ongoingCount', 'completedCount', 'cancelledCount'));
     }
 
     // =========================================================================

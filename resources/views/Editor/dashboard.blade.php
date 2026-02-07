@@ -15,31 +15,6 @@
             </div>
         </section>
 
-        <!-- Card Count for Upcoming Ongoing Completed and Cancelled Events -->
-        <h2 style="color: #004d25;">My Events Count</h2>
-        <section class="dashboard_stats_grid">
-            <div class="dashboard_stat_card dashboard_stat_upcoming">
-                <h4>Upcoming</h4>
-                <span>{{ $upcomingCount }}</span>
-            </div>
-
-            <div class="dashboard_stat_card dashboard_stat_ongoing">
-                <h4>Ongoing</h4>
-                <span>{{ $ongoingCount }}</span>
-            </div>
-
-            <div class="dashboard_stat_card dashboard_stat_completed">
-                <h4>Completed</h4>
-                <span>{{ $completedCount }}</span>
-            </div>
-
-            <div class="dashboard_stat_card dashboard_stat_cancelled">
-                <h4>Cancelled</h4>
-                <span>{{ $cancelledCount }}</span>
-            </div>
-
-        </section>
-
         <!-- Upcoming Events -->
         <section class="dashboard_upcoming_card">
             <h3 class="dashboard_upcoming_title">Upcoming Events</h3>

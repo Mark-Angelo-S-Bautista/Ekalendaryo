@@ -702,3 +702,117 @@ button {
         gap: 4px;
     }
 }
+/* ================================
+   EVENT COUNT CARDS
+   ================================ */
+
+/* GRID CONTAINER */
+.dashboard_stats_grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px;
+    margin: 25px 0;
+}
+
+/* BASE CARD */
+.dashboard_stat_card {
+    padding: 22px;
+    border-radius: 16px;
+    background: #f9fbff;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
+
+    /* CENTER CONTENT */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease;
+}
+
+/* TITLE */
+.dashboard_stat_card h4 {
+    margin: 0 0 6px 0;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+/* NUMBER */
+.dashboard_stat_card span {
+    font-size: 2.2rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+/* -------------------------------
+   STATUS COLORS
+   ------------------------------- */
+
+/* UPCOMING — BLUE */
+.dashboard_stat_upcoming {
+    border-left: 6px solid #2b5eff;
+}
+.dashboard_stat_upcoming h4,
+.dashboard_stat_upcoming span {
+    color: #2b5eff;
+}
+
+/* ONGOING — YELLOW */
+.dashboard_stat_ongoing {
+    border-left: 6px solid #f4b400;
+}
+.dashboard_stat_ongoing h4,
+.dashboard_stat_ongoing span {
+    color: #f4b400;
+}
+
+/* COMPLETED — GREEN */
+.dashboard_stat_completed {
+    border-left: 6px solid #2e7d32;
+}
+.dashboard_stat_completed h4,
+.dashboard_stat_completed span {
+    color: #2e7d32;
+}
+
+/* CANCELLED — RED */
+.dashboard_stat_cancelled {
+    border-left: 6px solid #e53935;
+}
+.dashboard_stat_cancelled h4,
+.dashboard_stat_cancelled span {
+    color: #e53935;
+}
+
+/* -------------------------------
+   HOVER (DESKTOP ONLY)
+   ------------------------------- */
+.dashboard_stat_card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+}
+
+/* -------------------------------
+   MOBILE RESPONSIVE
+   ------------------------------- */
+@media (max-width: 600px) {
+    .dashboard_stats_grid {
+        gap: 14px;
+    }
+
+    .dashboard_stat_card {
+        padding: 18px;
+        border-radius: 14px;
+    }
+
+    .dashboard_stat_card h4 {
+        font-size: 0.95rem;
+    }
+
+    .dashboard_stat_card span {
+        font-size: 1.8rem;
+    }
+}

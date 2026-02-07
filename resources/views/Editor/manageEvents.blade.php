@@ -18,6 +18,29 @@
                     <button class="create-btn" id="openModalBtn">+ Create Event</button>
                 </header>
 
+                <!-- Card Count for Upcoming Ongoing Completed and Cancelled Events -->
+                <section class="dashboard_stats_grid">
+                    <div class="dashboard_stat_card dashboard_stat_upcoming">
+                        <h4>Upcoming</h4>
+                        <span>{{ $upcomingCount }}</span>
+                    </div>
+
+                    <div class="dashboard_stat_card dashboard_stat_ongoing">
+                        <h4>Ongoing</h4>
+                        <span>{{ $ongoingCount }}</span>
+                    </div>
+
+                    <div class="dashboard_stat_card dashboard_stat_completed">
+                        <h4>Completed</h4>
+                        <span>{{ $completedCount }}</span>
+                    </div>
+
+                    <div class="dashboard_stat_card dashboard_stat_cancelled">
+                        <h4>Cancelled</h4>
+                        <span>{{ $cancelledCount }}</span>
+                    </div>
+                </section>
+
                 <!-- Create Event POP UP -->
                 <div class="modal-overlay" id="modalOverlay">
                     <div class="modal">
