@@ -606,7 +606,14 @@ class EventController extends Controller
     // =========================================================================
     public function index()
     {
+        // Get the current authenticated user's ID
         $userId = Auth::id();
+        
+        // Ensure user is authenticated
+        if (!$userId) {
+            return redirect()->route('login');
+        }
+        
         $today = Carbon::today('Asia/Manila')->toDateString();
 
         $events = Event::with('user')
@@ -616,25 +623,23 @@ class EventController extends Controller
             ->orderBy('date', 'asc')
             ->paginate(9);
 
-        // Calculate event counts by status
-        $upcomingCount = Event::where('user_id', $userId)
-            ->where('status', '!=', 'cancelled')
-            ->where('date', '>', $today)
-            ->count();
+        // Calculate event counts by status (ONLY for logged-in user's events)
+        // Using database status field - filtering ONLY events created by this user
+        
+        // Base query for all counts - only events by this user
+        $userEventsQuery = Event::where('user_id', $userId);
+        
+        // Upcoming: events with status 'upcoming' made by this user
+        $upcomingCount = (clone $userEventsQuery)->where('status', 'upcoming')->count();
 
-        $ongoingCount = Event::where('user_id', $userId)
-            ->where('status', '!=', 'cancelled')
-            ->where('date', '=', $today)
-            ->count();
+        // Ongoing: events with status 'ongoing' made by this user
+        $ongoingCount = (clone $userEventsQuery)->where('status', 'ongoing')->count();
 
-        $completedCount = Event::where('user_id', $userId)
-            ->where('status', '!=', 'cancelled')
-            ->where('date', '<', $today)
-            ->count();
+        // Completed: events with status 'completed' made by this user
+        $completedCount = (clone $userEventsQuery)->where('status', 'completed')->count();
 
-        $cancelledCount = Event::where('user_id', $userId)
-            ->where('status', 'cancelled')
-            ->count();
+        // Cancelled: events with status 'cancelled' made by this user
+        $cancelledCount = (clone $userEventsQuery)->where('status', 'cancelled')->count();
 
         $departments = Department::all();
 

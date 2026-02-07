@@ -24,17 +24,28 @@ class UpdateEventStatus extends Command
     public function handle()
     {
         $today = Carbon::today('Asia/Manila');
+        $now = Carbon::now('Asia/Manila');
 
-        // Upcoming → Ongoing
-        Event::where('status', 'upcoming')
-            ->whereDate('date', '=', $today)
-            ->update(['status' => 'ongoing']);
-
-        // Ongoing → Completed
-        Event::where('status', 'ongoing')
+        // STEP 1: Update upcoming events that have passed (missed) directly to completed
+        $missedEvents = Event::where('status', 'upcoming')
             ->whereDate('date', '<', $today)
             ->update(['status' => 'completed']);
 
-        $this->info('Event statuses updated safely.');
+        // STEP 2: Update upcoming events to ongoing (for today's events)
+        $toOngoing = Event::where('status', 'upcoming')
+            ->whereDate('date', '=', $today)
+            ->update(['status' => 'ongoing']);
+
+        // STEP 3: Update ongoing events to completed (for past events)
+        $toCompleted = Event::where('status', 'ongoing')
+            ->whereDate('date', '<', $today)
+            ->update(['status' => 'completed']);
+
+        $this->info('Event statuses updated successfully.');
+        $this->info("Missed events completed: {$missedEvents}");
+        $this->info("Events set to ongoing: {$toOngoing}");
+        $this->info("Events set to completed: {$toCompleted}");
+        
+        return 0;
     }
 }
