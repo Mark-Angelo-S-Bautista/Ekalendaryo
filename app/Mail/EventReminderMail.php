@@ -88,6 +88,9 @@ class EventReminderMail extends Mailable implements ShouldQueue
             'targetDepartments' => $targetDepartments,
             'targetSections' => $targetSections,
             'targetFacultyNames' => $targetFacultyNames,
+            'isCancelled' => false,
+            'isUpdate' => false,
+            'oldEvent' => null,
         ]);
     }
 }
