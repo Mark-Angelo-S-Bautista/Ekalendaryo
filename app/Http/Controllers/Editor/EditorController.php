@@ -58,30 +58,42 @@ class EditorController extends Controller
             ->orderBy('date', 'asc')
             ->get();
 
-        // Filter events according to department logic
-        $upcomingEvents = $events->filter(function ($event) use ($dept) {
+        // Filter events that target the logged-in user
+        $upcomingEvents = $events->filter(function ($event) use ($user, $dept) {
             // Skip cancelled or completed events
             if (in_array($event->computed_status, ['completed', 'cancelled'])) {
                 return false;
             }
-            if ($event->department === $dept) {
-                return true; // Show events in the same department
+
+            // Check if user is targeted by target_faculty
+            $targetFaculty = $event->target_faculty;
+            if (is_string($targetFaculty)) {
+                $targetFaculty = json_decode($targetFaculty, true) ?? [];
+            }
+            if (!is_array($targetFaculty)) {
+                $targetFaculty = [];
+            }
+            
+            if (!empty($targetFaculty) && in_array($user->id, $targetFaculty)) {
+                return true;
             }
 
-            if ($event->department === 'OFFICES') {
-                // Decode target_department
-                $targetDepartments = $event->target_department;
-                if (is_string($targetDepartments)) {
-                    $targetDepartments = json_decode($targetDepartments, true) ?? [];
+            // Check if user is targeted by target_users
+            $targetUsers = $event->target_users;
+            if (!empty($targetUsers)) {
+                // Check if user's title matches target_users
+                if ($targetUsers === 'Faculty' && $user->title !== 'Student') {
+                    return true;
                 }
-                if (!is_array($targetDepartments)) {
-                    $targetDepartments = [];
+                if ($targetUsers === 'Department Heads' && $user->title === 'Department Head') {
+                    return true;
                 }
-
-                return in_array($dept, $targetDepartments); // Show if user's department is targeted
+                if ($targetUsers === 'Students' && $user->title === 'Student') {
+                    return true;
+                }
             }
 
-            return false; // Hide everything else
+            return false; // Not targeted to this user
         });
 
         // Transform for frontend if needed
