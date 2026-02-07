@@ -924,6 +924,11 @@ $userTitle = $user->title ?? null;
                             {!! json_encode($attendeesData) !!}
                         </script>
                     @endforeach
+
+                    <!-- Pagination Links -->
+                    <div class="pagination-wrapper" style="margin-top: 30px;">
+                        {{ $events->links('pagination::simple') }}
+                    </div>
                 @else
                     <p style="color:#555; text-align:center;">No events found. Create one to get started!</p>
                 @endif

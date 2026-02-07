@@ -607,14 +607,14 @@ class EventController extends Controller
     public function index()
     {
         $userId = Auth::id();
+        $today = Carbon::today('Asia/Manila')->toDateString();
 
         $events = Event::with('user')
             ->where('user_id', $userId)
+            ->where('status', '!=', 'cancelled')
+            ->where('date', '>=', $today)
             ->orderBy('date', 'asc')
-            ->get()
-            ->filter(function ($event) {
-                return in_array($event->computed_status, ['upcoming', 'ongoing']);
-            });
+            ->paginate(3);
 
         $departments = Department::all();
 
