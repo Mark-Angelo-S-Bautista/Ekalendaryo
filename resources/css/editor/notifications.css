@@ -1,0 +1,272 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0fdf4;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+/* ===============================
+   Header
+=============================== */
+.page-header {
+    max-width: 900px;
+    margin: 50px auto 20px auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    padding: 0 20px;
+}
+
+.page-header h1 {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin: 0;
+}
+
+.notif-count {
+    background-color: #dcfce7;
+    color: #15803d;
+    padding: 6px 15px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+/* ===============================
+   Container
+=============================== */
+.container {
+    max-width: 900px;
+    margin: 0 auto 50px auto;
+    background: white;
+    border: 1px solid #bbf7d0;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* ===============================
+   Title Section
+=============================== */
+.notif-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.notif-title h2 {
+    color: #166534;
+    font-size: 18px;
+    margin: 0;
+    font-weight: bold;
+}
+
+.bell {
+    font-size: 18px;
+    color: #166534;
+}
+
+.subtitle {
+    font-size: 14px;
+    color: #555;
+    margin: 5px 0 20px 0;
+}
+
+/* ===============================
+   Notification List
+=============================== */
+.notif-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.notif-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    border-radius: 12px;
+    padding: 15px 20px;
+    border-left: 6px solid transparent;
+}
+
+/* ===============================
+   Content
+=============================== */
+.notif-info {
+    flex: 1 1 75%;
+}
+
+.notif-heading {
+    font-weight: bold;
+    font-size: 15px;
+    margin: 0;
+}
+
+.notif-sub {
+    font-size: 13px;
+    color: #555;
+    margin: 2px 0 8px 0;
+}
+
+.notif-details {
+    font-size: 12px;
+    color: #555;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+/* ===============================
+   Status Badge
+=============================== */
+.status {
+    font-size: 12px;
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 20px;
+    text-transform: lowercase;
+    align-self: flex-start;
+    margin-top: 10px;
+}
+
+/* ===============================
+   STATUS COLORS
+=============================== */
+
+/* 🟢 Upcoming */
+.notif-card.upcoming {
+    background-color: #e6f9ec;
+    border-left: 6px solid #2ecc71;
+}
+.upcoming-status {
+    color: #2ecc71;
+}
+
+/* 🔴 Canceled */
+.notif-card.cancelled {
+    background-color: #fdecea;
+    border-left: 6px solid #e74c3c;
+}
+.canceled-status {
+    color: #e74c3c;
+}
+
+/* ⚪ Completed */
+.notif-card.completed {
+    background-color: #f2f2f2;
+    border-left: 6px solid #95a5a6;
+}
+.completed-status {
+    color: #7f8c8d;
+}
+
+/* 🔴 Ongoing */
+.notif-card.ongoing {
+    background-color: #fff5dc;
+    border-left: 6px solid #ffb800;
+}
+.canceled-status {
+    color: #ffb800;
+}
+
+/* ===============================
+   Pagination
+=============================== */
+.pagination-wrapper {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.pagination-wrapper nav {
+    background: none;
+}
+
+.simple-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    margin: 30px 0;
+}
+
+.simple-pagination a,
+.simple-pagination span {
+    height: 36px;
+    padding: 0 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+    text-decoration: none;
+    background: #fff;
+    color: #333;
+}
+
+.simple-pagination a:hover {
+    background: #f1f1f1;
+}
+
+.simple-pagination .active {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: #fff;
+    font-weight: 600;
+}
+
+.simple-pagination .disabled {
+    color: #aaa;
+    background: #f9f9f9;
+    cursor: not-allowed;
+}
+
+/* ===============================
+   Responsive
+=============================== */
+@media (max-width: 600px) {
+    .notif-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .status {
+        margin-top: 10px;
+    }
+}
+
+/* ===============================
+   Misc
+=============================== */
+.logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border: 1px solid #006400;
+    border-radius: 6px;
+    background: none;
+    color: #006400;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: 0.2s ease;
+}
+
+.logout-btn:hover {
+    background: #006400;
+    color: #fff;
+}
+
+.logout-btn .icon {
+    font-style: normal;
+}
+
+p {
+    margin: 0;
+}

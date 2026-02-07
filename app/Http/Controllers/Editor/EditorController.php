@@ -483,4 +483,105 @@ class EditorController extends Controller
             'attendees_count' => $event->attendees()->count()
         ]);
     }
+    public function notifications()
+    {
+        $user = Auth::user();
+        $userTitle = strtolower($user->title ?? '');
+
+        // Fetch all events regardless of status (including completed, cancelled, updated)
+        $events = Event::where(function ($query) use ($user, $userTitle) {
+
+                if ($userTitle === 'faculty') {
+                    // Faculty should see events where they are specifically targeted
+                    $query->whereRaw("JSON_CONTAINS(target_faculty, ?)", [json_encode((string)$user->id)]);
+                } elseif ($userTitle === 'student' || $userTitle === 'viewer') {
+                    // Students should see events targeting their section and year level
+                    $query->where(function($q) use ($user) {
+                        $q->where('department', $user->department)
+                          ->orWhereJsonContains('target_department', $user->department);
+                    });
+                } else {
+                    // For Department Heads and Office users
+                    $query->where(function($q) use ($user) {
+                        // Check if user is specifically targeted in target_faculty
+                        $q->whereRaw("JSON_CONTAINS(target_faculty, ?)", [json_encode((string)$user->id)])
+                          // OR check if target_users matches their title
+                          ->orWhere(function($subQ) use ($user) {
+                              $subQ->where('target_users', 'LIKE', '%' . $user->title . '%')
+                                   ->orWhere('target_users', $user->title);
+                          });
+                    });
+                }
+            })
+            // Order by most recently updated first, fallback to created_at
+            ->orderBy('created_at', 'desc')
+            ->orderBy('updated_at', 'asc')
+            ->get();
+
+        // Filter students by section and year level
+        if ($userTitle === 'student' || $userTitle === 'viewer') {
+            $userSection = $user->section ? strtolower(trim($user->section)) : null;
+            $userYearLevel = $user->yearlevel ? strtolower(str_replace(' ', '', $user->yearlevel)) : null;
+
+            $events = $events->filter(function($event) use ($userSection, $userYearLevel) {
+                $targetSections = is_string($event->target_sections)
+                    ? json_decode($event->target_sections, true) ?? []
+                    : ($event->target_sections ?? []);
+                
+                $targetYearLevels = is_string($event->target_year_levels)
+                    ? json_decode($event->target_year_levels, true) ?? []
+                    : ($event->target_year_levels ?? []);
+
+                // Check section match
+                $sectionMatch = empty($targetSections) || 
+                    ($userSection && in_array($userSection, array_map('strtolower', array_map('trim', $targetSections))));
+
+                // Check year level match
+                $yearLevelMatch = empty($targetYearLevels) || 
+                    ($userYearLevel && in_array($userYearLevel, array_map(function($lvl) {
+                        return strtolower(str_replace(' ', '', $lvl));
+                    }, $targetYearLevels)));
+
+                return $sectionMatch && $yearLevelMatch;
+            });
+        }
+
+        // Additional filter for Department Heads and Office users to verify target_faculty and target_users
+        if (!in_array($userTitle, ['faculty', 'student', 'viewer'])) {
+            $events = $events->filter(function($event) use ($user) {
+                // Check if user ID is in target_faculty
+                $targetFaculty = is_string($event->target_faculty)
+                    ? json_decode($event->target_faculty, true) ?? []
+                    : ($event->target_faculty ?? []);
+                
+                if (is_array($targetFaculty) && in_array($user->id, $targetFaculty)) {
+                    return true;
+                }
+
+                // Check if target_users matches user title
+                $targetUsers = $event->target_users ?? '';
+                if (!empty($targetUsers) && (
+                    $targetUsers === $user->title || 
+                    stripos($targetUsers, $user->title) !== false
+                )) {
+                    return true;
+                }
+
+                return false;
+            });
+        }
+
+        // Paginate manually
+        $perPage = 3;
+        $currentPage = LengthAwarePaginator::resolveCurrentPage();
+        $events = new LengthAwarePaginator(
+            $events->forPage($currentPage, $perPage)->values(),
+            $events->count(),
+            $perPage,
+            $currentPage,
+            ['path' => LengthAwarePaginator::resolveCurrentPath()]
+        );
+
+        return view('Editor.notifications', compact('events'));
+    }
 }
