@@ -32,13 +32,13 @@
         <a href="{{ route('Editor.index') }}" class="nav_item {{ request()->routeIs('Editor.index') ? 'active' : '' }}">
             Manage Events
         </a>
-        <a href="{{ route('Editor.notifications') }}"
-            class="nav_item {{ request()->routeIs('Editor.notifications') ? 'active' : '' }}">
-            Notifications
-        </a>
         <a href="{{ route('Editor.activity_log') }}"
             class="nav_item {{ request()->routeIs('Editor.activity_log') ? 'active' : '' }}">
             Activity Log
+        </a>
+        <a href="{{ route('Editor.notifications') }}"
+            class="nav_item {{ request()->routeIs('Editor.notifications') ? 'active' : '' }}">
+            Notifications
         </a>
         <a href="{{ route('Editor.history') }}"
             class="nav_item {{ request()->routeIs('Editor.history') ? 'active' : '' }}">
