@@ -37,7 +37,13 @@
                                     <span>📍 {{ $event->location }}</span>
                                     <span>👤 {{ $event->department }}</span>
                                     <span>SY.{{ $event->school_year }}</span>
-                                    <span>👥 {{ $event->attendees()->count() }} attending</span>
+                                    <span>
+                                        👥 <button class="btn-attendees" data-event-id="{{ $event->id }}"
+                                            data-attendees="{{ json_encode($event->attendees) }}"
+                                            style="background: none; border: none; color: inherit; cursor: pointer; text-decoration: underline; padding: 0; font: inherit;">
+                                            {{ $event->attendees()->count() }} attending
+                                        </button>
+                                    </span>
                                     @php
                                         $eventSections = $event->target_sections;
                                         if (is_string($eventSections)) {
@@ -93,7 +99,7 @@
                                 </div>
                             </div>
                         @empty
-                            <p>No created events yet.</p>
+                            <p>No completed events yet.</p>
                         @endforelse
                     </div>
 
@@ -322,6 +328,29 @@
             </div>
         </div>
 
+        <!-- ATTENDEES MODAL -->
+        <div id="attendeesModalOverlay" class="attendees-modal-overlay">
+            <div class="attendees-modal">
+                <div class="attendees-modal-header">
+                    <h2>Event Attendees</h2>
+                    <button id="closeAttendeesModal" class="close-btn">&times;</button>
+                </div>
+                <div class="attendees-modal-body">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Department</th>
+                                <th>Year Level</th>
+                                <th>Section</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attendeesTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
         {{-- Toast Notification --}}
         <div id="toast" class="toast"
             style="position: fixed; bottom: 20px; right: 20px; background-color: #22c55e; color: white; padding: 15px 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: none; z-index: 9999; font-weight: bold;">
@@ -329,6 +358,57 @@
         </div>
 
         <script>
+            // Attendees Modal functionality
+            document.addEventListener('DOMContentLoaded', function() {
+                const modalOverlay = document.getElementById('attendeesModalOverlay');
+                const modalCloseBtn = document.getElementById('closeAttendeesModal');
+                const tbody = document.getElementById('attendeesTableBody');
+
+                // OPEN modal
+                document.querySelectorAll('.btn-attendees').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const eventId = this.dataset.eventId;
+                        const attendeesData = JSON.parse(this.dataset.attendees || '[]');
+
+                        // Clear previous content
+                        tbody.innerHTML = '';
+
+                        if (attendeesData.length === 0) {
+                            tbody.innerHTML =
+                                '<tr><td colspan="4" style="text-align:center;">No attendees</td></tr>';
+                        } else {
+                            attendeesData.forEach(att => {
+                                const row = document.createElement('tr');
+                                row.innerHTML = `
+                                    <td>
+                                        <div style="font-size: 0.85em; color: #6b7280; font-weight: 500;"><strong>${att.title || ''}</strong></div>
+                                        <div>${att.name || 'N/A'}</div>
+                                    </td>
+                                    <td>${att.department || 'N/A'}</td>
+                                    <td>${att.yearlevel || 'N/A'}</td>
+                                    <td>${att.section || 'N/A'}</td>
+                                `;
+                                tbody.appendChild(row);
+                            });
+                        }
+
+                        modalOverlay.style.display = 'flex';
+                    });
+                });
+
+                // CLOSE modal button
+                modalCloseBtn.addEventListener('click', () => {
+                    modalOverlay.style.display = 'none';
+                });
+
+                // CLOSE modal when clicking outside
+                modalOverlay.addEventListener('click', (e) => {
+                    if (e.target === modalOverlay) {
+                        modalOverlay.style.display = 'none';
+                    }
+                });
+            });
+
             // Star rating functionality
             document.querySelectorAll('input[name="rating"]').forEach((radio, index) => {
                 const label = document.querySelector(`label[for="rating-${index + 1}"]`);
