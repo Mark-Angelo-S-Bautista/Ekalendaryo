@@ -78,7 +78,7 @@ addDeptForm?.addEventListener("submit", async function (e) {
                 addDeptNameError.textContent = data.errors.department_name[0];
             }
             // Show general error message
-            addDeptMessage.textContent = "Please correct the error above.";
+            addDeptMessage.textContent = "Department Already Exist";
             addDeptMessage.style.color = "red";
         } else {
             // ✅ Success

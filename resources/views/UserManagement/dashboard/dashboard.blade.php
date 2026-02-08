@@ -57,7 +57,69 @@
             <h3 class="dashboard_upcoming_title">Upcoming Events</h3>
             <p>For the next 30 days</p>
             <div id="eventsWrapper">
-                <p>Loading events...</p>
+                <div class="dashboard_events_grid">
+                    @forelse ($upcomingEvents as $event)
+                        <div class="dashboard_event_card">
+                            <div class="dashboard_event_title">{{ $event->title }}</div>
+                            <div class="dashboard_event_details">
+                                📅 {{ \Carbon\Carbon::parse($event->date)->format('m/d/Y') }} &nbsp;&nbsp;
+                                🕓 {{ \Carbon\Carbon::parse($event->start_time)->format('g:i A') }} -
+                                {{ \Carbon\Carbon::parse($event->end_time)->format('g:i A') }} &nbsp;&nbsp;
+                                📍 {{ $event->location ?? 'N/A' }}
+                            </div>
+                            <div class="dashboard_event_details">
+                                <strong>Yearlevel:</strong>
+                                @if (is_array($event->target_year_levels) && count($event->target_year_levels) > 0)
+                                    {{ implode(', ', $event->target_year_levels) }}
+                                @elseif(is_string($event->target_year_levels) && $event->target_year_levels)
+                                    @php
+                                        $levels = json_decode($event->target_year_levels, true);
+                                    @endphp
+                                    {{ is_array($levels) ? implode(', ', $levels) : $event->target_year_levels }}
+                                @else
+                                    No target group
+                                @endif
+                            </div>
+                            @if (is_array($event->target_sections) && count($event->target_sections) > 0)
+                                <div class="dashboard_event_details">
+                                    <strong>Section:</strong> {{ implode(', ', $event->target_sections) }}
+                                </div>
+                            @endif
+                            <div class="dashboard_event_details"
+                                style="max-width:100%; white-space:normal; word-break:break-word; overflow-wrap:anywhere;">
+                                {{ $event->description ?? 'No description provided.' }}
+                            </div>
+                            <div class="dashboard_event_details"><strong>SY.{{ $event->school_year ?? 'N/A' }}</strong>
+                            </div>
+                            <div class="dashboard_event_tags">
+                                <span class="dashboard_tag dashboard_tag_admin">
+                                    {{ $event->department === 'OFFICES' ? $event->user->office_name ?? 'N/A' : $event->department }}
+                                </span>
+                                <span
+                                    class="dashboard_tag 
+                                    @if (strtolower($event->computed_status ?? $event->status) === 'upcoming') dashboard_tag_upcoming
+                                    @elseif(strtolower($event->computed_status ?? $event->status) === 'ongoing') dashboard_tag_ongoing
+                                    @elseif(strtolower($event->computed_status ?? $event->status) === 'completed') dashboard_tag_completed
+                                    @elseif(strtolower($event->computed_status ?? $event->status) === 'cancelled') dashboard_tag_cancelled
+                                    @else dashboard_tag_upcoming @endif">
+                                    {{ strtolower($event->computed_status ?? ($event->status ?? 'upcoming')) }}
+                                </span>
+                            </div>
+                            <button class="dashboard_view_btn"
+                                data-more-details="{{ htmlspecialchars($event->more_details ?? 'No additional details.', ENT_QUOTES, 'UTF-8') }}"
+                                style="padding:10px 22px; background:#e8ecf5; border:none; border-radius:10px; font-size:1rem; cursor:pointer; font-weight:600; color:#36415d; margin-top:10px;">
+                                👁️ View Details
+                            </button>
+                        </div>
+                    @empty
+                        <p>No upcoming events.</p>
+                    @endforelse
+                </div>
+            </div>
+
+            <!-- Pagination Links -->
+            <div style="margin-top: 20px; display: flex; justify-content: center;">
+                {{ $upcomingEvents->links('vendor.pagination.simple') }}
             </div>
         </section>
     </div>
@@ -107,6 +169,7 @@
             const eventsWrapper = document.getElementById('eventsWrapper');
             const clearButton = document.querySelector('.dashboard_clear_btn');
             let currentFetchedEvents = [];
+            let isSearching = false;
 
             const statusMap = {
                 upcoming: {
@@ -151,8 +214,8 @@
                     const startTime = formatTime(event.start_time);
                     const endTime = formatTime(event.end_time);
 
-                    const departmentTag = event.department === 'OFFICES' ? event.office_name : event
-                        .department;
+                    const departmentTag = event.department === 'OFFICES' ?
+                        (event.user?.office_name || 'N/A') : event.department;
 
                     let yearLevelsText = 'No target group';
                     if (Array.isArray(event.target_year_levels) && event.target_year_levels.length >
@@ -213,10 +276,16 @@
             };
 
             const fetchEvents = (query = '') => {
+                if (!query.trim()) {
+                    // Reload page to show paginated results
+                    window.location.href = '/usermanagement/dashboard';
+                    return;
+                }
+
+                isSearching = true;
                 fetch(`/usermanagement/dashboard/search?query=${encodeURIComponent(query)}`)
                     .then(res => res.json())
                     .then(data => {
-
                         currentFetchedEvents = data.events.filter(event => {
                             const status = String(
                                 event.computed_status || event.status || ''
@@ -231,13 +300,19 @@
                     .catch(err => console.error(err));
             };
 
-            // Initial fetch
-            fetchEvents();
+            // Only fetch when searching
+            searchInput.addEventListener('input', () => {
+                const query = searchInput.value.trim();
+                if (query) {
+                    fetchEvents(query);
+                }
+            });
 
-            searchInput.addEventListener('input', () => fetchEvents(searchInput.value.trim()));
             clearButton.addEventListener('click', () => {
                 searchInput.value = '';
-                fetchEvents();
+                if (isSearching) {
+                    window.location.href = '/usermanagement/dashboard';
+                }
             });
 
             // Event Details Modal
@@ -248,9 +323,19 @@
             document.addEventListener('click', (e) => {
                 if (e.target.classList.contains('dashboard_view_btn')) {
                     const index = e.target.dataset.index;
-                    const details = currentFetchedEvents[index]?.more_details || 'No additional details.';
-                    modalContent.innerHTML = details;
-                    modal.style.display = 'flex';
+                    const moreDetails = e.target.dataset.moreDetails;
+
+                    if (typeof index !== 'undefined' && currentFetchedEvents[index]) {
+                        // For AJAX searched events
+                        const details = currentFetchedEvents[index]?.more_details ||
+                            'No additional details.';
+                        modalContent.innerHTML = details;
+                        modal.style.display = 'flex';
+                    } else if (moreDetails) {
+                        // For server-side rendered events
+                        modalContent.innerHTML = moreDetails;
+                        modal.style.display = 'flex';
+                    }
                 }
             });
 

@@ -19,7 +19,7 @@ use Illuminate\Support\Str;
 
 class UserManagementController extends Controller
 {
-    public function dashboard()
+    public function dashboard(Request $request)
     {
         $user = Auth::user();
         $office_name = $user->office_name;
@@ -31,7 +31,7 @@ class UserManagementController extends Controller
             : 'N/A';
 
         // Fetch all events
-        $events = Event::all();
+        $events = Event::with('user')->get();
 
         // Departments
         $departments = Department::pluck('department_name')->toArray();
@@ -67,7 +67,8 @@ class UserManagementController extends Controller
         })
         ->sortBy(function ($event) {
             return \Carbon\Carbon::parse($event->date . ' ' . $event->start_time);
-        });
+        })
+        ->values(); // Reset keys for pagination
 
         /*
         |--------------------------------------------------------------------------
@@ -88,17 +89,67 @@ class UserManagementController extends Controller
             return [$dept => $departmentCounts[$dept] ?? 0];
         });
 
-        // Preview first 2 events
-        $eventsPreview = $activeEvents->take(2);
+        // Paginate with 8 per page
+        $currentPage = LengthAwarePaginator::resolveCurrentPage();
+        $perPage = 8;
+        $currentItems = $activeEvents->slice(($currentPage - 1) * $perPage, $perPage)->all();
+        $paginatedEvents = new LengthAwarePaginator(
+            $currentItems,
+            $activeEvents->count(),
+            $perPage,
+            $currentPage,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
 
         return view('UserManagement.dashboard.dashboard', [
             'user' => $user,
             'totalEvents' => $totalEvents,
             'departmentCounts' => $finalDeptCounts,
-            'upcomingEvents' => $eventsPreview, // still OK to keep this name
+            'upcomingEvents' => $paginatedEvents,
             'office_name' => $office_name,
             'currentSchoolYearName' => $currentSchoolYearName,
         ]);
+    }
+
+    public function dashboardSearch(Request $request)
+    {
+        $query = $request->input('query', '');
+        $now = now();
+
+        $events = Event::with('user')
+            ->when($query, function ($q) use ($query) {
+                $q->where('title', 'like', "%{$query}%")
+                  ->orWhere('description', 'like', "%{$query}%")
+                  ->orWhere('location', 'like', "%{$query}%");
+            })
+            ->get()
+            ->filter(function ($event) use ($now) {
+                // ❌ Exclude cancelled & completed
+                if (in_array($event->computed_status, ['cancelled', 'completed'])) {
+                    return false;
+                }
+
+                $start = \Carbon\Carbon::parse($event->date . ' ' . $event->start_time);
+                $end   = \Carbon\Carbon::parse($event->date . ' ' . $event->end_time);
+
+                // ✅ ONGOING: started already but not ended
+                if ($start->lessThanOrEqualTo($now) && $end->greaterThanOrEqualTo($now)) {
+                    return true;
+                }
+
+                // ✅ UPCOMING: within next 30 days
+                if ($start->greaterThan($now) && $start->lessThanOrEqualTo($now->copy()->addDays(30))) {
+                    return true;
+                }
+
+                return false;
+            })
+            ->sortBy(function ($event) {
+                return \Carbon\Carbon::parse($event->date . ' ' . $event->start_time);
+            })
+            ->values();
+
+        return response()->json(['events' => $events]);
     }
 
 

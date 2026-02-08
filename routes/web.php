@@ -77,7 +77,7 @@ Route::middleware(['auth', 'backhistory'])->group(function () {
     // Applies the prefix 'usermanagement/' and the route name prefix 'usermanagement.'
     Route::middleware('role.usermanagement')->prefix('usermanagement')->name('UserManagement.')->group(function () {
         Route::get('/dashboard', [UserManagementController::class, 'dashboard'])->name('dashboard');
-        Route::get('/dashboard/search', [UserController::class, 'search'])->name('search');
+        Route::get('/dashboard/search', [UserManagementController::class, 'dashboardSearch'])->name('dashboardSearch');
         Route::get('/calendar', [UserManagementController::class, 'calendar'])->name('calendar');
         Route::get('/profile', [UserManagementController::class, 'profile'])->name('profile');
         Route::post('/profile/update', [UserManagementController::class, 'updateProfile'])->name('profile.update');

@@ -236,7 +236,7 @@ class EditorController extends Controller
         });
 
         // Paginate created events
-        $perPage = 2;
+        $perPage = 3;
         $currentPage = request()->get('created_page', 1);
         $paginatedCreatedEvents = new LengthAwarePaginator(
             $createdEvents->forPage($currentPage, $perPage),
