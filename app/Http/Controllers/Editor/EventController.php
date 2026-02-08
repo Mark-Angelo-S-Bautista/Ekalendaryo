@@ -650,9 +650,15 @@ class EventController extends Controller
         $user = Auth::user();
         $userDepartment = $user->department_name ?? ($user->department ?? null);
 
-        $sectionsQuery = User::whereNotNull('section')->select('section', 'department')->distinct();
+        $sectionsQuery = User::whereNotNull('section')
+            ->where('section', '!=', '')
+            ->select('section', 'department')
+            ->distinct();
 
         $sectionsByDepartment = $sectionsQuery->get()
+            ->filter(function($item) {
+                return !empty(trim($item->section));
+            })
             ->groupBy('department')
             ->map(fn ($items) => $items->pluck('section')->values());
 
@@ -660,9 +666,13 @@ class EventController extends Controller
             $sections = collect();
         } else {
             $sections = User::whereNotNull('section')
+                ->where('section', '!=', '')
                 ->where('department', $userDepartment)
                 ->distinct('section')
-                ->pluck('section');
+                ->pluck('section')
+                ->filter(function($section) {
+                    return !empty(trim($section));
+                });
         }
 
         // ✅ Get max_year_levels for user's department
@@ -701,9 +711,15 @@ class EventController extends Controller
         $user = Auth::user();
         $userDepartment = $user->department_name ?? ($user->department ?? null);
 
-        $sectionsQuery = User::whereNotNull('section')->select('section', 'department')->distinct();
+        $sectionsQuery = User::whereNotNull('section')
+            ->where('section', '!=', '')
+            ->select('section', 'department')
+            ->distinct();
 
         $sectionsByDepartment = $sectionsQuery->get()
+            ->filter(function($item) {
+                return !empty(trim($item->section));
+            })
             ->groupBy('department')
             ->map(fn ($items) => $items->pluck('section')->values());
 
@@ -711,9 +727,13 @@ class EventController extends Controller
             $sections = collect();
         } else {
             $sections = User::whereNotNull('section')
+                ->where('section', '!=', '')
                 ->where('department', $userDepartment)
                 ->distinct('section')
-                ->pluck('section');
+                ->pluck('section')
+                ->filter(function($section) {
+                    return !empty(trim($section));
+                });
         }
 
         // ✅ Get max_year_levels for user's department
