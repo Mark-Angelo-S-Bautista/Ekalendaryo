@@ -87,7 +87,24 @@ class EditorController extends Controller
                 // For Department Heads: only show Faculty events if department matches
                 if ($user->title === 'Department Head') {
                     if ($targetUsers === 'Department Heads') {
-                        return true;
+                        // ✅ Check if the Department Head's department is in target_department
+                        $targetDepartments = $event->target_department;
+                        if (is_string($targetDepartments)) {
+                            $targetDepartments = json_decode($targetDepartments, true) ?? [];
+                        }
+                        if (!is_array($targetDepartments)) {
+                            $targetDepartments = [];
+                        }
+                        
+                        // Normalize department names for comparison
+                        $normalizedTargetDepts = array_map(fn($d) => strtoupper(trim($d)), $targetDepartments);
+                        $userDeptNormalized = strtoupper(trim($dept));
+                        
+                        // Show if 'All' is selected OR user's department is in the list
+                        if (in_array('All', $targetDepartments) || in_array($userDeptNormalized, $normalizedTargetDepts)) {
+                            return true;
+                        }
+                        return false; // Department not in target list
                     }
                     if ($targetUsers === 'Faculty' && $event->department === $dept) {
                         return true;
@@ -217,7 +234,22 @@ class EditorController extends Controller
                 // For Department Heads: only show Faculty events if department matches
                 if ($user->title === 'Department Head') {
                     if ($targetUsers === 'Department Heads') {
-                        return true;
+                        // ✅ Check if the Department Head's department is in target_department
+                        $targetDepartments = $event->target_department;
+                        if (is_string($targetDepartments)) {
+                            $targetDepartments = json_decode($targetDepartments, true) ?? [];
+                        }
+                        if (!is_array($targetDepartments)) {
+                            $targetDepartments = [];
+                        }
+                        
+                        $normalizedTargetDepts = array_map(fn($d) => strtoupper(trim($d)), $targetDepartments);
+                        $userDeptNormalized = strtoupper(trim($userDept));
+                        
+                        if (in_array('All', $targetDepartments) || in_array($userDeptNormalized, $normalizedTargetDepts)) {
+                            return true;
+                        }
+                        return false;
                     }
                     if ($targetUsers === 'Faculty' && $event->department === $userDept) {
                         return true;
@@ -688,7 +720,22 @@ class EditorController extends Controller
                     // For Department Heads: only show Faculty events if department matches
                     if ($user->title === 'Department Head') {
                         if ($targetUsers === 'Department Heads') {
-                            return true;
+                            // ✅ Check if the Department Head's department is in target_department
+                            $targetDepartments = $event->target_department;
+                            if (is_string($targetDepartments)) {
+                                $targetDepartments = json_decode($targetDepartments, true) ?? [];
+                            }
+                            if (!is_array($targetDepartments)) {
+                                $targetDepartments = [];
+                            }
+                            
+                            $normalizedTargetDepts = array_map(fn($d) => strtoupper(trim($d)), $targetDepartments);
+                            $userDeptNormalized = strtoupper(trim($user->department));
+                            
+                            if (in_array('All', $targetDepartments) || in_array($userDeptNormalized, $normalizedTargetDepts)) {
+                                return true;
+                            }
+                            return false;
                         }
                         if ($targetUsers === 'Faculty' && $event->department === $user->department) {
                             return true;
