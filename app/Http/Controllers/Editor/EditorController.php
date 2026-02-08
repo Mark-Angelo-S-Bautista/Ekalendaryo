@@ -81,6 +81,11 @@ class EditorController extends Controller
                 return true;
             }
 
+            // ✅ For Office users: ONLY show if they're in target_faculty (already checked above)
+            if ($dept === 'OFFICES' || $user->title === 'Offices') {
+                return false; // Not in target_faculty, so don't show
+            }
+
             // Check if user is targeted by target_users
             $targetUsers = $event->target_users;
             if (!empty($targetUsers)) {
@@ -226,6 +231,11 @@ class EditorController extends Controller
             
             if (is_array($targetFaculty) && in_array($user->id, $targetFaculty)) {
                 return true;
+            }
+
+            // ✅ For Office users: ONLY show if they're in target_faculty (already checked above)
+            if ($userDept === 'OFFICES' || $user->title === 'Offices') {
+                return false; // Not in target_faculty, so don't show
             }
 
             // Check if target_users matches user title
@@ -712,6 +722,11 @@ class EditorController extends Controller
                 
                 if (is_array($targetFaculty) && in_array($user->id, $targetFaculty)) {
                     return true;
+                }
+
+                // ✅ For Office users: ONLY show if they're in target_faculty (already checked above)
+                if ($user->department === 'OFFICES' || $user->title === 'Offices') {
+                    return false; // Not in target_faculty, so don't show
                 }
 
                 // Check if target_users matches user title
