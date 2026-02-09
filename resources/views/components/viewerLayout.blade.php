@@ -11,8 +11,8 @@
 <header>
     <header class="header">
         <div class="logo">
+            <img src="{{ asset('img/BPCLOGO.png') }}" alt="BPC Logo" style="width: 60px;">
             <img src="{{ asset('img/Main_logo.png') }}" alt="eKalendaryo Logo">
-            <span>Viewer</span>
         </div>
         <form action="{{ route('Viewer.logout') }}" method="post">
             @csrf
@@ -45,30 +45,50 @@
     </nav>
 
     <script>
-        const navItems = document.querySelectorAll(".nav_item");
-        const mainContent = document.getElementById("main_content");
+        document.addEventListener("DOMContentLoaded", () => {
+            const header = document.querySelector(".header");
+            const navbar = document.querySelector(".navbar");
 
-        // Load default tab
-        loadTab("Tabs/dashboard.html");
+            // Create menu button
+            const menuBtn = document.createElement("button");
+            menuBtn.classList.add("menu-btn");
+            menuBtn.innerHTML = "☰"; // hamburger icon
+            header.prepend(menuBtn);
 
-        navItems.forEach(item => {
-            item.addEventListener("click", () => {
-                // Highlight active tab
-                navItems.forEach(i => i.classList.remove("active"));
-                item.classList.add("active");
-
-                // Load page content
-                loadTab(item.dataset.page);
+            // Toggle navbar on click
+            menuBtn.addEventListener("click", () => {
+                navbar.classList.toggle("active");
             });
-        });
 
-        // This function checks if the page is being loaded from the browser's bfcache.
-        window.addEventListener('pageshow', function(event) {
-            // persisted == true means the page was loaded from the bfcache
-            if (event.persisted) {
-                // Force a hard reload, which forces the browser to make a fresh server request.
-                window.location.reload();
-            }
+            // Close navbar when clicking a nav item (mobile only)
+            const navItems = document.querySelectorAll(".nav_item");
+            navItems.forEach(item => {
+                item.addEventListener("click", () => {
+                    if (window.innerWidth <= 900) {
+                        navbar.classList.remove("active");
+                    }
+                });
+            });
+
+            // OPTIONAL: your old navItem click code for tabs
+            navItems.forEach(item => {
+                item.addEventListener("click", () => {
+                    navItems.forEach(i => i.classList.remove("active"));
+                    item.classList.add("active");
+
+                    // Load page content if using dynamic tabs
+                    if (item.dataset.page) {
+                        loadTab(item.dataset.page);
+                    }
+                });
+            });
+
+            // Force reload if loaded from bfcache
+            window.addEventListener('pageshow', function(event) {
+                if (event.persisted) {
+                    window.location.reload();
+                }
+            });
         });
     </script>
 </header>
