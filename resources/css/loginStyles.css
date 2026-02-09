@@ -1,20 +1,55 @@
 @import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css");
+/* === BACKGROUND IMAGE FIX === */
+html, body{
+    width: 100%;
+    overflow-x: hidden;
+}
+
 body {
-    display: flex;
+    margin: 0;
+    min-height: 100vh;
     font-family: Arial, sans-serif;
-    background: #f6fff6;
+
+    /* Center login */
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
-    margin: 0;
+
+    position: relative;
+    overflow: hidden;
 }
+
+/* Target the background image */
+body > img {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    z-index: -1; /* push behind login */
+}
+
+/* Optional dark overlay for readability */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35); /* adjust darkness */
+    z-index: -1;
+}
+
+
+/*CHANGES HERE BY FRONT END*/
 
 .container {
     text-align: center;
+    align-items: center;
     max-width: 400px;
     width: 100%;
     margin-top: 100px;
+    position: relative;
+    z-index: 2;
 }
 
 .logo img {
@@ -36,7 +71,7 @@ body {
 
 .title {
     margin-bottom: 30px;
-    color: #555;
+    color: #ffffff;
     font-style: italic;
     margin-block-start: 0px;
 }
@@ -59,7 +94,10 @@ body {
 .form-group {
     margin-bottom: 15px;
 }
-
+.box input,
+.btn{
+    font-size: 16px;
+}
 .box input {
     width: 328px;
     padding: 10px;

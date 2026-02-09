@@ -1,4 +1,7 @@
 <x-loginLayout>
+
+    <img src = "{{ asset('img/BPC_BG.png') }}">
+
     <div class="container">
         <!-- Logo placeholder (replace this image with your own) -->
         <div class="logo">
