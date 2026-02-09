@@ -12,7 +12,7 @@
         <!-- Sign In Box -->
         <div class="box">
             <div class="calendar-header"></div>
-            <h3>Welcome please, Sign in</h3>
+            <h3>Welcome, please Log In</h3>
             <form action="{{ route('login') }}" method="post">
                 @csrf
                 <div class="form-group">
