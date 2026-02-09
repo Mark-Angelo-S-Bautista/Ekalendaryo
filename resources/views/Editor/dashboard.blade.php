@@ -286,7 +286,7 @@
             flex-direction:column;
             animation: fadeInScale 0.28s ease-out;
 
-            border-top:7px solid #2b5eff;
+            border-top:7px solid #38761d;
         ">
 
             <h2
@@ -311,7 +311,7 @@
             transition:0.2s;
             background:#f9fbff;
         "
-                onfocus="this.style.border='1px solid #2b5eff'; this.style.boxShadow='0 0 0 3px rgba(43,94,255,0.15)'"
+                onfocus="this.style.border='1px solid #38761d'; this.style.boxShadow='0 0 0 3px rgba(43,94,255,0.15)'"
                 onblur="this.style.border='1px solid #d0d7e3'; this.style.boxShadow='none'"></textarea>
 
             <div style="display:flex; justify-content:flex-end; margin-top:18px;">

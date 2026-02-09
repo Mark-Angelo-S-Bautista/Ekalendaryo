@@ -1,3 +1,7 @@
+* {
+    max-width: 100%;
+}
+
 .header {
     margin: 0;
     font-family: "Inter", Arial, sans-serif;
@@ -21,6 +25,7 @@
     width: 350px;
     height: 40px;
     margin-right: 10px;
+    height: auto;
 }
 .logo span {
     margin-left: 8px;
@@ -537,4 +542,215 @@ body {
     .dashboard_stat_card span {
         font-size: 1.8rem;
     }
+
+    .dashboard_events_grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard_welcome_card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .dashboard_view_btn {
+        width: 100%;
+    }
 }
+
+.menu-btn {
+    display: none;          /* HIDE by default (desktop) */
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #064420;
+}
+
+@media (max-width: 900px) {
+    /* Show hamburger */
+    .menu-btn {
+        display: block;
+    }
+
+    .header {
+        flex-wrap: wrap;
+        justify-content: space-between;
+        padding: 10px 15px;
+        gap: 10px;
+    }
+    .logo {
+        flex: 1;
+    }
+
+    .logo img {
+        width: 180px;
+        height: auto;
+    }
+
+    .logout-btn {
+        margin-left: auto;
+    }
+
+    .navbar {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+        padding-left: 0;
+        gap: 0;
+        border-top: 1px solid #cde3d3;
+    }
+
+    .navbar.active {
+        display: flex;
+    }
+
+    .nav_item {
+        padding: 12px 20px;
+        border-bottom: 1px solid #cde3d3;
+    }
+
+    .dashboard_events_grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 1200px) {
+    .dashboard_events_grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+
+/* =========================================
+   DASHBOARD CONTAINER
+========================================= */
+@media (max-width: 600px) {
+    .dashboard_container {
+        padding: 1rem;
+    }
+}
+
+/* =========================================
+   WELCOME CARD
+========================================= */
+@media (max-width: 600px) {
+    .dashboard_welcome_card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .dashboard_change_year_btn {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+/* =========================================
+   SEARCH BAR
+========================================= */
+@media (max-width: 600px) {
+    .dashboard_search_card {
+        padding: 0.8rem;
+    }
+
+    .dashboard_search_input {
+        width: 100%;
+        margin-bottom: 8px;
+    }
+
+    .dashboard_clear_btn {
+        width: 100%;
+    }
+}
+
+/* =========================================
+   STATS GRID
+========================================= */
+@media (max-width: 600px) {
+    .dashboard_stats_grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* =========================================
+   EVENT GRID
+========================================= */
+/* Already responsive, but tighten spacing on mobile */
+@media (max-width: 600px) {
+    .dashboard_events_grid {
+        gap: 16px;
+    }
+
+    .dashboard_event_card {
+        padding: 10px;
+    }
+}
+
+/* =========================================
+   MODAL
+========================================= */
+@media (max-width: 600px) {
+    .dashboard_modal_content {
+        width: 95%;
+        padding: 1.2rem;
+    }
+}
+
+/* =========================================
+   DEPARTMENT GRID
+========================================= */
+@media (max-width: 600px) {
+    .dashboard_department_grid {
+        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    }
+}
+
+
+/* =========================================
+   FIX UPCOMING EVENTS OVERFLOW
+========================================= */
+
+/* Prevent grid from forcing overflow */
+.dashboard_upcoming_card {
+    overflow: hidden;
+}
+
+/* Make sure grid never exceeds container */
+.dashboard_events_grid {
+    width: 100%;
+    max-width: 100%;
+}
+
+/* Ensure cards shrink properly */
+.dashboard_event_card {
+    min-width: 0; /* VERY IMPORTANT for grid overflow issues */
+    box-sizing: border-box;
+}
+
+/* Prevent long text from pushing width */
+.dashboard_event_title,
+.dashboard_event_details {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+/* Tags should wrap instead of stretching card */
+.dashboard_event_tags {
+    flex-wrap: wrap;
+}
+
+/* -----------------------------------------
+   MOBILE FIX (MOST IMPORTANT)
+------------------------------------------ */
+@media (max-width: 600px) {
+    .dashboard_events_grid {
+        grid-template-columns: 1fr; /* force single column */
+    }
+
+    .dashboard_event_card {
+        width: 100%;
+    }
+}
+
