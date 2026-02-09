@@ -11,7 +11,10 @@ body {
 }
 
 .content {
-    padding: 30px 50px;
+    padding: 30px 20px; /* Reduced side padding slightly for better mobile fit */
+    max-width: 1000px;  /* This controls the width on desktop */
+    margin: 0 auto;     /* This centers the container horizontally */
+    width: 100%;        /* Ensures it takes full width on smaller screens */
 }
 
 .content-header {
@@ -53,6 +56,9 @@ body {
     background-color: #ecfff0;
     padding: 20px;
     border-radius: 10px;
+    width: 100%;
+    padding-left: 30%;
+    padding-right: 30%;
 }
 
 .activity-header {
@@ -222,4 +228,25 @@ del {
     color: #aaa;
     background: #f9f9f9;
     cursor: not-allowed;
+}
+@media (max-width: 900px) {
+    .activity-section {
+        padding: 2%;
+    }
+}
+
+@media (max-width: 768px) {
+    .activity-section {
+        padding: 2%;
+    }
+}
+@media (max-width: 600px) {
+    .activity-section {
+        padding: 2%;
+    }
+}
+@media (max-width: 480px) {
+    .activity-section {
+        padding: 2%;
+    }
 }

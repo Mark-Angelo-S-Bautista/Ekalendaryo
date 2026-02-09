@@ -11,7 +11,8 @@
 
         <!-- Sign In Box -->
         <div class="box">
-            <h3>Sign In</h3>
+            <div class="calendar-header"></div>
+            <h3>Welcome please, Sign in</h3>
             <form action="{{ route('login') }}" method="post">
                 @csrf
                 <div class="form-group">

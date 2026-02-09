@@ -875,6 +875,10 @@ button {
         margin: 0;
         width: 100%; /* Buttons fill the grid cells */
         font-size: 0.85rem;
+        
+    }
+    .edit{
+        width: 85%;
     }
 
     /* Modal Adjustments */

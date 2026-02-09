@@ -74,16 +74,16 @@
                                     @endif
 
                                     <span>
-                                        💬
+                                        
                                         <button class="feedback-btn" data-event-id="{{ $event->id }}">
-                                            {{ $event->feedbacks_count }} feedback
+                                            {{ $event->feedbacks_count }} 💬 feedback
                                         </button>
 
-                                        📄
+                                        
                                         @if ($event->report_path)
                                             <a href="{{ route('Editor.downloadReport', $event->id) }}"
                                                 class="report-btn">
-                                                Download Report
+                                               📄 Download Report
                                             </a>
 
                                             <button class="remove-report-btn" data-event-id="{{ $event->id }}"

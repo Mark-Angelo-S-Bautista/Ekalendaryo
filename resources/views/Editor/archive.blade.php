@@ -29,7 +29,7 @@
 
             {{-- TABLE --}}
             
-            <div clas="table-wrapper">
+            <div class="table-wrapper">
                 <table class="archive-table">
                 <thead>
                     <tr>

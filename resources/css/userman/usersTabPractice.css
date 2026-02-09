@@ -6,17 +6,20 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1em;
+    margin-bottom: 1.5em;
+    gap: 15px; /* Ensures space between title and buttons */
 }
 
 .title {
-    font-size: 1.5em;
+    font-size: 1.2em;
     font-weight: 600;
+    padding-left: 0; /* Removed fixed 50px to prevent mobile clipping */
 }
 
 .users_header_buttons {
     display: flex;
     gap: 8px;
+    flex-wrap: wrap; /* Allows buttons to wrap if they run out of space */
 }
 
 .users_btn {
@@ -1552,36 +1555,81 @@ th {
         font-size: 12px;
         min-width: 36px;
     }
-}
-.users_table.scrollable {
-    max-height: 400px; /* adjust height as needed */
-    overflow-y: auto;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-}
 
-/* Optional: keep table header fixed */
-.users_table.scrollable thead th {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
-}
+    .users_table {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        width: 100%;
+        border-radius: 8px;
+    }
 
-/* Optional: style scrollbars for better look */
-.users_table.scrollable::-webkit-scrollbar {
-    width: 8px;
-}
+    /* Keep the table as a table, but give it a minimum width */
+    .users_table table {
+        display: table !important; /* Forces it to stay a table */
+        min-width: 750px; /* Prevents columns from squishing */
+    }
 
-.users_table.scrollable::-webkit-scrollbar-thumb {
-    background-color: rgba(0, 0, 0, 0.2);
-    border-radius: 4px;
-}
+    /* Ensure headers and cells remain as table elements */
+    .users_table thead, 
+    .users_table tbody, 
+    .users_table tr {
+        display: table-row-group !important;
+    }
 
-.users_table.scrollable::-webkit-scrollbar-track {
-    background-color: #f0f0f0;
-}
+    .users_table thead tr {
+        display: table-row !important;
+    }
 
+    .users_table th, 
+    .users_table td {
+        display: table-cell !important;
+        padding: 10px 8px;
+        white-space: nowrap; /* Keeps content on one line where possible */
+    }
+
+    /* Fix the Name/Title column to handle the two-line layout */
+    .user-info-cell {
+        display: flex;
+        flex-direction: column;
+        white-space: normal; /* Allows the name to wrap if needed */
+        min-width: 150px;
+    }
+
+    /* Clean up the header buttons and search bar for mobile */
+    .users_header {
+        flex-direction: column; /* Stacks Title above Buttons */
+        align-items: flex-start; /* Aligns both to the left */
+        gap: 12px;
+    }
+
+    .title {
+        padding-left: 0; /* Ensures title is flush left on mobile */
+    }
+
+    .users_header_buttons {
+        width: 100%; /* Buttons take full width of container */
+        justify-content: flex-start;
+    }
+
+    /* Optional: Makes buttons slightly larger for touch targets */
+    .users_btn {
+        padding: 8px 14px;
+        flex: 1; /* Buttons grow to fill the row on mobile */
+        justify-content: center;
+        min-width: 120px;
+    }
+
+    .users_searchbar {
+        padding-left: 0 !important;
+        width: 100%;
+    }
+
+    .users_searchbar input[type="text"] {
+        width: 100% !important;
+    }
+}
 
 /*CHANGES IN RESPONSIVENESS HERE*/
 
@@ -1607,6 +1655,17 @@ th {
     .users_table table {
         min-width: 700px; /* prevents squeezing */
     }
+
+    /* Menu / action button */
+  .menu-btn,
+  .action-btn,
+  .dropdown-btn {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
 }
 
 /* Mobile: Stack rows like cards for very small screens */
@@ -1677,6 +1736,17 @@ th {
         padding: 6px 8px;
         font-size: 12px;
     }
+
+    /* Menu / action button */
+  .menu-btn,
+  .action-btn,
+  .dropdown-btn {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
 }
 
 /* ============================= */
@@ -1685,23 +1755,60 @@ th {
 
 @media (max-width: 768px) {
 
-  /* Make table scroll instead of hiding columns */
-  .users_table-wrapper,
-  .table-responsive {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
+  .users_table table,
+    .users_table thead,
+    .users_table tbody,
+    .users_table th,
+    .users_table td,
+    .users_table tr {
+        display: block;
+    }
 
-  table#userTable {
-    min-width: 700px; /* prevents columns from collapsing */
-  }
+    .users_table thead tr {
+        display: none;
+    }
 
-  /* Force action/menu column to stay visible */
-  #userTable td:last-child,
-  #userTable th:last-child {
-    display: table-cell !important;
-    visibility: visible !important;
-  }
+    .users_table tbody tr {
+        margin-bottom: 15px;
+        border: 1px solid #d1f0d4;
+        border-radius: 8px;
+        padding: 10px;
+        background-color: white;
+    }
+
+    .users_table td {
+        padding: 6px 10px;
+        border: none;
+        display: flex;
+        justify-content: space-between;
+        font-size: 13px;
+        position: relative;
+    }
+
+    /* Add labels before each cell using data-label attribute */
+    .users_table td:before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #27ae60;
+        flex: 1;
+    }
+
+    .users_table td span {
+        flex: 1;
+        text-align: right;
+        color: #1e392a;
+    }
+
+    .users_actions {
+        justify-content: flex-end;
+        gap: 8px;
+    }
+
+    .edit-btn,
+    .delete-btn {
+        padding: 6px 8px;
+        font-size: 12px;
+    }
 
   /* Menu / action button */
   .menu-btn,
@@ -1716,3 +1823,12 @@ th {
 
 }
 
+@media (max-width: 480px) {
+    .users_header_buttons {
+        flex-direction: column; /* Stacks buttons vertically on tiny screens */
+    }
+
+    .users_btn {
+        width: 100%; /* Each button gets its own line */
+    }
+}
