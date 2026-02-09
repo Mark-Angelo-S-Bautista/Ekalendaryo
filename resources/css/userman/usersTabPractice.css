@@ -173,6 +173,7 @@ input[type="text"] {
     cursor: pointer;
 }
 
+/* Container for table */
 .users_table {
     background-color: white;
     border-radius: 8px;
@@ -182,44 +183,101 @@ input[type="text"] {
     font-size: 13px;
     margin-left: 50px;
     margin-right: 50px;
+    overflow: hidden;
 }
 
-table {
+/* Table itself */
+.users_table table {
     width: 100%;
     border-collapse: collapse;
-    padding-left: 50px;
-    padding-right: 50px;
 }
 
-th,
-td {
-    text-align: left;
-    padding: 8px;
-    border-bottom: 1px solid #e0e0e0;
-}
-
-th {
-    color: #1e392a;
+.users_table thead th {
+    background-color: #27ae60 !important; /* ensure it overrides other styles */
+    color: white !important;
     font-weight: 600;
+    padding: 10px 12px;
+    text-align: left;
 }
 
+
+/* Table header with primary green */
+.users_table th {
+    background-color: #38761d; /* system primary green */
+    color: white;
+    font-weight: 600;
+    padding: 10px 12px;
+    text-align: left;
+}
+
+/* Table body cells */
+.users_table td {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid #e0e0e0;
+    color: #1e392a;
+}
+
+/* Zebra rows for better readability */
+.users_table tbody tr:nth-child(even) {
+    background-color: #f8fff8;
+}
+
+/* Hover effect on rows */
+.users_table tbody tr:hover {
+    background-color: #e8fbe8;
+    transition: background-color 0.2s ease;
+}
+
+/* Roles / badges */
 .users_role {
     background-color: #e8f0ff;
     color: #1e392a;
     border-radius: 6px;
-    padding: 2px 8px;
+    padding: 3px 8px;
     font-size: 12px;
+    display: inline-block;
 }
 
+/* Actions icons */
 .users_actions i {
     margin-right: 8px;
     cursor: pointer;
     color: #27ae60;
     font-size: 14px;
+    transition: color 0.2s ease;
 }
 
 .users_actions i:hover {
     color: #1e392a;
+}
+
+/* Scrollable table for smaller screens */
+.users_table.scrollable {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+/* Sticky header for scrollable tables */
+.users_table.scrollable thead th {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Scrollbar styling */
+.users_table.scrollable::-webkit-scrollbar {
+    width: 8px;
+}
+
+.users_table.scrollable::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+.users_table.scrollable::-webkit-scrollbar-track {
+    background-color: #f0f0f0;
 }
 
 /* ---- Modal ---- */
@@ -1532,3 +1590,138 @@ th {
 .users_table.scrollable::-webkit-scrollbar-track {
     background-color: #f0f0f0;
 }
+
+
+/*CHANGES IN RESPONSIVENESS HERE*/
+
+/* --- MOBILE NAV TOGGLE --- */
+.menu-btn {
+    display: none; /* hidden by default */
+    font-size: 1.4rem;
+    cursor: pointer;
+    border: none;
+    background: none;
+    color: #064420;
+}
+
+/* ---------------- TABLE RESPONSIVENESS ----------------- */
+
+/* Make table scrollable on small screens */
+@media (max-width: 900px) {
+    .users_table {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .users_table table {
+        min-width: 700px; /* prevents squeezing */
+    }
+}
+
+/* Mobile: Stack rows like cards for very small screens */
+@media (max-width: 600px) {
+    .users_table {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .users_table table {
+        min-width: 700px; /* prevents squeezing */
+    }
+}
+
+/* Mobile stacked rows */
+@media (max-width: 600px) {
+    .users_table table,
+    .users_table thead,
+    .users_table tbody,
+    .users_table th,
+    .users_table td,
+    .users_table tr {
+        display: block;
+    }
+
+    .users_table thead tr {
+        display: none;
+    }
+
+    .users_table tbody tr {
+        margin-bottom: 15px;
+        border: 1px solid #d1f0d4;
+        border-radius: 8px;
+        padding: 10px;
+        background-color: white;
+    }
+
+    .users_table td {
+        padding: 6px 10px;
+        border: none;
+        display: flex;
+        justify-content: space-between;
+        font-size: 13px;
+        position: relative;
+    }
+
+    /* Add labels before each cell using data-label attribute */
+    .users_table td:before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #27ae60;
+        flex: 1;
+    }
+
+    .users_table td span {
+        flex: 1;
+        text-align: right;
+        color: #1e392a;
+    }
+
+    .users_actions {
+        justify-content: flex-end;
+        gap: 8px;
+    }
+
+    .edit-btn,
+    .delete-btn {
+        padding: 6px 8px;
+        font-size: 12px;
+    }
+}
+
+/* ============================= */
+/* RESPONSIVE USER TABLE FIX */
+/* ============================= */
+
+@media (max-width: 768px) {
+
+  /* Make table scroll instead of hiding columns */
+  .users_table-wrapper,
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  table#userTable {
+    min-width: 700px; /* prevents columns from collapsing */
+  }
+
+  /* Force action/menu column to stay visible */
+  #userTable td:last-child,
+  #userTable th:last-child {
+    display: table-cell !important;
+    visibility: visible !important;
+  }
+
+  /* Menu / action button */
+  .menu-btn,
+  .action-btn,
+  .dropdown-btn {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+
+}
+

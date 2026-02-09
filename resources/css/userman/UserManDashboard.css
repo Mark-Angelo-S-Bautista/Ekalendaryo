@@ -552,3 +552,102 @@ body {
     background: #e53935;
     color: #fff;
 }
+
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+    .edituser_wrapper {
+        padding: 25px;
+    }
+
+    .edituser_actions {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .edituser_btn {
+        width: 100%;
+    }
+}
+.edit-btn,
+.delete-btn {
+    border: none;
+    background: none;
+    font-size: 14px;
+    cursor: pointer;
+    text-decoration: none;
+    padding: 6px 10px;
+    border-radius: 6px;
+    transition: background-color 0.2s ease;
+}
+
+/* Edit button styling */
+.edit-btn {
+    color: green; /* blue */
+}
+
+.edit-btn:hover {
+    background-color: #e0e7ff;
+}
+.dashboard_tag_upcoming {
+    background: #2b5eff;
+    color: #fff;
+}
+.dashboard_tag_ongoing {
+    background: #ffb800;
+    color: #fff;
+}
+.dashboard_tag_cancelled {
+    background: #e53935;
+    color: #fff;
+}
+
+
+/*CHANGES IN RESPONSIVENESS HERE*/
+
+/* --- MOBILE NAV TOGGLE --- */
+.menu-btn {
+    display: none; /* hidden by default */
+    font-size: 1.4rem;
+    cursor: pointer;
+    border: none;
+    background: none;
+    color: #064420;
+}
+
+/* Header adjustments for mobile */
+@media (max-width: 900px) {
+    .header {
+        flex-wrap: wrap;
+        justify-content: space-between;
+        padding: 10px 15px;
+    }
+
+    .logo img {
+        width: 180px;
+        height: auto;
+    }
+
+    .navbar {
+        display: none; /* hide nav by default on mobile */
+        flex-direction: column;
+        width: 100%;
+        padding-left: 0;
+        gap: 0;
+        border-top: 1px solid #cde3d3;
+    }
+
+    .nav_item {
+        padding: 12px 20px;
+        border-bottom: 1px solid #cde3d3;
+    }
+
+    .menu-btn {
+        display: block; /* show the menu button */
+    }
+}
+
+/* Show nav when active */
+.navbar.active {
+    display: flex;
+}

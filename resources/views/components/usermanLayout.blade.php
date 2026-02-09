@@ -11,8 +11,8 @@
 <header>
     <header class="header">
         <div class="logo">
+            <img src="{{ asset('img/BPCLOGO.png') }}" alt="BPC Logo" style="width: 60px;">
             <img src="{{ asset('img/Main_logo.png') }}" alt="eKalendaryo Logo">
-            <span>User Management</span>
         </div>
         <form action="{{ route('UserManagement.logout') }}" method="post">
             @csrf
@@ -84,5 +84,58 @@
 <body>
     {{ $slot }}
 </body>
+
+<script>
+
+      document.addEventListener("DOMContentLoaded", () => {
+            const header = document.querySelector(".header");
+            const navbar = document.querySelector(".navbar");
+
+            // Create menu button
+            const menuBtn = document.createElement("button");
+            menuBtn.classList.add("menu-btn");
+            menuBtn.innerHTML = "☰"; // hamburger icon
+            header.prepend(menuBtn);
+
+            // Toggle navbar on click
+            menuBtn.addEventListener("click", () => {
+                navbar.classList.toggle("active");
+            });
+
+            // Close navbar on mobile when clicking a nav item
+            const navItems = document.querySelectorAll(".nav_item");
+            navItems.forEach(item => {
+                item.addEventListener("click", () => {
+                    if (window.innerWidth <= 900) {
+                        navbar.classList.remove("active");
+                    }
+                });
+            });
+
+            // Existing tab highlight/loadTab code
+            navItems.forEach(item => {
+                item.addEventListener("click", () => {
+                    navItems.forEach(i => i.classList.remove("active"));
+                    item.classList.add("active");
+
+                    if (item.dataset.page) {
+                        loadTab(item.dataset.page);
+                    }
+                });
+            });
+
+            // Reload if loaded from bfcache
+            window.addEventListener('pageshow', function (event) {
+                if (event.persisted) {
+                    window.location.reload();
+                }
+            });
+        });
+
+
+
+</script>
+
+
 
 </html>
