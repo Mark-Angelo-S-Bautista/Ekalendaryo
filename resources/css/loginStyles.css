@@ -86,8 +86,8 @@ body::before {
     width: 18px;
     height: 30px;
 
-    background: #d1d5db;              /* light metal */
-    border: 2px solid #9ca3af;        /* darker edge */
+    background: #ffffff;              /* light metal */
+    border: 2px solid #dadada;        /* darker edge */
     border-radius: 10px;
 
     box-shadow:
