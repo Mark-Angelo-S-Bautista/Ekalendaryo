@@ -816,3 +816,122 @@ button {
         font-size: 1.8rem;
     }
 }
+
+
+/* ================================
+   RESPONSIVE INTEGRATION
+   ================================ */
+
+@media (max-width: 1024px) {
+    .event-container {
+        max-width: 100%;
+        padding: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    /* Header Adjustment */
+    .event-container header {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .create-btn {
+        margin-top: 20px;
+    }
+
+    /* Card Adjustment */
+    .event-card {
+        padding: 16px;
+    }
+
+    .event-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .event-info {
+        flex-direction: column; /* Stack Date, Time, Location */
+        gap: 8px;
+    }
+
+    /* Actions Adjustment */
+    .actions {
+        position: static; /* Removes bottom-right pinning */
+        margin-top: 15px;
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* Two columns for buttons */
+        gap: 8px;
+        width: 100%;
+    }
+
+    .actions button, 
+    .btn-view-details, 
+    .edit, 
+    .delete, 
+    .btn-attendees {
+        margin: 0;
+        width: 100%; /* Buttons fill the grid cells */
+        font-size: 0.85rem;
+    }
+
+    /* Modal Adjustments */
+    .modal {
+        width: 95%;
+        height: auto;
+        max-height: 90vh;
+        padding: 15px;
+    }
+
+    .checkbox-grid {
+        grid-template-columns: repeat(2, 1fr); /* 2 per row on tablets */
+    }
+}
+
+@media (max-width: 480px) {
+    /* Statistics Grid */
+    .dashboard_stats_grid {
+        grid-template-columns: 1fr 1fr; /* 2x2 layout for stats */
+    }
+
+    .dashboard_stat_card {
+        padding: 12px;
+    }
+
+    .dashboard_stat_card span {
+        font-size: 1.5rem;
+    }
+
+    /* Form & Checkbox Adjustments */
+    .checkbox-grid {
+        grid-template-columns: 1fr; /* 1 per row on phones */
+    }
+
+    .custom-modal .checkbox-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .button-group {
+        flex-direction: column; /* Stack Cancel/Create buttons */
+    }
+
+    .btn-cancel, .btn-create {
+        width: 100%;
+    }
+
+    /* Attendees Table */
+    .attendees-modal-body {
+        padding: 10px;
+    }
+
+    .attendees-modal-body table {
+        font-size: 0.8rem;
+    }
+    
+    /* Actions on small phones */
+    .actions {
+        grid-template-columns: 1fr; /* Stack buttons vertically */
+    }
+}
