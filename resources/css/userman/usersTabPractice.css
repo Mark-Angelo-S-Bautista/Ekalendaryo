@@ -192,14 +192,6 @@ input[type="text"] {
     border-collapse: collapse;
 }
 
-.users_table thead th {
-    background-color: #27ae60 !important; /* ensure it overrides other styles */
-    color: white !important;
-    font-weight: 600;
-    padding: 10px 12px;
-    text-align: left;
-}
-
 
 /* Table header with primary green */
 .users_table th {
@@ -1572,7 +1564,6 @@ th {
 .users_table.scrollable thead th {
     position: sticky;
     top: 0;
-    background-color: #f8f8f8; /* header background */
     z-index: 10;
     box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
 }

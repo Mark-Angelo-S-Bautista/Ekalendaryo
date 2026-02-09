@@ -53,7 +53,6 @@ p {
     margin: 0 0 10px 0;
 }
 
-/* Added flex for subcards beside each other */
 .subcard-container {
     display: flex;
     gap: 20px;
@@ -209,8 +208,9 @@ select {
 }
 
 .logout-btn .icon {
-    font-style: normal; /* so it doesn’t go italic */
+    font-style: normal;
 }
+
 .dropdown-container {
     margin-top: 10px;
     max-height: 300px;
@@ -233,50 +233,10 @@ select {
 .dropdown-item:hover {
     background: #e8f0fe;
 }
-.records-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-    font-size: 14px;
-}
 
-.records-table thead {
-    background-color: #2b5eff;
-    color: white;
-}
-
-.records-table th,
-.records-table td {
-    padding: 8px 12px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
-}
-
-.records-table tr:nth-child(even) {
-    background-color: #f9f9f9;
-}
-
-.records-table tr:hover {
-    background-color: #e8f0fe;
-}
-
-.modal-pagination {
-    margin-top: 10px;
-    text-align: right;
-}
-
-.modal-pagination nav a {
-    padding: 5px 10px;
-    margin: 0 2px;
-    background: #2b5eff;
-    color: white;
-    border-radius: 5px;
-    text-decoration: none;
-}
-
-.modal-pagination nav a:hover {
-    background: #1f42c4;
-}
+/* ================================
+   Archive Table Styles
+   ================================ */
 .archive-container {
     padding: 30px;
 }
@@ -301,27 +261,30 @@ select {
     border-radius: 14px;
     padding: 20px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    overflow-x: auto;  /* enable horizontal scroll on small screens */
+    -webkit-overflow-scrolling: touch;
 }
 
 .archive-table {
     width: 100%;
     border-collapse: collapse;
+    min-width: 600px; /* ensures scroll appears on mobile */
+    font-size: 13px;
 }
 
-.archive-table thead {
-    background: #f1f5f9;
+.archive-table thead th {
+    background-color: #38761d !important; /* table header green */
+    color: white;
+    font-weight: 600;
+    padding: 12px 15px;
+    text-align: left;
 }
 
 .archive-table th,
 .archive-table td {
-    padding: 14px 16px;
+    padding: 12px 15px;
     text-align: left;
-    font-size: 14px;
-}
-
-.archive-table th {
-    font-weight: 600;
-    color: #374151;
+    white-space: nowrap;
 }
 
 .archive-table tbody tr {
@@ -365,6 +328,7 @@ select {
     color: #9ca3af;
     padding: 40px 0;
 }
+
 .archive-filters {
     margin-bottom: 18px;
     display: flex;
@@ -396,4 +360,22 @@ select {
     outline: none;
     border-color: #2b5eff;
     box-shadow: 0 0 0 2px rgba(43, 94, 255, 0.15);
+}
+
+/* Responsive: make tables scroll horizontally on mobile */
+@media screen and (max-width: 768px) {
+    .archive-table {
+        display: block;
+        overflow-x: auto;
+    }
+
+    .archive-filters {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .filter-group select {
+        width: 100%;
+    }
 }
