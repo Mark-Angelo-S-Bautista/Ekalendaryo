@@ -505,7 +505,7 @@ h2 {
     font-weight: 700;
     margin-bottom: 15px;
     color: #2b3a67;
-    border-bottom: 2px solid #2b5eff;
+    border-bottom: 2px solid #38761d;
     padding-bottom: 10px;
 }
 
@@ -696,4 +696,155 @@ h2 {
 
 .attendees-modal-body table tbody tr:hover {
     background-color: #f9fafb;
+}
+
+
+/* =========================================
+   RESPONSIVE OVERRIDES (Add to bottom)
+   ========================================= */
+
+@media (max-width: 768px) {
+    /* 1. Container & Layout */
+    .container {
+        padding: 16px; /* Reduced padding for more screen real estate */
+    }
+
+    h2 {
+        font-size: 1.25em;
+    }
+
+    /* 2. Event Cards Styling */
+    .event-card {
+        padding: 15px;
+    }
+
+    .event-header {
+        flex-wrap: wrap; /* Allows title and status to stack if name is long */
+    }
+
+    .event-meta {
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* Two columns for meta data */
+        gap: 10px;
+    }
+
+    /* 3. Modals Management */
+    .modal-content {
+        width: 95% !important; /* Force modals to be almost full width */
+        margin: 5% auto;
+        padding: 15px;
+        max-height: 95vh;
+    }
+
+    .attendees-modal {
+        padding: 15px;
+        width: 98%;
+    }
+
+    /* 4. Responsive Table (Mobile View) */
+    /* This transforms the table into a list-like view so it doesn't overflow */
+    .attendees-modal-body table, 
+    .attendees-modal-body thead, 
+    .attendees-modal-body tbody, 
+    .attendees-modal-body th, 
+    .attendees-modal-body td, 
+    .attendees-modal-body tr {
+        display: block;
+    }
+
+    .attendees-modal-body thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+
+    .attendees-modal-body tr {
+        border: 1px solid #e5e7eb;
+        margin-bottom: 10px;
+        border-radius: 8px;
+        background: #f9fafb;
+    }
+
+    .attendees-modal-body td {
+        border: none;
+        border-bottom: 1px solid #eee;
+        position: relative;
+        padding-left: 50% !important; /* Create space for labels */
+        text-align: right;
+    }
+
+    .attendees-modal-body td:before {
+        /* This adds labels back to the mobile table cells */
+        position: absolute;
+        left: 10px;
+        width: 45%;
+        padding-right: 10px;
+        white-space: nowrap;
+        text-align: left;
+        font-weight: bold;
+        color: #374151;
+    }
+
+    /* Add labels based on your column order */
+    .attendees-modal-body td:nth-of-type(1):before { content: "Name"; }
+    .attendees-modal-body td:nth-of-type(2):before { content: "Dept"; }
+    .attendees-modal-body td:nth-of-type(3):before { content: "Year"; }
+    .attendees-modal-body td:nth-of-type(4):before { content: "Section"; }
+
+    /* 5. Feedback Form Tweaks */
+    #submitFeedbackForm textarea {
+        height: 150px; /* Reduce default height on mobile */
+    }
+}
+
+@media (max-width: 480px) {
+    .event-meta {
+        grid-template-columns: 1fr; /* Stack meta info fully on small phones */
+    }
+
+    .footer-box {
+        width: 100%;
+        justify-content: center;
+        font-size: 12px;
+    }
+
+    /* Adjust Feedback Star size for easier clicking on touch screens */
+    label[for^="rating-"] {
+        font-size: 2.5rem !important;
+    }
+}
+@media (max-width: 768px) {
+    /* 1. Target the container holding these buttons */
+    /* Adjust the selector if your buttons are inside a specific div class */
+    .event-card {
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* 2. Stack Feedback, Report, and Remove buttons vertically */
+    .feedback-btn, 
+    .report-btn, 
+    .remove-report-btn,
+    .upload-btn {
+        display: block;      /* Ensure they occupy their own line */
+        width: 100%;         /* Full width for easier tapping */
+        margin-top: 8px;     /* Spacing between vertical buttons */
+        padding: 12px;       /* Larger tap area for mobile */
+        text-align: center;  /* Center the text inside the button */
+        font-size: 14px;     /* Slightly larger font for readability */
+    }
+
+    /* Remove horizontal margins if they were floated or inline */
+    .feedback-btn, .report-btn, .remove-report-btn {
+        margin-left: 0;
+        margin-right: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .event-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 10px; /* Provides consistent spacing between buttons */
+    }
 }

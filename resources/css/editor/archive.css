@@ -185,7 +185,7 @@ select {
     font-size: 15px;
 }
 .archive-table thead {
-    background: linear-gradient(135deg, #b7db99, #b7db99);
+    background-color: #38761d;
     color: #ffffff;
 }
 .archive-table th {
@@ -281,4 +281,35 @@ select {
     font-size: 13px;
     color: #9ca3af;
     font-style: italic;
+}
+
+
+/* This container prevents the page from expanding horizontally */
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto; /* Adds the scrollbar ONLY when needed */
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on mobile */
+    border-radius: 14px; /* Matches your table styling */
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
+    margin-top: 20px;
+}
+
+.archive-table {
+    width: 100%;
+    /* This ensures columns have enough space and don't squish too much */
+    min-width: 800px; 
+    border-collapse: separate;
+    box-shadow: none; /* Move shadow to .table-wrapper to avoid clipping */
+}
+
+/* Fix for main container padding on small screens */
+@media (max-width: 768px) {
+    main {
+        padding: 15px;
+        overflow-x: hidden; /* Prevent the body from scrolling horizontally */
+    }
+    
+    .archive-table {
+        font-size: 14px; /* Slightly smaller text for better fit */
+    }
 }

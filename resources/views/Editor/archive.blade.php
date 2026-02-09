@@ -28,7 +28,9 @@
             </form>
 
             {{-- TABLE --}}
-            <table class="archive-table">
+            
+            <div clas="table-wrapper">
+                <table class="archive-table">
                 <thead>
                     <tr>
                         <th>Title</th>
@@ -86,6 +88,7 @@
                     @endforelse
                 </tbody>
             </table>
+            </div>
 
             {{-- PAGINATION --}}
             <div style="margin-top: 20px;">
