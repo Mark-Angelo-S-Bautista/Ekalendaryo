@@ -15,7 +15,7 @@
                 <header>
                     <h1>Event Management</h1>
                     <p>Create and manage events for your organization</p>
-                    <button class="create-btn" id="openModalBtn">+ Create Event</button>
+                    <button class="create-btn" id="openModalBtn">+ Publish Event</button>
                 </header>
 
                 <!-- Card Count for Upcoming Ongoing Completed and Cancelled Events -->
