@@ -29,7 +29,7 @@ class EventController extends Controller
         // Validate input
         // ==============================
         $validated = $request->validate([
-            'title' => 'required|string|max:50',
+            'title' => 'required|string',
             'description' => 'nullable|string|max:155',
             'more_details' => 'nullable|string',
             'date' => 'required|date|after:today',
