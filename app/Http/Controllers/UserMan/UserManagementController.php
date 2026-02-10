@@ -59,7 +59,7 @@ class UserManagementController extends Controller
             }
 
             // ✅ UPCOMING: within next 30 days
-            if ($start->greaterThan($now) && $start->lessThanOrEqualTo($now->copy()->addDays(30))) {
+            if ($start->greaterThan($now) && $start->lessThanOrEqualTo($now->copy()->addDays(356))) {
                 return true;
             }
 

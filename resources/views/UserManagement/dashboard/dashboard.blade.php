@@ -55,7 +55,6 @@
         <!-- Upcoming Events -->
         <section class="dashboard_upcoming_card">
             <h3 class="dashboard_upcoming_title">Upcoming Events</h3>
-            <p>For the next 30 days</p>
             <div id="eventsWrapper">
                 <div class="dashboard_events_grid">
                     @forelse ($upcomingEvents as $event)
