@@ -39,6 +39,7 @@ export default defineConfig({
                 "resources/css/editor/history.css",
                 "resources/css/editor/manageEvents.css",
                 "resources/css/editor/profile.css",
+                "resources/css/editor/notifications.css",
 
                 "resources/css/userman/activityLog.css",
                 "resources/css/userman/app.css",
