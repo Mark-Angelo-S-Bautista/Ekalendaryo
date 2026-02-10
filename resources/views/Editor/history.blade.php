@@ -17,7 +17,7 @@
             <div class="history-columns">
                 {{-- COLUMN 1: Events Created by User (Report Upload) --}}
                 <div class="column-container">
-                    <div class="column-title">📝 My Created Events</div>
+                    <div class="column-title">📝 My Published Events</div>
 
                     <div id="createdEventList">
                         @forelse($createdEvents as $event)
@@ -74,16 +74,16 @@
                                     @endif
 
                                     <span>
-                                        
+
                                         <button class="feedback-btn" data-event-id="{{ $event->id }}">
                                             {{ $event->feedbacks_count }} 💬 feedback
                                         </button>
 
-                                        
+
                                         @if ($event->report_path)
                                             <a href="{{ route('Editor.downloadReport', $event->id) }}"
                                                 class="report-btn">
-                                               📄 Download Report
+                                                📄 Download Report
                                             </a>
 
                                             <button class="remove-report-btn" data-event-id="{{ $event->id }}"

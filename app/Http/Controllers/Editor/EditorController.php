@@ -50,13 +50,16 @@ class EditorController extends Controller
             ->where('status', 'cancelled')
             ->count();
 
-        // Fetch all events within 30 days
+        // Fetch all upcoming and ongoing events
         $events = Event::with('attendees', 'user')
-            ->whereBetween('date', [$now->toDateString(), $limitDate->toDateString()])
-            ->orWhere(function ($q) use ($now) {
-                // Include events happening today but not finished
-                $q->where('date', $now->toDateString())
-                ->where('end_time', '>=', $now->format('H:i:s'));
+            ->where(function ($query) use ($now) {
+                // Upcoming events
+                $query->where('date', '>', $now->toDateString())
+                    // Ongoing events today
+                    ->orWhere(function ($q) use ($now) {
+                        $q->where('date', $now->toDateString())
+                          ->where('end_time', '>=', $now->format('H:i:s'));
+                    });
             })
             ->orderBy('date', 'asc')
             ->get();

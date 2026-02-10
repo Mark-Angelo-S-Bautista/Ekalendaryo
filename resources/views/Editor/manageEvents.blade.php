@@ -44,7 +44,7 @@
                 <!-- Create Event POP UP -->
                 <div class="modal-overlay" id="modalOverlay">
                     <div class="modal">
-                        <h2>Create New Event</h2>
+                        <h2>Publish New Event</h2>
                         <p>Fill in the event details to create a new event</p>
 
                         <!-- Create Event FORM -->
@@ -295,7 +295,7 @@ $userTitle = $user->title ?? null;
                             @endif
                             <div class="button-group">
                                 <button type="button" class="btn-cancel" id="closeModalBtn">Cancel</button>
-                                <button type="submit" class="btn-create">Create Event</button>
+                                <button type="submit" class="btn-create">Publish Event</button>
                             </div>
                             <div id="sectionFacultyValidationError"
                                 style="color: red; margin-top: 10px; font-weight: 500; display: none;"></div>
