@@ -223,11 +223,11 @@ class EventController extends Controller
             $recipients = $recipients->merge($students);
 
             // =====================================================
-            // Add ONLY selected faculty (if any)
+            // Add ONLY selected faculty/offices/department heads (if any)
             // =====================================================
             if (!empty($targetFacultyIds)) {
                 $selectedFaculty = User::whereIn('id', $targetFacultyIds)
-                    ->where('title', 'Faculty')
+                    ->whereIn('title', ['Faculty', 'Offices', 'Department Head'])
                     ->get();
 
                 $recipients = $recipients->merge($selectedFaculty);
@@ -368,11 +368,11 @@ class EventController extends Controller
 
         // =====================================================
         // STEP 5: ALWAYS add target_faculty regardless of target_users
-        // (Faculty coordinators/advisors should always be notified)
+        // (Faculty coordinators/advisors/offices/department heads should always be notified)
         // =====================================================
         if (!empty($event->target_faculty)) {
             $targetedFaculty = User::whereIn('id', $event->target_faculty)
-                ->where('title', 'Faculty')
+                ->whereIn('title', ['Faculty', 'Offices', 'Department Head'])
                 ->get();
             $users = $users->merge($targetedFaculty);
         }
@@ -514,10 +514,10 @@ class EventController extends Controller
                 }
             }
 
-            // Always add selected faculty
+            // Always add selected faculty/offices/department heads
             if (!empty($event->target_faculty)) {
                 $targetedFaculty = User::whereIn('id', $event->target_faculty)
-                    ->where('title', 'Faculty')
+                    ->whereIn('title', ['Faculty', 'Offices', 'Department Head'])
                     ->get();
                 $users = $users->merge($targetedFaculty);
             }
@@ -547,10 +547,10 @@ class EventController extends Controller
 
                 $recipients = $recipients->merge($students);
 
-                // Add selected faculty
+                // Add selected faculty/offices/department heads
                 if (!empty($targetFacultyIds)) {
                     $selectedFaculty = User::whereIn('id', $targetFacultyIds)
-                        ->where('title', 'Faculty')
+                        ->whereIn('title', ['Faculty', 'Offices', 'Department Head'])
                         ->get();
                     $recipients = $recipients->merge($selectedFaculty);
                 }
