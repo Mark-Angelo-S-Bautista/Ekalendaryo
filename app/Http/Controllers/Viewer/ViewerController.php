@@ -159,7 +159,7 @@ class ViewerController
             ->sort()
             ->values();
 
-        $events = Event::with('user')->where('status', '!=', 'cancelled')
+        $events = Event::with('user')->whereNotIn('status', ['cancelled', 'archived'])
             ->get()
             ->map(function ($event) {
 
