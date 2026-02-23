@@ -1,478 +1,476 @@
-    .header {
-        margin: 0;
-        font-family: "Inter", Arial, sans-serif;
-        background-color: #f5fbf7;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 10px 20px;
-        background: white;
-        border-bottom: 1px solid #cde3d3;
-    }
+.header {
+    margin: 0;
+    font-family: "Inter", Arial, sans-serif;
+    background-color: #f5fbf7;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background: white;
+    border-bottom: 1px solid #cde3d3;
+}
 
-    .logo {
-        display: flex;
-        align-items: center;
-        font-weight: 800;
-        font-size: 20px;
-        color: #064420;
-    }
-    .logo img {
-        width: 350px;
-        height: 40px;
-        margin-right: 10px;
-    }
-    .logo span {
-        margin-left: 8px;
-        font-weight: 600;
-        font-size: 16px;
-        color: #064420;
-        margin-left: 6px;
-        font-style: italic;
-    }
+.logo {
+    display: flex;
+    align-items: center;
+    font-weight: 800;
+    font-size: 20px;
+    color: #064420;
+}
+.logo img {
+    width: 350px;
+    height: 40px;
+    margin-right: 10px;
+}
+.logo span {
+    margin-left: 8px;
+    font-weight: 600;
+    font-size: 16px;
+    color: #064420;
+    margin-left: 6px;
+    font-style: italic;
+}
 
-    .logout_btn {
-        border: 1px solid #064420;
-        color: #064420;
-        background: white;
-        border-radius: 8px;
-        padding: 5px 14px;
-        cursor: pointer;
-        font-weight: 500;
-        display: flex;
-        align-items: center;
-        gap: 4px;
-    }
-    .logout_btn:hover {
-        background-color: #eff8f2;
-    }
+.logout_btn {
+    border: 1px solid #064420;
+    color: #064420;
+    background: white;
+    border-radius: 8px;
+    padding: 5px 14px;
+    cursor: pointer;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.logout_btn:hover {
+    background-color: #eff8f2;
+}
 
-    /* Navigation Tabs */
-    .navbar {
-        display: flex;
-        background: white;
-        border-bottom: 2px solid #cde3d3;
-        padding-left: 20px;
-        gap: 15px;
-    }
+/* Navigation Tabs */
+.navbar {
+    display: flex;
+    background: white;
+    border-bottom: 2px solid #cde3d3;
+    padding-left: 20px;
+    gap: 15px;
+}
 
-    .nav_item {
-        padding: 14px 30px;
-        text-decoration: none;
-        color: #064420;
-        font-weight: 300;
-        border-bottom: 3px solid transparent;
-        cursor: pointer;
-        transition: 0.2s;
-        font-size: 14px;
-    }
+.nav_item {
+    padding: 14px 30px;
+    text-decoration: none;
+    color: #064420;
+    font-weight: 300;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    transition: 0.2s;
+    font-size: 14px;
+}
 
-    .nav_item:hover {
-        background-color: #eff8f2;
-    }
+.nav_item:hover {
+    background-color: #eff8f2;
+}
 
-    .nav_item.active {
-        border-bottom: 3px solid #064420;
-        color: #064420;
-        font-weight: 600;
-    }
+.nav_item.active {
+    border-bottom: 3px solid #064420;
+    color: #064420;
+    font-weight: 600;
+}
 
-    /* Notification Badge */
-    .notif-badge {
-        position: absolute;
-        top: 5px;
-        right: 5px;
-        background-color: #dc3545;
-        color: white;
-        font-size: 11px;
-        font-weight: 600;
-        min-width: 18px;
-        height: 18px;
-        padding: 0 5px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        line-height: 1;
-        box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
-    }
+/* Notification Badge */
+.notif-badge {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background-color: #dc3545;
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
+}
 
-    body {
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        background-color: #f3f8f4;
-        margin: 0;
-        color: #2e2e2e;
-    }
+body {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f3f8f4;
+    margin: 0;
+    color: #2e2e2e;
+}
 
-    /* Container */
-    .dashboard_container {
-        padding: 1.5rem;
-    }
+/* Container */
+.dashboard_container {
+    padding: 1.5rem;
+}
 
-    /* Welcome Card */
-    .dashboard_welcome_card {
-        background-color: #eaf6ec;
-        border-radius: 12px;
-        padding: 1.5rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1rem;
-    }
+/* Welcome Card */
+.dashboard_welcome_card {
+    background-color: #eaf6ec;
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
 
-    .dashboard_welcome_card h2 {
-        margin: 0 0 5px 0;
-        color: #004d25;
-    }
+.dashboard_welcome_card h2 {
+    margin: 0 0 5px 0;
+    color: #004d25;
+}
 
-    .dashboard_school_year {
-        color: #007f3d;
-        font-size: 0.9rem;
-    }
+.dashboard_school_year {
+    color: #007f3d;
+    font-size: 0.9rem;
+}
 
-    .dashboard_change_year_btn {
-        background-color: #007f3d;
-        border: none;
-        color: white;
-        padding: 10px 16px;
-        border-radius: 8px;
-        cursor: pointer;
-        font-weight: 500;
-    }
+.dashboard_change_year_btn {
+    background-color: #007f3d;
+    border: none;
+    color: white;
+    padding: 10px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+}
 
-    .dashboard_change_year_btn:hover {
-        background-color: #005d2c;
-    }
+.dashboard_change_year_btn:hover {
+    background-color: #005d2c;
+}
 
-    /* Search */
-    .dashboard_search_card {
-        background-color: #ffffff;
-        border: 1px solid #d8eeda;
-        border-radius: 10px;
-        padding: 1rem;
-        margin-bottom: 1.5rem;
-    }
+/* Search */
+.dashboard_search_card {
+    background-color: #ffffff;
+    border: 1px solid #d8eeda;
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
 
-    .dashboard_search_input {
-        width: calc(100% - 90px);
-        padding: 8px 10px;
-        border: 1px solid #cde6cd;
-        border-radius: 8px;
-        outline: none;
-        font-size: 0.9rem;
-    }
+.dashboard_search_input {
+    width: calc(100% - 90px);
+    padding: 8px 10px;
+    border: 1px solid #cde6cd;
+    border-radius: 8px;
+    outline: none;
+    font-size: 0.9rem;
+}
 
-    .dashboard_clear_btn {
-        background-color: #ffffff;
-        border: 1px solid #cde6cd;
-        color: #004d25;
-        padding: 8px 12px;
-        border-radius: 8px;
-        cursor: pointer;
-        font-weight: 500;
-    }
+.dashboard_clear_btn {
+    background-color: #ffffff;
+    border: 1px solid #cde6cd;
+    color: #004d25;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+}
 
-    .dashboard_clear_btn:hover {
-        background-color: #eaf6ec;
-    }
+.dashboard_clear_btn:hover {
+    background-color: #eaf6ec;
+}
 
-    /* Upcoming Events */
-    .dashboard_upcoming_card {
-        background-color: #ffffff;
-        border: 1px solid #d8eeda;
-        border-radius: 10px;
-        padding: 1.2rem;
-    }
+/* Upcoming Events */
+.dashboard_upcoming_card {
+    background-color: #ffffff;
+    border: 1px solid #d8eeda;
+    border-radius: 10px;
+    padding: 1.2rem;
+}
 
-    .dashboard_upcoming_title {
-        color: #004d25;
-        font-weight: bold;
-        margin-bottom: 10px;
-    }
+.dashboard_upcoming_title {
+    color: #004d25;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
 
-    /* --- NEW GRID SYSTEM --- */
+/* --- NEW GRID SYSTEM --- */
+.dashboard_events_grid {
+    display: grid;
+    /* Forces 4 columns */
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    column-gap: 20px;
+    row-gap: 30px;
+    margin-top: 20px;
+}
+
+.dashboard_event_card {
+    border: 1px solid #cde6cd;
+    border-radius: 10px;
+    padding: 5px;
+    background-color: #ffffff;
+    /* Flex properties to make cards equal height */
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    margin-bottom: 0; /* Removed margin since grid handles gap */
+}
+
+.dashboard_event_card:hover {
+    background-color: #f5fbf5;
+}
+
+/* RESPONSIVE QUERIES */
+@media (max-width: 1200px) {
     .dashboard_events_grid {
-        display: grid;
-        /* Forces 4 columns */
-        grid-template-columns: repeat(4, 1fr);
-        gap: 20px;
-        column-gap: 20px;
-        row-gap: 30px;
-        margin-top: 20px;
+        grid-template-columns: repeat(3, 1fr);
     }
+}
 
-    .dashboard_event_card {
-        border: 1px solid #cde6cd;
-        border-radius: 10px;
-        padding: 5px;
-        background-color: #ffffff;
-        /* Flex properties to make cards equal height */
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        margin-bottom: 0; /* Removed margin since grid handles gap */
+@media (max-width: 900px) {
+    .dashboard_events_grid {
+        grid-template-columns: repeat(2, 1fr);
     }
+}
 
-    .dashboard_event_card:hover {
-        background-color: #f5fbf5;
+@media (max-width: 600px) {
+    .dashboard_events_grid {
+        grid-template-columns: 1fr;
     }
+}
+/* ----------------------- */
 
-    /* RESPONSIVE QUERIES */
-    @media (max-width: 1200px) {
-        .dashboard_events_grid {
-            grid-template-columns: repeat(3, 1fr);
-        }
-    }
+.dashboard_event_title {
+    font-weight: 600;
+    color: #004d25;
+}
 
-    @media (max-width: 900px) {
-        .dashboard_events_grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
-    }
+.dashboard_event_details {
+    font-size: 0.85rem;
+    color: #444;
+    margin: 4px 0;
+}
 
-    @media (max-width: 600px) {
-        .dashboard_events_grid {
-            grid-template-columns: 1fr;
-        }
-    }
-    /* ----------------------- */
+.dashboard_event_tags {
+    display: flex;
+    gap: 6px;
+    /* Pushes the tags and button to the bottom of the card */
+    margin-top: auto;
+    margin-bottom: 10px;
+}
 
-    .dashboard_event_title {
-        font-weight: 600;
-        color: #004d25;
-    }
+.dashboard_tag {
+    font-size: 0.75rem;
+    padding: 4px 8px;
+    border-radius: 5px;
+    font-weight: 500;
+    text-transform: lowercase;
+}
 
-    .dashboard_event_details {
-        font-size: 0.85rem;
-        color: #444;
-        margin: 4px 0;
-    }
+.dashboard_tag_admin {
+    background-color: #007f3d;
+    color: white;
+}
 
-    .dashboard_event_tags {
-        display: flex;
-        gap: 6px;
-        /* Pushes the tags and button to the bottom of the card */
-        margin-top: auto;
-        margin-bottom: 10px;
-    }
+/* Modal */
+.dashboard_modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(2px);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
 
-    .dashboard_tag {
-        font-size: 0.75rem;
-        padding: 4px 8px;
-        border-radius: 5px;
-        font-weight: 500;
-        text-transform: lowercase;
-    }
+.dashboard_modal_content {
+    background: #ffffff;
+    border-radius: 10px;
+    width: 520px;
+    max-width: 90%;
+    padding: 1.5rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+    animation: fadeIn 0.3s ease-in-out;
+}
 
-    .dashboard_tag_admin {
-        background-color: #007f3d;
-        color: white;
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
     }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
 
-    /* Modal */
-    .dashboard_modal {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.3);
-        backdrop-filter: blur(2px);
-        justify-content: center;
-        align-items: center;
-        z-index: 1000;
-    }
+.dashboard_modal_header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #d8eeda;
+    padding-bottom: 0.5rem;
+}
 
-    .dashboard_modal_content {
-        background: #ffffff;
-        border-radius: 10px;
-        width: 520px;
-        max-width: 90%;
-        padding: 1.5rem;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
-        animation: fadeIn 0.3s ease-in-out;
-    }
+.dashboard_modal_header h3 {
+    margin: 0;
+    color: #004d25;
+    font-size: 1.05rem;
+}
 
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: scale(0.9);
-        }
-        to {
-            opacity: 1;
-            transform: scale(1);
-        }
-    }
+.dashboard_close_btn {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: #333;
+}
 
-    .dashboard_modal_header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-bottom: 1px solid #d8eeda;
-        padding-bottom: 0.5rem;
-    }
+.dashboard_modal_body {
+    margin-top: 1rem;
+}
 
-    .dashboard_modal_header h3 {
-        margin: 0;
-        color: #004d25;
-        font-size: 1.05rem;
-    }
+.dashboard_modal_body p {
+    color: #555;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
 
-    .dashboard_close_btn {
-        background: none;
-        border: none;
-        font-size: 1.2rem;
-        cursor: pointer;
-        color: #333;
-    }
+.dashboard_department_grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 15px;
+}
 
-    .dashboard_modal_body {
-        margin-top: 1rem;
-    }
+.dashboard_department_card {
+    border: 1px solid #cde6cd;
+    border-radius: 10px;
+    text-align: center;
+    padding: 12px;
+    background-color: #fff;
+    transition: 0.2s;
+}
 
-    .dashboard_modal_body p {
-        color: #555;
-        font-size: 0.9rem;
-        margin-bottom: 1rem;
-    }
+.dashboard_department_card:hover {
+    background-color: #f2fbf2;
+}
 
-    .dashboard_department_grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-        gap: 15px;
-    }
+.dashboard_department_card h4 {
+    margin: 0;
+    color: #004d25;
+    font-size: 0.95rem;
+}
 
-    .dashboard_department_card {
-        border: 1px solid #cde6cd;
-        border-radius: 10px;
-        text-align: center;
-        padding: 12px;
-        background-color: #fff;
-        transition: 0.2s;
-    }
+.dashboard_department_card p {
+    margin: 5px 0 0;
+    font-size: 0.85rem;
+    color: #007f3d;
+}
+.logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border: 1px solid #006400;
+    border-radius: 6px;
+    background: none;
+    color: #006400;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: 0.2s ease;
+}
 
-    .dashboard_department_card:hover {
-        background-color: #f2fbf2;
-    }
+.logout-btn:hover {
+    background: #006400;
+    color: #fff;
+}
 
-    .dashboard_department_card h4 {
-        margin: 0;
-        color: #004d25;
-        font-size: 0.95rem;
-    }
+.logout-btn .icon {
+    font-style: normal; /* so it doesn’t go italic */
+}
+.viewer-modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.65);
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    padding: 20px;
+}
 
-    .dashboard_department_card p {
-        margin: 5px 0 0;
-        font-size: 0.85rem;
-        color: #007f3d;
-    }
-    .logout-btn {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        padding: 4px 10px;
-        border: 1px solid #006400;
-        border-radius: 6px;
-        background: none;
-        color: #006400;
-        cursor: pointer;
-        font-size: 0.9rem;
-        transition: 0.2s ease;
-    }
+.viewer-modal-content {
+    background: #fff;
+    padding: 30px;
+    width: 85%;
+    max-width: 1000px;
+    height: 75%;
+    border-radius: 18px;
+    box-shadow: 0 12px 45px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    border-top: 6px solid #2b5eff;
+    animation: fadeInScale 0.28s ease-out;
+}
 
-    .logout-btn:hover {
-        background: #006400;
-        color: #fff;
-    }
+.viewer-modal-text {
+    flex: 1;
+    overflow-y: auto;
+    padding: 15px;
+    border-radius: 12px;
+    background: #f1f4fb;
+    color: #2b2b2b;
+    border: 1px solid #d5dce7;
+    user-select: text;
+}
 
-    .logout-btn .icon {
-        font-style: normal; /* so it doesn’t go italic */
-    }
-    .viewer-modal-overlay {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.65);
-        justify-content: center;
-        align-items: center;
-        z-index: 9999;
-        padding: 20px;
-    }
+.viewer-modal-close-btn {
+    padding: 10px 22px;
+    background: #e8ecf5;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: 0.25s;
+    font-weight: 600;
+    color: #36415d;
+}
 
-    .viewer-modal-content {
-        background: #fff;
-        padding: 30px;
-        width: 85%;
-        max-width: 1000px;
-        height: 75%;
-        border-radius: 18px;
-        box-shadow: 0 12px 45px rgba(0, 0, 0, 0.3);
-        display: flex;
-        flex-direction: column;
-        border-top: 6px solid #2b5eff;
-        animation: fadeInScale 0.28s ease-out;
-    }
+.viewer-modal-close-btn:hover {
+    background: #d4d9e6;
+}
+.dashboard_attend_btn:hover {
+    background-color: #f0f0f0;
+}
+/* Specific style when the button is in 'Attending' state (handled by JS inline styles mostly, but good for backup) */
+.attending-active {
+    background-color: #4caf50 !important;
+    color: white !important;
+    border-color: #4caf50 !important;
+}
+.dashboard_tag_upcoming {
+    background: #2b5eff;
+    color: #fff;
+}
+.dashboard_tag_ongoing {
+    background: #ffb800;
+    color: #fff;
+}
+.dashboard_tag_cancelled {
+    background: #e53935;
+    color: #fff;
+}
 
-    .viewer-modal-text {
-        flex: 1;
-        overflow-y: auto;
-        padding: 15px;
-        border-radius: 12px;
-        background: #f1f4fb;
-        color: #2b2b2b;
-        border: 1px solid #d5dce7;
-        user-select: text;
-    }
-
-    .viewer-modal-close-btn {
-        padding: 10px 22px;
-        background: #e8ecf5;
-        border: none;
-        border-radius: 10px;
-        font-size: 1rem;
-        cursor: pointer;
-        transition: 0.25s;
-        font-weight: 600;
-        color: #36415d;
-    }
-
-    .viewer-modal-close-btn:hover {
-        background: #d4d9e6;
-    }
-    .dashboard_attend_btn:hover {
-        background-color: #f0f0f0;
-    }
-    /* Specific style when the button is in 'Attending' state (handled by JS inline styles mostly, but good for backup) */
-    .attending-active {
-        background-color: #4caf50 !important;
-        color: white !important;
-        border-color: #4caf50 !important;
-    }
-    .dashboard_tag_upcoming {
-        background: #2b5eff;
-        color: #fff;
-    }
-    .dashboard_tag_ongoing {
-        background: #ffb800;
-        color: #fff;
-    }
-    .dashboard_tag_cancelled {
-        background: #e53935;
-        color: #fff;
-    }
-
-
-    /* =========================================
+/* =========================================
    COMPREHENSIVE RESPONSIVE DESIGN
    ========================================= */
 
 /* Tablets and Mobile (max-width: 768px) */
 @media (max-width: 768px) {
-
     /* 3. Welcome Card & Search */
 
     .dashboard_search_card {
@@ -490,7 +488,7 @@
     }
 
     /* 4. Modal Optimization */
-    .dashboard_modal_content, 
+    .dashboard_modal_content,
     .viewer-modal-content {
         width: 95% !important;
         height: auto;
@@ -499,7 +497,10 @@
     }
 
     .dashboard_department_grid {
-        grid-template-columns: repeat(2, 1fr); /* 2 columns for departments on mobile */
+        grid-template-columns: repeat(
+            2,
+            1fr
+        ); /* 2 columns for departments on mobile */
     }
 }
 
@@ -525,7 +526,6 @@
         grid-template-columns: 1fr; /* Stack departments fully */
     }
 }
-
 
 /*CHANGES IN RESPONSIVENESS HERE*/
 

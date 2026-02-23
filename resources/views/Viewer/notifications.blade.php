@@ -32,7 +32,7 @@
                             'ongoing' => 'ongoing',
                             default => 'upcoming',
                         };
-                        
+
                         // Check if this is a new notification
                         $isNew = !$lastViewed || $event->created_at > $lastViewed || $event->updated_at > $lastViewed;
                     @endphp

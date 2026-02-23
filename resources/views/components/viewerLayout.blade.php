@@ -38,20 +38,25 @@
             if ($notifUser) {
                 $notifEvents = \App\Models\Event::where(function ($query) use ($notifUser, $notifUserTitle) {
                     if ($notifUserTitle === 'faculty') {
-                        $query->where(function($q) use ($notifUser) {
-                            $q->whereRaw('JSON_CONTAINS(target_faculty, ?)', [json_encode((string) $notifUser->id)])
-                              ->orWhere(function($subQ) use ($notifUser) {
-                                  $subQ->where('target_users', 'LIKE', '%Faculty%')
-                                       ->where('department', $notifUser->department);
-                              });
+                        $query->where(function ($q) use ($notifUser) {
+                            $q->whereRaw('JSON_CONTAINS(target_faculty, ?)', [
+                                json_encode((string) $notifUser->id),
+                            ])->orWhere(function ($subQ) use ($notifUser) {
+                                $subQ
+                                    ->where('target_users', 'LIKE', '%Faculty%')
+                                    ->where('department', $notifUser->department);
+                            });
                         });
                     } elseif ($notifUserTitle === 'student' || $notifUserTitle === 'viewer') {
-                        $query->where(function($q) use ($notifUser) {
-                            $q->where('department', $notifUser->department)
-                              ->orWhereJsonContains('target_department', $notifUser->department);
+                        $query->where(function ($q) use ($notifUser) {
+                            $q->where('department', $notifUser->department)->orWhereJsonContains(
+                                'target_department',
+                                $notifUser->department,
+                            );
                         });
                     } else {
-                        $query->where('department', $notifUser->department)
+                        $query
+                            ->where('department', $notifUser->department)
                             ->orWhereJsonContains('target_department', $notifUser->department);
                     }
                 })->get();
@@ -59,13 +64,17 @@
                 // Additional filtering for students
                 if ($notifUserTitle === 'student' || $notifUserTitle === 'viewer') {
                     $userSection = $notifUser->section ? strtolower(trim($notifUser->section)) : null;
-                    $userYearLevel = $notifUser->yearlevel ? strtolower(str_replace(' ', '', $notifUser->yearlevel)) : null;
+                    $userYearLevel = $notifUser->yearlevel
+                        ? strtolower(str_replace(' ', '', $notifUser->yearlevel))
+                        : null;
 
                     $notifEvents = $notifEvents->filter(function ($event) use ($userSection, $userYearLevel) {
                         $targetUsersNormalized = strtolower($event->target_users ?? '');
-                        if (str_contains($targetUsersNormalized, 'faculty') || 
+                        if (
+                            str_contains($targetUsersNormalized, 'faculty') ||
                             str_contains($targetUsersNormalized, 'department head') ||
-                            str_contains($targetUsersNormalized, 'offices')) {
+                            str_contains($targetUsersNormalized, 'offices')
+                        ) {
                             return false;
                         }
 
@@ -77,13 +86,20 @@
                             ? json_decode($event->target_year_levels, true) ?? []
                             : $event->target_year_levels ?? [];
 
-                        $sectionMatch = empty($targetSections) ||
-                            ($userSection && in_array($userSection, array_map('strtolower', array_map('trim', $targetSections))));
+                        $sectionMatch =
+                            empty($targetSections) ||
+                            ($userSection &&
+                                in_array($userSection, array_map('strtolower', array_map('trim', $targetSections))));
 
-                        $yearLevelMatch = empty($targetYearLevels) ||
-                            ($userYearLevel && in_array($userYearLevel, array_map(function ($lvl) {
-                                return strtolower(str_replace(' ', '', $lvl));
-                            }, $targetYearLevels)));
+                        $yearLevelMatch =
+                            empty($targetYearLevels) ||
+                            ($userYearLevel &&
+                                in_array(
+                                    $userYearLevel,
+                                    array_map(function ($lvl) {
+                                        return strtolower(str_replace(' ', '', $lvl));
+                                    }, $targetYearLevels),
+                                ));
 
                         return $sectionMatch && $yearLevelMatch;
                     });
