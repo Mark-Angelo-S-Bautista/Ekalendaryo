@@ -29,9 +29,83 @@
             class="nav_item {{ request()->routeIs('Viewer.calendar') ? 'active' : '' }}">
             Calendar
         </a>
+        @php
+            $notifUser = auth()->user();
+            $notifUserTitle = strtolower($notifUser->title ?? '');
+            $notifCount = 0;
+            $lastViewed = $notifUser->notifications_last_viewed_at ?? null;
+
+            if ($notifUser) {
+                $notifEvents = \App\Models\Event::where(function ($query) use ($notifUser, $notifUserTitle) {
+                    if ($notifUserTitle === 'faculty') {
+                        $query->where(function($q) use ($notifUser) {
+                            $q->whereRaw('JSON_CONTAINS(target_faculty, ?)', [json_encode((string) $notifUser->id)])
+                              ->orWhere(function($subQ) use ($notifUser) {
+                                  $subQ->where('target_users', 'LIKE', '%Faculty%')
+                                       ->where('department', $notifUser->department);
+                              });
+                        });
+                    } elseif ($notifUserTitle === 'student' || $notifUserTitle === 'viewer') {
+                        $query->where(function($q) use ($notifUser) {
+                            $q->where('department', $notifUser->department)
+                              ->orWhereJsonContains('target_department', $notifUser->department);
+                        });
+                    } else {
+                        $query->where('department', $notifUser->department)
+                            ->orWhereJsonContains('target_department', $notifUser->department);
+                    }
+                })->get();
+
+                // Additional filtering for students
+                if ($notifUserTitle === 'student' || $notifUserTitle === 'viewer') {
+                    $userSection = $notifUser->section ? strtolower(trim($notifUser->section)) : null;
+                    $userYearLevel = $notifUser->yearlevel ? strtolower(str_replace(' ', '', $notifUser->yearlevel)) : null;
+
+                    $notifEvents = $notifEvents->filter(function ($event) use ($userSection, $userYearLevel) {
+                        $targetUsersNormalized = strtolower($event->target_users ?? '');
+                        if (str_contains($targetUsersNormalized, 'faculty') || 
+                            str_contains($targetUsersNormalized, 'department head') ||
+                            str_contains($targetUsersNormalized, 'offices')) {
+                            return false;
+                        }
+
+                        $targetSections = is_string($event->target_sections)
+                            ? json_decode($event->target_sections, true) ?? []
+                            : $event->target_sections ?? [];
+
+                        $targetYearLevels = is_string($event->target_year_levels)
+                            ? json_decode($event->target_year_levels, true) ?? []
+                            : $event->target_year_levels ?? [];
+
+                        $sectionMatch = empty($targetSections) ||
+                            ($userSection && in_array($userSection, array_map('strtolower', array_map('trim', $targetSections))));
+
+                        $yearLevelMatch = empty($targetYearLevels) ||
+                            ($userYearLevel && in_array($userYearLevel, array_map(function ($lvl) {
+                                return strtolower(str_replace(' ', '', $lvl));
+                            }, $targetYearLevels)));
+
+                        return $sectionMatch && $yearLevelMatch;
+                    });
+                }
+
+                // Only count events created or updated after the last time user viewed notifications
+                if ($lastViewed) {
+                    $notifEvents = $notifEvents->filter(function ($event) use ($lastViewed) {
+                        return $event->created_at > $lastViewed || $event->updated_at > $lastViewed;
+                    });
+                }
+
+                $notifCount = $notifEvents->count();
+            }
+        @endphp
         <a href="{{ route('Viewer.notifications') }}"
-            class="nav_item {{ request()->routeIs('Viewer.notifications') ? 'active' : '' }}">
+            class="nav_item {{ request()->routeIs('Viewer.notifications') ? 'active' : '' }}"
+            style="position: relative;">
             Notifications
+            @if ($notifCount > 0)
+                <span class="notif-badge">{{ $notifCount > 99 ? '99+' : $notifCount }}</span>
+            @endif
         </a>
         <a href="{{ route('Viewer.history') }}"
             class="nav_item {{ request()->routeIs('Viewer.history') ? 'active' : '' }}">

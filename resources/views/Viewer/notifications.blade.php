@@ -32,9 +32,12 @@
                             'ongoing' => 'ongoing',
                             default => 'upcoming',
                         };
+                        
+                        // Check if this is a new notification
+                        $isNew = !$lastViewed || $event->created_at > $lastViewed || $event->updated_at > $lastViewed;
                     @endphp
 
-                    <div class="notif-card {{ $status }}">
+                    <div class="notif-card {{ $status }}{{ $isNew ? ' new-notification' : '' }}">
                         <div class="notif-info">
 
                             <p class="notif-heading">

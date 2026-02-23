@@ -199,6 +199,13 @@ class ViewerController
     public function notifications()
     {
         $user = Auth::user();
+        
+        // Store the last viewed timestamp BEFORE updating (for highlighting new items)
+        $lastViewed = $user->notifications_last_viewed_at;
+        
+        // Update the last viewed timestamp to reset notification count
+        $user->update(['notifications_last_viewed_at' => now()]);
+        
         $userTitle = strtolower($user->title ?? '');
 
         $events = Event::where(function ($query) use ($user, $userTitle) {
@@ -282,7 +289,7 @@ class ViewerController
             ['path' => LengthAwarePaginator::resolveCurrentPath()]
         );
 
-        return view('Viewer.notifications', compact('events'));
+        return view('Viewer.notifications', compact('events', 'lastViewed'));
     }
 
     public function history()
