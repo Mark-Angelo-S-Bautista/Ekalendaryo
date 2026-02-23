@@ -21,7 +21,7 @@ use App\Mail\VerifyNewEmail;
 use Carbon\Carbon;
 use App\Models\User;
 
-class EditorController extends Controller
+class EditorController
 {
     public function dashboard()
     {

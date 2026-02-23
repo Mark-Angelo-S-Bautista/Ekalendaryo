@@ -18,7 +18,7 @@ use Carbon\Carbon;
 
 /** @var \App\Models\User $user */
 
-class EventController extends Controller
+class EventController
 {
     // =========================================================================
     // STORE FUNCTION (Correct - associates event with Auth::id())

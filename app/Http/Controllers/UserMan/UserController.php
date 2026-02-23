@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Event;
 
-class UserController extends Controller
+class UserController
 {
     public function edit($id)// ADDS DEPARTMENT
     {

@@ -18,7 +18,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Pagination\LengthAwarePaginator;
 
-class ViewerController extends Controller
+class ViewerController
 {
     public function dashboard()
     {

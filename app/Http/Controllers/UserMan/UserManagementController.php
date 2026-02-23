@@ -17,7 +17,7 @@ use App\Mail\VerifyNewEmail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
-class UserManagementController extends Controller
+class UserManagementController
 {
     public function dashboard(Request $request)
     {

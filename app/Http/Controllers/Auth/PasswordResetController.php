@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use App\Models\User;
 
-class PasswordResetController extends Controller
+class PasswordResetController
 {
     public function requestOtp(Request $request)
     {

@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Feedback;
 use Illuminate\Support\Facades\Auth;
 
-class FeedbackController extends Controller
+class FeedbackController
 {
     public function store(Request $request)
     {
