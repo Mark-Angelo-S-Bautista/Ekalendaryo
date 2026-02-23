@@ -189,7 +189,7 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
             <div class="calendar_event-info">
                 <div>📅 ${formatShortDate(eventData.date)}</div>
-                <div>⏰ ${eventData.timeStart} - ${eventData.timeEnd}</div>
+                <div>⏰ ${formatTo12Hour(eventData.timeStart)} - ${formatTo12Hour(eventData.timeEnd)}</div>
                 <div>📍 ${eventData.location}</div>
                 <div>👤 ${eventData.organizer}</div>
                 <div>🎓 ${yearLevelsString}</div>
@@ -270,6 +270,40 @@ document.addEventListener("DOMContentLoaded", () => {
     function formatShortDate(dateStr) {
         const d = new Date(dateStr + "T00:00:00");
         return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`;
+    }
+
+    function formatTo12Hour(timeStr) {
+        if (!timeStr) return "";
+
+        // Remove leading/trailing whitespace
+        timeStr = timeStr.trim();
+
+        // Check if already in 12-hour format with AM/PM
+        if (/\s(AM|PM)$/i.test(timeStr)) {
+            return timeStr;
+        }
+
+        // Parse 24-hour format (HH:MM or H:MM, with optional seconds)
+        const match24 = timeStr.match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);
+        if (match24) {
+            let hours = parseInt(match24[1]);
+            const minutes = match24[2];
+            let period = "AM";
+
+            if (hours >= 12) {
+                period = "PM";
+                if (hours > 12) {
+                    hours -= 12;
+                }
+            } else if (hours === 0) {
+                hours = 12;
+            }
+
+            return `${hours}:${minutes} ${period}`;
+        }
+
+        // Return as is if format doesn't match
+        return timeStr;
     }
 
     // Initial render
