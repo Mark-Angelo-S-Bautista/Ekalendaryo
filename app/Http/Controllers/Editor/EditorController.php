@@ -671,6 +671,10 @@ class EditorController
     public function notifications()
     {
         $user = Auth::user();
+        
+        // Update the last viewed timestamp to reset notification count
+        $user->update(['notifications_last_viewed_at' => now()]);
+        
         $userTitle = strtolower($user->title ?? '');
 
         // Fetch all events regardless of status (including completed, cancelled, updated)

@@ -82,6 +82,26 @@
     font-weight: 600;
 }
 
+/* Notification Badge */
+.notif-badge {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background-color: #dc3545;
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
+}
+
 body {
     font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
     background-color: #f3f8f4;
@@ -559,7 +579,7 @@ body {
 }
 
 .menu-btn {
-    display: none;          /* HIDE by default (desktop) */
+    display: none; /* HIDE by default (desktop) */
     background: none;
     border: none;
     font-size: 24px;
@@ -620,7 +640,6 @@ body {
         grid-template-columns: repeat(3, 1fr);
     }
 }
-
 
 /* =========================================
    DASHBOARD CONTAINER
@@ -707,7 +726,6 @@ body {
     }
 }
 
-
 /* =========================================
    FIX UPCOMING EVENTS OVERFLOW
 ========================================= */
@@ -753,4 +771,3 @@ body {
         width: 100%;
     }
 }
-
