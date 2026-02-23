@@ -672,6 +672,9 @@ class EditorController
     {
         $user = Auth::user();
         
+        // Store the last viewed timestamp BEFORE updating (for highlighting new items)
+        $lastViewed = $user->notifications_last_viewed_at;
+        
         // Update the last viewed timestamp to reset notification count
         $user->update(['notifications_last_viewed_at' => now()]);
         
@@ -803,6 +806,6 @@ class EditorController
             ['path' => LengthAwarePaginator::resolveCurrentPath()]
         );
 
-        return view('Editor.notifications', compact('events'));
+        return view('Editor.notifications', compact('events', 'lastViewed'));
     }
 }
