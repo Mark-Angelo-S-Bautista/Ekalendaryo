@@ -158,9 +158,19 @@ class EditorController
 
     public function calendar()
     {
+        $user = Auth::user();
         $departments = Department::orderBy('department_name')->get();
+        
+        // Get unique office names from all OFFICES users
+        $officeNames = User::where('department', 'OFFICES')
+            ->where('status', 'active')
+            ->whereNotNull('office_name')
+            ->distinct('office_name')
+            ->pluck('office_name')
+            ->sort()
+            ->values();
 
-        $events = Event::where('status', '!=', 'cancelled')
+        $events = Event::with('user')->where('status', '!=', 'cancelled')
             ->get()
             ->map(function ($event) {
 
@@ -170,6 +180,12 @@ class EditorController
                     $targetYearLevels = json_decode($targetYearLevels, true) ?? [];
                 } elseif (!is_array($targetYearLevels)) {
                     $targetYearLevels = [];
+                }
+
+                // If event is from OFFICES department, use creator's office name
+                $displayDept = $event->department;
+                if ($event->department === 'OFFICES' && $event->user && $event->user->office_name) {
+                    $displayDept = $event->user->office_name;
                 }
 
                 return [
@@ -182,13 +198,13 @@ class EditorController
                     'status' => $event->computed_status,
                     'location' => $event->location,
                     'sy' => $event->school_year,
-                    'type' => strtolower(str_replace(['/', ' '], '_', $event->department)),
-                    'organizer' => $event->department,
+                    'type' => strtolower(str_replace(['/', ' '], '_', $displayDept)),
+                    'organizer' => $displayDept,
                     'targetYearLevels' => $targetYearLevels,
                 ];
             });
 
-        return view('Editor.calendar', compact('events', 'departments'));
+        return view('Editor.calendar', compact('events', 'departments', 'user', 'officeNames'));
     }
 
     public function activity_log()

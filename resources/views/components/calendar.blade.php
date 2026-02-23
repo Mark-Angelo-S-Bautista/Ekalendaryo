@@ -48,11 +48,19 @@
                     <select id="calendar_eventFilter">
                         <option value="all">All Events</option>
 
-                        @foreach ($departments as $department)
-                            <option
-                                value="{{ strtolower(str_replace(['/', ' '], '_', $department->department_name)) }}">
-                                {{ $department->department_name }}
+                        @foreach ($officeNames as $officeName)
+                            <option value="{{ strtolower(str_replace(['/', ' '], '_', $officeName)) }}">
+                                {{ $officeName }}
                             </option>
+                        @endforeach
+
+                        @foreach ($departments as $department)
+                            @if ($department->department_name !== 'OFFICES')
+                                <option
+                                    value="{{ strtolower(str_replace(['/', ' '], '_', $department->department_name)) }}">
+                                    {{ $department->department_name }}
+                                </option>
+                            @endif
                         @endforeach
                     </select>
                 </div>
