@@ -11,6 +11,7 @@
     </script>
 
     @vite(['resources/css/userman/calendar.css', 'resources/js/userman/calendar.js'])
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('img/NEW_MAINLOGO.png') }}">
 
     <script>
         // This function checks if the page is being loaded from the browser's bfcache.

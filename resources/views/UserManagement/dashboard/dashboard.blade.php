@@ -1,4 +1,6 @@
 <x-usermanLayout>
+    
+    
     <div class="dashboard_container">
         <!-- Welcome Card -->
         <section class="dashboard_welcome_card">

@@ -40,6 +40,17 @@ body::before {
 }
 
 
+header {
+    display: flex;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #f5f5f5;
+}
+header img {
+    height: 50px; /* Adjust logo size */
+}
+
+
 /*CHANGES HERE BY FRONT END*/
 
 .container {

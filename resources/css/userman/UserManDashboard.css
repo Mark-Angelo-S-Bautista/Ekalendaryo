@@ -568,6 +568,9 @@ body {
     .edituser_btn {
         width: 100%;
     }
+    .dashboard_watermark img {
+    width: 500px; /* adjust size */
+    }
 }
 .edit-btn,
 .delete-btn {
@@ -645,9 +648,13 @@ body {
     .menu-btn {
         display: block; /* show the menu button */
     }
+    .dashboard_watermark img {
+    width: 200px; /* adjust size */
+    }
 }
 
 /* Show nav when active */
 .navbar.active {
     display: flex;
 }
+

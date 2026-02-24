@@ -48,6 +48,7 @@ body {
     border-radius: 10px;
     padding: 10px 20px;
     margin-top: 10px;
+    opacity: 80%;
 }
 
 .calendar_day {
@@ -532,3 +533,4 @@ body {
         display: none;
     }
 }
+

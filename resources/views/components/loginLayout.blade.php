@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>eKalendaryo - Sign In</title>
     @vite(['resources/css/loginStyles.css', 'resources/js/auth/login.js'])
-
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('img/NEW_MAINLOGO.png') }}">
+    
 </head>
 <script>
     // This function checks if the page is being loaded from the browser's bfcache.
