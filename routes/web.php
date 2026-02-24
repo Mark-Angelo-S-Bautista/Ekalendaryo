@@ -71,6 +71,7 @@ Route::middleware(['auth', 'backhistory'])->group(function () {
         Route::get('/manageEvents/{id}', [EventController::class, 'edit'])->name('editEvent');
         Route::put('/manageEvents/{id}', [EventController::class, 'update'])->name('update');
         Route::delete('/manageEvents/{id}', [EventController::class, 'destroy'])->name('destroy');
+        Route::post('/archive/{id}/restore', [EventController::class, 'restore'])->name('restore');
     });
 
     // --- B. USER MANAGEMENT ROUTES (Requires 'auth' + 'role.usermanagement') ---

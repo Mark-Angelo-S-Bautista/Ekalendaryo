@@ -26,6 +26,8 @@
                                     ✏️
                                 @elseif($log->action_type === 'cancelled')
                                     🗑️
+                                @elseif($log->action_type === 'restored')
+                                    🔄
                                 @endif
                             </div>
                             <div class="info">

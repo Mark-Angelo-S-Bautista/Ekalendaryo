@@ -12,9 +12,9 @@ body {
 
 .content {
     padding: 30px 20px; /* Reduced side padding slightly for better mobile fit */
-    max-width: 1000px;  /* This controls the width on desktop */
-    margin: 0 auto;     /* This centers the container horizontally */
-    width: 100%;        /* Ensures it takes full width on smaller screens */
+    max-width: 1000px; /* This controls the width on desktop */
+    margin: 0 auto; /* This centers the container horizontally */
+    width: 100%; /* Ensures it takes full width on smaller screens */
 }
 
 .content-header {
@@ -71,6 +71,14 @@ body {
 
 .activity-card-cancelled {
     background-color: lightcoral;
+    border-radius: 10px;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.activity-card-restored {
+    background-color: lightblue;
     border-radius: 10px;
     padding: 15px 20px;
     margin-bottom: 20px;

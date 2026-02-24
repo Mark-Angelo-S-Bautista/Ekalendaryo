@@ -748,7 +748,10 @@ class EventController
         // ✅ Get max_year_levels for all departments (for Offices users)
         $departmentMaxYearLevels = $departments->pluck('max_year_levels', 'department_name')->toArray();
 
-        return view('Editor.editEvents', compact('event', 'departments', 'faculty', 'sections', 'sectionsByDepartment', 'userDepartment', 'userMaxYearLevels', 'departmentMaxYearLevels'));
+        // Check if this is a restore operation
+        $isRestore = request()->has('restore') && in_array($event->status, ['cancelled', 'archived']);
+
+        return view('Editor.editEvents', compact('event', 'departments', 'faculty', 'sections', 'sectionsByDepartment', 'userDepartment', 'userMaxYearLevels', 'departmentMaxYearLevels', 'isRestore'));
     }
 
     // =========================================================================
@@ -813,14 +816,20 @@ class EventController
                 ]);
         }
 
+        // Check if this is a restore operation
+        $isRestore = $request->has('is_restore') && $request->is_restore == '1';
+        $wasRestored = in_array($event->status, ['cancelled', 'archived']);
+
         // To this (capture the ID BEFORE updating):
         $originalEventId = $event->id;
         $oldEventDate = $event->date; // Store old date
         $oldEvent = $event->replicate();
 
+        // Get active school year for restore
+        $activeSchoolYear = SchoolYear::where('is_active', 1)->first();
 
-        // No conflict, update the event
-        $event->update([
+        // Build update data
+        $updateData = [
             'title' => $validated['title'],
             'description' => $validated['description'] ?? null,
             'more_details' => $validated['more_details'] ?? null,
@@ -833,12 +842,53 @@ class EventController
             'target_users' => $request->target_users ?? null,
             'target_faculty' => $validated['target_faculty'] ?? [],
             'target_sections' => $validated['target_sections'] ?? [],
-        ]);
+        ];
+
+        // If restoring, also update status and school year
+        if ($isRestore && $wasRestored) {
+            $updateData['status'] = 'upcoming';
+            if ($activeSchoolYear) {
+                $updateData['school_year'] = $activeSchoolYear->school_year;
+            }
+        }
+
+        // Update the event
+        $event->update($updateData);
 
         // Cancel old reminder jobs
         $this->cancelEventReminders($event);
 
-        // ✅ FIX: Always reschedule reminders after ANY update (not just date changes)
+        // Handle email notifications based on whether this is a restore or regular update
+        if ($isRestore && $wasRestored) {
+            // RESTORE: Send NEW event notifications (like creating a new event)
+            if ($event->department === 'OFFICES') {
+                $this->sendEmailsForOfficesEvent($event); // No isUpdate flag - treated as new
+            } else {
+                $this->sendEmailsForEvent($event); // No isUpdate flag - treated as new
+            }
+
+            // Activity Log for restore
+            ActivityLog::create([
+                'user_id' => Auth::id(),
+                'action_type' => 'restored',
+                'model_type' => 'Event',
+                'model_id' => $event->id,
+                'description' => [
+                    'title' => $event->title,
+                    'event_date' => $event->date,
+                    'start_time' => $event->start_time,
+                    'end_time' => $event->end_time,
+                    'location' => $event->location,
+                    'event_description' => $event->description,
+                    'target_sections' => $this->resolveTargetSections($event),
+                    'target_faculty' => $this->resolveTargetFacultyNames($event),
+                ],
+            ]);
+
+            return redirect()->route('Editor.index')->with('success', 'Event restored successfully! Notification emails have been sent.');
+        }
+
+        // REGULAR UPDATE: Reschedule reminders and send update notifications
         if ($event->status !== 'cancelled') {
             $recipients = $this->getRecipientsForEvent($event);
             $this->scheduleEventReminders($event, $recipients);
@@ -851,7 +901,7 @@ class EventController
             $this->sendEmailsForEvent($event, true, $oldEvent);
         }
 
-        // Activity log...
+        // Activity log for edit
         ActivityLog::create([
             'user_id' => Auth::id(),
             'action_type' => 'edited',
@@ -947,6 +997,24 @@ class EventController
         ]);
 
         return redirect()->back()->with('success', 'Event cancelled and email sent successfully.');
+    }
+
+    // =========================================================================
+    // RESTORE FUNCTION - Redirect to edit page for restoration
+    // =========================================================================
+    public function restore($id)
+    {
+        $userId = Auth::id();
+
+        // Find event ONLY if its ID and user_id match
+        $event = Event::where('id', $id)
+            ->where('user_id', $userId)
+            ->whereIn('status', ['cancelled', 'archived'])
+            ->firstOrFail();
+
+        // Redirect to edit page with restore flag - actual restore happens on update
+        return redirect()->route('Editor.editEvent', ['id' => $event->id, 'restore' => 1])
+            ->with('info', '');
     }
 
     // =========================================================================

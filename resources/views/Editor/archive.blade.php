@@ -28,66 +28,78 @@
             </form>
 
             {{-- TABLE --}}
-            
+
             <div class="table-wrapper">
                 <table class="archive-table">
-                <thead>
-                    <tr>
-                        <th>Title</th>
-                        <th>Date</th>
-                        <th>Time</th>
-                        <th>Location</th>
-                        <th>School Year</th>
-                        <th>Report</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    @forelse ($archivedEvents as $event)
+                    <thead>
                         <tr>
-                            <td>{{ $event->title }}</td>
-
-                            <td>{{ \Carbon\Carbon::parse($event->date)->format('F j, Y') }}</td>
-
-                            <td>
-                                {{ \Carbon\Carbon::parse($event->start_time)->format('g:i A') }}
-                                -
-                                {{ \Carbon\Carbon::parse($event->end_time)->format('g:i A') }}
-                            </td>
-
-                            <td>{{ $event->location }}</td>
-
-                            <td>{{ $event->school_year }}</td>
-
-                            <td data-label="Report">
-                                @if ($event->report_path)
-                                    <a href="{{ route('Editor.downloadReport', $event->id) }}"
-                                        class="report-download-btn">
-                                        📄 Download
-                                    </a>
-                                @else
-                                    <span class="no-report">No Report</span>
-                                @endif
-                            </td>
-
-                            <td>
-                                @if ($event->status === 'archived')
-                                    <span class="status archived">Archived</span>
-                                @elseif ($event->status === 'cancelled')
-                                    <span class="status cancelled">Cancelled</span>
-                                @endif
-                            </td>
+                            <th>Title</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Location</th>
+                            <th>School Year</th>
+                            <th>Report</th>
+                            <th>Status</th>
+                            <th style="text-align: center;">Actions</th>
                         </tr>
-                    @empty
-                        <tr>
-                            <td colspan="7" style="text-align:center;">
-                                No archived or cancelled events found.
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
+                    </thead>
+
+                    <tbody>
+                        @forelse ($archivedEvents as $event)
+                            <tr>
+                                <td>{{ $event->title }}</td>
+
+                                <td>{{ \Carbon\Carbon::parse($event->date)->format('F j, Y') }}</td>
+
+                                <td>
+                                    {{ \Carbon\Carbon::parse($event->start_time)->format('g:i A') }}
+                                    -
+                                    {{ \Carbon\Carbon::parse($event->end_time)->format('g:i A') }}
+                                </td>
+
+                                <td>{{ $event->location }}</td>
+
+                                <td>{{ $event->school_year }}</td>
+
+                                <td data-label="Report">
+                                    @if ($event->report_path)
+                                        <a href="{{ route('Editor.downloadReport', $event->id) }}"
+                                            class="report-download-btn">
+                                            📄 Download
+                                        </a>
+                                    @else
+                                        <span class="no-report">No Report</span>
+                                    @endif
+                                </td>
+
+                                <td>
+                                    @if ($event->status === 'archived')
+                                        <span class="status archived">Archived</span>
+                                    @elseif ($event->status === 'cancelled')
+                                        <span class="status cancelled">Cancelled</span>
+                                    @endif
+                                </td>
+
+                                <td class="action-cell">
+                                    <div
+                                        style="display: flex; justify-content: center; align-items: center; width: 100%;">
+                                        <form action="{{ route('Editor.restore', $event->id) }}" method="POST"
+                                            onsubmit="return confirm('Are you sure you want to restore this event? This will set it as upcoming and send notification emails to all targeted users.');">
+                                            @csrf
+                                            <button type="submit" class="restore-btn">🔄 Restore</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="8" style="text-align:center;">
+                                    No archived or cancelled events found.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
 
             {{-- PAGINATION --}}

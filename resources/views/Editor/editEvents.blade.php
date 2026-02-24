@@ -5,7 +5,24 @@
     </head>
 
     <div class="edit-event-container">
-        <h1>Edit Event</h1>
+        <h1>{{ isset($isRestore) && $isRestore ? 'Restore Event' : 'Edit Event' }}</h1>
+
+        @if (isset($isRestore) && $isRestore)
+            <div class="restore-notice"
+                style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
+                <strong style="color: #b45309;">🔄 Restoring Event</strong>
+                <p style="margin: 5px 0 0; color: #92400e;">You are restoring a cancelled/archived event. Update the
+                    details below and click "Restore Event" to restore it and send notification emails to all targeted
+                    users.</p>
+            </div>
+        @endif
+
+        @if (session('info'))
+            <div class="info-message"
+                style="background: #dbeafe; border: 1px solid #3b82f6; border-radius: 8px; padding: 15px; margin-bottom: 20px; color: #1e40af;">
+                {{ session('info') }}
+            </div>
+        @endif
 
         @if (session('conflict'))
             <div class="conflict-message">
@@ -31,6 +48,10 @@
         <form action="{{ route('Editor.update', $event->id) }}" method="POST">
             @csrf
             @method('PUT')
+
+            @if (isset($isRestore) && $isRestore)
+                <input type="hidden" name="is_restore" value="1">
+            @endif
 
             {{-- Event Title --}}
             <div class="form-group">
@@ -149,9 +170,9 @@
                                     <label class="checkbox-item">
                                         <input type="checkbox" class="dept-checkbox" name="target_department[]"
                                             value="{{ $dept->department_name }}"
-                                            {{ in_array($dept->department_name, $selectedDepartments) ? 'checked disabled' : '' }}>
+                                            {{ in_array($dept->department_name, $selectedDepartments) ? (isset($isRestore) && $isRestore ? 'checked' : 'checked disabled') : '' }}>
                                         <span>{{ $dept->department_name }}</span>
-                                        @if (in_array($dept->department_name, $selectedDepartments))
+                                        @if (in_array($dept->department_name, $selectedDepartments) && !(isset($isRestore) && $isRestore))
                                             <input type="hidden" name="target_department[]"
                                                 value="{{ $dept->department_name }}">
                                         @endif
@@ -166,7 +187,7 @@
                 <div class="form-group">
                     <label for="targetUsers">Target Users</label>
                     <select id="targetUsers" name="target_users" class="form-control"
-                        {{ $event->target_users ? 'disabled' : '' }}>
+                        {{ $event->target_users && !(isset($isRestore) && $isRestore) ? 'disabled' : '' }}>
                         <option value="">-- Select Users --</option>
                         <option value="Faculty" {{ $event->target_users === 'Faculty' ? 'selected' : '' }}>Faculty
                         </option>
@@ -181,7 +202,7 @@
                         <option value="Students" {{ $event->target_users === 'Students' ? 'selected' : '' }}>Students
                         </option>
                     </select>
-                    @if ($event->target_users)
+                    @if ($event->target_users && !(isset($isRestore) && $isRestore))
                         <input type="hidden" name="target_users" value="{{ $event->target_users }}">
                     @endif
                 </div>
@@ -190,14 +211,14 @@
                 <div class="form-group">
                     <label for="targetUsers">Target Users</label>
                     <select id="targetUsers" name="target_users" class="form-control"
-                        {{ $event->target_users ? 'disabled' : '' }}>
+                        {{ $event->target_users && !(isset($isRestore) && $isRestore) ? 'disabled' : '' }}>
                         <option value="">-- Select Users --</option>
                         <option value="Faculty" {{ $event->target_users === 'Faculty' ? 'selected' : '' }}>Faculty
                         </option>
                         <option value="Students" {{ $event->target_users === 'Students' ? 'selected' : '' }}>Students
                         </option>
                     </select>
-                    @if ($event->target_users)
+                    @if ($event->target_users && !(isset($isRestore) && $isRestore))
                         <input type="hidden" name="target_users" value="{{ $event->target_users }}">
                     @endif
                 </div>
@@ -237,9 +258,10 @@
                             @if ($yearNumbers[$index] <= $userMaxYearLevels)
                                 <div class="checkbox-inline">
                                     <input type="checkbox" name="target_year_levels[]" value="{{ $year }}"
-                                        class="syear" {{ in_array($year, $levels) ? 'checked disabled' : '' }}>
+                                        class="syear"
+                                        {{ in_array($year, $levels) ? (isset($isRestore) && $isRestore ? 'checked' : 'checked disabled') : '' }}>
                                     {{ $year }}
-                                    @if (in_array($year, $levels))
+                                    @if (in_array($year, $levels) && !(isset($isRestore) && $isRestore))
                                         <input type="hidden" name="target_year_levels[]"
                                             value="{{ $year }}">
                                     @endif
@@ -258,11 +280,13 @@
                 }
             @endphp
 
-            <div id="lockedSectionInputs" style="display:none;">
-                @foreach ($selectedSections as $section)
-                    <input type="hidden" name="target_sections[]" value="{{ $section }}">
-                @endforeach
-            </div>
+            @if (!(isset($isRestore) && $isRestore))
+                <div id="lockedSectionInputs" style="display:none;">
+                    @foreach ($selectedSections as $section)
+                        <input type="hidden" name="target_sections[]" value="{{ $section }}">
+                    @endforeach
+                </div>
+            @endif
 
             <!-- Section Modal -->
             <div id="sectionModalOverlay" class="custom-modal-overlay">
@@ -279,7 +303,7 @@
                         @foreach ($sections as $section)
                             <label class="checkbox-item">
                                 <input type="checkbox" name="target_sections[]" value="{{ $section }}"
-                                    {{ in_array($section, $selectedSections) ? 'checked disabled' : '' }}>
+                                    {{ in_array($section, $selectedSections) ? (isset($isRestore) && $isRestore ? 'checked' : 'checked disabled') : '' }}>
                                 <span>{{ $section }}</span>
                             </label>
                         @endforeach
@@ -295,11 +319,13 @@
                 }
             @endphp
 
-            <div id="lockedFacultyInputs" style="display:none;">
-                @foreach ($selectedFaculty as $facultyId)
-                    <input type="hidden" name="target_faculty[]" value="{{ $facultyId }}">
-                @endforeach
-            </div>
+            @if (!(isset($isRestore) && $isRestore))
+                <div id="lockedFacultyInputs" style="display:none;">
+                    @foreach ($selectedFaculty as $facultyId)
+                        <input type="hidden" name="target_faculty[]" value="{{ $facultyId }}">
+                    @endforeach
+                </div>
+            @endif
 
             <!-- Faculty Modal -->
             <div id="facultyModalOverlay" class="custom-modal-overlay">
@@ -309,7 +335,7 @@
                         @foreach ($faculty as $f)
                             <label class="checkbox-item">
                                 <input type="checkbox" name="target_faculty[]" value="{{ $f->id }}"
-                                    {{ in_array($f->id, $selectedFaculty) ? 'checked disabled' : '' }}>
+                                    {{ in_array($f->id, $selectedFaculty) ? (isset($isRestore) && $isRestore ? 'checked' : 'checked disabled') : '' }}>
                                 <span>{{ $f->name }}
                                     ({{ $f->department === 'OFFICES' ? $f->office_name ?? 'Office' : $f->department }})
                                 </span>
@@ -320,8 +346,10 @@
             </div>
 
             <div class="button-group">
-                <button type="submit" class="btn-update">Update Event</button>
-                <a href="{{ route('Editor.index') }}" class="btn-cancel">Cancel</a>
+                <button type="submit"
+                    class="btn-update">{{ isset($isRestore) && $isRestore ? '🔄 Restore Event' : 'Update Event' }}</button>
+                <a href="{{ isset($isRestore) && $isRestore ? route('Editor.archive') : route('Editor.index') }}"
+                    class="btn-cancel">Cancel</a>
             </div>
         </form>
     </div>
@@ -390,6 +418,7 @@
         window.initialSelectedDepartments = @json($selectedDepartments ?? []);
         window.departmentMaxYearLevels = @json($departmentMaxYearLevels ?? []);
         window.userMaxYearLevels = @json($userMaxYearLevels ?? 4);
+        window.isRestore = @json(isset($isRestore) && $isRestore);
     </script>
     <script>
         function toggleOtherLocation() {
@@ -457,6 +486,8 @@
 
                 yearLevelsContainerEdit.innerHTML = '';
 
+                const isRestoreMode = window.isRestore || false;
+
                 yearNumbers.forEach((num, index) => {
                     if (num <= maxYear) {
                         const div = document.createElement('div');
@@ -471,14 +502,16 @@
                         // Check if this year level was previously selected
                         if (existingChecked.includes(yearOptions[index])) {
                             input.checked = true;
-                            input.disabled = true;
+                            input.disabled = !isRestoreMode; // Allow editing in restore mode
 
-                            // Add hidden input to preserve the value
-                            const hiddenInput = document.createElement('input');
-                            hiddenInput.type = 'hidden';
-                            hiddenInput.name = 'target_year_levels[]';
-                            hiddenInput.value = yearOptions[index];
-                            div.appendChild(hiddenInput);
+                            // Add hidden input to preserve the value (only when not restoring)
+                            if (!isRestoreMode) {
+                                const hiddenInput = document.createElement('input');
+                                hiddenInput.type = 'hidden';
+                                hiddenInput.name = 'target_year_levels[]';
+                                hiddenInput.value = yearOptions[index];
+                                div.appendChild(hiddenInput);
+                            }
                         }
 
                         const label = document.createElement('label');
@@ -650,6 +683,7 @@
                 }
 
                 const lockedSet = new Set(initialSelectedSections);
+                const isRestoreMode = window.isRestore || false;
 
                 effectiveSections.forEach(section => {
                     const label = document.createElement('label');
@@ -660,7 +694,7 @@
                     input.name = 'target_sections[]';
                     input.value = section;
                     input.checked = lockedSet.has(section) || selected.includes(section);
-                    input.disabled = lockedSet.has(section);
+                    input.disabled = !isRestoreMode && lockedSet.has(section);
 
                     const span = document.createElement('span');
                     span.textContent = section;
