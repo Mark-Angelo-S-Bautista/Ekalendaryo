@@ -258,7 +258,7 @@ select {
     border-radius: 14px;
     padding: 20px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-    overflow-x: auto;  /* enable horizontal scroll on small screens */
+    overflow-x: auto; /* enable horizontal scroll on small screens */
     -webkit-overflow-scrolling: touch;
 }
 

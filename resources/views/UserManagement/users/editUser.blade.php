@@ -5,9 +5,10 @@
     </head>
 
     <div class="edituser_wrapper">
-        @if(isset($isRestore) && $isRestore)
+        @if (isset($isRestore) && $isRestore)
             <h2>🔄 Restore User</h2>
-            <div style="background-color: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px;">
+            <div
+                style="background-color: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px;">
                 <strong>⚠️ You are restoring an archived user.</strong><br>
                 Review and update the details below, then click "Restore User" to reactivate this account.
             </div>
@@ -18,7 +19,7 @@
         <form id="editUserForm" action="{{ route('UserManagement.update', $user->id) }}" method="POST">
             @csrf
             @method('PUT')
-            @if(isset($isRestore) && $isRestore)
+            @if (isset($isRestore) && $isRestore)
                 <input type="hidden" name="is_restore" value="1">
             @endif
 
@@ -100,7 +101,7 @@
 
             <div class="edituser_actions">
                 <div id="editUserMessage" class="edituser_message"></div>
-                @if(isset($isRestore) && $isRestore)
+                @if (isset($isRestore) && $isRestore)
                     <a href="{{ route('UserManagement.archive') }}" class="edituser_btn edituser_btn-cancel">Cancel</a>
                     <button type="submit" class="edituser_btn edituser_btn-save">🔄 Restore User</button>
                 @else
