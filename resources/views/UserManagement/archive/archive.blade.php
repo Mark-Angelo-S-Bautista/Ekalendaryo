@@ -62,6 +62,7 @@
                             <th>School Year</th>
                             <th>Status</th>
                             <th>Archived On</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -87,6 +88,12 @@
                                     </span>
                                 </td>
                                 <td>{{ $user->updated_at->format('M d, Y') }}</td>
+                                <td>
+                                    <form action="{{ route('UserManagement.restore', $user->id) }}" method="POST" style="display:inline;">
+                                        @csrf
+                                        <button type="submit" class="restore-btn" onclick="return confirm('Are you sure you want to restore this user?');">🔄 Restore</button>
+                                    </form>
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>

@@ -15,16 +15,33 @@ use App\Models\Event;
 
 class UserController
 {
-    public function edit($id)// ADDS DEPARTMENT
+    public function edit($id, Request $request)// ADDS DEPARTMENT
     {
         $user = User::findOrFail($id);
         $departments = Department::all(); // adjust if your model is named differently
+        $isRestore = $request->has('restore') && $request->restore == '1';
 
-        return view('UserManagement.users.editUser', compact('user', 'departments'))->with('success', 'Department Added Successfully');
+        return view('UserManagement.users.editUser', compact('user', 'departments', 'isRestore'))->with('success', 'Department Added Successfully');
+    }
+
+    public function restore($id)
+    {
+        $user = User::findOrFail($id);
+
+        // Check if user is in a restorable status
+        if (!in_array($user->status, ['graduated', 'dropped', 'fired'])) {
+            return redirect()->route('UserManagement.archive')->with('error', 'This user cannot be restored.');
+        }
+
+        // Redirect to edit page with restore flag
+        return redirect()->route('UserManagement.edit', ['id' => $id, 'restore' => 1]);
     }
 
     public function update(Request $request, $id)
     {
+        // Check if this is a restore operation
+        $isRestore = $request->has('is_restore') && $request->is_restore == '1';
+
         $validator = Validator::make(
             $request->all(),
             [
@@ -81,6 +98,7 @@ class UserController
         }
 
         $user = User::findOrFail($id);
+        $wasRestored = in_array($user->status, ['graduated', 'dropped', 'fired']);
 
         // Only update password if provided
         $updateData = $request->only([
@@ -91,7 +109,31 @@ class UserController
             $updateData['password'] = bcrypt($request->password);
         }
 
+        // If restoring, also update status and related fields
+        if ($isRestore && $wasRestored) {
+            $activeSY = SchoolYear::where('is_active', 1)->first();
+            $updateData['status'] = 'active';
+            $updateData['is_deleted'] = 0;
+            $updateData['deleted_at'] = null;
+            $updateData['deleted_school_year'] = null;
+            if ($activeSY) {
+                $updateData['school_year_id'] = $activeSY->id;
+            }
+        }
+
         $user->update($updateData);
+
+        // Return success for restore operation
+        if ($isRestore && $wasRestored) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'User restored successfully!',
+                    'redirect' => route('UserManagement.users'),
+                ]);
+            }
+            return redirect()->route('UserManagement.users')->with('success', 'User restored successfully!');
+        }
 
         if ($request->ajax()) {
             return response()->json([

@@ -5,11 +5,22 @@
     </head>
 
     <div class="edituser_wrapper">
-        <h2>Edit User</h2>
+        @if(isset($isRestore) && $isRestore)
+            <h2>🔄 Restore User</h2>
+            <div style="background-color: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px;">
+                <strong>⚠️ You are restoring an archived user.</strong><br>
+                Review and update the details below, then click "Restore User" to reactivate this account.
+            </div>
+        @else
+            <h2>Edit User</h2>
+        @endif
 
         <form id="editUserForm" action="{{ route('UserManagement.update', $user->id) }}" method="POST">
             @csrf
             @method('PUT')
+            @if(isset($isRestore) && $isRestore)
+                <input type="hidden" name="is_restore" value="1">
+            @endif
 
             <div class="edituser_form-group">
                 <label class="edituser_label">Name:</label>
@@ -89,8 +100,13 @@
 
             <div class="edituser_actions">
                 <div id="editUserMessage" class="edituser_message"></div>
-                <a href="{{ route('UserManagement.users') }}" class="edituser_btn edituser_btn-cancel">Cancel</a>
-                <button type="submit" class="edituser_btn edituser_btn-save">Save Changes</button>
+                @if(isset($isRestore) && $isRestore)
+                    <a href="{{ route('UserManagement.archive') }}" class="edituser_btn edituser_btn-cancel">Cancel</a>
+                    <button type="submit" class="edituser_btn edituser_btn-save">🔄 Restore User</button>
+                @else
+                    <a href="{{ route('UserManagement.users') }}" class="edituser_btn edituser_btn-cancel">Cancel</a>
+                    <button type="submit" class="edituser_btn edituser_btn-save">Save Changes</button>
+                @endif
             </div>
         </form>
     </div>

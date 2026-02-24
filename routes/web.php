@@ -96,6 +96,7 @@ Route::middleware(['auth', 'backhistory'])->group(function () {
         // Handle update
         Route::put('/edituser/{id}', [UserController::class, 'update'])->name('update'); 
         Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('delete');
+        Route::post('/users/{id}/restore', [UserController::class, 'restore'])->name('restore');
         //Insert users using CSV file
         Route::post('/users', [UserController::class, 'import'])->name('import');
         Route::get('/users/download-template', [UserController::class, 'downloadTemplate'])->name('downloadTemplate');

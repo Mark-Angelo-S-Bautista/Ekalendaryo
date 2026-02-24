@@ -146,21 +146,18 @@ select {
 }
 
 .restore-btn {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    background-color: #4caf50;
+    background-color: #17a2b8;
     color: white;
     border: none;
     padding: 6px 12px;
-    border-radius: 6px;
+    border-radius: 5px;
     cursor: pointer;
-    font-size: 13px;
+    font-size: 0.85rem;
     transition: background-color 0.2s;
 }
 
 .restore-btn:hover {
-    background-color: #45a049;
+    background-color: #138496;
 }
 
 .phone-icon {
@@ -378,4 +375,20 @@ select {
     .filter-group select {
         width: 100%;
     }
+}
+
+/* Restore Button */
+.restore-btn {
+    background-color: #17a2b8;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: background-color 0.2s;
+}
+
+.restore-btn:hover {
+    background-color: #138496;
 }
