@@ -274,8 +274,7 @@
                     <button id="closeUploadModal" class="close-btn">&times;</button>
                 </div>
                 <div class="modal-body">
-                    <form id="uploadReportForm" action="{{ route('UserManagement.uploadReport') }}" method="POST"
-                        enctype="multipart/form-data">
+                    <form id="uploadReportForm" method="POST" enctype="multipart/form-data">
                         @csrf
                         <label for="reportInput" class="custom-file-upload">
                             Choose PDF File
