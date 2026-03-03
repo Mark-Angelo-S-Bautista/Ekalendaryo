@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\UserMan\UserManagementController;
+use App\Http\Controllers\UserMan\UserManEventController;
 use App\Http\Controllers\Editor\EventController;
 use App\Http\Controllers\Editor\EditorController;
 use App\Http\Controllers\Auth\PasswordResetController;
@@ -105,8 +106,26 @@ Route::middleware(['auth', 'backhistory'])->group(function () {
 
         Route::get('/activity_log', [UserManagementController::class, 'activity_log'])->name('activity_log');
         Route::get('/history', [UserManagementController::class, 'history'])->name('history');
+        Route::post('/events/feedback', [UserManagementController::class, 'storeFeedback'])->name('feedback.store');
+        Route::get('/event/{event}/feedback', [UserManagementController::class, 'getFeedback']);
+        Route::post('/events/{event}/upload-report', [UserManagementController::class, 'uploadReport'])->name('uploadReport');
+        Route::post('/events/{event}/remove-report', [UserManagementController::class, 'removeReport'])->name('removeReport');
+        Route::get('/events/{event}/download-report', [UserManagementController::class, 'downloadReport'])->name('downloadReport');
+        Route::get('/notifications', [UserManagementController::class, 'notifications'])->name('notifications');
+        Route::get('/eventsArchive', [UserManagementController::class, 'eventsArchive'])->name('eventsArchive');
         Route::get('/archive', [UserManagementController::class, 'archive'])->name('archive');
+        Route::post('/dashboard/{event}/attend', [UserManagementController::class, 'attend'])->name('attend');
         Route::post('/logout', [UserManagementController::class, 'destroy'])->name('logout');
+
+        //Manage Events for UserManagement
+        Route::get('/manageEvents', [UserManEventController::class, 'index'])->name('manageEvents');
+        Route::post('/manageEvents', [UserManEventController::class, 'store'])->name('store');
+        Route::post('/check-conflict', [UserManEventController::class, 'checkConflict'])->name('checkConflict');
+        Route::post('/check-user-conflict', [UserManEventController::class, 'checkUserConflict'])->name('checkUserConflict');
+        Route::get('/manageEvents/{id}', [UserManEventController::class, 'edit'])->name('editEvent');
+        Route::put('/manageEvents/{id}', [UserManEventController::class, 'update'])->name('updateEvent');
+        Route::delete('/manageEvents/{id}', [UserManEventController::class, 'destroy'])->name('destroyEvent');
+        Route::post('/eventsArchive/{id}/restore', [UserManEventController::class, 'restore'])->name('restoreEvent');
     });
 
     // --- C. VIEWER ROUTES (Requires 'auth' + 'role.viewer') ---

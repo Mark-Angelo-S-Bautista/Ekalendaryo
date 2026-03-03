@@ -7,15 +7,19 @@ use App\Models\User;
 use App\Models\Event;
 use App\Models\SchoolYear;
 use App\Models\Department;
+use App\Models\Feedback;
+use App\Models\ActivityLog;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use App\Mail\VerifyNewEmail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class UserManagementController
 {
@@ -403,7 +407,390 @@ class UserManagementController
 
     public function activity_log()
     {
-        return view('UserManagement.activity_log.activity_log');
+        $userId = Auth::id();
+
+        // Fetch logs for current user, latest first
+        $logs = ActivityLog::where('user_id', $userId)
+            ->orderBy('created_at', 'desc')
+            ->paginate(3);
+
+        return view('UserManagement.activity_log.activity_log', compact('logs'));
+    }
+
+    public function history()
+    {
+        $userId = Auth::id();
+        $user = Auth::user();
+
+        // Events created by the user (for report upload)
+        $createdEvents = Event::withCount('feedbacks')
+            ->where('user_id', $userId)
+            ->where('status', 'completed')
+            ->orderBy('date', 'desc')
+            ->get();
+
+        // Events the user was invited to (for feedback submission)
+        $invitedEvents = Event::query()
+            ->where('status', 'completed')
+            ->where('user_id', '!=', $userId)
+            ->orderBy('date', 'desc')
+            ->get();
+
+        // Filter invited events based on targeting logic
+        $userTitle = strtolower($user->title ?? '');
+        $userDept = $user->department;
+
+        $invitedEvents = $invitedEvents->filter(function($event) use ($user, $userTitle, $userDept) {
+            // Check if user is in target_faculty
+            $targetFaculty = is_string($event->target_faculty)
+                ? json_decode($event->target_faculty, true) ?? []
+                : ($event->target_faculty ?? []);
+            
+            if (is_array($targetFaculty) && in_array($user->id, $targetFaculty)) {
+                return true;
+            }
+
+            // For Office users: ONLY show if they're in target_faculty
+            if ($userDept === 'OFFICES' || $user->title === 'Offices') {
+                return false;
+            }
+
+            // Check if target_users matches user title
+            $targetUsers = $event->target_users ?? '';
+            if (!empty($targetUsers)) {
+                if ($user->title === 'Department Head') {
+                    if ($targetUsers === 'Department Heads') {
+                        $targetDepartments = $event->target_department;
+                        if (is_string($targetDepartments)) {
+                            $targetDepartments = json_decode($targetDepartments, true) ?? [];
+                        }
+                        if (!is_array($targetDepartments)) {
+                            $targetDepartments = [];
+                        }
+                        
+                        $normalizedTargetDepts = array_map(fn($d) => strtoupper(trim($d)), $targetDepartments);
+                        $userDeptNormalized = strtoupper(trim($userDept));
+                        
+                        if (in_array('All', $targetDepartments) || in_array($userDeptNormalized, $normalizedTargetDepts)) {
+                            return true;
+                        }
+                        return false;
+                    }
+                    if ($targetUsers === 'Faculty' && $event->department === $userDept) {
+                        return true;
+                    }
+                    return false;
+                }
+                
+                if ($targetUsers === $user->title || stripos($targetUsers, $user->title) !== false) {
+                    return true;
+                }
+            }
+
+            return false;
+        });
+
+        // Paginate created events
+        $perPage = 3;
+        $currentPage = request()->get('created_page', 1);
+        $paginatedCreatedEvents = new LengthAwarePaginator(
+            $createdEvents->forPage($currentPage, $perPage),
+            $createdEvents->count(),
+            $perPage,
+            $currentPage,
+            [
+                'path' => request()->url(),
+                'query' => request()->query(),
+                'pageName' => 'created_page'
+            ]
+        );
+
+        // Paginate invited events
+        $invitedPage = request()->get('invited_page', 1);
+        $paginatedInvitedEvents = new LengthAwarePaginator(
+            $invitedEvents->forPage($invitedPage, $perPage)->values(),
+            $invitedEvents->count(),
+            $perPage,
+            $invitedPage,
+            [
+                'path' => request()->url(),
+                'query' => request()->query(),
+                'pageName' => 'invited_page'
+            ]
+        );
+
+        // Get submitted feedback IDs and attended event IDs
+        $submittedFeedbackIds = Feedback::where('user_id', $userId)
+            ->pluck('event_id')
+            ->toArray();
+
+        $attendedEventIds = DB::table('event_attendees')
+            ->where('user_id', $userId)
+            ->pluck('event_id')
+            ->toArray();
+
+        return view('UserManagement.history.history', [
+            'createdEvents' => $paginatedCreatedEvents,
+            'invitedEvents' => $paginatedInvitedEvents,
+            'submittedFeedbackIds' => $submittedFeedbackIds,
+            'attendedEventIds' => $attendedEventIds,
+        ]);
+    }
+
+    public function getFeedback(Event $event)
+    {
+        $feedbacks = $event->feedbacks()->with('user')->orderBy('created_at', 'desc')->paginate(2);
+        $averageRating = $event->feedbacks()->avg('rating');
+        return view('UserManagement.partials.feedback_modal_content', compact('feedbacks', 'averageRating'))->render();
+    }
+
+    public function storeFeedback(Request $request)
+    {
+        $request->validate([
+            'event_id' => 'required|exists:events,id',
+            'rating' => 'required|integer|min:1|max:5',
+            'q_satisfaction' => 'required|string',
+            'q_organization' => 'required|string',
+            'q_relevance' => 'required|string',
+            'comment' => 'required|string|max:1000',
+        ]);
+
+        $userId = auth()->id();
+        $eventId = $request->event_id;
+
+        $existing = Feedback::where('user_id', $userId)
+                            ->where('event_id', $eventId)
+                            ->first();
+
+        if ($existing) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You have already submitted feedback for this event.'
+            ]);
+        }
+
+        Feedback::create([
+            'user_id' => $userId,
+            'event_id' => $eventId,
+            'rating' => $request->rating,
+            'q_satisfaction' => $request->q_satisfaction,
+            'q_organization' => $request->q_organization,
+            'q_relevance' => $request->q_relevance,
+            'comment' => $request->comment,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Feedback submitted successfully!'
+        ]);
+    }
+
+    public function uploadReport(Request $request, Event $event)
+    {
+        $request->validate([
+            'report' => 'required|file|mimes:pdf|max:10240',
+        ]);
+
+        $file = $request->file('report');
+        $filename = time().'_'.$file->getClientOriginalName();
+        $path = $file->storeAs('reports', $filename, 'public');
+
+        $event->update([
+            'report_path' => $path,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Report uploaded successfully!',
+            'downloadUrl' => route('UserManagement.downloadReport', $event->id),
+        ]);
+    }
+
+    public function removeReport(Event $event)
+    {
+        if ($event->report_path && Storage::disk('public')->exists($event->report_path)) {
+            Storage::disk('public')->delete($event->report_path);
+        }
+
+        $event->update(['report_path' => null]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Report removed successfully.'
+        ]);
+    }
+
+    public function downloadReport(Event $event)
+    {
+        if (!$event->report_path || !Storage::disk('public')->exists($event->report_path)) {
+            return redirect()->back()->with('error', 'Report not found.');
+        }
+
+        return response()->download(storage_path('app/public/' . $event->report_path));
+    }
+
+    public function notifications()
+    {
+        $user = Auth::user();
+        
+        $lastViewed = $user->notifications_last_viewed_at;
+        
+        $user->update(['notifications_last_viewed_at' => now()]);
+        
+        $userTitle = strtolower($user->title ?? '');
+
+        $events = Event::where(function ($query) use ($user, $userTitle) {
+
+                if ($userTitle === 'faculty') {
+                    $query->whereRaw("JSON_CONTAINS(target_faculty, ?)", [json_encode((string)$user->id)]);
+                } elseif ($userTitle === 'student' || $userTitle === 'viewer') {
+                    $query->where(function($q) use ($user) {
+                        $q->where('department', $user->department)
+                          ->orWhereJsonContains('target_department', $user->department);
+                    });
+                } else {
+                    $query->where(function($q) use ($user) {
+                        $q->whereRaw("JSON_CONTAINS(target_faculty, ?)", [json_encode((string)$user->id)])
+                          ->orWhere(function($subQ) use ($user) {
+                              $subQ->where('target_users', 'LIKE', '%' . $user->title . '%')
+                                   ->orWhere('target_users', $user->title);
+                          });
+                    });
+                }
+            })
+            ->orderBy('created_at', 'desc')
+            ->orderBy('updated_at', 'asc')
+            ->get();
+
+        if ($userTitle === 'student' || $userTitle === 'viewer') {
+            $userSection = $user->section ? strtolower(trim($user->section)) : null;
+            $userYearLevel = $user->yearlevel ? strtolower(str_replace(' ', '', $user->yearlevel)) : null;
+
+            $events = $events->filter(function($event) use ($userSection, $userYearLevel) {
+                $targetSections = is_string($event->target_sections)
+                    ? json_decode($event->target_sections, true) ?? []
+                    : ($event->target_sections ?? []);
+                
+                $targetYearLevels = is_string($event->target_year_levels)
+                    ? json_decode($event->target_year_levels, true) ?? []
+                    : ($event->target_year_levels ?? []);
+
+                $sectionMatch = empty($targetSections) || 
+                    ($userSection && in_array($userSection, array_map('strtolower', array_map('trim', $targetSections))));
+
+                $yearLevelMatch = empty($targetYearLevels) || 
+                    ($userYearLevel && in_array($userYearLevel, array_map(function($lvl) {
+                        return strtolower(str_replace(' ', '', $lvl));
+                    }, $targetYearLevels)));
+
+                return $sectionMatch && $yearLevelMatch;
+            });
+        }
+
+        if (!in_array($userTitle, ['faculty', 'student', 'viewer'])) {
+            $events = $events->filter(function($event) use ($user) {
+                $targetFaculty = is_string($event->target_faculty)
+                    ? json_decode($event->target_faculty, true) ?? []
+                    : ($event->target_faculty ?? []);
+                
+                if (is_array($targetFaculty) && in_array($user->id, $targetFaculty)) {
+                    return true;
+                }
+
+                if ($user->department === 'OFFICES' || $user->title === 'Offices') {
+                    return false;
+                }
+
+                $targetUsers = $event->target_users ?? '';
+                if (!empty($targetUsers)) {
+                    if ($user->title === 'Department Head') {
+                        if ($targetUsers === 'Department Heads') {
+                            $targetDepartments = $event->target_department;
+                            if (is_string($targetDepartments)) {
+                                $targetDepartments = json_decode($targetDepartments, true) ?? [];
+                            }
+                            if (!is_array($targetDepartments)) {
+                                $targetDepartments = [];
+                            }
+                            
+                            $normalizedTargetDepts = array_map(fn($d) => strtoupper(trim($d)), $targetDepartments);
+                            $userDeptNormalized = strtoupper(trim($user->department));
+                            
+                            if (in_array('All', $targetDepartments) || in_array($userDeptNormalized, $normalizedTargetDepts)) {
+                                return true;
+                            }
+                            return false;
+                        }
+                        if ($targetUsers === 'Faculty' && $event->department === $user->department) {
+                            return true;
+                        }
+                        return false;
+                    }
+                    
+                    if ($targetUsers === $user->title || stripos($targetUsers, $user->title) !== false) {
+                        return true;
+                    }
+                }
+
+                return false;
+            });
+        }
+
+        $perPage = 3;
+        $currentPage = LengthAwarePaginator::resolveCurrentPage();
+        $events = new LengthAwarePaginator(
+            $events->forPage($currentPage, $perPage)->values(),
+            $events->count(),
+            $perPage,
+            $currentPage,
+            ['path' => LengthAwarePaginator::resolveCurrentPath()]
+        );
+
+        return view('UserManagement.notifications.notifications', compact('events', 'lastViewed'));
+    }
+
+    public function eventsArchive(Request $request)
+    {
+        $userId = Auth::id();
+        $schoolYear = $request->get('school_year');
+
+        $schoolYears = Event::where('user_id', $userId)
+            ->whereIn('status', ['archived', 'cancelled'])
+            ->distinct()
+            ->orderBy('school_year', 'desc')
+            ->pluck('school_year');
+
+        $archivedEvents = Event::with('user')
+            ->where('user_id', $userId)
+            ->whereIn('status', ['archived', 'cancelled'])
+            ->when($schoolYear, function ($q) use ($schoolYear) {
+                $q->where('school_year', $schoolYear);
+            })
+            ->orderBy('updated_at', 'desc')
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('UserManagement.eventsArchive.eventsArchive', compact(
+            'archivedEvents',
+            'schoolYears',
+            'schoolYear'
+        ));
+    }
+
+    public function attend(Event $event)
+    {
+        $user = Auth::user();
+
+        if ($event->attendees()->where('user_id', $user->id)->exists()) {
+            return response()->json(['status' => 'already'], 200);
+        }
+
+        $event->attendees()->attach($user->id);
+
+        return response()->json([
+            'status' => 'success',
+            'attendees_count' => $event->attendees()->count()
+        ]);
     }
 
     public function calendar()
