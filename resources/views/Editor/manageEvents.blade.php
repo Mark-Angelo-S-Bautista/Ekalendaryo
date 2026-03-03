@@ -189,10 +189,39 @@ $userTitle = $user->title ?? null;
                                         <option value="Faculty">Faculty</option>
                                         @if (auth()->user()->title === 'Offices')
                                             <option value="Department Heads">Department Heads</option>
+                                            <option value="Offices">Offices</option>
                                         @endif
                                         <option value="Students">Students</option>
                                     </select>
                                 </div>
+
+                                {{-- Target Office Users (only shown when target_users is Offices) --}}
+                                @if (auth()->user()->title === 'Offices')
+                                    <div class="form-group" id="targetOfficeUsersContainer" style="display: none;">
+                                        <label>Target Office Users</label>
+                                        <p class="note">Select which office accounts will receive notifications for
+                                            this event</p>
+
+                                        <div class="checkbox_select">
+                                            <div class="checkbox-inline">
+                                                <input type="checkbox" id="select_all_offices">
+                                                <label for="select_all_offices">Select All Office Users</label>
+                                            </div>
+                                        </div>
+
+                                        <div class="checkbox-grid" id="officeUsersContainer">
+                                            @foreach ($officeUsers as $officeUser)
+                                                <label class="checkbox-item">
+                                                    <input type="checkbox" name="target_office_users[]"
+                                                        value="{{ $officeUser->id }}" class="office-user-checkbox">
+                                                    <span>{{ $officeUser->name }}
+                                                        ({{ $officeUser->office_name ?? 'Office' }})
+                                                    </span>
+                                                </label>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
                             @endif
 
                             @if (auth()->user()->title !== 'Offices' || 'Department Head')
@@ -453,19 +482,55 @@ $userTitle = $user->title ?? null;
                                 const targetUsers = document.getElementById('targetUsers');
                                 const openSectionBtn = document.getElementById('openSectionModalBtn');
                                 const openFacultyBtn = document.getElementById('openFacultyModalBtn');
+                                const targetYearLevelsDiv = document.getElementById('targetYearLevelsContainer');
+                                const officeUsersContainer = document.getElementById('targetOfficeUsersContainer');
 
                                 function toggleButtons() {
-                                    if (targetUsers.value === 'Students') {
-                                        openSectionBtn.style.display = 'inline-block';
-                                        openFacultyBtn.style.display = 'inline-block';
+                                    const selectedValue = targetUsers ? targetUsers.value : null;
+
+                                    // Show/hide Section and Faculty buttons (only for Students)
+                                    if (selectedValue === 'Students') {
+                                        if (openSectionBtn) openSectionBtn.style.display = 'inline-block';
+                                        if (openFacultyBtn) openFacultyBtn.style.display = 'inline-block';
                                     } else {
-                                        openSectionBtn.style.display = 'none';
-                                        openFacultyBtn.style.display = 'none';
+                                        if (openSectionBtn) openSectionBtn.style.display = 'none';
+                                        if (openFacultyBtn) openFacultyBtn.style.display = 'none';
+                                    }
+
+                                    // Show Office Users when Offices is selected
+                                    if (selectedValue === 'Offices') {
+                                        if (officeUsersContainer) officeUsersContainer.style.display = 'block';
+                                    } else {
+                                        if (officeUsersContainer) officeUsersContainer.style.display = 'none';
                                     }
                                 }
 
-                                targetUsers.addEventListener('change', toggleButtons);
+                                if (targetUsers) {
+                                    targetUsers.addEventListener('change', toggleButtons);
+                                }
                                 toggleButtons(); // initial check on page load
+
+                                // ==============================
+                                // Select All Office Users Logic
+                                // ==============================
+                                const selectAllOffices = document.getElementById('select_all_offices');
+                                const officeUserCheckboxes = document.querySelectorAll('.office-user-checkbox');
+
+                                if (selectAllOffices) {
+                                    selectAllOffices.addEventListener('change', () => {
+                                        officeUserCheckboxes.forEach(cb => cb.checked = selectAllOffices.checked);
+                                    });
+
+                                    officeUserCheckboxes.forEach(cb => {
+                                        cb.addEventListener('change', () => {
+                                            if (![...officeUserCheckboxes].every(cb => cb.checked)) {
+                                                selectAllOffices.checked = false;
+                                            } else {
+                                                selectAllOffices.checked = true;
+                                            }
+                                        });
+                                    });
+                                }
 
                                 // ==============================
                                 // Faculty Modal Logic

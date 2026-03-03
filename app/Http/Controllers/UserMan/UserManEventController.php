@@ -656,7 +656,12 @@ class UserManEventController
 
         $departmentMaxYearLevels = $departments->pluck('max_year_levels', 'department_name')->toArray();
 
-        return view('UserManagement.manageEvents.manageEvents', compact('events', 'departments', 'faculty', 'sections', 'sectionsByDepartment', 'userDepartment', 'userMaxYearLevels', 'departmentMaxYearLevels', 'upcomingCount', 'ongoingCount', 'completedCount', 'cancelledCount'));
+        // ✅ Get all office users except the current user (for targeting Offices)
+        $officeUsers = User::where('title', 'Offices')
+            ->where('id', '!=', $user->id)
+            ->get();
+
+        return view('UserManagement.manageEvents.manageEvents', compact('events', 'departments', 'faculty', 'sections', 'sectionsByDepartment', 'userDepartment', 'userMaxYearLevels', 'departmentMaxYearLevels', 'upcomingCount', 'ongoingCount', 'completedCount', 'cancelledCount', 'officeUsers'));
     }
 
     // =========================================================================
@@ -712,9 +717,14 @@ class UserManEventController
 
         $departmentMaxYearLevels = $departments->pluck('max_year_levels', 'department_name')->toArray();
 
+        // ✅ Get all office users except the current user (for targeting Offices)
+        $officeUsers = User::where('title', 'Offices')
+            ->where('id', '!=', $user->id)
+            ->get();
+
         $isRestore = request()->has('restore') && in_array($event->status, ['cancelled', 'archived']);
 
-        return view('UserManagement.manageEvents.editEvents', compact('event', 'departments', 'faculty', 'sections', 'sectionsByDepartment', 'userDepartment', 'userMaxYearLevels', 'departmentMaxYearLevels', 'isRestore'));
+        return view('UserManagement.manageEvents.editEvents', compact('event', 'departments', 'faculty', 'sections', 'sectionsByDepartment', 'userDepartment', 'userMaxYearLevels', 'departmentMaxYearLevels', 'isRestore', 'officeUsers'));
     }
 
     // =========================================================================

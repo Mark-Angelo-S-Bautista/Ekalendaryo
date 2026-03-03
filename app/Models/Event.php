@@ -26,6 +26,7 @@ class Event extends Model
         'target_users',
         'target_faculty',
         'target_sections',
+        'target_office_users',
         'department',
     ];
 
@@ -34,6 +35,7 @@ class Event extends Model
         'target_department' => 'array',
         'target_faculty' => 'array',
         'target_sections' => 'array',
+        'target_office_users' => 'array',
     ];
 
     protected $appends = ['computed_status'];

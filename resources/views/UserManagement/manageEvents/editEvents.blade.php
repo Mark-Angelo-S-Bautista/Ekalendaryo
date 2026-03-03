@@ -140,137 +140,139 @@
             </div>
 
             {{-- TARGET DEPARTMENTS AND USERS — SAME LOGIC AS CREATE FORM --}}
-            @if (auth()->user()->title === 'Offices' || auth()->user()->title === 'Department Head')
-                <div class="form-group">
-                    <label for="targetDepartment">Target Department</label>
+            <div class="form-group">
+                <label for="targetDepartment">Target Department</label>
 
-                    @php
-                        $user = Auth::user();
-                        $userTitle = $user->title;
-                        $userDepartment = $user->department_name ?? $user->department;
-                        $selectedDepartments = $event->target_department ?? [];
-                        if (is_string($selectedDepartments)) {
-                            $selectedDepartments = json_decode($selectedDepartments, true) ?? [];
-                        }
-                    @endphp
-
-                    {{-- Department Head sees only their department (fixed) --}}
-                    @if ($userTitle === 'Department Head')
-                        <input type="hidden" name="target_department[]" value="{{ $userDepartment }}">
-                        <p style="color:#6c757d; margin-top:5px;">
-                            Targeting is set to your department:
-                            <strong>{{ $userDepartment }}</strong> (Fixed)
-                        </p>
-
-                        {{-- Offices sees all except OFFICES --}}
-                    @else
-                        <div class="checkbox-grid">
-                            @foreach ($departments as $dept)
-                                @if ($dept->department_name !== 'OFFICES')
-                                    <label class="checkbox-item">
-                                        <input type="checkbox" class="dept-checkbox" name="target_department[]"
-                                            value="{{ $dept->department_name }}"
-                                            {{ in_array($dept->department_name, $selectedDepartments) ? (isset($isRestore) && $isRestore ? 'checked' : 'checked disabled') : '' }}>
-                                        <span>{{ $dept->department_name }}</span>
-                                        @if (in_array($dept->department_name, $selectedDepartments) && !(isset($isRestore) && $isRestore))
-                                            <input type="hidden" name="target_department[]"
-                                                value="{{ $dept->department_name }}">
-                                        @endif
-                                    </label>
-                                @endif
-                            @endforeach
-                        </div>
-                    @endif
-                </div>
-
-                {{-- Target Users --}}
-                <div class="form-group">
-                    <label for="targetUsers">Target Users</label>
-                    <select id="targetUsers" name="target_users" class="form-control"
-                        {{ $event->target_users && !(isset($isRestore) && $isRestore) ? 'disabled' : '' }}>
-                        <option value="">-- Select Users --</option>
-                        <option value="Faculty" {{ $event->target_users === 'Faculty' ? 'selected' : '' }}>Faculty
-                        </option>
-
-                        @if ($userTitle === 'Offices')
-                            <option value="Department Heads"
-                                {{ $event->target_users === 'Department Heads' ? 'selected' : '' }}>
-                                Department Heads
-                            </option>
-                        @endif
-
-                        <option value="Students" {{ $event->target_users === 'Students' ? 'selected' : '' }}>Students
-                        </option>
-                    </select>
-                    @if ($event->target_users && !(isset($isRestore) && $isRestore))
-                        <input type="hidden" name="target_users" value="{{ $event->target_users }}">
-                    @endif
-                </div>
-            @else
-                {{-- For non-Offices/non-Department Head users, show Target Users only --}}
-                <div class="form-group">
-                    <label for="targetUsers">Target Users</label>
-                    <select id="targetUsers" name="target_users" class="form-control"
-                        {{ $event->target_users && !(isset($isRestore) && $isRestore) ? 'disabled' : '' }}>
-                        <option value="">-- Select Users --</option>
-                        <option value="Faculty" {{ $event->target_users === 'Faculty' ? 'selected' : '' }}>Faculty
-                        </option>
-                        <option value="Students" {{ $event->target_users === 'Students' ? 'selected' : '' }}>Students
-                        </option>
-                    </select>
-                    @if ($event->target_users && !(isset($isRestore) && $isRestore))
-                        <input type="hidden" name="target_users" value="{{ $event->target_users }}">
-                    @endif
-                </div>
-            @endif
-
-            {{-- Target Year Levels --}}
-            @if (auth()->user()->title === 'Offices' || auth()->user()->title === 'Department Head')
                 @php
-                    $levels = $event->target_year_levels;
-                    if (is_string($levels)) {
-                        $levels = json_decode($levels, true) ?? [];
+                    $user = Auth::user();
+                    $userTitle = $user->title;
+                    $userDepartment = $user->department_name ?? $user->department;
+                    $selectedDepartments = $event->target_department ?? [];
+                    if (is_string($selectedDepartments)) {
+                        $selectedDepartments = json_decode($selectedDepartments, true) ?? [];
                     }
                 @endphp
 
-                @php
-                    $showYearLevels = $event->target_users === 'Students' || !empty($levels);
-                @endphp
-                <div class="form-group" id="targetYearLevelsContainer"
-                    data-force-show="{{ $showYearLevels ? '1' : '0' }}"
-                    style="display: {{ $showYearLevels ? 'block' : 'none' }};">
-                    <label>Target Year Levels</label>
-                    <p class="note">Select which year levels of students will receive notifications</p>
+                <div class="checkbox-grid">
+                    @foreach ($departments as $dept)
+                        @if ($dept->department_name !== 'OFFICES')
+                            <label class="checkbox-item">
+                                <input type="checkbox" class="dept-checkbox" name="target_department[]"
+                                    value="{{ $dept->department_name }}"
+                                    {{ in_array($dept->department_name, $selectedDepartments) ? (isset($isRestore) && $isRestore ? 'checked' : 'checked disabled') : '' }}>
+                                <span>{{ $dept->department_name }}</span>
+                                @if (in_array($dept->department_name, $selectedDepartments) && !(isset($isRestore) && $isRestore))
+                                    <input type="hidden" name="target_department[]"
+                                        value="{{ $dept->department_name }}">
+                                @endif
+                            </label>
+                        @endif
+                    @endforeach
+                </div>
+            </div>
 
-                    <div class="checkbox_select">
-                        <div class="checkbox-inline">
-                            <input type="checkbox" id="select_all_edit">
-                            <label for="select_all_edit">Select All Year Levels</label>
-                        </div>
-                    </div>
+            {{-- Target Users --}}
+            <div class="form-group">
+                <label for="targetUsers">Target Users</label>
+                <select id="targetUsers" name="target_users" class="form-control"
+                    {{ $event->target_users && !(isset($isRestore) && $isRestore) ? 'disabled' : '' }}>
+                    <option value="">-- Select Users --</option>
+                    <option value="Faculty" {{ $event->target_users === 'Faculty' ? 'selected' : '' }}>Faculty
+                    </option>
+                    <option value="Department Heads"
+                        {{ $event->target_users === 'Department Heads' ? 'selected' : '' }}>
+                        Department Heads
+                    </option>
+                    <option value="Offices" {{ $event->target_users === 'Offices' ? 'selected' : '' }}>
+                        Offices
+                    </option>
+                    <option value="Students" {{ $event->target_users === 'Students' ? 'selected' : '' }}>Students
+                    </option>
+                </select>
+                @if ($event->target_users && !(isset($isRestore) && $isRestore))
+                    <input type="hidden" name="target_users" value="{{ $event->target_users }}">
+                @endif
+            </div>
 
-                    <div class="checkbox-group" id="yearLevelsContainerEdit">
-                        @php
-                            $yearOptions = ['1st Year', '2nd Year', '3rd Year', '4th Year', '5th Year'];
-                            $yearNumbers = [1, 2, 3, 4, 5];
-                        @endphp
-                        @foreach ($yearOptions as $index => $year)
-                            @if ($yearNumbers[$index] <= $userMaxYearLevels)
-                                <div class="checkbox-inline">
-                                    <input type="checkbox" name="target_year_levels[]" value="{{ $year }}"
-                                        class="syear"
-                                        {{ in_array($year, $levels) ? (isset($isRestore) && $isRestore ? 'checked' : 'checked disabled') : '' }}>
-                                    {{ $year }}
-                                    @if (in_array($year, $levels) && !(isset($isRestore) && $isRestore))
-                                        <input type="hidden" name="target_year_levels[]"
-                                            value="{{ $year }}">
-                                    @endif
-                                </div>
-                            @endif
-                        @endforeach
+            {{-- Target Office Users (only shown when target_users is Offices) --}}
+            @php
+                $selectedOfficeUsers = $event->target_office_users ?? [];
+                if (is_string($selectedOfficeUsers)) {
+                    $selectedOfficeUsers = json_decode($selectedOfficeUsers, true) ?? [];
+                }
+                $showOfficeUsers = $event->target_users === 'Offices' || !empty($selectedOfficeUsers);
+            @endphp
+            <div class="form-group" id="targetOfficeUsersContainer"
+                style="display: {{ $showOfficeUsers ? 'block' : 'none' }};">
+                <label>Target Office Users</label>
+                <p class="note">Select which office accounts will receive notifications for this event</p>
+
+                <div class="checkbox_select">
+                    <div class="checkbox-inline">
+                        <input type="checkbox" id="select_all_offices_edit">
+                        <label for="select_all_offices_edit">Select All Office Users</label>
                     </div>
                 </div>
-            @endif
+
+                <div class="checkbox-grid" id="officeUsersContainerEdit">
+                    @foreach ($officeUsers as $officeUser)
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="target_office_users[]" value="{{ $officeUser->id }}"
+                                class="office-user-checkbox"
+                                {{ in_array($officeUser->id, $selectedOfficeUsers) ? (isset($isRestore) && $isRestore ? 'checked' : 'checked disabled') : '' }}>
+                            <span>{{ $officeUser->name }} ({{ $officeUser->office_name ?? 'Office' }})</span>
+                            @if (in_array($officeUser->id, $selectedOfficeUsers) && !(isset($isRestore) && $isRestore))
+                                <input type="hidden" name="target_office_users[]" value="{{ $officeUser->id }}">
+                            @endif
+                        </label>
+                    @endforeach
+                </div>
+            </div>
+
+            {{-- Target Year Levels --}}
+            @php
+                $levels = $event->target_year_levels;
+                if (is_string($levels)) {
+                    $levels = json_decode($levels, true) ?? [];
+                }
+            @endphp
+
+            @php
+                $showYearLevels = $event->target_users === 'Students' || !empty($levels);
+            @endphp
+            <div class="form-group" id="targetYearLevelsContainer"
+                data-force-show="{{ $showYearLevels ? '1' : '0' }}"
+                style="display: {{ $showYearLevels ? 'block' : 'none' }};">
+                <label>Target Year Levels</label>
+                <p class="note">Select which year levels of students will receive notifications</p>
+
+                <div class="checkbox_select">
+                    <div class="checkbox-inline">
+                        <input type="checkbox" id="select_all_edit">
+                        <label for="select_all_edit">Select All Year Levels</label>
+                    </div>
+                </div>
+
+                <div class="checkbox-group" id="yearLevelsContainerEdit">
+                    @php
+                        $yearOptions = ['1st Year', '2nd Year', '3rd Year', '4th Year', '5th Year'];
+                        $yearNumbers = [1, 2, 3, 4, 5];
+                    @endphp
+                    @foreach ($yearOptions as $index => $year)
+                        @if ($yearNumbers[$index] <= $userMaxYearLevels)
+                            <div class="checkbox-inline">
+                                <input type="checkbox" name="target_year_levels[]" value="{{ $year }}"
+                                    class="syear"
+                                    {{ in_array($year, $levels) ? (isset($isRestore) && $isRestore ? 'checked' : 'checked disabled') : '' }}>
+                                {{ $year }}
+                                @if (in_array($year, $levels) && !(isset($isRestore) && $isRestore))
+                                    <input type="hidden" name="target_year_levels[]" value="{{ $year }}">
+                                @endif
+                            </div>
+                        @endif
+                    @endforeach
+                </div>
+            </div>
 
             {{-- Section Button (only shown when target_users is Students) --}}
             @php
@@ -567,17 +569,26 @@
                 cb.addEventListener('change', updateYearLevelsEdit);
             });
 
-            // Initial setup for year levels
-            if (window.userTitle === 'Offices') {
-                updateYearLevelsEdit();
-            } else {
-                wireSelectAllEdit();
-            }
+            // Initial setup for year levels - UserManagement users always have full access
+            updateYearLevelsEdit();
+            wireSelectAllEdit();
+
+            const officeUsersContainer = document.getElementById('targetOfficeUsersContainer');
 
             function toggleButtons() {
                 const forceShow = yearLevels && yearLevels.dataset.forceShow === '1';
                 const isStudents = targetUsers && targetUsers.value === 'Students';
+                const isOfficesTarget = targetUsers && targetUsers.value === 'Offices';
                 const shouldShow = isStudents || forceShow;
+
+                // Show/hide Office Users container
+                if (isOfficesTarget) {
+                    if (officeUsersContainer) officeUsersContainer.style.display = 'block';
+                    if (yearLevels) yearLevels.style.display = 'none';
+                } else {
+                    if (officeUsersContainer) officeUsersContainer.style.display = 'none';
+                }
+
                 if (isStudents) {
                     if (yearLevels) yearLevels.style.display = 'block';
                     if (openSectionBtn) openSectionBtn.style.display = 'inline-block';
@@ -603,6 +614,35 @@
 
             // Always call toggleButtons on initial load for all users
             toggleButtons();
+
+            // ==============================
+            // Select All Office Users Logic (Edit)
+            // ==============================
+            const selectAllOfficesEdit = document.getElementById('select_all_offices_edit');
+            const officeUserCheckboxesEdit = document.querySelectorAll('.office-user-checkbox');
+
+            if (selectAllOfficesEdit) {
+                selectAllOfficesEdit.addEventListener('change', () => {
+                    officeUserCheckboxesEdit.forEach(cb => {
+                        if (!cb.disabled) cb.checked = selectAllOfficesEdit.checked;
+                    });
+                });
+
+                officeUserCheckboxesEdit.forEach(cb => {
+                    cb.addEventListener('change', () => {
+                        const enabled = [...officeUserCheckboxesEdit].filter(c => !c.disabled);
+                        if (!enabled.length) {
+                            selectAllOfficesEdit.checked = false;
+                            return;
+                        }
+                        if (!enabled.every(c => c.checked)) {
+                            selectAllOfficesEdit.checked = false;
+                        } else {
+                            selectAllOfficesEdit.checked = true;
+                        }
+                    });
+                });
+            }
 
             // ==============================
             const facultyModal = document.getElementById('facultyModalOverlay');

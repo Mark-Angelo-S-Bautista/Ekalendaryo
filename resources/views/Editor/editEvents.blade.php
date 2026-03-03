@@ -197,6 +197,9 @@
                                 {{ $event->target_users === 'Department Heads' ? 'selected' : '' }}>
                                 Department Heads
                             </option>
+                            <option value="Offices" {{ $event->target_users === 'Offices' ? 'selected' : '' }}>
+                                Offices
+                            </option>
                         @endif
 
                         <option value="Students" {{ $event->target_users === 'Students' ? 'selected' : '' }}>Students
@@ -206,6 +209,44 @@
                         <input type="hidden" name="target_users" value="{{ $event->target_users }}">
                     @endif
                 </div>
+
+                {{-- Target Office Users (only shown when target_users is Offices) --}}
+                @if ($userTitle === 'Offices')
+                    @php
+                        $selectedOfficeUsers = $event->target_office_users ?? [];
+                        if (is_string($selectedOfficeUsers)) {
+                            $selectedOfficeUsers = json_decode($selectedOfficeUsers, true) ?? [];
+                        }
+                        $showOfficeUsers = $event->target_users === 'Offices' || !empty($selectedOfficeUsers);
+                    @endphp
+                    <div class="form-group" id="targetOfficeUsersContainer"
+                        style="display: {{ $showOfficeUsers ? 'block' : 'none' }};">
+                        <label>Target Office Users</label>
+                        <p class="note">Select which office accounts will receive notifications for this event</p>
+
+                        <div class="checkbox_select">
+                            <div class="checkbox-inline">
+                                <input type="checkbox" id="select_all_offices_edit">
+                                <label for="select_all_offices_edit">Select All Office Users</label>
+                            </div>
+                        </div>
+
+                        <div class="checkbox-grid" id="officeUsersContainerEdit">
+                            @foreach ($officeUsers as $officeUser)
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="target_office_users[]"
+                                        value="{{ $officeUser->id }}" class="office-user-checkbox"
+                                        {{ in_array($officeUser->id, $selectedOfficeUsers) ? (isset($isRestore) && $isRestore ? 'checked' : 'checked disabled') : '' }}>
+                                    <span>{{ $officeUser->name }} ({{ $officeUser->office_name ?? 'Office' }})</span>
+                                    @if (in_array($officeUser->id, $selectedOfficeUsers) && !(isset($isRestore) && $isRestore))
+                                        <input type="hidden" name="target_office_users[]"
+                                            value="{{ $officeUser->id }}">
+                                    @endif
+                                </label>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
             @else
                 {{-- For non-Offices/non-Department Head users, show Target Users only --}}
                 <div class="form-group">
@@ -574,10 +615,21 @@
                 wireSelectAllEdit();
             }
 
+            const officeUsersContainer = document.getElementById('targetOfficeUsersContainer');
+
             function toggleButtons() {
                 const forceShow = yearLevels && yearLevels.dataset.forceShow === '1';
                 const isStudents = targetUsers && targetUsers.value === 'Students';
+                const isOfficesTarget = targetUsers && targetUsers.value === 'Offices';
                 const shouldShow = isStudents || forceShow;
+
+                // Show/hide Office Users container (don't hide year levels)
+                if (isOfficesTarget) {
+                    if (officeUsersContainer) officeUsersContainer.style.display = 'block';
+                } else {
+                    if (officeUsersContainer) officeUsersContainer.style.display = 'none';
+                }
+
                 if (isStudents) {
                     if (yearLevels) yearLevels.style.display = 'block';
                     if (openSectionBtn) openSectionBtn.style.display = 'inline-block';
@@ -603,6 +655,35 @@
 
             // Always call toggleButtons on initial load for all users
             toggleButtons();
+
+            // ==============================
+            // Select All Office Users Logic (Edit)
+            // ==============================
+            const selectAllOfficesEdit = document.getElementById('select_all_offices_edit');
+            const officeUserCheckboxesEdit = document.querySelectorAll('.office-user-checkbox');
+
+            if (selectAllOfficesEdit) {
+                selectAllOfficesEdit.addEventListener('change', () => {
+                    officeUserCheckboxesEdit.forEach(cb => {
+                        if (!cb.disabled) cb.checked = selectAllOfficesEdit.checked;
+                    });
+                });
+
+                officeUserCheckboxesEdit.forEach(cb => {
+                    cb.addEventListener('change', () => {
+                        const enabled = [...officeUserCheckboxesEdit].filter(c => !c.disabled);
+                        if (!enabled.length) {
+                            selectAllOfficesEdit.checked = false;
+                            return;
+                        }
+                        if (!enabled.every(c => c.checked)) {
+                            selectAllOfficesEdit.checked = false;
+                        } else {
+                            selectAllOfficesEdit.checked = true;
+                        }
+                    });
+                });
+            }
 
             // ==============================
             const facultyModal = document.getElementById('facultyModalOverlay');

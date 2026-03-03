@@ -126,173 +126,191 @@
                                 }
                             </script>
 
-                            @if (auth()->user()->title === 'Offices' || auth()->user()->title === 'Department Head')
-                                <div class="form-group">
-                                    <label for="targetDepartment">Target Department</label>
+                            <div class="form-group">
+                                <label for="targetDepartment">Target Department</label>
 
-                                    @php
-                                        // Get the authenticated user's data for comparison
+                                @php
+                                    // Get the authenticated user's data for comparison
 $user = Auth::user();
 $userTitle = $user->title ?? null;
 // Assuming the user's department name is stored in 'department_name' or falls back to 'department'
-                                        $userDepartment = $user->department_name ?? ($user->department ?? null);
-                                    @endphp
-
-                                    <div class="form-group">
-
-
-                                        @if ($userTitle === 'Department Head')
-                                            {{-- 🔑 FIX: If the user is Department Head, render a hidden field with their department as the value. --}}
-                                            <input type="hidden" name="target_department[]"
-                                                value="{{ $userDepartment }}">
-                                            <p style="color: #6c757d; margin-top: 5px;">
-                                                Targeting is set to your department:
-                                                <strong>{{ $userDepartment }}</strong> (Fixed)
-                                            </p>
-                                        @else
-                                            {{-- If the user is NOT a Department Head (e.g., OFFICES or other), show the standard checkbox grid --}}
-                                            <div class="checkbox-grid">
-                                                @foreach ($departments as $dept)
-                                                    @php
-                                                        $departmentName = $dept->department_name;
-                                                        $shouldRender = true; // Assume true unless excluded
-
-                                                        if ($userTitle === 'Offices') {
-                                                            // If user title is OFFICES, show all departments EXCEPT 'OFFICES'
-                                                            if ($departmentName === 'OFFICES') {
-                                                                $shouldRender = false;
-                                                            }
-                                                        }
-                                                        // For other titles, you can add more specific rules here if needed.
-                                                    @endphp
-
-                                                    @if ($shouldRender)
-                                                        <label class="checkbox-item">
-                                                            <input type="checkbox" class="dept-checkbox"
-                                                                name="target_department[]"
-                                                                value="{{ $departmentName }}">
-                                                            <span>{{ $departmentName }}</span>
-                                                        </label>
-                                                    @endif
-                                                @endforeach
-                                            </div>
-                                        @endif
-                                    </div>
-                                </div>
-
-
+                                    $userDepartment = $user->department_name ?? ($user->department ?? null);
+                                @endphp
 
                                 <div class="form-group">
-                                    <label for="targetUsers">Target Users</label>
-                                    <select id="targetUsers" name="target_users" class="form-control">
-                                        <option value="">-- Select Users --</option>
-                                        <option value="Faculty">Faculty</option>
-                                        @if (auth()->user()->title === 'Offices')
-                                            <option value="Department Heads">Department Heads</option>
-                                        @endif
-                                        <option value="Students">Students</option>
-                                    </select>
-                                </div>
-                            @endif
 
-                            @if (auth()->user()->title !== 'Offices' || 'Department Head')
-                                <!-- Target Year Levels checkboxes -->
-                                <div class="form-group" id="targetYearLevelsContainer">
-                                    <label>Target Year Levels</label>
-                                    <p class="note">Select which year levels of students will receive notifications
-                                        for this event</p>
 
-                                    <div class="checkbox_select">
-                                        <div class="checkbox-inline">
-                                            <input type="checkbox" id="select_all_create">
-                                            <label for="select_all_create">Select All Year Levels</label>
+                                    @if ($userTitle === 'Department Head')
+                                        {{-- 🔑 FIX: If the user is Department Head, render a hidden field with their department as the value. --}}
+                                        <input type="hidden" name="target_department[]" value="{{ $userDepartment }}">
+                                        <p style="color: #6c757d; margin-top: 5px;">
+                                            Targeting is set to your department:
+                                            <strong>{{ $userDepartment }}</strong> (Fixed)
+                                        </p>
+                                    @else
+                                        {{-- If the user is NOT a Department Head (e.g., OFFICES or other), show the standard checkbox grid --}}
+                                        <div class="checkbox-grid">
+                                            @foreach ($departments as $dept)
+                                                @php
+                                                    $departmentName = $dept->department_name;
+                                                    $shouldRender = true; // Assume true unless excluded
+
+                                                    if ($userTitle === 'Offices') {
+                                                        // If user title is OFFICES, show all departments EXCEPT 'OFFICES'
+                                                        if ($departmentName === 'OFFICES') {
+                                                            $shouldRender = false;
+                                                        }
+                                                    }
+                                                    // For other titles, you can add more specific rules here if needed.
+                                                @endphp
+
+                                                @if ($shouldRender)
+                                                    <label class="checkbox-item">
+                                                        <input type="checkbox" class="dept-checkbox"
+                                                            name="target_department[]" value="{{ $departmentName }}">
+                                                        <span>{{ $departmentName }}</span>
+                                                    </label>
+                                                @endif
+                                            @endforeach
                                         </div>
+                                    @endif
+                                </div>
+                            </div>
+
+
+
+                            <div class="form-group">
+                                <label for="targetUsers">Target Users</label>
+                                <select id="targetUsers" name="target_users" class="form-control">
+                                    <option value="">-- Select Users --</option>
+                                    <option value="Faculty">Faculty</option>
+                                    <option value="Department Heads">Department Heads</option>
+                                    <option value="Offices">Offices</option>
+                                    <option value="Students">Students</option>
+                                </select>
+                            </div>
+
+                            {{-- Target Office Users (only shown when target_users is Offices) --}}
+                            <div class="form-group" id="targetOfficeUsersContainer" style="display: none;">
+                                <label>Target Office Users</label>
+                                <p class="note">Select which office accounts will receive notifications for this event
+                                    ({{ $officeUsers->count() }} users found)</p>
+
+                                <div class="checkbox_select">
+                                    <div class="checkbox-inline">
+                                        <input type="checkbox" id="select_all_offices">
+                                        <label for="select_all_offices">Select All Office Users</label>
+                                    </div>
+                                </div>
+
+                                <div class="checkbox-grid" id="officeUsersContainer">
+                                    @foreach ($officeUsers as $officeUser)
+                                        <label class="checkbox-item">
+                                            <input type="checkbox" name="target_office_users[]"
+                                                value="{{ $officeUser->id }}" class="office-user-checkbox">
+                                            <span>{{ $officeUser->name }}
+                                                ({{ $officeUser->office_name ?? 'Office' }})</span>
+                                        </label>
+                                    @endforeach
+                                </div>
+                            </div>
+
+                            <!-- Target Year Levels checkboxes -->
+                            <div class="form-group" id="targetYearLevelsContainer">
+                                <label>Target Year Levels</label>
+                                <p class="note">Select which year levels of students will receive notifications
+                                    for this event</p>
+
+                                <div class="checkbox_select">
+                                    <div class="checkbox-inline">
+                                        <input type="checkbox" id="select_all_create">
+                                        <label for="select_all_create">Select All Year Levels</label>
+                                    </div>
+                                </div>
+
+                                <div class="checkbox-group" id="yearLevelsContainer">
+                                    @php
+                                        $maxYear =
+                                            auth()->user()->title === 'Offices'
+                                                ? $userMaxYearLevels
+                                                : $userMaxYearLevels;
+                                        $yearOptions = ['1st Year', '2nd Year', '3rd Year', '4th Year', '5th Year'];
+                                        $yearNumbers = [1, 2, 3, 4, 5];
+                                    @endphp
+                                    @foreach ($yearOptions as $index => $year)
+                                        @if ($yearNumbers[$index] <= $userMaxYearLevels)
+                                            <div class="checkbox-inline">
+                                                <input type="checkbox" name="target_year_levels[]"
+                                                    value="{{ $year }}" class="syear">
+                                                {{ $year }}
+                                            </div>
+                                        @endif
+                                    @endforeach
+                                </div>
+                            </div>
+
+                            <!-- Section Button -->
+                            <div class="form-group" style="margin-top: 10px;">
+                                <button type="button" id="openSectionModalBtn" class="btn btn-secondary"
+                                    style="display:none;">➕ Select Section</button>
+                            </div>
+
+                            <!-- Section Modal -->
+                            <div id="sectionModalOverlay" class="custom-modal-overlay">
+                                <div class="custom-modal">
+                                    <h3>Select Section</h3>
+
+                                    <!-- Select All -->
+                                    <div class="checkbox-select-all">
+                                        <input type="checkbox" id="selectAllSections"><strong> Select All</strong>
                                     </div>
 
-                                    <div class="checkbox-group" id="yearLevelsContainer">
-                                        @php
-                                            $maxYear =
-                                                auth()->user()->title === 'Offices'
-                                                    ? $userMaxYearLevels
-                                                    : $userMaxYearLevels;
-                                            $yearOptions = ['1st Year', '2nd Year', '3rd Year', '4th Year', '5th Year'];
-                                            $yearNumbers = [1, 2, 3, 4, 5];
-                                        @endphp
-                                        @foreach ($yearOptions as $index => $year)
-                                            @if ($yearNumbers[$index] <= $userMaxYearLevels)
-                                                <div class="checkbox-inline">
-                                                    <input type="checkbox" name="target_year_levels[]"
-                                                        value="{{ $year }}" class="syear">
-                                                    {{ $year }}
-                                                </div>
-                                            @endif
+                                    <!-- Section checkboxes -->
+                                    <div class="checkbox-grid" id="sectionsContainer">
+                                        @foreach ($sections as $section)
+                                            <label class="checkbox-item">
+                                                <input type="checkbox" name="target_sections[]"
+                                                    value="{{ $section }}">
+                                                <span>{{ $section }}</span>
+                                            </label>
                                         @endforeach
                                     </div>
-                                </div>
 
-                                <!-- Section Button -->
-                                <div class="form-group" style="margin-top: 10px;">
-                                    <button type="button" id="openSectionModalBtn" class="btn btn-secondary"
-                                        style="display:none;">➕ Select Section</button>
-                                </div>
-
-                                <!-- Section Modal -->
-                                <div id="sectionModalOverlay" class="custom-modal-overlay">
-                                    <div class="custom-modal">
-                                        <h3>Select Section</h3>
-
-                                        <!-- Select All -->
-                                        <div class="checkbox-select-all">
-                                            <input type="checkbox" id="selectAllSections"><strong> Select All</strong>
-                                        </div>
-
-                                        <!-- Section checkboxes -->
-                                        <div class="checkbox-grid" id="sectionsContainer">
-                                            @foreach ($sections as $section)
-                                                <label class="checkbox-item">
-                                                    <input type="checkbox" name="target_sections[]"
-                                                        value="{{ $section }}">
-                                                    <span>{{ $section }}</span>
-                                                </label>
-                                            @endforeach
-                                        </div>
-
-                                        <div class="modal-buttons">
-                                            <button type="button" id="closeSectionModalBtn"
-                                                class="btn-cancel">Close</button>
-                                        </div>
+                                    <div class="modal-buttons">
+                                        <button type="button" id="closeSectionModalBtn"
+                                            class="btn-cancel">Close</button>
                                     </div>
                                 </div>
+                            </div>
 
-                                <!-- Buttons -->
-                                <div class="form-group" style="margin-top: 10px;">
-                                    <button type="button" id="openFacultyModalBtn" class="btn btn-secondary">➕
-                                        Select
-                                        Faculty</button>
-                                </div>
+                            <!-- Buttons -->
+                            <div class="form-group" style="margin-top: 10px;">
+                                <button type="button" id="openFacultyModalBtn" class="btn btn-secondary">➕
+                                    Select
+                                    Faculty</button>
+                            </div>
 
-                                <!-- Faculty Modal -->
-                                <div id="facultyModalOverlay" class="custom-modal-overlay">
-                                    <div class="custom-modal">
-                                        <h3>Select Faculty</h3>
-                                        <div class="checkbox-grid">
-                                            @foreach ($faculty as $f)
-                                                <label class="checkbox-item">
-                                                    <input type="checkbox" name="target_faculty[]"
-                                                        value="{{ $f->id }}">
-                                                    <span>{{ $f->name }}
-                                                        ({{ $f->department === 'OFFICES' ? $f->office_name ?? 'Office' : $f->department }})
-                                                    </span>
-                                                </label>
-                                            @endforeach
-                                        </div>
-                                        <div class="modal-buttons">
-                                            <button type="button" id="closeFacultyModalBtn"
-                                                class="btn btn-cancel">Close</button>
-                                        </div>
+                            <!-- Faculty Modal -->
+                            <div id="facultyModalOverlay" class="custom-modal-overlay">
+                                <div class="custom-modal">
+                                    <h3>Select Faculty</h3>
+                                    <div class="checkbox-grid">
+                                        @foreach ($faculty as $f)
+                                            <label class="checkbox-item">
+                                                <input type="checkbox" name="target_faculty[]"
+                                                    value="{{ $f->id }}">
+                                                <span>{{ $f->name }}
+                                                    ({{ $f->department === 'OFFICES' ? $f->office_name ?? 'Office' : $f->department }})
+                                                </span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                    <div class="modal-buttons">
+                                        <button type="button" id="closeFacultyModalBtn"
+                                            class="btn btn-cancel">Close</button>
                                     </div>
                                 </div>
-                            @endif
+                            </div>
                             <div class="button-group">
                                 <button type="button" class="btn-cancel" id="closeModalBtn">Cancel</button>
                                 <button type="submit" class="btn-create">Publish Event</button>
@@ -453,19 +471,65 @@ $userTitle = $user->title ?? null;
                                 const targetUsers = document.getElementById('targetUsers');
                                 const openSectionBtn = document.getElementById('openSectionModalBtn');
                                 const openFacultyBtn = document.getElementById('openFacultyModalBtn');
+                                const targetYearLevelsDiv = document.getElementById('targetYearLevelsContainer');
+                                const officeUsersContainer = document.getElementById('targetOfficeUsersContainer');
+
+                                console.log('DEBUG: targetUsers element:', targetUsers);
+                                console.log('DEBUG: officeUsersContainer element:', officeUsersContainer);
 
                                 function toggleButtons() {
-                                    if (targetUsers.value === 'Students') {
-                                        openSectionBtn.style.display = 'inline-block';
-                                        openFacultyBtn.style.display = 'inline-block';
+                                    const selectedValue = targetUsers ? targetUsers.value : null;
+                                    console.log('DEBUG: toggleButtons called, selectedValue:', selectedValue);
+
+                                    // Show/hide Section and Faculty buttons (only for Students)
+                                    if (selectedValue === 'Students') {
+                                        if (openSectionBtn) openSectionBtn.style.display = 'inline-block';
+                                        if (openFacultyBtn) openFacultyBtn.style.display = 'inline-block';
                                     } else {
-                                        openSectionBtn.style.display = 'none';
-                                        openFacultyBtn.style.display = 'none';
+                                        if (openSectionBtn) openSectionBtn.style.display = 'none';
+                                        if (openFacultyBtn) openFacultyBtn.style.display = 'none';
+                                    }
+
+                                    // Show Office Users when Offices is selected (don't hide year levels)
+                                    if (selectedValue === 'Offices') {
+                                        console.log('DEBUG: Showing office users container');
+                                        if (officeUsersContainer) {
+                                            officeUsersContainer.style.display = 'block';
+                                            console.log('DEBUG: officeUsersContainer display set to block');
+                                        } else {
+                                            console.log('DEBUG: officeUsersContainer is NULL!');
+                                        }
+                                    } else {
+                                        if (officeUsersContainer) officeUsersContainer.style.display = 'none';
                                     }
                                 }
 
-                                targetUsers.addEventListener('change', toggleButtons);
+                                if (targetUsers) {
+                                    targetUsers.addEventListener('change', toggleButtons);
+                                }
                                 toggleButtons(); // initial check on page load
+
+                                // ==============================
+                                // Select All Office Users Logic
+                                // ==============================
+                                const selectAllOffices = document.getElementById('select_all_offices');
+                                const officeUserCheckboxes = document.querySelectorAll('.office-user-checkbox');
+
+                                if (selectAllOffices) {
+                                    selectAllOffices.addEventListener('change', () => {
+                                        officeUserCheckboxes.forEach(cb => cb.checked = selectAllOffices.checked);
+                                    });
+
+                                    officeUserCheckboxes.forEach(cb => {
+                                        cb.addEventListener('change', () => {
+                                            if (![...officeUserCheckboxes].every(cb => cb.checked)) {
+                                                selectAllOffices.checked = false;
+                                            } else {
+                                                selectAllOffices.checked = true;
+                                            }
+                                        });
+                                    });
+                                }
 
                                 // ==============================
                                 // Faculty Modal Logic

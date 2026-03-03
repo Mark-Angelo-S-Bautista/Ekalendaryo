@@ -687,7 +687,12 @@ class EventController
         // ✅ Get max_year_levels for all departments (for Offices users)
         $departmentMaxYearLevels = $departments->pluck('max_year_levels', 'department_name')->toArray();
 
-        return view('Editor.manageEvents', compact('events', 'departments', 'faculty', 'sections', 'sectionsByDepartment', 'userDepartment', 'userMaxYearLevels', 'departmentMaxYearLevels', 'upcomingCount', 'ongoingCount', 'completedCount', 'cancelledCount'));
+        // ✅ Get all office users except the current user (for targeting Offices)
+        $officeUsers = User::where('title', 'Offices')
+            ->where('id', '!=', $user->id)
+            ->get();
+
+        return view('Editor.manageEvents', compact('events', 'departments', 'faculty', 'sections', 'sectionsByDepartment', 'userDepartment', 'userMaxYearLevels', 'departmentMaxYearLevels', 'upcomingCount', 'ongoingCount', 'completedCount', 'cancelledCount', 'officeUsers'));
     }
 
     // =========================================================================
@@ -748,10 +753,15 @@ class EventController
         // ✅ Get max_year_levels for all departments (for Offices users)
         $departmentMaxYearLevels = $departments->pluck('max_year_levels', 'department_name')->toArray();
 
+        // ✅ Get all office users except the current user (for targeting Offices)
+        $officeUsers = User::where('title', 'Offices')
+            ->where('id', '!=', $user->id)
+            ->get();
+
         // Check if this is a restore operation
         $isRestore = request()->has('restore') && in_array($event->status, ['cancelled', 'archived']);
 
-        return view('Editor.editEvents', compact('event', 'departments', 'faculty', 'sections', 'sectionsByDepartment', 'userDepartment', 'userMaxYearLevels', 'departmentMaxYearLevels', 'isRestore'));
+        return view('Editor.editEvents', compact('event', 'departments', 'faculty', 'sections', 'sectionsByDepartment', 'userDepartment', 'userMaxYearLevels', 'departmentMaxYearLevels', 'isRestore', 'officeUsers'));
     }
 
     // =========================================================================
