@@ -1,7 +1,7 @@
 <x-usermanLayout>
 
     <head>
-        @vite(['resources/css/editor/editEvents.css'])
+        @vite(['resources/css/userman/editEvents.css'])
     </head>
 
     <div class="edit-event-container">

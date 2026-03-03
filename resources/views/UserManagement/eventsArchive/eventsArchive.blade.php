@@ -6,7 +6,7 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Archived Events</title>
-        @vite(['resources/css/editor/archive.css'])
+        @vite(['resources/css/userman/eventsArchive.css'])
     </head>
 
     <body>
@@ -83,7 +83,8 @@
                                 <td class="action-cell">
                                     <div
                                         style="display: flex; justify-content: center; align-items: center; width: 100%;">
-                                        <form action="{{ route('UserManagement.restoreEvent', $event->id) }}" method="POST"
+                                        <form action="{{ route('UserManagement.restoreEvent', $event->id) }}"
+                                            method="POST"
                                             onsubmit="return confirm('Are you sure you want to restore this event? This will set it as upcoming and send notification emails to all targeted users.');">
                                             @csrf
                                             <button type="submit" class="restore-btn">🔄 Restore</button>

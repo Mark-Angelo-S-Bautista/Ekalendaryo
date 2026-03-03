@@ -6,7 +6,7 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>eKalendaryo - Notifications</title>
-        @vite(['resources/css/editor/notifications.css'])
+        @vite(['resources/css/userman/notifications.css'])
     </head>
 
     <body>

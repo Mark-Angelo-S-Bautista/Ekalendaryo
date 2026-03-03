@@ -6,7 +6,7 @@
         <meta charset="UTF-8">
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <title>eKalendaryo - Event History</title>
-        @vite(['resources/css/editor/history.css', 'resources/js/editor/history.js'])
+        @vite(['resources/css/userman/history.css', 'resources/js/userman/history.js'])
 
     </head>
 

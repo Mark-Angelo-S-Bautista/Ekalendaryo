@@ -6,7 +6,7 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>eKalendaryo - Activity Log</title>
-        @vite(['resources/css/editor/activity_log.css', 'resources/js/editor/activity_log.js'])
+        @vite(['resources/css/userman/activity_log.css', 'resources/js/userman/activity_log.js'])
     </head>
 
     <body>

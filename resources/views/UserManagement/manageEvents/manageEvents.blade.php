@@ -6,7 +6,7 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Document</title>
-        @vite(['resources/css/editor/manageEvents.css', 'resources/js/editor/manageEvents.js'])
+        @vite(['resources/css/userman/manageEvents.css', 'resources/js/userman/manageEvents.js'])
     </head>
 
     <body>
@@ -1011,10 +1011,11 @@ $userTitle = $user->title ?? null;
                                 </button>
 
                                 @if ($event->computed_status !== 'ongoing')
-                                    <a href="{{ route('UserManagement.editEvent', $event->id) }}" class="edit">✏️ Edit</a>
+                                    <a href="{{ route('UserManagement.editEvent', $event->id) }}" class="edit">✏️
+                                        Edit</a>
 
-                                    <form action="{{ route('UserManagement.destroyEvent', $event->id) }}" method="POST"
-                                        style="display:inline;">
+                                    <form action="{{ route('UserManagement.destroyEvent', $event->id) }}"
+                                        method="POST" style="display:inline;">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="delete"

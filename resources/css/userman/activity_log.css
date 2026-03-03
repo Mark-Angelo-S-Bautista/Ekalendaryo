@@ -1,0 +1,260 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Inter", sans-serif;
+}
+
+body {
+    background-color: #f6fff7;
+    color: #1c1c1c;
+}
+
+.content {
+    padding: 30px 20px;
+    max-width: 1000px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.content-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.content h2 {
+    font-size: 22px;
+}
+
+/* Dropdown Styles */
+.filter-dropdown select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-color: #fff;
+    border: 1px solid #cddfcc;
+    border-radius: 4px;
+    padding: 6px 30px 6px 10px;
+    font-size: 14px;
+    cursor: pointer;
+    color: #000;
+    background-image: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path fill='black' d='M0 0l5 6 5-6z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 10px;
+}
+
+.filter-dropdown select:focus {
+    outline: none;
+    border-color: #a2c9a2;
+    box-shadow: 0 0 3px rgba(72, 187, 120, 0.3);
+}
+
+.activity-section {
+    background-color: #ecfff0;
+    padding: 20px;
+    border-radius: 10px;
+    width: 100%;
+    padding-left: 30%;
+    padding-right: 30%;
+}
+
+.activity-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    margin-bottom: 20px;
+}
+
+.activity-card-cancelled {
+    background-color: lightcoral;
+    border-radius: 10px;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.activity-card-restored {
+    background-color: lightblue;
+    border-radius: 10px;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.activity-card-edited {
+    background-color: lightgoldenrodyellow;
+    border-radius: 10px;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.activity-card-created {
+    background-color: #c7f7c8;
+    border-radius: 10px;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.activity-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.activity-card-header .icon {
+    font-size: 20px;
+    background-color: white;
+    border-radius: 50%;
+    padding: 5px 10px;
+    margin-right: 10px;
+}
+
+.activity-card-header .info h4 {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.activity-card-header .info p {
+    font-size: 14px;
+    color: #333;
+}
+
+.activity-card-header .status {
+    background-color: white;
+    color: #075e2f;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    text-transform: lowercase;
+}
+
+.activity-meta {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    font-size: 14px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    column-gap: 8px;
+    row-gap: 4px;
+}
+
+.activity-meta p {
+    margin: 0;
+}
+
+.activity-meta .performed {
+    grid-column: span 2;
+    color: #555;
+}
+
+.activity-details {
+    background-color: #f8fdf8;
+    padding: 8px;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+/* Outer container for rounded edge */
+.wrapper {
+    background-color: #f6fff7;
+    min-height: 100vh;
+}
+
+.logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border: 1px solid #006400;
+    border-radius: 6px;
+    background: none;
+    color: #006400;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: 0.2s ease;
+}
+
+.logout-btn:hover {
+    background: #006400;
+    color: #fff;
+}
+
+.logout-btn .icon {
+    font-style: normal;
+}
+
+del {
+    color: #999;
+}
+
+/* Simple Pagination */
+.simple-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    margin: 30px 0;
+}
+
+.simple-pagination a,
+.simple-pagination span {
+    min-width: 36px;
+    height: 36px;
+    padding: 0 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+    text-decoration: none;
+    background: #fff;
+    color: #333;
+}
+
+.simple-pagination a:hover {
+    background: #f1f1f1;
+}
+
+.simple-pagination .active {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: #fff;
+    font-weight: 600;
+}
+
+.simple-pagination .disabled {
+    color: #aaa;
+    background: #f9f9f9;
+    cursor: not-allowed;
+}
+
+@media (max-width: 900px) {
+    .activity-section {
+        padding: 2%;
+    }
+}
+
+@media (max-width: 768px) {
+    .activity-section {
+        padding: 2%;
+    }
+}
+
+@media (max-width: 600px) {
+    .activity-section {
+        padding: 2%;
+    }
+}
+
+@media (max-width: 480px) {
+    .activity-section {
+        padding: 2%;
+    }
+}
