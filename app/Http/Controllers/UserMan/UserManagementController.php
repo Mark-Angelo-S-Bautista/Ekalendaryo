@@ -42,12 +42,18 @@ class UserManagementController
 
         $now = now();
 
+        // User targeting variables
+        $userTitle = strtolower($user->title ?? '');
+        $userDept = $user->department;
+        $userSection = $user->section ? strtolower(trim($user->section)) : null;
+        $userYearLevel = $user->yearlevel ? strtolower(str_replace(' ', '', $user->yearlevel)) : null;
+
         /*
         |--------------------------------------------------------------------------
-        | FILTER UPCOMING + ONGOING EVENTS (ACTIVE EVENTS)
+        | FILTER UPCOMING + ONGOING EVENTS (ACTIVE EVENTS) + USER PARTICIPATION
         |--------------------------------------------------------------------------
         */
-        $activeEvents = $events->filter(function ($event) use ($now) {
+        $activeEvents = $events->filter(function ($event) use ($now, $user, $userTitle, $userDept, $userSection, $userYearLevel) {
 
             // ❌ Exclude cancelled & completed
             if (in_array($event->computed_status, ['cancelled', 'completed'])) {
@@ -57,14 +63,107 @@ class UserManagementController
             $start = \Carbon\Carbon::parse($event->date . ' ' . $event->start_time);
             $end   = \Carbon\Carbon::parse($event->date . ' ' . $event->end_time);
 
-            // ✅ ONGOING: started already but not ended
-            if ($start->lessThanOrEqualTo($now) && $end->greaterThanOrEqualTo($now)) {
+            // Check if event is ongoing or upcoming
+            $isOngoing = $start->lessThanOrEqualTo($now) && $end->greaterThanOrEqualTo($now);
+            $isUpcoming = $start->greaterThan($now) && $start->lessThanOrEqualTo($now->copy()->addDays(356));
+
+            if (!$isOngoing && !$isUpcoming) {
+                return false;
+            }
+
+            // Check if user is in target_faculty
+            $targetFaculty = is_string($event->target_faculty)
+                ? json_decode($event->target_faculty, true) ?? []
+                : ($event->target_faculty ?? []);
+            
+            if (is_array($targetFaculty) && in_array($user->id, $targetFaculty)) {
                 return true;
             }
 
-            // ✅ UPCOMING: within next 30 days
-            if ($start->greaterThan($now) && $start->lessThanOrEqualTo($now->copy()->addDays(356))) {
+            // Check if user is in target_office_users
+            $targetOfficeUsers = is_string($event->target_office_users)
+                ? json_decode($event->target_office_users, true) ?? []
+                : ($event->target_office_users ?? []);
+            
+            if (is_array($targetOfficeUsers) && in_array($user->id, $targetOfficeUsers)) {
                 return true;
+            }
+
+            // For Office users: ONLY show if they're in target_faculty or target_office_users (already checked above)
+            if ($userDept === 'OFFICES' || $user->title === 'Offices') {
+                return false;
+            }
+
+            // For Faculty users
+            if ($userTitle === 'faculty') {
+                return false; // Faculty only sees events where they're in target_faculty
+            }
+
+            // For Students/Viewers: check department, sections, and year levels
+            if ($userTitle === 'student' || $userTitle === 'viewer') {
+                // Check department match
+                $targetDepartments = is_string($event->target_department)
+                    ? json_decode($event->target_department, true) ?? []
+                    : ($event->target_department ?? []);
+
+                $deptMatch = $event->department === $userDept || 
+                    (is_array($targetDepartments) && (in_array('All', $targetDepartments) || in_array($userDept, $targetDepartments)));
+
+                if (!$deptMatch) {
+                    return false;
+                }
+
+                // Check section match
+                $targetSections = is_string($event->target_sections)
+                    ? json_decode($event->target_sections, true) ?? []
+                    : ($event->target_sections ?? []);
+                
+                $sectionMatch = empty($targetSections) || 
+                    ($userSection && in_array($userSection, array_map('strtolower', array_map('trim', $targetSections))));
+
+                // Check year level match
+                $targetYearLevels = is_string($event->target_year_levels)
+                    ? json_decode($event->target_year_levels, true) ?? []
+                    : ($event->target_year_levels ?? []);
+
+                $yearLevelMatch = empty($targetYearLevels) || 
+                    ($userYearLevel && in_array($userYearLevel, array_map(function($lvl) {
+                        return strtolower(str_replace(' ', '', $lvl));
+                    }, $targetYearLevels)));
+
+                return $sectionMatch && $yearLevelMatch;
+            }
+
+            // For Department Heads
+            if ($user->title === 'Department Head') {
+                $targetUsers = $event->target_users ?? '';
+                
+                if ($targetUsers === 'Department Heads') {
+                    $targetDepartments = is_string($event->target_department)
+                        ? json_decode($event->target_department, true) ?? []
+                        : ($event->target_department ?? []);
+                    
+                    $normalizedTargetDepts = array_map(fn($d) => strtoupper(trim($d)), $targetDepartments);
+                    $userDeptNormalized = strtoupper(trim($userDept));
+                    
+                    if (in_array('All', $targetDepartments) || in_array($userDeptNormalized, $normalizedTargetDepts)) {
+                        return true;
+                    }
+                }
+                
+                if ($targetUsers === 'Faculty' && $event->department === $userDept) {
+                    return true;
+                }
+                
+                return false;
+            }
+
+            // For other user types: check target_users field
+            $targetUsers = $event->target_users ?? '';
+            if (!empty($targetUsers)) {
+                if ($targetUsers === $user->title || stripos($targetUsers, $user->title) !== false) {
+                    return true;
+                }
             }
 
             return false;
@@ -119,6 +218,11 @@ class UserManagementController
     {
         $query = $request->input('query', '');
         $now = now();
+        $user = Auth::user();
+        $userTitle = strtolower($user->title ?? '');
+        $userDept = $user->department;
+        $userSection = $user->section ? strtolower(trim($user->section)) : null;
+        $userYearLevel = $user->yearlevel ? strtolower(str_replace(' ', '', $user->yearlevel)) : null;
 
         $events = Event::with('user')
             ->when($query, function ($q) use ($query) {
@@ -127,7 +231,7 @@ class UserManagementController
                   ->orWhere('location', 'like', "%{$query}%");
             })
             ->get()
-            ->filter(function ($event) use ($now) {
+            ->filter(function ($event) use ($now, $user, $userTitle, $userDept, $userSection, $userYearLevel) {
                 // ❌ Exclude cancelled & completed
                 if (in_array($event->computed_status, ['cancelled', 'completed'])) {
                     return false;
@@ -136,14 +240,104 @@ class UserManagementController
                 $start = \Carbon\Carbon::parse($event->date . ' ' . $event->start_time);
                 $end   = \Carbon\Carbon::parse($event->date . ' ' . $event->end_time);
 
-                // ✅ ONGOING: started already but not ended
-                if ($start->lessThanOrEqualTo($now) && $end->greaterThanOrEqualTo($now)) {
+                // Check if event is ongoing or upcoming
+                $isOngoing = $start->lessThanOrEqualTo($now) && $end->greaterThanOrEqualTo($now);
+                $isUpcoming = $start->greaterThan($now) && $start->lessThanOrEqualTo($now->copy()->addDays(30));
+
+                if (!$isOngoing && !$isUpcoming) {
+                    return false;
+                }
+
+                // Check if user is in target_faculty
+                $targetFaculty = is_string($event->target_faculty)
+                    ? json_decode($event->target_faculty, true) ?? []
+                    : ($event->target_faculty ?? []);
+                
+                if (is_array($targetFaculty) && in_array($user->id, $targetFaculty)) {
                     return true;
                 }
 
-                // ✅ UPCOMING: within next 30 days
-                if ($start->greaterThan($now) && $start->lessThanOrEqualTo($now->copy()->addDays(30))) {
+                // Check if user is in target_office_users
+                $targetOfficeUsers = is_string($event->target_office_users)
+                    ? json_decode($event->target_office_users, true) ?? []
+                    : ($event->target_office_users ?? []);
+                
+                if (is_array($targetOfficeUsers) && in_array($user->id, $targetOfficeUsers)) {
                     return true;
+                }
+
+                // For Office users: ONLY show if they're in target_faculty or target_office_users
+                if ($userDept === 'OFFICES' || $user->title === 'Offices') {
+                    return false;
+                }
+
+                // For Faculty users
+                if ($userTitle === 'faculty') {
+                    return false;
+                }
+
+                // For Students/Viewers
+                if ($userTitle === 'student' || $userTitle === 'viewer') {
+                    $targetDepartments = is_string($event->target_department)
+                        ? json_decode($event->target_department, true) ?? []
+                        : ($event->target_department ?? []);
+
+                    $deptMatch = $event->department === $userDept || 
+                        (is_array($targetDepartments) && (in_array('All', $targetDepartments) || in_array($userDept, $targetDepartments)));
+
+                    if (!$deptMatch) {
+                        return false;
+                    }
+
+                    $targetSections = is_string($event->target_sections)
+                        ? json_decode($event->target_sections, true) ?? []
+                        : ($event->target_sections ?? []);
+                    
+                    $sectionMatch = empty($targetSections) || 
+                        ($userSection && in_array($userSection, array_map('strtolower', array_map('trim', $targetSections))));
+
+                    $targetYearLevels = is_string($event->target_year_levels)
+                        ? json_decode($event->target_year_levels, true) ?? []
+                        : ($event->target_year_levels ?? []);
+
+                    $yearLevelMatch = empty($targetYearLevels) || 
+                        ($userYearLevel && in_array($userYearLevel, array_map(function($lvl) {
+                            return strtolower(str_replace(' ', '', $lvl));
+                        }, $targetYearLevels)));
+
+                    return $sectionMatch && $yearLevelMatch;
+                }
+
+                // For Department Heads
+                if ($user->title === 'Department Head') {
+                    $targetUsers = $event->target_users ?? '';
+                    
+                    if ($targetUsers === 'Department Heads') {
+                        $targetDepartments = is_string($event->target_department)
+                            ? json_decode($event->target_department, true) ?? []
+                            : ($event->target_department ?? []);
+                        
+                        $normalizedTargetDepts = array_map(fn($d) => strtoupper(trim($d)), $targetDepartments);
+                        $userDeptNormalized = strtoupper(trim($userDept));
+                        
+                        if (in_array('All', $targetDepartments) || in_array($userDeptNormalized, $normalizedTargetDepts)) {
+                            return true;
+                        }
+                    }
+                    
+                    if ($targetUsers === 'Faculty' && $event->department === $userDept) {
+                        return true;
+                    }
+                    
+                    return false;
+                }
+
+                // For other user types
+                $targetUsers = $event->target_users ?? '';
+                if (!empty($targetUsers)) {
+                    if ($targetUsers === $user->title || stripos($targetUsers, $user->title) !== false) {
+                        return true;
+                    }
                 }
 
                 return false;
@@ -450,7 +644,16 @@ class UserManagementController
                 return true;
             }
 
-            // For Office users: ONLY show if they're in target_faculty
+            // Check if user is in target_office_users
+            $targetOfficeUsers = is_string($event->target_office_users)
+                ? json_decode($event->target_office_users, true) ?? []
+                : ($event->target_office_users ?? []);
+            
+            if (is_array($targetOfficeUsers) && in_array($user->id, $targetOfficeUsers)) {
+                return true;
+            }
+
+            // For Office users: ONLY show if they're in target_faculty or target_office_users
             if ($userDept === 'OFFICES' || $user->title === 'Offices') {
                 return false;
             }
@@ -694,6 +897,15 @@ class UserManagementController
                     : ($event->target_faculty ?? []);
                 
                 if (is_array($targetFaculty) && in_array($user->id, $targetFaculty)) {
+                    return true;
+                }
+
+                // Check if user is in target_office_users
+                $targetOfficeUsers = is_string($event->target_office_users)
+                    ? json_decode($event->target_office_users, true) ?? []
+                    : ($event->target_office_users ?? []);
+                
+                if (is_array($targetOfficeUsers) && in_array($user->id, $targetOfficeUsers)) {
                     return true;
                 }
 

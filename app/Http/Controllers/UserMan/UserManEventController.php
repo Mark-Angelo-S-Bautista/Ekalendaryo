@@ -65,6 +65,7 @@ class UserManEventController
             'target_users'       => 'nullable|string',
             'target_faculty'     => 'nullable|array',
             'target_sections'    => 'nullable|array',
+            'target_office_users' => 'nullable|array',
         ]);
 
         // ==============================
@@ -136,6 +137,7 @@ class UserManEventController
             'target_users'       => $validated['target_users'] ?? null,
             'target_faculty'     => $validated['target_faculty'] ?? [],
             'target_sections'    => $validated['target_sections'] ?? [],
+            'target_office_users' => $validated['target_office_users'] ?? [],
 
             'department' => Auth::user()->department,
             'status' => 'upcoming',
@@ -370,6 +372,15 @@ class UserManEventController
                 ->whereIn('title', ['Faculty', 'Offices', 'Department Head'])
                 ->get();
             $users = $users->merge($targetedFaculty);
+        }
+
+        // =====================================================
+        // STEP 5b: ALWAYS add target_office_users regardless of target_users
+        // =====================================================
+        if (!empty($event->target_office_users)) {
+            $targetedOfficeUsers = User::whereIn('id', $event->target_office_users)
+                ->get();
+            $users = $users->merge($targetedOfficeUsers);
         }
 
         // Remove duplicate users by ID
@@ -751,6 +762,7 @@ class UserManEventController
             'target_users' => 'nullable|string',
             'target_faculty' => 'nullable|array',
             'target_sections' => 'nullable|array',
+            'target_office_users' => 'nullable|array',
             'other_location' => 'nullable|string|max:255',
         ]);
 
@@ -807,6 +819,7 @@ class UserManEventController
             'target_users' => $request->target_users ?? null,
             'target_faculty' => $validated['target_faculty'] ?? [],
             'target_sections' => $validated['target_sections'] ?? [],
+            'target_office_users' => $validated['target_office_users'] ?? [],
         ];
 
         if ($isRestore && $wasRestored) {
