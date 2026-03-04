@@ -200,6 +200,8 @@
                 if (is_string($selectedOfficeUsers)) {
                     $selectedOfficeUsers = json_decode($selectedOfficeUsers, true) ?? [];
                 }
+                // Cast all IDs to integers for proper comparison
+                $selectedOfficeUsers = array_map('intval', $selectedOfficeUsers);
                 $showOfficeUsers = $event->target_users === 'Offices' || !empty($selectedOfficeUsers);
             @endphp
             <div class="form-group" id="targetOfficeUsersContainer"
@@ -319,6 +321,8 @@
                 if (is_string($selectedFaculty)) {
                     $selectedFaculty = json_decode($selectedFaculty, true) ?? [];
                 }
+                // Cast all IDs to integers for proper comparison
+                $selectedFaculty = array_map('intval', $selectedFaculty);
             @endphp
 
             @if (!(isset($isRestore) && $isRestore))
