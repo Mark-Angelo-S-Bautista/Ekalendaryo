@@ -847,13 +847,18 @@ class UserManagementController
                 if ($userTitle === 'faculty') {
                     $query->whereRaw("JSON_CONTAINS(target_faculty, ?)", [json_encode((string)$user->id)]);
                 } elseif ($userTitle === 'student' || $userTitle === 'viewer') {
+                    // Students should see events from their department OR events targeting their department (including 'All')
                     $query->where(function($q) use ($user) {
                         $q->where('department', $user->department)
-                          ->orWhereJsonContains('target_department', $user->department);
+                          ->orWhereJsonContains('target_department', $user->department)
+                          ->orWhereJsonContains('target_department', 'All');
                     });
                 } else {
+                    // For Department Heads and Office users
                     $query->where(function($q) use ($user) {
                         $q->whereRaw("JSON_CONTAINS(target_faculty, ?)", [json_encode((string)$user->id)])
+                          // OR check if user is targeted in target_office_users
+                          ->orWhereRaw("JSON_CONTAINS(target_office_users, ?)", [json_encode((string)$user->id)])
                           ->orWhere(function($subQ) use ($user) {
                               $subQ->where('target_users', 'LIKE', '%' . $user->title . '%')
                                    ->orWhere('target_users', $user->title);
@@ -870,6 +875,14 @@ class UserManagementController
             $userYearLevel = $user->yearlevel ? strtolower(str_replace(' ', '', $user->yearlevel)) : null;
 
             $events = $events->filter(function($event) use ($userSection, $userYearLevel) {
+                // Exclude events targeted for faculty, department heads, or offices
+                $targetUsersNormalized = strtolower($event->target_users ?? '');
+                if (str_contains($targetUsersNormalized, 'faculty') || 
+                    str_contains($targetUsersNormalized, 'department head') ||
+                    str_contains($targetUsersNormalized, 'offices')) {
+                    return false;
+                }
+                
                 $targetSections = is_string($event->target_sections)
                     ? json_decode($event->target_sections, true) ?? []
                     : ($event->target_sections ?? []);

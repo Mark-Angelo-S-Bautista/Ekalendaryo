@@ -84,9 +84,22 @@ class EditorController
                 return true;
             }
 
-            // ✅ For Office users: ONLY show if they're in target_faculty (already checked above)
+            // Check if user is targeted by target_office_users
+            $targetOfficeUsers = $event->target_office_users;
+            if (is_string($targetOfficeUsers)) {
+                $targetOfficeUsers = json_decode($targetOfficeUsers, true) ?? [];
+            }
+            if (!is_array($targetOfficeUsers)) {
+                $targetOfficeUsers = [];
+            }
+            
+            if (!empty($targetOfficeUsers) && in_array($user->id, $targetOfficeUsers)) {
+                return true;
+            }
+
+            // For Office users: ONLY show if they're in target_faculty or target_office_users (already checked above)
             if ($dept === 'OFFICES' || $user->title === 'Offices') {
-                return false; // Not in target_faculty, so don't show
+                return false; // Not in target_faculty or target_office_users, so don't show
             }
 
             // Check if user is targeted by target_users
@@ -95,7 +108,7 @@ class EditorController
                 // For Department Heads: only show Faculty events if department matches
                 if ($user->title === 'Department Head') {
                     if ($targetUsers === 'Department Heads') {
-                        // ✅ Check if the Department Head's department is in target_department
+                        // Check if the Department Head's department is in target_department
                         $targetDepartments = $event->target_department;
                         if (is_string($targetDepartments)) {
                             $targetDepartments = json_decode($targetDepartments, true) ?? [];
@@ -252,9 +265,18 @@ class EditorController
                 return true;
             }
 
-            // ✅ For Office users: ONLY show if they're in target_faculty (already checked above)
+            // Check if user is in target_office_users
+            $targetOfficeUsers = is_string($event->target_office_users)
+                ? json_decode($event->target_office_users, true) ?? []
+                : ($event->target_office_users ?? []);
+            
+            if (is_array($targetOfficeUsers) && in_array($user->id, $targetOfficeUsers)) {
+                return true;
+            }
+
+            // For Office users: ONLY show if they're in target_faculty or target_office_users (already checked above)
             if ($userDept === 'OFFICES' || $user->title === 'Offices') {
-                return false; // Not in target_faculty, so don't show
+                return false; // Not in target lists, so don't show
             }
 
             // Check if target_users matches user title
@@ -263,7 +285,7 @@ class EditorController
                 // For Department Heads: only show Faculty events if department matches
                 if ($user->title === 'Department Head') {
                     if ($targetUsers === 'Department Heads') {
-                        // ✅ Check if the Department Head's department is in target_department
+                        // Check if the Department Head's department is in target_department
                         $targetDepartments = $event->target_department;
                         if (is_string($targetDepartments)) {
                             $targetDepartments = json_decode($targetDepartments, true) ?? [];
@@ -687,16 +709,19 @@ class EditorController
                     // Faculty should see events where they are specifically targeted
                     $query->whereRaw("JSON_CONTAINS(target_faculty, ?)", [json_encode((string)$user->id)]);
                 } elseif ($userTitle === 'student' || $userTitle === 'viewer') {
-                    // Students should see events targeting their section and year level
+                    // Students should see events from their department OR events targeting their department (including 'All')
                     $query->where(function($q) use ($user) {
                         $q->where('department', $user->department)
-                          ->orWhereJsonContains('target_department', $user->department);
+                          ->orWhereJsonContains('target_department', $user->department)
+                          ->orWhereJsonContains('target_department', 'All');
                     });
                 } else {
                     // For Department Heads and Office users
                     $query->where(function($q) use ($user) {
                         // Check if user is specifically targeted in target_faculty
                         $q->whereRaw("JSON_CONTAINS(target_faculty, ?)", [json_encode((string)$user->id)])
+                          // OR check if user is targeted in target_office_users
+                          ->orWhereRaw("JSON_CONTAINS(target_office_users, ?)", [json_encode((string)$user->id)])
                           // OR check if target_users matches their title
                           ->orWhere(function($subQ) use ($user) {
                               $subQ->where('target_users', 'LIKE', '%' . $user->title . '%')
@@ -716,6 +741,14 @@ class EditorController
             $userYearLevel = $user->yearlevel ? strtolower(str_replace(' ', '', $user->yearlevel)) : null;
 
             $events = $events->filter(function($event) use ($userSection, $userYearLevel) {
+                // Exclude events targeted for faculty, department heads, or offices
+                $targetUsersNormalized = strtolower($event->target_users ?? '');
+                if (str_contains($targetUsersNormalized, 'faculty') || 
+                    str_contains($targetUsersNormalized, 'department head') ||
+                    str_contains($targetUsersNormalized, 'offices')) {
+                    return false;
+                }
+                
                 $targetSections = is_string($event->target_sections)
                     ? json_decode($event->target_sections, true) ?? []
                     : ($event->target_sections ?? []);
@@ -750,9 +783,18 @@ class EditorController
                     return true;
                 }
 
-                // ✅ For Office users: ONLY show if they're in target_faculty (already checked above)
+                // Check if user ID is in target_office_users
+                $targetOfficeUsers = is_string($event->target_office_users)
+                    ? json_decode($event->target_office_users, true) ?? []
+                    : ($event->target_office_users ?? []);
+                
+                if (is_array($targetOfficeUsers) && in_array($user->id, $targetOfficeUsers)) {
+                    return true;
+                }
+
+                // For Office users: ONLY show if they're in target_faculty or target_office_users (already checked above)
                 if ($user->department === 'OFFICES' || $user->title === 'Offices') {
-                    return false; // Not in target_faculty, so don't show
+                    return false; // Not in target lists, so don't show
                 }
 
                 // Check if target_users matches user title
@@ -761,7 +803,7 @@ class EditorController
                     // For Department Heads: only show Faculty events if department matches
                     if ($user->title === 'Department Head') {
                         if ($targetUsers === 'Department Heads') {
-                            // ✅ Check if the Department Head's department is in target_department
+                            // Check if the Department Head's department is in target_department
                             $targetDepartments = $event->target_department;
                             if (is_string($targetDepartments)) {
                                 $targetDepartments = json_decode($targetDepartments, true) ?? [];

@@ -79,14 +79,16 @@ class ViewerController
 
                 $targetUsersNormalized = strtolower($ev->target_users ?? '');
 
-                if (str_contains($targetUsersNormalized, 'faculty') || str_contains($targetUsersNormalized, 'department head')) {
+                // Skip events targeting only faculty or department heads
+                if (str_contains($targetUsersNormalized, 'faculty') || str_contains($targetUsersNormalized, 'department head') || str_contains($targetUsersNormalized, 'offices')) {
                     return false;
                 }
 
                 $userYearLevelNormalized = !empty($yearLevel) ? strtolower(str_replace(' ', '', $yearLevel)) : null;
+                $userSection = $user->section ? strtolower(trim($user->section)) : null;
 
+                // Helper function to check year level match
                 $matchesYearLevel = function ($ev) use ($userYearLevelNormalized) {
-
                     $targetYearLevels = is_string($ev->target_year_levels)
                         ? json_decode($ev->target_year_levels, true) ?? []
                         : $ev->target_year_levels;
@@ -98,29 +100,49 @@ class ViewerController
                     return in_array($userYearLevelNormalized, $normalizedTargets);
                 };
 
+                // Helper function to check section match
+                $matchesSection = function ($ev) use ($userSection) {
+                    $targetSections = is_string($ev->target_sections)
+                        ? json_decode($ev->target_sections, true) ?? []
+                        : ($ev->target_sections ?? []);
+
+                    if (empty($targetSections)) return true;
+                    if (empty($userSection)) return false;
+
+                    $normalizedTargets = array_map(fn($sec) => strtolower(trim($sec)), $targetSections);
+                    return in_array($userSection, $normalizedTargets);
+                };
+
+                // Combined matching function for year level and section
+                $matchesTargets = function ($ev) use ($matchesYearLevel, $matchesSection) {
+                    return $matchesYearLevel($ev) && $matchesSection($ev);
+                };
+
                 $targetDepartments = is_string($ev->target_department)
                     ? json_decode($ev->target_department, true) ?? []
-                    : $ev->target_department;
+                    : ($ev->target_department ?? []);
 
                 $targetUsersCheck = strtolower($ev->target_users ?? '');
 
                 // Rule 1: Events from user's department
                 if ($ev->department === $dept) {
-                    return $matchesYearLevel($ev);
+                    return $matchesTargets($ev);
                 }
 
-                // Rule 2: Events from OFFICES targeting student's department
+                // Rule 2: Events from OFFICES targeting student's department (including 'All')
                 if ($ev->department === 'OFFICES' &&
                     is_array($targetDepartments) &&
-                    in_array($dept, $targetDepartments) &&
+                    (in_array($dept, $targetDepartments) || in_array('All', $targetDepartments)) &&
                     ($targetUsersCheck === 'students' || empty($targetUsersCheck))
                 ) {
-                    return $matchesYearLevel($ev);
+                    return $matchesTargets($ev);
                 }
 
-                // Rule 3: Any event targeting student's department + Students
-                if (is_array($targetDepartments) && in_array($dept, $targetDepartments) && $targetUsersCheck === 'students') {
-                    return $matchesYearLevel($ev);
+                // Rule 3: Any event targeting student's department + Students (for events from other departments)
+                if (is_array($targetDepartments) && 
+                    (in_array($dept, $targetDepartments) || in_array('All', $targetDepartments)) && 
+                    $targetUsersCheck === 'students') {
+                    return $matchesTargets($ev);
                 }
 
                 return false;
@@ -222,15 +244,17 @@ class ViewerController
                           });
                     });
                 } elseif ($userTitle === 'student' || $userTitle === 'viewer') {
-                    // Students should see events targeting their section and year level
+                    // Students should see events from their department OR events targeting their department (including 'All')
                     $query->where(function($q) use ($user) {
                         $q->where('department', $user->department)
-                          ->orWhereJsonContains('target_department', $user->department);
+                          ->orWhereJsonContains('target_department', $user->department)
+                          ->orWhereJsonContains('target_department', 'All');
                     });
                 } else {
                     // For other users
                     $query->where('department', $user->department)
                         ->orWhereJsonContains('target_department', $user->department)
+                        ->orWhereJsonContains('target_department', 'All')
                         ->orWhere(function ($q) use ($user) {
                             $q->whereNotNull('target_year_levels')
                             ->whereJsonContains('target_year_levels', $user->yearlevel);
@@ -366,7 +390,7 @@ class ViewerController
                 }
 
                 if ($userTitle === 'viewer' || $userTitle === 'student') {
-                    if (str_contains($targetUsers, 'faculty') || str_contains($targetUsers, 'department head')) {
+                    if (str_contains($targetUsers, 'faculty') || str_contains($targetUsers, 'department head') || str_contains($targetUsers, 'offices')) {
                         return false;
                     }
 
@@ -376,15 +400,19 @@ class ViewerController
                         return $matchesTargets;
                     }
 
+                    // Events from OFFICES targeting student's department (including 'All')
                     if ($event->department === 'OFFICES' &&
                         is_array($targetDepartments) &&
-                        in_array($userDept, $targetDepartments) &&
+                        (in_array($userDept, $targetDepartments) || in_array('All', $targetDepartments)) &&
                         ($targetUsers === 'students' || empty($targetUsers))
                     ) {
                         return $matchesTargets;
                     }
 
-                    if (is_array($targetDepartments) && in_array($userDept, $targetDepartments) && $targetUsers === 'students') {
+                    // Any event from other departments targeting student's department + Students (including 'All')
+                    if (is_array($targetDepartments) && 
+                        (in_array($userDept, $targetDepartments) || in_array('All', $targetDepartments)) && 
+                        $targetUsers === 'students') {
                         return $matchesTargets;
                     }
 
