@@ -118,6 +118,15 @@
                             return true;
                         }
 
+                        // Check if user is in target_office_users
+                        $targetOfficeUsers = is_string($event->target_office_users)
+                            ? json_decode($event->target_office_users, true) ?? []
+                            : $event->target_office_users ?? [];
+
+                        if (is_array($targetOfficeUsers) && in_array($notifUser->id, $targetOfficeUsers)) {
+                            return true;
+                        }
+
                         if ($notifUser->department === 'OFFICES' || $notifUser->title === 'Offices') {
                             return false;
                         }

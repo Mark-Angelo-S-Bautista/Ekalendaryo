@@ -82,6 +82,27 @@
     color: #064420;
     font-weight: 600;
 }
+
+/* Notification Badge */
+.notif-badge {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background-color: #dc3545;
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
+}
+
 body {
     font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
     background-color: #f3f8f4;
@@ -553,7 +574,6 @@ body {
     color: #fff;
 }
 
-
 /* Responsive adjustments */
 @media (max-width: 600px) {
     .edituser_wrapper {
@@ -569,7 +589,7 @@ body {
         width: 100%;
     }
     .dashboard_watermark img {
-    width: 500px; /* adjust size */
+        width: 500px; /* adjust size */
     }
 }
 .edit-btn,
@@ -604,7 +624,6 @@ body {
     background: #e53935;
     color: #fff;
 }
-
 
 /*CHANGES IN RESPONSIVENESS HERE*/
 
@@ -649,7 +668,7 @@ body {
         display: block; /* show the menu button */
     }
     .dashboard_watermark img {
-    width: 200px; /* adjust size */
+        width: 200px; /* adjust size */
     }
 }
 
@@ -657,4 +676,3 @@ body {
 .navbar.active {
     display: flex;
 }
-
