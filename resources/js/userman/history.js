@@ -33,7 +33,7 @@ if (searchInput && clearBtn && eventList) {
 // ==========================
 document.addEventListener("DOMContentLoaded", function () {
     const modal = document.getElementById("feedbackModal");
-    const feedbackList = document.getElementById("feedbackModalContent");
+    const feedbackList = document.getElementById("feedbackList");
 
     if (modal && feedbackList) {
         const closeBtn = modal.querySelector(".close-btn");
@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", function () {
             btn.addEventListener("click", function () {
                 currentEventId = this.dataset.eventId;
                 loadFeedback(1);
-                modal.style.display = "flex";
+                modal.style.display = "block";
             });
         });
 
@@ -94,9 +94,9 @@ document.addEventListener("DOMContentLoaded", function () {
 // ==========================
 // Report Modal & Upload
 // ==========================
-const reportModal = document.getElementById("uploadReportModal");
-const reportCloseBtn = document.getElementById("closeUploadModal");
-const reportForm = document.getElementById("uploadReportForm");
+const reportModal = document.getElementById("reportModal");
+const reportCloseBtn = document.getElementById("reportCloseBtn");
+const reportForm = document.getElementById("reportForm");
 const reportInput = document.getElementById("reportInput");
 const reportEventId = document.getElementById("reportEventId");
 const selectedFile = document.getElementById("selectedFile");
@@ -137,7 +137,7 @@ if (
                 reportForm.action = `/usermanagement/events/${this.dataset.eventId}/upload-report`;
                 reportInput.value = "";
                 selectedFile.textContent = "No file selected";
-                reportModal.style.display = "flex";
+                reportModal.style.display = "block";
             });
         });
     }
@@ -230,12 +230,12 @@ if (
 
                     const downloadLink = document.createElement("a");
                     downloadLink.href = data.downloadUrl;
-                    downloadLink.textContent = "Download Report";
+                    downloadLink.textContent = "📄 Download Report";
                     downloadLink.classList.add("report-btn");
                     downloadLink.style.marginLeft = "10px";
 
                     const removeBtn = document.createElement("button");
-                    removeBtn.textContent = "🗑 Remove Report";
+                    removeBtn.textContent = "Delete Report";
                     removeBtn.classList.add("remove-report-btn");
                     removeBtn.dataset.eventId = reportEventId.value;
                     removeBtn.style.marginLeft = "10px";

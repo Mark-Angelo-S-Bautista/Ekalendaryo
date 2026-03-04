@@ -215,76 +215,116 @@
             </div>
         </div>
 
-        {{-- FEEDBACK MODAL (View feedback for events you created) --}}
-        <div id="feedbackModal" class="modal-overlay" style="display:none;">
+        {{-- Feedback View Modal (for created events) --}}
+        <div id="feedbackModal" class="modal">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h2>Event Feedback</h2>
-                    <button id="closeFeedbackModal" class="close-btn">&times;</button>
-                </div>
-                <div class="modal-body" id="feedbackModalContent">
-                    <p>Loading...</p>
+                <span class="close-btn">&times;</span>
+                <h3>💬 Event Feedback</h3>
+                <div id="feedbackList">
+                    <!-- Feedback items will be loaded here via AJAX -->
                 </div>
             </div>
         </div>
 
-        {{-- SUBMIT FEEDBACK MODAL (for events invited to) --}}
-        <div id="submitFeedbackModal" class="modal-overlay" style="display:none;">
+        {{-- Feedback Submission Modal (for invited events) --}}
+        <div id="submitFeedbackModal" class="modal">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h2>Submit Feedback for <span id="submitFeedbackEventTitle"></span></h2>
-                    <button id="submitFeedbackCloseBtn" class="close-btn">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <form id="submitFeedbackForm" action="{{ route('UserManagement.feedback.store') }}" method="POST">
-                        @csrf
-                        <input type="hidden" name="event_id" id="submitFeedbackEventId">
+                <span class="close-btn" id="submitFeedbackCloseBtn">&times;</span>
 
-                        <div class="form-group">
-                            <label>Rating</label>
-                            <div class="star-rating">
-                                @for ($i = 5; $i >= 1; $i--)
-                                    <input type="radio" id="rating-{{ $i }}" name="rating"
-                                        value="{{ $i }}" required>
-                                    <label for="rating-{{ $i }}">&#9733;</label>
-                                @endfor
+                <h3 id="submitFeedbackEventTitle">Event Feedback</h3>
+
+                {{-- Feedback Form --}}
+                <form id="submitFeedbackForm" method="POST" action="{{ route('UserManagement.feedback.store') }}">
+                    @csrf
+                    <input type="hidden" name="event_id" id="submitFeedbackEventId">
+
+                    <div>
+                        <label>Overall Rating</label>
+                        <div style="display:flex; gap:8px; align-items:center; font-size:2rem;">
+                            @for ($i = 1; $i <= 5; $i++)
+                                <input type="radio" name="rating" id="rating-{{ $i }}"
+                                    value="{{ $i }}" style="display:none;">
+                                <label for="rating-{{ $i }}"
+                                    title="{{ $i }} star{{ $i > 1 ? 's' : '' }}"
+                                    style="cursor:pointer; color: #e0e0e0; font-weight: normal;">★</label>
+                            @endfor
+                        </div>
+                        <small style="color:#6b7280;">Select 1–5 stars</small>
+                    </div>
+
+                    <div>
+                        <label>General Questions</label>
+
+                        <div style="margin-bottom:8px;">
+                            <div style="font-size:0.95rem; margin-bottom:4px;">How satisfied are you with the event?
                             </div>
+                            <label style="margin-right:10px; font-weight: normal;"><input type="radio"
+                                    name="q_satisfaction" value="Very Satisfied"> Very Satisfied</label>
+                            <label style="margin-right:10px; font-weight: normal;"><input type="radio"
+                                    name="q_satisfaction" value="Satisfied"> Satisfied</label>
+                            <label style="margin-right:10px; font-weight: normal;"><input type="radio"
+                                    name="q_satisfaction" value="Neutral"> Neutral</label>
+                            <label style="margin-right:10px; font-weight: normal;"><input type="radio"
+                                    name="q_satisfaction" value="Dissatisfied"> Dissatisfied</label>
                         </div>
 
-                        <div class="form-group">
-                            <label for="submitComment">Comment (optional)</label>
-                            <textarea id="submitComment" name="comment" rows="4" maxlength="1000"
-                                placeholder="Share your thoughts about this event..."></textarea>
-                            <div class="char-counter" id="submitCharCounter">0 / 1000 characters</div>
-                            <div class="char-error" id="submitCharError" style="display:none; color:red;">Max 1000
-                                characters reached!</div>
+                        <div style="margin-bottom:8px;">
+                            <div style="font-size:0.95rem; margin-bottom:4px;">Was the event well organized?</div>
+                            <label style="margin-right:10px; font-weight: normal;"><input type="radio"
+                                    name="q_organization" value="Yes"> Yes</label>
+                            <label style="margin-right:10px; font-weight: normal;"><input type="radio"
+                                    name="q_organization" value="Somewhat"> Somewhat</label>
+                            <label style="margin-right:10px; font-weight: normal;"><input type="radio"
+                                    name="q_organization" value="No"> No</label>
                         </div>
 
-                        <button type="submit" class="submit-btn">Submit Feedback</button>
-                    </form>
-                </div>
+                        <div style="margin-bottom:8px;">
+                            <div style="font-size:0.95rem; margin-bottom:4px;">Was the event helpfull to you?</div>
+                            <label style="margin-right:10px; font-weight: normal;"><input type="radio"
+                                    name="q_relevance" value="Yes">
+                                Yes</label>
+                            <label style="margin-right:10px; font-weight: normal;"><input type="radio"
+                                    name="q_relevance" value="Somewhat">
+                                Somewhat</label>
+                            <label style="margin-right:10px; font-weight: normal;"><input type="radio"
+                                    name="q_relevance" value="No">
+                                No</label>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="submitComment">Your Feedback</label>
+                        <textarea name="comment" id="submitComment" rows="20" placeholder="Write your feedback here..." required></textarea>
+                        <div id="submitCharCounter" style="font-size: 0.9rem; color: gray;">
+                            0 / 1000 characters
+                        </div>
+                        <div id="submitCharError" style="color: red; display: none; font-size: 0.9rem;">
+                            Maximum 1000 characters reached!
+                        </div>
+                    </div>
+
+                    <button type="submit" id="submitFeedbackBtn">
+                        Submit Feedback
+                    </button>
+                </form>
             </div>
         </div>
 
-        <!-- UPLOAD REPORT MODAL -->
-        <div id="uploadReportModal" class="modal-overlay" style="display:none;">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2>Upload Event Report</h2>
-                    <button id="closeUploadModal" class="close-btn">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <form id="uploadReportForm" method="POST" enctype="multipart/form-data">
-                        @csrf
-                        <label for="reportInput" class="custom-file-upload">
-                            Choose PDF File
-                        </label>
-                        <input type="file" name="report" id="reportInput" accept=".pdf">
-                        <p id="selectedFile" class="selected-file">No file selected</p>
-                        <input type="hidden" name="event_id" id="reportEventId">
-                        <button type="submit" class="upload-btn">Upload PDF</button>
-                    </form>
-                </div>
+        {{-- Report Upload Modal --}}
+        <div id="reportModal" class="modal">
+            <div class="modal-content report-modal">
+                <span class="close-btn" id="reportCloseBtn">&times;</span>
+                <h3>📄 Manage Event Report</h3>
+                <form id="reportForm" method="POST" enctype="multipart/form-data" class="report-form">
+                    @csrf
+                    <label for="reportInput" class="custom-file-upload">
+                        Choose PDF File
+                    </label>
+                    <input type="file" name="report" id="reportInput" accept=".pdf">
+                    <p id="selectedFile" class="selected-file">No file selected</p>
+                    <input type="hidden" name="event_id" id="reportEventId">
+                    <button type="submit" class="upload-btn">Upload PDF</button>
+                </form>
             </div>
         </div>
 
