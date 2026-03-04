@@ -3,7 +3,6 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
@@ -12,7 +11,7 @@ use App\Models\Event;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
 
-class EventNotificationMail extends Mailable implements ShouldQueue
+class EventNotificationMail extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -24,8 +23,6 @@ class EventNotificationMail extends Mailable implements ShouldQueue
 
     public function __construct($eventId, $userId, bool $isUpdate = false, $oldEventData = null, bool $isCancelled = false)
     {
-        $this->afterCommit();
-        
         // Store only IDs and primitive data
         $this->eventId = is_object($eventId) ? $eventId->id : $eventId;
         $this->userId = is_object($userId) ? $userId->id : $userId;

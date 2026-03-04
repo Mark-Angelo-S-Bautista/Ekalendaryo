@@ -303,7 +303,53 @@ class UserManEventController
      */
     private function sendEmailsForOfficesEvent(Event $event, bool $isUpdate = false, $oldEvent = null, bool $isCancelled = false)
     {
-        // Start with all users
+        // =====================================================
+        // SPECIAL CASE: If target_users is 'Offices', ONLY send to target_office_users
+        // =====================================================
+        if ($event->target_users === 'Offices') {
+            $users = collect();
+            
+            // Only add the specifically selected office users
+            if (!empty($event->target_office_users)) {
+                $targetedOfficeUsers = User::whereIn('id', $event->target_office_users)->get();
+                $users = $users->merge($targetedOfficeUsers);
+            }
+            
+            // Also add any specifically selected faculty (if any)
+            if (!empty($event->target_faculty)) {
+                $targetedFaculty = User::whereIn('id', $event->target_faculty)->get();
+                $users = $users->merge($targetedFaculty);
+            }
+            
+            // Remove duplicates and exclude inactive users
+            $users = $users->unique('id')->filter(function ($user) {
+                $status = strtolower($user->status ?? '');
+                return !in_array($status, ['graduated', 'dropped', 'fired']);
+            });
+            
+            if (!$isUpdate && !$isCancelled) {
+                $this->scheduleEventReminders($event, $users);
+            }
+            
+            // Send emails
+            foreach ($users as $user) {
+                if (!empty($user->email)) {
+                    Mail::to($user->email)->send(
+                        new EventNotificationMail(
+                            $event->id,
+                            $user->id,
+                            $isUpdate,
+                            $oldEvent ? $oldEvent->toArray() : null,
+                            $isCancelled
+                        )
+                    );
+                }
+            }
+            
+            return; // Exit early for Offices target
+        }
+
+        // Start with query builder for other target types
         $users = User::query();
 
         // =====================================================
@@ -320,6 +366,7 @@ class UserManEventController
                 $users->where('title', 'Department Head');
                 break;
             default:
+                // No specific role filter
                 break;
         }
 
@@ -480,6 +527,30 @@ class UserManEventController
         $recipients = collect();
 
         if ($event->department === 'OFFICES') {
+            // =====================================================
+            // SPECIAL CASE: If target_users is 'Offices', ONLY return target_office_users
+            // =====================================================
+            if ($event->target_users === 'Offices') {
+                $users = collect();
+                
+                // Only add the specifically selected office users
+                if (!empty($event->target_office_users)) {
+                    $targetedOfficeUsers = User::whereIn('id', $event->target_office_users)->get();
+                    $users = $users->merge($targetedOfficeUsers);
+                }
+                
+                // Also add any specifically selected faculty (if any)
+                if (!empty($event->target_faculty)) {
+                    $targetedFaculty = User::whereIn('id', $event->target_faculty)->get();
+                    $users = $users->merge($targetedFaculty);
+                }
+                
+                return $users->unique('id')->filter(function ($user) {
+                    $status = strtolower($user->status ?? '');
+                    return !in_array($status, ['graduated', 'dropped', 'fired']);
+                });
+            }
+
             $users = User::query();
 
             switch ($event->target_users) {
@@ -520,6 +591,12 @@ class UserManEventController
                     ->whereIn('title', ['Faculty', 'Offices', 'Department Head'])
                     ->get();
                 $users = $users->merge($targetedFaculty);
+            }
+
+            // Also add target_office_users
+            if (!empty($event->target_office_users)) {
+                $targetedOfficeUsers = User::whereIn('id', $event->target_office_users)->get();
+                $users = $users->merge($targetedOfficeUsers);
             }
 
             $recipients = $users->unique('id');
