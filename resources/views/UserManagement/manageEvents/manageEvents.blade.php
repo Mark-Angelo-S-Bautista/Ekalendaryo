@@ -209,7 +209,8 @@ $userTitle = $user->title ?? null;
                                             <input type="checkbox" name="target_office_users[]"
                                                 value="{{ $officeUser->id }}" class="office-user-checkbox">
                                             <span>{{ $officeUser->name }}
-                                                ({{ $officeUser->office_name ?? 'Office' }})</span>
+                                                ({{ $officeUser->office_name ?? 'Office' }})
+                                            </span>
                                         </label>
                                     @endforeach
                                 </div>
@@ -294,6 +295,13 @@ $userTitle = $user->title ?? null;
                             <div id="facultyModalOverlay" class="custom-modal-overlay">
                                 <div class="custom-modal">
                                     <h3>Select Faculty</h3>
+                                    <div class="select-all-container"
+                                        style="margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #e0e0e0;">
+                                        <label class="checkbox-item" style="font-weight: 600;">
+                                            <input type="checkbox" id="selectAllFaculty">
+                                            <span>Select All</span>
+                                        </label>
+                                    </div>
                                     <div class="checkbox-grid">
                                         @foreach ($faculty as $f)
                                             <label class="checkbox-item">
@@ -543,6 +551,32 @@ $userTitle = $user->title ?? null;
                                 closeFacultyBtn.addEventListener('click', () => {
                                     facultyModal.classList.remove('active');
                                 });
+
+                                // Select All Faculty Logic
+                                const selectAllFacultyCheckbox = document.getElementById('selectAllFaculty');
+                                const facultyCheckboxes = document.querySelectorAll(
+                                    '#facultyModalOverlay input[name="target_faculty[]"]');
+
+                                if (selectAllFacultyCheckbox) {
+                                    selectAllFacultyCheckbox.addEventListener('change', function() {
+                                        facultyCheckboxes.forEach(cb => {
+                                            if (!cb.disabled) {
+                                                cb.checked = this.checked;
+                                            }
+                                        });
+                                    });
+
+                                    // Update Select All state when individual checkboxes change
+                                    facultyCheckboxes.forEach(cb => {
+                                        cb.addEventListener('change', function() {
+                                            const enabledCheckboxes = [...facultyCheckboxes].filter(c => !c.disabled);
+                                            const allChecked = enabledCheckboxes.every(c => c.checked);
+                                            const someChecked = enabledCheckboxes.some(c => c.checked);
+                                            selectAllFacultyCheckbox.checked = allChecked;
+                                            selectAllFacultyCheckbox.indeterminate = someChecked && !allChecked;
+                                        });
+                                    });
+                                }
 
                                 // ==============================
                                 // Section Modal Logic
