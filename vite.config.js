@@ -7,6 +7,9 @@ export default defineConfig({
         laravel({
             input: [
                 // JS FILES
+                "resources/js/app.js",
+                "resources/js/bootstrap.js",
+
                 "resources/js/auth/login.js",
                 "resources/js/auth/scriptuserman.js",
 
@@ -18,9 +21,11 @@ export default defineConfig({
                 "resources/js/editor/activity_log.js",
 
                 "resources/js/userman/activityLog.js",
+                "resources/js/userman/activity_log.js",
                 "resources/js/userman/archive.js",
                 "resources/js/userman/calendar.js",
                 "resources/js/userman/history.js",
+                "resources/js/userman/manageEvents.js",
                 "resources/js/userman/UserManDashboard.js",
                 "resources/js/userman/UserManProfile.js",
                 "resources/js/userman/usersTabPractice.js",
@@ -42,10 +47,15 @@ export default defineConfig({
                 "resources/css/editor/notifications.css",
 
                 "resources/css/userman/activityLog.css",
+                "resources/css/userman/activity_log.css",
                 "resources/css/userman/app.css",
                 "resources/css/userman/archive.css",
                 "resources/css/userman/calendar.css",
+                "resources/css/userman/editEvents.css",
+                "resources/css/userman/eventsArchive.css",
                 "resources/css/userman/history.css",
+                "resources/css/userman/manageEvents.css",
+                "resources/css/userman/notifications.css",
                 "resources/css/userman/UserManDashboard.css",
                 "resources/css/userman/UserManProfile.css",
                 "resources/css/userman/usersTabPractice.css",
