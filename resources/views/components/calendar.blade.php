@@ -68,6 +68,12 @@
             </div>
         </div>
 
+        <!-- Department Legend -->
+        <div class="calendar_legend" id="calendar_legend">
+            <h4>Legend</h4>
+            <div class="calendar_legend-items" id="calendar_legend-items"></div>
+        </div>
+
         <!-- More Details Modal -->
         <div id="moreDetailsModal" class="modal"
             style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.65); z-index:9999; justify-content:center; align-items:center; padding:20px;">

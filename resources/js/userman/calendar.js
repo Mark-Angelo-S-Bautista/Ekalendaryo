@@ -42,14 +42,121 @@ document.addEventListener("DOMContentLoaded", () => {
     const monthYear = document.getElementById("calendar_monthYear");
     const eventFilter = document.getElementById("calendar_eventFilter");
 
+    // Department color mapping
+    // Offices keep green (default), specified departments have custom colors
+    // Unspecified departments get unique random colors
     const departmentColors = {
-        bsis_act: "#0000FF",
-        bsom: "#FF69B4",
-        bsais: "#FFD700",
-        btvted: "#87CEFA",
-        bsca: "#DAA520",
-        default: "#28a745",
+        // Specified colors
+        bsca: "#808080", // Grey
+        bsais: "#FFD700", // Yellow
+        btvted: "#87CEEB", // Light blue
+        bsom: "#FF6B6B", // Light red
+        bsis_act: "#0000FF", // Blue
+        dhrmt: "#9370DB", // Purple
+        // Default for Offices
+        default: "#28a745", // Green
     };
+
+    // Known department prefixes (these are academic departments, not offices)
+    const knownDeptPrefixes = ["bs", "bt", "dh", "ab", "ba"];
+
+    // Track assigned random colors for unknown departments
+    const assignedRandomColors = {};
+    const additionalColors = [
+        "#FF8C00", // Dark Orange
+        "#20B2AA", // Light Sea Green
+        "#DB7093", // Pale Violet Red
+        "#6495ED", // Cornflower Blue
+        "#32CD32", // Lime Green
+        "#FF4500", // Orange Red
+        "#8B4513", // Saddle Brown
+        "#4682B4", // Steel Blue
+        "#D2691E", // Chocolate
+        "#9ACD32", // Yellow Green
+        "#CD5C5C", // Indian Red
+        "#00CED1", // Dark Turquoise
+        "#BA55D3", // Medium Orchid
+        "#2E8B57", // Sea Green
+        "#F4A460", // Sandy Brown
+    ];
+    let colorIndex = 0;
+
+    function getDepartmentColor(deptKey) {
+        // If department has a specified color, use it
+        if (departmentColors[deptKey]) {
+            return departmentColors[deptKey];
+        }
+
+        // Check if this looks like a department (starts with known prefixes like BS, BT, DH, etc.)
+        const isDepartment = knownDeptPrefixes.some((prefix) =>
+            deptKey.startsWith(prefix),
+        );
+
+        if (isDepartment) {
+            // It's an unspecified department - assign a random color
+            if (!assignedRandomColors[deptKey]) {
+                assignedRandomColors[deptKey] =
+                    additionalColors[colorIndex % additionalColors.length];
+                colorIndex++;
+            }
+            return assignedRandomColors[deptKey];
+        }
+
+        // It's likely an office - use default green
+        return departmentColors.default;
+    }
+
+    // Department display names mapping
+    const departmentDisplayNames = {
+        bsca: "BSCA",
+        bsais: "BSAIS",
+        btvted: "BTVTED",
+        bsom: "BSOM",
+        bsis_act: "BSIS/ACT",
+        dhrmt: "DHRMT",
+    };
+
+    // Build dynamic legend based on events
+    function buildLegend() {
+        const legendContainer = document.getElementById(
+            "calendar_legend-items",
+        );
+        if (!legendContainer) return;
+
+        legendContainer.innerHTML = "";
+
+        // Collect unique department types from events
+        const uniqueTypes = new Set();
+        formattedEvents.forEach((ev) => {
+            if (normalizeStatus(ev.status) !== "cancelled") {
+                uniqueTypes.add(ev.type.toLowerCase());
+            }
+        });
+
+        // Sort types: specified departments first, then offices (green)
+        const sortedTypes = Array.from(uniqueTypes).sort((a, b) => {
+            const aHasColor = departmentColors[a] !== undefined;
+            const bHasColor = departmentColors[b] !== undefined;
+            if (aHasColor && !bHasColor) return -1;
+            if (!aHasColor && bHasColor) return 1;
+            return a.localeCompare(b);
+        });
+
+        sortedTypes.forEach((type) => {
+            const color = getDepartmentColor(type);
+            const displayName =
+                departmentDisplayNames[type] ||
+                type.replace(/_/g, " ").toUpperCase();
+
+            const legendItem = document.createElement("div");
+            legendItem.className = "calendar_legend-item";
+            legendItem.innerHTML = `
+                <span class="calendar_legend-color" style="background-color: ${color};"></span>
+                <span>${displayName}</span>
+            `;
+            legendContainer.appendChild(legendItem);
+        });
+    }
 
     // Helper to normalize status (optional but safe)
     function normalizeStatus(status) {
@@ -123,8 +230,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     e.textContent = ev.title;
 
                     const deptKey = ev.type.toLowerCase();
-                    e.style.backgroundColor =
-                        departmentColors[deptKey] || departmentColors.default;
+                    e.style.backgroundColor = getDepartmentColor(deptKey);
                     e.style.color = "#fff";
 
                     e.addEventListener("click", (event) => {
@@ -308,4 +414,5 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Initial render
     renderCalendar();
+    buildLegend();
 });

@@ -39,6 +39,43 @@ body {
     border: 1px solid #ccc;
 }
 
+/* --- DEPARTMENT LEGEND --- */
+.calendar_legend {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-top: 15px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.calendar_legend h4 {
+    margin: 0 0 10px 0;
+    font-size: 14px;
+    color: #333;
+    font-weight: 600;
+}
+
+.calendar_legend-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.calendar_legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #444;
+}
+
+.calendar_legend-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
 /* --- CALENDAR GRID --- */
 .calendar_grid {
     display: grid;
@@ -342,12 +379,14 @@ body {
     }
 }
 
-
 /* --- CALENDAR GRID SCROLLABLE ON SMALL SCREENS --- */
 @media (max-width: 767px) {
     .calendar_grid {
         display: grid;
-        grid-template-columns: repeat(14, minmax(100px, 1fr)); /* allow horizontal scroll */
+        grid-template-columns: repeat(
+            14,
+            minmax(100px, 1fr)
+        ); /* allow horizontal scroll */
         overflow-x: auto;
         gap: 4px;
         padding: 5px;
@@ -526,11 +565,9 @@ body {
     }
 }
 
-
 /* Hide day headers on mobile/tablet */
 @media (max-width: 768px) {
     .calendar_day-header {
         display: none;
     }
 }
-
