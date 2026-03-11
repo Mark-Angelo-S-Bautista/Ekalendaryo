@@ -204,6 +204,24 @@ class UserManagementController
             return [$dept => $departmentCounts[$dept] ?? 0];
         });
 
+        // Add Registrar card count (events created by users with title 'Offices')
+        $registrarCount = $events->filter(function ($event) use ($now) {
+            // Exclude cancelled & completed
+            if (in_array($event->computed_status, ['cancelled', 'completed'])) {
+                return false;
+            }
+            $start = \Carbon\Carbon::parse($event->date . ' ' . $event->start_time);
+            $end = \Carbon\Carbon::parse($event->date . ' ' . $event->end_time);
+            $isOngoing = $start->lessThanOrEqualTo($now) && $end->greaterThanOrEqualTo($now);
+            $isUpcoming = $start->greaterThan($now) && $start->lessThanOrEqualTo($now->copy()->addDays(356));
+            if (!$isOngoing && !$isUpcoming) {
+                return false;
+            }
+            // Filter by creator's title being 'Offices'
+            return $event->user && $event->user->title === 'Offices';
+        })->count();
+        $finalDeptCounts['Registrar'] = $registrarCount;
+
         // Paginate with 8 per page
         $currentPage = LengthAwarePaginator::resolveCurrentPage();
         $perPage = 8;
