@@ -389,7 +389,14 @@
                 const titleSelect = document.getElementById('title');
                 const officeNameField = document.getElementById('office_name_field');
                 const departmentField = document.getElementById('department_field');
+                const departmentSelect = document.getElementById('department');
                 const roleSelect = document.getElementById('role');
+
+                // Store all original department options
+                const allDepartmentOptions = departmentSelect ? Array.from(departmentSelect.options).map(opt => ({
+                    value: opt.value,
+                    text: opt.text
+                })) : [];
 
                 const setRoleBasedOnTitle = (title) => {
                     if (title === 'Student' || title === 'Faculty') roleSelect.value = 'Viewer';
@@ -397,15 +404,58 @@
                     else roleSelect.value = '';
                 };
 
+                const filterDepartmentOptions = (title) => {
+                    if (!departmentSelect) return;
+
+                    // Clear current options
+                    departmentSelect.innerHTML = '';
+
+                    // Filter and add options based on title
+                    allDepartmentOptions.forEach(opt => {
+                        let shouldShow = true;
+                        const optValueUpper = opt.value.toUpperCase();
+
+                        if (title === 'Department Head' || title === 'Faculty') {
+                            // Hide BSIS, ACT, and OFFICES (show BSIS/ACT combined)
+                            if (optValueUpper === 'BSIS' || optValueUpper === 'ACT' || optValueUpper ===
+                                'OFFICES') {
+                                shouldShow = false;
+                            }
+                        } else if (title === 'Student') {
+                            // Hide BSIS/ACT and OFFICES (show BSIS and ACT separately)
+                            if (optValueUpper === 'BSIS/ACT' || optValueUpper === 'OFFICES') {
+                                shouldShow = false;
+                            }
+                        }
+
+                        if (shouldShow) {
+                            const option = document.createElement('option');
+                            option.value = opt.value;
+                            option.text = opt.text;
+                            departmentSelect.appendChild(option);
+                        }
+                    });
+                };
+
                 if (titleSelect) {
-                    if (titleSelect.value) setRoleBasedOnTitle(titleSelect.value);
+                    if (titleSelect.value) {
+                        setRoleBasedOnTitle(titleSelect.value);
+                        filterDepartmentOptions(titleSelect.value);
+                    }
 
                     titleSelect.addEventListener('change', function() {
                         const selectedTitle = this.value;
                         officeNameField.style.display = selectedTitle === 'Offices' ? 'block' : 'none';
-                        departmentField.style.display = selectedTitle === 'Student' ? 'block' : 'none';
-                        if (selectedTitle !== 'Student' && selectedTitle !== 'Offices') departmentField.style
-                            .display = 'none';
+
+                        // Show department field for Student, Faculty, and Department Head
+                        if (selectedTitle === 'Student' || selectedTitle === 'Faculty' || selectedTitle ===
+                            'Department Head') {
+                            departmentField.style.display = 'block';
+                            filterDepartmentOptions(selectedTitle);
+                        } else {
+                            departmentField.style.display = 'none';
+                        }
+
                         setRoleBasedOnTitle(selectedTitle);
                     });
                 }
