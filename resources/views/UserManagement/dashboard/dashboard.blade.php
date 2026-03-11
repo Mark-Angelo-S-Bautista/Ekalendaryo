@@ -1,6 +1,6 @@
 <x-usermanLayout>
-    
-    
+
+
     <div class="dashboard_container">
         <!-- Welcome Card -->
         <section class="dashboard_welcome_card">
@@ -106,11 +106,37 @@
                                     {{ strtolower($event->computed_status ?? ($event->status ?? 'upcoming')) }}
                                 </span>
                             </div>
-                            <button class="dashboard_view_btn"
-                                data-more-details="{{ htmlspecialchars($event->more_details ?? 'No additional details.', ENT_QUOTES, 'UTF-8') }}"
-                                style="padding:10px 22px; background:#e8ecf5; border:none; border-radius:10px; font-size:1rem; cursor:pointer; font-weight:600; color:#36415d; margin-top:10px;">
-                                👁️ View Details
-                            </button>
+                            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                <button class="dashboard_view_btn"
+                                    data-more-details="{{ htmlspecialchars($event->more_details ?? 'No additional details.', ENT_QUOTES, 'UTF-8') }}"
+                                    style="padding:10px 22px; background:#e8ecf5; border:none; border-radius:10px; font-size:1rem; cursor:pointer; font-weight:600; color:#36415d; margin-top:10px;">
+                                    👁️ View Details
+                                </button>
+                                <button class="dashboard_attend_btn" data-event-id="{{ $event->id }}"
+                                    style="padding:10px 22px; 
+                                        border-radius:10px; 
+                                        font-size:1rem; 
+                                        cursor:pointer; 
+                                        font-weight:600; 
+                                        margin-top:10px; 
+                                        transition: all 0.3s ease;
+                                        @if ($event->attendees->contains(Auth::id())) background:#4CAF50; 
+                                            color:#ffffff; 
+                                            border:1px solid #4CAF50; 
+                                            cursor:not-allowed;
+                                        @else
+                                            background:#ffffff; 
+                                            color:#36415d; 
+                                            border:1px solid #36415d; @endif
+                                    "
+                                    @if ($event->attendees->contains(Auth::id())) disabled @endif>
+                                    @if ($event->attendees->contains(Auth::id()))
+                                        ✅ Attending
+                                    @else
+                                        ✋ Attend
+                                    @endif
+                                </button>
+                            </div>
                         </div>
                     @empty
                         <p>No upcoming events.</p>
@@ -265,15 +291,68 @@
                                 <span class="dashboard_tag dashboard_tag_admin">${departmentTag}</span>
                                 <span class="dashboard_tag ${status.class}">${status.text}</span>
                             </div>
-                            <button class="dashboard_view_btn" data-index="${index}"
-                                style="padding:10px 22px; background:#e8ecf5; border:none; border-radius:10px; font-size:1rem; cursor:pointer; font-weight:600; color:#36415d; margin-top:10px;">
-                                👁️ View Details
-                            </button>
+                            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                <button class="dashboard_view_btn" data-index="${index}"
+                                    style="padding:10px 22px; background:#e8ecf5; border:none; border-radius:10px; font-size:1rem; cursor:pointer; font-weight:600; color:#36415d; margin-top:10px;">
+                                    👁️ View Details
+                                </button>
+                                <button class="dashboard_attend_btn" data-event-id="${event.id}"
+                                    style="padding:10px 22px; 
+                                        border-radius:10px; 
+                                        font-size:1rem; 
+                                        cursor:pointer; 
+                                        font-weight:600; 
+                                        margin-top:10px; 
+                                        transition: all 0.3s ease;
+                                        ${event.is_attending ? 'background:#4CAF50; color:#ffffff; border:1px solid #4CAF50; cursor:not-allowed;' : 'background:#ffffff; color:#36415d; border:1px solid #36415d;'}"
+                                    ${event.is_attending ? 'disabled' : ''}>
+                                    ${event.is_attending ? '✅ Attending' : '✋ Attend'}
+                                </button>
+                            </div>
                         </div>
                     `;
                 });
                 htmlContent += `</div>`;
                 eventsWrapper.innerHTML = htmlContent;
+
+                // Re-attach attend button handlers for dynamically rendered events
+                document.querySelectorAll('.dashboard_attend_btn').forEach(button => {
+                    if (!button.hasAttribute('data-listener')) {
+                        button.setAttribute('data-listener', 'true');
+                        button.addEventListener('click', function() {
+                            const btn = this;
+                            const eventId = btn.dataset.eventId;
+
+                            fetch(`/usermanagement/dashboard/${eventId}/attend`, {
+                                    method: 'POST',
+                                    headers: {
+                                        'X-CSRF-TOKEN': document.querySelector(
+                                            'meta[name="csrf-token"]').getAttribute(
+                                            'content'),
+                                        'Accept': 'application/json',
+                                    },
+                                })
+                                .then(res => res.json())
+                                .then(data => {
+                                    if (data.status === 'already' || data.status ===
+                                        'success') {
+                                        btn.innerHTML = "✅ Attending";
+                                        btn.style.backgroundColor = "#4CAF50";
+                                        btn.style.color = "#ffffff";
+                                        btn.style.border = "1px solid #4CAF50";
+                                        btn.style.transition = "all 0.3s ease";
+                                        btn.disabled = true;
+                                        btn.style.cursor = "not-allowed";
+                                    }
+                                })
+                                .catch(err => {
+                                    console.error(err);
+                                    btn.disabled = false;
+                                    btn.style.cursor = 'pointer';
+                                });
+                        });
+                    }
+                });
             };
 
             const fetchEvents = (query = '') => {
@@ -343,6 +422,40 @@
             closeBtn.addEventListener('click', () => modal.style.display = 'none');
             modal.addEventListener('click', e => {
                 if (e.target === modal) modal.style.display = 'none';
+            });
+
+            // Attend Button Handler
+            document.querySelectorAll('.dashboard_attend_btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const btn = this;
+                    const eventId = btn.dataset.eventId;
+
+                    fetch(`/usermanagement/dashboard/${eventId}/attend`, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector(
+                                    'meta[name="csrf-token"]').getAttribute('content'),
+                                'Accept': 'application/json',
+                            },
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.status === 'already' || data.status === 'success') {
+                                btn.innerHTML = "✅ Attending";
+                                btn.style.backgroundColor = "#4CAF50";
+                                btn.style.color = "#ffffff";
+                                btn.style.border = "1px solid #4CAF50";
+                                btn.style.transition = "all 0.3s ease";
+                                btn.disabled = true;
+                                btn.style.cursor = "not-allowed";
+                            }
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            btn.disabled = false;
+                            btn.style.cursor = 'pointer';
+                        });
+                });
             });
 
             // Department Modal

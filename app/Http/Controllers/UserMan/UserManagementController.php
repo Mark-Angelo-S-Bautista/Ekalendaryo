@@ -34,8 +34,8 @@ class UserManagementController
             ? $currentSchoolYear->school_year
             : 'N/A';
 
-        // Fetch all events
-        $events = Event::with('user')->get();
+        // Fetch all events with attendees
+        $events = Event::with('user', 'attendees')->get();
 
         // Departments
         $departments = Department::pluck('department_name')->toArray();
@@ -236,7 +236,7 @@ class UserManagementController
         $userSection = $user->section ? strtolower(trim($user->section)) : null;
         $userYearLevel = $user->yearlevel ? strtolower(str_replace(' ', '', $user->yearlevel)) : null;
 
-        $events = Event::with('user')
+        $events = Event::with('user', 'attendees')
             ->when($query, function ($q) use ($query) {
                 $q->where('title', 'like', "%{$query}%")
                   ->orWhere('description', 'like', "%{$query}%")
@@ -370,6 +370,13 @@ class UserManagementController
                 return \Carbon\Carbon::parse($event->date . ' ' . $event->start_time);
             })
             ->values();
+
+        // Add is_attending flag for each event
+        $userId = $user->id;
+        $events = $events->map(function ($event) use ($userId) {
+            $event->is_attending = $event->attendees->contains('id', $userId);
+            return $event;
+        });
 
         return response()->json(['events' => $events]);
     }
