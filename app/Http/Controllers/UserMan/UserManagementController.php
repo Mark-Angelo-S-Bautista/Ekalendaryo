@@ -138,7 +138,8 @@ class UserManagementController
             if ($user->title === 'Department Head') {
                 $targetUsers = $event->target_users ?? '';
                 
-                if ($targetUsers === 'Department Heads') {
+                // Check for Department Heads or Faculty & Department Heads
+                if (in_array($targetUsers, ['Department Heads', 'Faculty & Department Heads'])) {
                     $targetDepartments = is_string($event->target_department)
                         ? json_decode($event->target_department, true) ?? []
                         : ($event->target_department ?? []);
@@ -151,8 +152,19 @@ class UserManagementController
                     }
                 }
                 
-                if ($targetUsers === 'Faculty' && $event->department === $userDept) {
-                    return true;
+                // Faculty target_users also targets Department Heads
+                if ($targetUsers === 'Faculty') {
+                    $targetDepartments = is_string($event->target_department)
+                        ? json_decode($event->target_department, true) ?? []
+                        : ($event->target_department ?? []);
+                    
+                    // Show if same department OR target_department includes user's dept or 'All'
+                    if ($event->department === $userDept ||
+                        in_array($userDept, $targetDepartments) ||
+                        in_array('All', $targetDepartments)) {
+                        return true;
+                    }
+                    return false;
                 }
                 
                 return false;
@@ -312,7 +324,8 @@ class UserManagementController
                 if ($user->title === 'Department Head') {
                     $targetUsers = $event->target_users ?? '';
                     
-                    if ($targetUsers === 'Department Heads') {
+                    // Check for Department Heads or Faculty & Department Heads
+                    if (in_array($targetUsers, ['Department Heads', 'Faculty & Department Heads'])) {
                         $targetDepartments = is_string($event->target_department)
                             ? json_decode($event->target_department, true) ?? []
                             : ($event->target_department ?? []);
@@ -325,8 +338,19 @@ class UserManagementController
                         }
                     }
                     
-                    if ($targetUsers === 'Faculty' && $event->department === $userDept) {
-                        return true;
+                    // Faculty target_users also targets Department Heads
+                    if ($targetUsers === 'Faculty') {
+                        $targetDepartments = is_string($event->target_department)
+                            ? json_decode($event->target_department, true) ?? []
+                            : ($event->target_department ?? []);
+                        
+                        // Show if same department OR target_department includes user's dept or 'All'
+                        if ($event->department === $userDept ||
+                            in_array($userDept, $targetDepartments) ||
+                            in_array('All', $targetDepartments)) {
+                            return true;
+                        }
+                        return false;
                     }
                     
                     return false;
@@ -662,7 +686,8 @@ class UserManagementController
             $targetUsers = $event->target_users ?? '';
             if (!empty($targetUsers)) {
                 if ($user->title === 'Department Head') {
-                    if ($targetUsers === 'Department Heads') {
+                    // Check for Department Heads or Faculty & Department Heads
+                    if (in_array($targetUsers, ['Department Heads', 'Faculty & Department Heads'])) {
                         $targetDepartments = $event->target_department;
                         if (is_string($targetDepartments)) {
                             $targetDepartments = json_decode($targetDepartments, true) ?? [];
@@ -679,8 +704,23 @@ class UserManagementController
                         }
                         return false;
                     }
-                    if ($targetUsers === 'Faculty' && $event->department === $userDept) {
-                        return true;
+                    // Faculty target_users also targets Department Heads
+                    if ($targetUsers === 'Faculty') {
+                        $targetDepartments = $event->target_department;
+                        if (is_string($targetDepartments)) {
+                            $targetDepartments = json_decode($targetDepartments, true) ?? [];
+                        }
+                        if (!is_array($targetDepartments)) {
+                            $targetDepartments = [];
+                        }
+                        
+                        // Show if same department OR target_department includes user's dept or 'All'
+                        if ($event->department === $userDept ||
+                            in_array($userDept, $targetDepartments) ||
+                            in_array('All', $targetDepartments)) {
+                            return true;
+                        }
+                        return false;
                     }
                     return false;
                 }
@@ -929,7 +969,8 @@ class UserManagementController
                 $targetUsers = $event->target_users ?? '';
                 if (!empty($targetUsers)) {
                     if ($user->title === 'Department Head') {
-                        if ($targetUsers === 'Department Heads') {
+                        // Check for Department Heads or Faculty & Department Heads
+                        if (in_array($targetUsers, ['Department Heads', 'Faculty & Department Heads'])) {
                             $targetDepartments = $event->target_department;
                             if (is_string($targetDepartments)) {
                                 $targetDepartments = json_decode($targetDepartments, true) ?? [];
@@ -946,8 +987,23 @@ class UserManagementController
                             }
                             return false;
                         }
-                        if ($targetUsers === 'Faculty' && $event->department === $user->department) {
-                            return true;
+                        // Faculty target_users also targets Department Heads
+                        if ($targetUsers === 'Faculty') {
+                            $targetDepartments = $event->target_department;
+                            if (is_string($targetDepartments)) {
+                                $targetDepartments = json_decode($targetDepartments, true) ?? [];
+                            }
+                            if (!is_array($targetDepartments)) {
+                                $targetDepartments = [];
+                            }
+                            
+                            // Show if same department OR target_department includes user's dept or 'All'
+                            if ($event->department === $user->department ||
+                                in_array($user->department, $targetDepartments) ||
+                                in_array('All', $targetDepartments)) {
+                                return true;
+                            }
+                            return false;
                         }
                         return false;
                     }

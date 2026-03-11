@@ -51,7 +51,23 @@
             if ($notifUser) {
                 $notifEvents = \App\Models\Event::where(function ($query) use ($notifUser, $notifUserTitle) {
                     if ($notifUserTitle === 'faculty') {
-                        $query->whereRaw('JSON_CONTAINS(target_faculty, ?)', [json_encode((string) $notifUser->id)]);
+                        $query->where(function ($q) use ($notifUser) {
+                            $q->whereRaw('JSON_CONTAINS(target_faculty, ?)', [json_encode((string) $notifUser->id)])
+                                ->orWhere(function ($subQ) use ($notifUser) {
+                                    $subQ
+                                        ->where('target_users', 'LIKE', '%Faculty%')
+                                        ->where('department', $notifUser->department);
+                                })
+                                ->orWhere(function ($subQ) use ($notifUser) {
+                                    $subQ
+                                        ->where('target_users', 'LIKE', '%Faculty%')
+                                        ->where(function ($deptQ) use ($notifUser) {
+                                            $deptQ
+                                                ->whereJsonContains('target_department', $notifUser->department)
+                                                ->orWhereJsonContains('target_department', 'All');
+                                        });
+                                });
+                        });
                     } elseif ($notifUserTitle === 'student' || $notifUserTitle === 'viewer') {
                         $query->where(function ($q) use ($notifUser) {
                             $q->where('department', $notifUser->department)->orWhereJsonContains(
@@ -134,7 +150,8 @@
                         $targetUsers = $event->target_users ?? '';
                         if (!empty($targetUsers)) {
                             if ($notifUser->title === 'Department Head') {
-                                if ($targetUsers === 'Department Heads') {
+                                // Check for Department Heads or Faculty & Department Heads
+                                if (in_array($targetUsers, ['Department Heads', 'Faculty & Department Heads'])) {
                                     $targetDepartments = $event->target_department;
                                     if (is_string($targetDepartments)) {
                                         $targetDepartments = json_decode($targetDepartments, true) ?? [];
@@ -157,8 +174,25 @@
                                     }
                                     return false;
                                 }
-                                if ($targetUsers === 'Faculty' && $event->department === $notifUser->department) {
-                                    return true;
+                                // Faculty target_users also targets Department Heads
+                                if ($targetUsers === 'Faculty') {
+                                    $targetDepartments = $event->target_department;
+                                    if (is_string($targetDepartments)) {
+                                        $targetDepartments = json_decode($targetDepartments, true) ?? [];
+                                    }
+                                    if (!is_array($targetDepartments)) {
+                                        $targetDepartments = [];
+                                    }
+
+                                    // Show if same department OR target_department includes user's dept or 'All'
+                        if (
+                            $event->department === $notifUser->department ||
+                            in_array($notifUser->department, $targetDepartments) ||
+                            in_array('All', $targetDepartments)
+                                    ) {
+                                        return true;
+                                    }
+                                    return false;
                                 }
                                 return false;
                             }

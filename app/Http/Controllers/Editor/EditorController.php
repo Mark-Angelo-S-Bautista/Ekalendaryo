@@ -107,7 +107,8 @@ class EditorController
             if (!empty($targetUsers)) {
                 // For Department Heads: only show Faculty events if department matches
                 if ($user->title === 'Department Head') {
-                    if ($targetUsers === 'Department Heads') {
+                    // Check for Department Heads or Faculty & Department Heads
+                    if (in_array($targetUsers, ['Department Heads', 'Faculty & Department Heads'])) {
                         // Check if the Department Head's department is in target_department
                         $targetDepartments = $event->target_department;
                         if (is_string($targetDepartments)) {
@@ -127,8 +128,24 @@ class EditorController
                         }
                         return false; // Department not in target list
                     }
-                    if ($targetUsers === 'Faculty' && $event->department === $dept) {
-                        return true;
+                    // Faculty target_users also targets Department Heads
+                    if ($targetUsers === 'Faculty') {
+                        // Check target_department
+                        $targetDepartments = $event->target_department;
+                        if (is_string($targetDepartments)) {
+                            $targetDepartments = json_decode($targetDepartments, true) ?? [];
+                        }
+                        if (!is_array($targetDepartments)) {
+                            $targetDepartments = [];
+                        }
+                        
+                        // Show if same department OR target_department includes user's dept or 'All'
+                        if ($event->department === $dept ||
+                            in_array($dept, $targetDepartments) ||
+                            in_array('All', $targetDepartments)) {
+                            return true;
+                        }
+                        return false;
                     }
                     // Don't show other Faculty events or Student events to Dept Heads
                     return false;
@@ -136,7 +153,22 @@ class EditorController
                 
                 // For other users (Faculty, Students, etc.)
                 if ($targetUsers === 'Faculty' && $user->title !== 'Student') {
-                    return true;
+                    // Check if event is from same department OR if target_department includes user's department
+                    $targetDepartments = $event->target_department;
+                    if (is_string($targetDepartments)) {
+                        $targetDepartments = json_decode($targetDepartments, true) ?? [];
+                    }
+                    if (!is_array($targetDepartments)) {
+                        $targetDepartments = [];
+                    }
+                    
+                    // Show if event is from same department OR target_department includes user's dept or 'All'
+                    if ($event->department === $dept || 
+                        in_array($dept, $targetDepartments) || 
+                        in_array('All', $targetDepartments)) {
+                        return true;
+                    }
+                    return false;
                 }
                 if ($targetUsers === 'Students' && $user->title === 'Student') {
                     return true;
@@ -284,7 +316,8 @@ class EditorController
             if (!empty($targetUsers)) {
                 // For Department Heads: only show Faculty events if department matches
                 if ($user->title === 'Department Head') {
-                    if ($targetUsers === 'Department Heads') {
+                    // Check for Department Heads or Faculty & Department Heads
+                    if (in_array($targetUsers, ['Department Heads', 'Faculty & Department Heads'])) {
                         // Check if the Department Head's department is in target_department
                         $targetDepartments = $event->target_department;
                         if (is_string($targetDepartments)) {
@@ -302,14 +335,48 @@ class EditorController
                         }
                         return false;
                     }
-                    if ($targetUsers === 'Faculty' && $event->department === $userDept) {
-                        return true;
+                    // Faculty target_users also targets Department Heads
+                    if ($targetUsers === 'Faculty') {
+                        // Check target_department
+                        $targetDepartments = $event->target_department;
+                        if (is_string($targetDepartments)) {
+                            $targetDepartments = json_decode($targetDepartments, true) ?? [];
+                        }
+                        if (!is_array($targetDepartments)) {
+                            $targetDepartments = [];
+                        }
+                        
+                        // Show if same department OR target_department includes user's dept or 'All'
+                        if ($event->department === $userDept ||
+                            in_array($userDept, $targetDepartments) ||
+                            in_array('All', $targetDepartments)) {
+                            return true;
+                        }
+                        return false;
                     }
                     // Don't show other events unless directly targeted
                     return false;
                 }
                 
                 // For other users
+                if ($targetUsers === 'Faculty' && $user->title !== 'Student') {
+                    // Check if event is from same department OR if target_department includes user's department
+                    $targetDepartments = $event->target_department;
+                    if (is_string($targetDepartments)) {
+                        $targetDepartments = json_decode($targetDepartments, true) ?? [];
+                    }
+                    if (!is_array($targetDepartments)) {
+                        $targetDepartments = [];
+                    }
+                    
+                    // Show if event is from same department OR target_department includes user's dept or 'All'
+                    if ($event->department === $userDept || 
+                        in_array($userDept, $targetDepartments) || 
+                        in_array('All', $targetDepartments)) {
+                        return true;
+                    }
+                    return false;
+                }
                 if ($targetUsers === $user->title || stripos($targetUsers, $user->title) !== false) {
                     return true;
                 }
@@ -706,8 +773,23 @@ class EditorController
         $events = Event::where(function ($query) use ($user, $userTitle) {
 
                 if ($userTitle === 'faculty') {
-                    // Faculty should see events where they are specifically targeted
-                    $query->whereRaw("JSON_CONTAINS(target_faculty, ?)", [json_encode((string)$user->id)]);
+                    // Faculty should see events where:
+                    // 1. They are specifically targeted in target_faculty OR
+                    // 2. target_users contains "Faculty" AND (department matches OR target_department includes their dept)
+                    $query->where(function($q) use ($user) {
+                        $q->whereRaw("JSON_CONTAINS(target_faculty, ?)", [json_encode((string)$user->id)])
+                          ->orWhere(function($subQ) use ($user) {
+                              $subQ->where('target_users', 'LIKE', '%Faculty%')
+                                   ->where('department', $user->department);
+                          })
+                          ->orWhere(function($subQ) use ($user) {
+                              $subQ->where('target_users', 'LIKE', '%Faculty%')
+                                   ->where(function($deptQ) use ($user) {
+                                       $deptQ->whereJsonContains('target_department', $user->department)
+                                             ->orWhereJsonContains('target_department', 'All');
+                                   });
+                          });
+                    });
                 } elseif ($userTitle === 'student' || $userTitle === 'viewer') {
                     // Students should see events from their department OR events targeting their department (including 'All')
                     $query->where(function($q) use ($user) {
@@ -727,6 +809,19 @@ class EditorController
                               $subQ->where('target_users', 'LIKE', '%' . $user->title . '%')
                                    ->orWhere('target_users', $user->title);
                           });
+                        
+                        // For Department Heads: also fetch events where target_users = 'Faculty' or 'Faculty & Department Heads'
+                        // since both target Department Heads
+                        if ($user->title === 'Department Head') {
+                            $q->orWhere(function($subQ) use ($user) {
+                                $subQ->whereIn('target_users', ['Faculty', 'Faculty & Department Heads'])
+                                     ->where(function($deptQ) use ($user) {
+                                         $deptQ->where('department', $user->department)
+                                               ->orWhereJsonContains('target_department', $user->department)
+                                               ->orWhereJsonContains('target_department', 'All');
+                                     });
+                            });
+                        }
                     });
                 }
             })
@@ -802,7 +897,8 @@ class EditorController
                 if (!empty($targetUsers)) {
                     // For Department Heads: only show Faculty events if department matches
                     if ($user->title === 'Department Head') {
-                        if ($targetUsers === 'Department Heads') {
+                        // Check for Department Heads or Faculty & Department Heads
+                        if (in_array($targetUsers, ['Department Heads', 'Faculty & Department Heads'])) {
                             // Check if the Department Head's department is in target_department
                             $targetDepartments = $event->target_department;
                             if (is_string($targetDepartments)) {
@@ -820,8 +916,24 @@ class EditorController
                             }
                             return false;
                         }
-                        if ($targetUsers === 'Faculty' && $event->department === $user->department) {
-                            return true;
+                        // Faculty target_users also targets Department Heads
+                        if ($targetUsers === 'Faculty') {
+                            // Check target_department
+                            $targetDepartments = $event->target_department;
+                            if (is_string($targetDepartments)) {
+                                $targetDepartments = json_decode($targetDepartments, true) ?? [];
+                            }
+                            if (!is_array($targetDepartments)) {
+                                $targetDepartments = [];
+                            }
+                            
+                            // Show if same department OR target_department includes user's dept or 'All'
+                            if ($event->department === $user->department ||
+                                in_array($user->department, $targetDepartments) ||
+                                in_array('All', $targetDepartments)) {
+                                return true;
+                            }
+                            return false;
                         }
                         // Don't show other events to Dept Heads unless directly targeted
                         return false;

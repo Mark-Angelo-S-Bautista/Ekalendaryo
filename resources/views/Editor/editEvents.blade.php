@@ -663,7 +663,7 @@
 
             // Initial setup for year levels
             const isBsisActDeptHead = window.userTitle === 'Department Head' && window.userDepartment ===
-            'BSIS/ACT';
+                'BSIS/ACT';
             if (window.userTitle === 'Offices' || isBsisActDeptHead) {
                 updateYearLevelsEdit();
             } else {

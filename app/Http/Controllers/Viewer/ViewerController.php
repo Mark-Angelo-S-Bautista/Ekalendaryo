@@ -66,10 +66,20 @@ class ViewerController
 
                 // OR if target_users contains "Faculty" and department matches
                 $targetUsersNormalized = strtolower($ev->target_users ?? '');
+                
+                // Check if event is from same department
                 $isGeneralFaculty = str_contains($targetUsersNormalized, 'faculty') && 
                                    ($ev->department === $dept);
 
-                return $isFacultyTargeted || $isGeneralFaculty;
+                // Also check if event targets Faculty AND user's department is in target_department (for OFFICES/UserManagement events)
+                $targetDepartments = is_string($ev->target_department)
+                    ? json_decode($ev->target_department, true) ?? []
+                    : ($ev->target_department ?? []);
+                $isTargetedByDept = str_contains($targetUsersNormalized, 'faculty') && 
+                                   is_array($targetDepartments) && 
+                                   (in_array($dept, $targetDepartments) || in_array('All', $targetDepartments));
+
+                return $isFacultyTargeted || $isGeneralFaculty || $isTargetedByDept;
             }
 
             // ============================================================
@@ -235,12 +245,19 @@ class ViewerController
                 if ($userTitle === 'faculty') {
                     // Faculty should see events where:
                     // 1. They are specifically targeted in target_faculty OR
-                    // 2. target_users contains "Faculty" AND department matches
+                    // 2. target_users contains "Faculty" AND (department matches OR target_department includes their dept)
                     $query->where(function($q) use ($user) {
                         $q->whereRaw("JSON_CONTAINS(target_faculty, ?)", [json_encode((string)$user->id)])
                           ->orWhere(function($subQ) use ($user) {
                               $subQ->where('target_users', 'LIKE', '%Faculty%')
                                    ->where('department', $user->department);
+                          })
+                          ->orWhere(function($subQ) use ($user) {
+                              $subQ->where('target_users', 'LIKE', '%Faculty%')
+                                   ->where(function($deptQ) use ($user) {
+                                       $deptQ->whereJsonContains('target_department', $user->department)
+                                             ->orWhereJsonContains('target_department', 'All');
+                                   });
                           });
                     });
                 } elseif ($userTitle === 'student' || $userTitle === 'viewer') {
@@ -381,8 +398,18 @@ class ViewerController
                         return true;
                     }
                     
-                    // Also check if target_users is "Faculty" and department matches
-                    if ($targetUsers === 'faculty' && $event->department === $userDept) {
+                    // Check if target_users includes Faculty (either 'Faculty' or 'Faculty & Department Heads')
+                    $targetsFaculty = ($targetUsers === 'faculty' || $targetUsers === 'faculty & department heads');
+                    
+                    // Also check if target_users targets Faculty and department matches
+                    if ($targetsFaculty && $event->department === $userDept) {
+                        return true;
+                    }
+                    
+                    // Also check if target_users targets Faculty AND user's department is in target_department (for OFFICES/UserManagement events)
+                    if ($targetsFaculty && 
+                        is_array($targetDepartments) && 
+                        (in_array($userDept, $targetDepartments) || in_array('All', $targetDepartments))) {
                         return true;
                     }
                     

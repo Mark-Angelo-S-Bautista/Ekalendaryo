@@ -40,13 +40,21 @@
                 $notifEvents = \App\Models\Event::where(function ($query) use ($notifUser, $notifUserTitle) {
                     if ($notifUserTitle === 'faculty') {
                         $query->where(function ($q) use ($notifUser) {
-                            $q->whereRaw('JSON_CONTAINS(target_faculty, ?)', [
-                                json_encode((string) $notifUser->id),
-                            ])->orWhere(function ($subQ) use ($notifUser) {
-                                $subQ
-                                    ->where('target_users', 'LIKE', '%Faculty%')
-                                    ->where('department', $notifUser->department);
-                            });
+                            $q->whereRaw('JSON_CONTAINS(target_faculty, ?)', [json_encode((string) $notifUser->id)])
+                                ->orWhere(function ($subQ) use ($notifUser) {
+                                    $subQ
+                                        ->where('target_users', 'LIKE', '%Faculty%')
+                                        ->where('department', $notifUser->department);
+                                })
+                                ->orWhere(function ($subQ) use ($notifUser) {
+                                    $subQ
+                                        ->where('target_users', 'LIKE', '%Faculty%')
+                                        ->where(function ($deptQ) use ($notifUser) {
+                                            $deptQ
+                                                ->whereJsonContains('target_department', $notifUser->department)
+                                                ->orWhereJsonContains('target_department', 'All');
+                                        });
+                                });
                         });
                     } elseif ($notifUserTitle === 'student' || $notifUserTitle === 'viewer') {
                         $query->where(function ($q) use ($notifUser) {

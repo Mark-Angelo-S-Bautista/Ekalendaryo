@@ -177,7 +177,10 @@
                 <select id="targetUsers" name="target_users" class="form-control"
                     {{ $event->target_users && !(isset($isRestore) && $isRestore) ? 'disabled' : '' }}>
                     <option value="">-- Select Users --</option>
-                    <option value="Faculty" {{ $event->target_users === 'Faculty' ? 'selected' : '' }}>Faculty
+                    <option value="Faculty & Department Heads"
+                        {{ in_array($event->target_users, ['Faculty', 'Faculty & Department Heads']) ? 'selected' : '' }}>
+                        Faculty &
+                        Department Heads
                     </option>
                     <option value="Department Heads"
                         {{ $event->target_users === 'Department Heads' ? 'selected' : '' }}>

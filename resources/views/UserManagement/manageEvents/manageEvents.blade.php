@@ -183,7 +183,7 @@ $userTitle = $user->title ?? null;
                                 <label for="targetUsers">Target Users</label>
                                 <select id="targetUsers" name="target_users" class="form-control">
                                     <option value="">-- Select Users --</option>
-                                    <option value="Faculty">Faculty</option>
+                                    <option value="Faculty & Department Heads">Faculty & Department Heads</option>
                                     <option value="Department Heads">Department Heads</option>
                                     <option value="Offices">Offices</option>
                                     <option value="Students">Students</option>
