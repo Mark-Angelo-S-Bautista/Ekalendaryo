@@ -1098,131 +1098,143 @@ $userTitle = $user->title ?? null;
                 </div>
 
 
+                <!-- Search Bar for Events -->
+                <div class="search-bar">
+                    <input type="text" id="eventSearch"
+                        placeholder="🔍 Search events by title, location, or status...">
+                    <button type="button" id="clearSearch">Clear</button>
+                </div>
+
                 <!-- Sample Event Cards -->
-                @if ($events->count() > 0)
-                    @foreach ($events as $event)
-                        <div class="event-card">
-                            <div class="event-header">
-                                <h2>{{ $event->title }}</h2>
-                                <div class="tags">
-                                    <span class="tag {{ strtolower($event->computed_status) }}">
-                                        {{ ucfirst($event->computed_status) }}
+                <div id="eventList">
+                    @if ($events->count() > 0)
+                        @foreach ($events as $event)
+                            <div class="event-card" data-title="{{ strtolower($event->title) }}"
+                                data-location="{{ strtolower($event->location) }}"
+                                data-status="{{ strtolower($event->computed_status) }}">
+                                <div class="event-header">
+                                    <h2>{{ $event->title }}</h2>
+                                    <div class="tags">
+                                        <span class="tag {{ strtolower($event->computed_status) }}">
+                                            {{ ucfirst($event->computed_status) }}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <p>{{ $event->description ?? 'No description available.' }}</p>
+
+                                <div class="event-info">
+                                    <span>📅 {{ \Carbon\Carbon::parse($event->date)->format('M d, Y') }}</span>
+                                    <span>⏰ {{ \Carbon\Carbon::parse($event->start_time)->format('g:i A') }} -
+                                        {{ \Carbon\Carbon::parse($event->end_time)->format('g:i A') }}</span>
+                                    <span>📍 {{ $event->location }}</span>
+                                    <span>
+                                        👤
+                                        @if (is_array($event->target_year_levels) && count($event->target_year_levels) > 0)
+                                            {{ implode(', ', $event->target_year_levels) }}
+                                        @else
+                                            {{ $event->target_users }}
+                                        @endif
                                     </span>
+                                    @php
+                                        $eventSections = $event->target_sections;
+                                        if (is_string($eventSections)) {
+                                            $eventSections = json_decode($eventSections, true) ?? [];
+                                        } elseif (!is_array($eventSections)) {
+                                            $eventSections = [];
+                                        }
+
+                                        $eventFacultyIds = $event->target_faculty;
+                                        if (is_string($eventFacultyIds)) {
+                                            $eventFacultyIds = json_decode($eventFacultyIds, true) ?? [];
+                                        } elseif (!is_array($eventFacultyIds)) {
+                                            $eventFacultyIds = [];
+                                        }
+
+                                        $eventFacultyNames = [];
+                                        if (!empty($eventFacultyIds)) {
+                                            $eventFacultyNames = \App\Models\User::whereIn('id', $eventFacultyIds)
+                                                ->pluck('name')
+                                                ->toArray();
+                                        }
+                                    @endphp
+                                    @if (!empty($eventSections))
+                                        <span>🏫 {{ implode(', ', $eventSections) }}</span>
+                                    @endif
+                                    @if (!empty($eventFacultyNames))
+                                        <span>👩‍🏫 {{ implode(', ', $eventFacultyNames) }}</span>
+                                    @endif
+
+
+                                </div>
+
+                                <div class="actions">
+                                    <button class="btn-attendees" data-event-id="{{ $event->id }}">
+                                        👥 {{ $event->attendees->count() }} attending
+                                    </button>
+
+                                    <button class="btn-view-details" data-details="{{ $event->more_details }}">
+                                        👁️ View Details
+                                    </button>
+
+                                    @if ($event->computed_status !== 'ongoing')
+                                        <a href="{{ route('Editor.editEvent', $event->id) }}" class="edit">✏️
+                                            Edit</a>
+
+                                        <form action="{{ route('Editor.destroy', $event->id) }}" method="POST"
+                                            style="display:inline;">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="delete"
+                                                onclick="return confirm('Are you sure you want to delete this event?')">
+                                                🗑️ Delete
+                                            </button>
+                                        </form>
+                                    @else
+                                        <span class="status-locked">🔒 Ongoing</span>
+                                    @endif
                                 </div>
                             </div>
+                            @php
+                                $attendeesData = $event->attendees->map(function ($user) {
+                                    // Map department
+                                    $department =
+                                        $user->department === 'OFFICES'
+                                            ? $user->office_name ?? 'Office'
+                                            : $user->department;
 
-                            <p>{{ $event->description ?? 'No description available.' }}</p>
+                                    // Map year_level safely
+                                    $year_level =
+                                        isset($user->yearlevel) && $user->yearlevel !== ''
+                                            ? $user->yearlevel // will be like 1stYear, 2ndYear
+                                            : 'N/A';
 
-                            <div class="event-info">
-                                <span>📅 {{ \Carbon\Carbon::parse($event->date)->format('M d, Y') }}</span>
-                                <span>⏰ {{ \Carbon\Carbon::parse($event->start_time)->format('g:i A') }} -
-                                    {{ \Carbon\Carbon::parse($event->end_time)->format('g:i A') }}</span>
-                                <span>📍 {{ $event->location }}</span>
-                                <span>
-                                    👤
-                                    @if (is_array($event->target_year_levels) && count($event->target_year_levels) > 0)
-                                        {{ implode(', ', $event->target_year_levels) }}
-                                    @else
-                                        {{ $event->target_users }}
-                                    @endif
-                                </span>
-                                @php
-                                    $eventSections = $event->target_sections;
-                                    if (is_string($eventSections)) {
-                                        $eventSections = json_decode($eventSections, true) ?? [];
-                                    } elseif (!is_array($eventSections)) {
-                                        $eventSections = [];
-                                    }
+                                    // Map section safely
+                                    $section = isset($user->section) && $user->section !== '' ? $user->section : 'N/A';
 
-                                    $eventFacultyIds = $event->target_faculty;
-                                    if (is_string($eventFacultyIds)) {
-                                        $eventFacultyIds = json_decode($eventFacultyIds, true) ?? [];
-                                    } elseif (!is_array($eventFacultyIds)) {
-                                        $eventFacultyIds = [];
-                                    }
+                                    return [
+                                        'name' => $user->name,
+                                        'title' => $user->title,
+                                        'department' => $department,
+                                        'yearlevel' => $year_level,
+                                        'section' => $section,
+                                    ];
+                                });
+                            @endphp
 
-                                    $eventFacultyNames = [];
-                                    if (!empty($eventFacultyIds)) {
-                                        $eventFacultyNames = \App\Models\User::whereIn('id', $eventFacultyIds)
-                                            ->pluck('name')
-                                            ->toArray();
-                                    }
-                                @endphp
-                                @if (!empty($eventSections))
-                                    <span>🏫 {{ implode(', ', $eventSections) }}</span>
-                                @endif
-                                @if (!empty($eventFacultyNames))
-                                    <span>👩‍🏫 {{ implode(', ', $eventFacultyNames) }}</span>
-                                @endif
-
-
-                            </div>
-
-                            <div class="actions">
-                                <button class="btn-attendees" data-event-id="{{ $event->id }}">
-                                    👥 {{ $event->attendees->count() }} attending
-                                </button>
-
-                                <button class="btn-view-details" data-details="{{ $event->more_details }}">
-                                    👁️ View Details
-                                </button>
-
-                                @if ($event->computed_status !== 'ongoing')
-                                    <a href="{{ route('Editor.editEvent', $event->id) }}" class="edit">✏️ Edit</a>
-
-                                    <form action="{{ route('Editor.destroy', $event->id) }}" method="POST"
-                                        style="display:inline;">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="delete"
-                                            onclick="return confirm('Are you sure you want to delete this event?')">
-                                            🗑️ Delete
-                                        </button>
-                                    </form>
-                                @else
-                                    <span class="status-locked">🔒 Ongoing</span>
-                                @endif
-                            </div>
-                        </div>
-                        @php
-                            $attendeesData = $event->attendees->map(function ($user) {
-                                // Map department
-                                $department =
-                                    $user->department === 'OFFICES'
-                                        ? $user->office_name ?? 'Office'
-                                        : $user->department;
-
-                                // Map year_level safely
-                                $year_level =
-                                    isset($user->yearlevel) && $user->yearlevel !== ''
-                                        ? $user->yearlevel // will be like 1stYear, 2ndYear
-                                        : 'N/A';
-
-                                // Map section safely
-                                $section = isset($user->section) && $user->section !== '' ? $user->section : 'N/A';
-
-                                return [
-                                    'name' => $user->name,
-                                    'title' => $user->title,
-                                    'department' => $department,
-                                    'yearlevel' => $year_level,
-                                    'section' => $section,
-                                ];
-                            });
-                        @endphp
-
-                        <script type="application/json" id="attendees-data-{{ $event->id }}">
+                            <script type="application/json" id="attendees-data-{{ $event->id }}">
                             {!! json_encode($attendeesData) !!}
                         </script>
-                    @endforeach
+                        @endforeach
 
-                    <!-- Pagination Links -->
-                    <div class="pagination-wrapper" style="margin-top: 30px;">
-                        {{ $events->links('pagination::simple') }}
-                    </div>
-                @else
-                    <p style="color:#555; text-align:center;">No events found. Create one to get started!</p>
-                @endif
+                        <!-- Pagination Links -->
+                        <div class="pagination-wrapper" style="margin-top: 30px;">
+                            {{ $events->links('pagination::simple') }}
+                        </div>
+                    @else
+                        <p style="color:#555; text-align:center;">No events found. Create one to get started!</p>
+                    @endif
+                </div>
                 <!-- View Details Modal -->
                 <div class="modal-overlay" id="viewDetailsModal" style="display:none;">
                     <div class="modal"

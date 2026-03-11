@@ -124,13 +124,17 @@ const openModalBtn = document.getElementById("openModalBtn");
 const modalOverlay = document.getElementById("modalOverlay");
 const closeModalBtn = document.getElementById("closeModalBtn");
 
-openModalBtn.addEventListener("click", () => {
-    modalOverlay.style.display = "flex";
-});
+if (openModalBtn && modalOverlay) {
+    openModalBtn.addEventListener("click", () => {
+        modalOverlay.style.display = "flex";
+    });
+}
 
-closeModalBtn.addEventListener("click", () => {
-    modalOverlay.style.display = "none";
-});
+if (closeModalBtn && modalOverlay) {
+    closeModalBtn.addEventListener("click", () => {
+        modalOverlay.style.display = "none";
+    });
+}
 
 // EDIT MODAL
 const editButtons = document.querySelectorAll(".event-card .edit");
@@ -171,6 +175,75 @@ editButtons.forEach((button) => {
     });
 });
 
-closeEditModalBtn.addEventListener("click", () => {
-    editModal.style.display = "none";
+if (closeEditModalBtn && editModal) {
+    closeEditModalBtn.addEventListener("click", () => {
+        editModal.style.display = "none";
+    });
+}
+
+// ===== Event Search Functionality =====
+document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.getElementById("eventSearch");
+    const clearBtn = document.getElementById("clearSearch");
+    const eventList = document.getElementById("eventList");
+
+    console.log("Search init:", { searchInput, clearBtn, eventList });
+
+    if (searchInput && eventList) {
+        searchInput.addEventListener("input", function () {
+            const query = this.value.toLowerCase().trim();
+            const events = eventList.querySelectorAll(".event-card");
+            console.log(
+                "Searching for:",
+                query,
+                "Found events:",
+                events.length,
+            );
+            let visibleCount = 0;
+
+            events.forEach((event) => {
+                const title = event.getAttribute("data-title") || "";
+                const location = event.getAttribute("data-location") || "";
+                const status = event.getAttribute("data-status") || "";
+                const description =
+                    event.querySelector("p")?.textContent?.toLowerCase() || "";
+
+                const matches =
+                    title.includes(query) ||
+                    location.includes(query) ||
+                    status.includes(query) ||
+                    description.includes(query);
+
+                event.style.display = matches ? "block" : "none";
+                if (matches) visibleCount++;
+            });
+
+            // Show no results message
+            let noResultsMsg = eventList.querySelector(".no-results-message");
+            if (visibleCount === 0 && query !== "") {
+                if (!noResultsMsg) {
+                    noResultsMsg = document.createElement("p");
+                    noResultsMsg.className = "no-results-message";
+                    noResultsMsg.textContent =
+                        "No events found matching your search.";
+                    eventList.appendChild(noResultsMsg);
+                }
+            } else if (noResultsMsg) {
+                noResultsMsg.remove();
+            }
+        });
+    }
+
+    if (clearBtn && searchInput && eventList) {
+        clearBtn.addEventListener("click", function () {
+            console.log("Clear button clicked");
+            searchInput.value = "";
+            const events = eventList.querySelectorAll(".event-card");
+            events.forEach((event) => (event.style.display = "block"));
+
+            // Remove no results message
+            const noResultsMsg = eventList.querySelector(".no-results-message");
+            if (noResultsMsg) noResultsMsg.remove();
+        });
+    }
 });

@@ -111,6 +111,52 @@ a {
     text-decoration: none;
 }
 
+/* Search Bar */
+.search-bar {
+    background-color: #f0fdf4;
+    padding: 16px;
+    border-radius: 10px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.search-bar input {
+    flex: 1;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid #d1fae5;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.search-bar input:focus {
+    border-color: #1c7d39;
+}
+
+.search-bar button {
+    padding: 10px 16px;
+    background-color: #ecfdf5;
+    border: 1px solid #d1fae5;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: background-color 0.2s;
+}
+
+.search-bar button:hover {
+    background-color: #d1fae5;
+}
+
+.no-results-message {
+    text-align: center;
+    color: #555;
+    padding: 20px;
+    font-size: 0.9rem;
+}
+
 /* Create event popup */
 .modal-overlay {
     position: fixed;
