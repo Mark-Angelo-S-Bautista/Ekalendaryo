@@ -1066,4 +1066,30 @@
             </div>
         </div>
     </div>
+
+    {{-- Toast Notification --}}
+    @if (session('success'))
+        <div id="toast"
+            style="position: fixed; bottom: 30px; right: 30px; background: #4bb543; color: white; padding: 14px 24px; border-radius: 8px; z-index: 9999; opacity: 0; transition: opacity 0.4s ease, transform 0.4s ease; transform: translateY(20px);">
+            {{ session('success') }}
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const toast = document.getElementById('toast');
+                if (toast) {
+                    // Show toast
+                    setTimeout(() => {
+                        toast.style.opacity = '1';
+                        toast.style.transform = 'translateY(0)';
+                    }, 100);
+                    // Hide toast after 4 seconds
+                    setTimeout(() => {
+                        toast.style.opacity = '0';
+                        toast.style.transform = 'translateY(20px)';
+                    }, 4000);
+                }
+            });
+        </script>
+    @endif
 </x-usermanLayout>
