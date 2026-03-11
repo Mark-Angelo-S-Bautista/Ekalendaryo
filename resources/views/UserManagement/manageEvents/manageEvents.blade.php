@@ -126,7 +126,7 @@
                                 }
                             </script>
 
-                            <div class="form-group">
+                            <div class="form-group" id="targetDepartmentContainer">
                                 <label for="targetDepartment">Target Department</label>
 
                                 @php
@@ -193,7 +193,8 @@ $userTitle = $user->title ?? null;
                             {{-- Target Office Users (only shown when target_users is Offices) --}}
                             <div class="form-group" id="targetOfficeUsersContainer" style="display: none;">
                                 <label>Target Office Users</label>
-                                <p class="note">Select which office accounts will receive notifications for this event
+                                <p class="note">Select which office accounts will receive notifications for this
+                                    event
                                     ({{ $officeUsers->count() }} users found)</p>
 
                                 <div class="checkbox_select">
@@ -489,6 +490,10 @@ $userTitle = $user->title ?? null;
                                     const selectedValue = targetUsers ? targetUsers.value : null;
                                     console.log('DEBUG: toggleButtons called, selectedValue:', selectedValue);
 
+                                    // Get Target Department container and checkbox items
+                                    const targetDepartmentContainer = document.getElementById('targetDepartmentContainer');
+                                    const deptCheckboxItems = document.querySelectorAll('.checkbox-grid .checkbox-item');
+
                                     // Show/hide Section and Faculty buttons (only for Students)
                                     if (selectedValue === 'Students') {
                                         if (openSectionBtn) openSectionBtn.style.display = 'inline-block';
@@ -509,6 +514,57 @@ $userTitle = $user->title ?? null;
                                         }
                                     } else {
                                         if (officeUsersContainer) officeUsersContainer.style.display = 'none';
+                                    }
+
+                                    // Handle Target Department visibility based on Target Users selection
+                                    if (selectedValue === 'Offices') {
+                                        // Hide entire Target Department container when Offices is selected
+                                        if (targetDepartmentContainer) {
+                                            targetDepartmentContainer.style.display = 'none';
+                                            // Uncheck all department checkboxes when hiding
+                                            deptCheckboxItems.forEach(item => {
+                                                const checkbox = item.querySelector('.dept-checkbox');
+                                                if (checkbox) checkbox.checked = false;
+                                            });
+                                        }
+                                    } else if (selectedValue === 'Department Heads' || selectedValue === 'Faculty & Department Heads') {
+                                        // Show Target Department but hide separate BSIS and ACT checkboxes (show BSIS/ACT combined)
+                                        if (targetDepartmentContainer) targetDepartmentContainer.style.display = 'block';
+                                        deptCheckboxItems.forEach(item => {
+                                            const checkbox = item.querySelector('.dept-checkbox');
+                                            if (checkbox) {
+                                                const deptValue = checkbox.value;
+                                                // Hide separate BSIS and ACT, show combined BSIS/ACT
+                                                if (deptValue === 'BSIS' || deptValue === 'ACT') {
+                                                    item.style.display = 'none';
+                                                    checkbox.checked = false; // Uncheck hidden checkboxes
+                                                } else {
+                                                    item.style.display = '';
+                                                }
+                                            }
+                                        });
+                                    } else if (selectedValue === 'Students') {
+                                        // Show Target Department but hide combined BSIS/ACT checkbox (show separate BSIS and ACT)
+                                        if (targetDepartmentContainer) targetDepartmentContainer.style.display = 'block';
+                                        deptCheckboxItems.forEach(item => {
+                                            const checkbox = item.querySelector('.dept-checkbox');
+                                            if (checkbox) {
+                                                const deptValue = checkbox.value;
+                                                // Hide combined BSIS/ACT, show separate BSIS and ACT
+                                                if (deptValue === 'BSIS/ACT') {
+                                                    item.style.display = 'none';
+                                                    checkbox.checked = false; // Uncheck hidden checkboxes
+                                                } else {
+                                                    item.style.display = '';
+                                                }
+                                            }
+                                        });
+                                    } else {
+                                        // Show all department checkboxes for other selections or no selection
+                                        if (targetDepartmentContainer) targetDepartmentContainer.style.display = 'block';
+                                        deptCheckboxItems.forEach(item => {
+                                            item.style.display = '';
+                                        });
                                     }
                                 }
 
