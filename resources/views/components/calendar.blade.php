@@ -56,7 +56,7 @@
                         @endforeach
 
                         @foreach ($departments as $department)
-                            @if ($department->department_name !== 'OFFICES')
+                            @if (!in_array($department->department_name, ['OFFICES', 'BSIS', 'ACT']))
                                 <option
                                     value="{{ strtolower(str_replace(['/', ' '], '_', $department->department_name)) }}">
                                     {{ $department->department_name }}

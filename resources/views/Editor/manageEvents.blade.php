@@ -183,7 +183,7 @@ $userTitle = $user->title ?? null;
                                                     @endphp
 
                                                     @if ($shouldRender)
-                                                        <label class="checkbox-item">
+                                                        <label class="checkbox-item" data-dept="{{ $departmentName }}">
                                                             <input type="checkbox" class="dept-checkbox"
                                                                 name="target_department[]"
                                                                 value="{{ $departmentName }}">
@@ -514,7 +514,7 @@ $userTitle = $user->title ?? null;
 
                                 // Initial setup
                                 const isBsisActDeptHead = window.userTitle === 'Department Head' && window.userDepartment ===
-                                'BSIS/ACT';
+                                    'BSIS/ACT';
                                 if (window.userTitle === 'Offices' || isBsisActDeptHead) {
                                     // For Offices users or BSIS/ACT Department Heads, dynamically render year levels
                                     updateYearLevels();
@@ -549,6 +549,22 @@ $userTitle = $user->title ?? null;
                                         if (officeUsersContainer) officeUsersContainer.style.display = 'block';
                                     } else {
                                         if (officeUsersContainer) officeUsersContainer.style.display = 'none';
+                                    }
+
+                                    // For Offices users: Hide BSIS and ACT when targeting Department Heads or Faculty
+                                    if (window.userTitle === 'Offices') {
+                                        const bsisActLabels = document.querySelectorAll(
+                                            'label.checkbox-item[data-dept="BSIS"], label.checkbox-item[data-dept="ACT"]');
+                                        const hideBsisAct = (selectedValue === 'Department Heads' || selectedValue === 'Faculty');
+
+                                        bsisActLabels.forEach(label => {
+                                            label.style.display = hideBsisAct ? 'none' : '';
+                                            // Uncheck if hiding
+                                            if (hideBsisAct) {
+                                                const checkbox = label.querySelector('input[type="checkbox"]');
+                                                if (checkbox) checkbox.checked = false;
+                                            }
+                                        });
                                     }
                                 }
 
