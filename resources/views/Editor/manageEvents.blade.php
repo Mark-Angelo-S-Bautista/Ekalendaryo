@@ -142,13 +142,31 @@ $userTitle = $user->title ?? null;
 
 
                                         @if ($userTitle === 'Department Head')
-                                            {{-- 🔑 FIX: If the user is Department Head, render a hidden field with their department as the value. --}}
-                                            <input type="hidden" name="target_department[]"
-                                                value="{{ $userDepartment }}">
-                                            <p style="color: #6c757d; margin-top: 5px;">
-                                                Targeting is set to your department:
-                                                <strong>{{ $userDepartment }}</strong> (Fixed)
-                                            </p>
+                                            @if ($userDepartment === 'BSIS/ACT')
+                                                {{-- Special case for BSIS/ACT Department Head: show two checkboxes --}}
+                                                <div class="checkbox-grid">
+                                                    <label class="checkbox-item">
+                                                        <input type="checkbox" class="dept-checkbox"
+                                                            name="target_department[]"
+                                                            value="BSIS">
+                                                        <span>BSIS</span>
+                                                    </label>
+                                                    <label class="checkbox-item">
+                                                        <input type="checkbox" class="dept-checkbox"
+                                                            name="target_department[]"
+                                                            value="ACT">
+                                                        <span>ACT</span>
+                                                    </label>
+                                                </div>
+                                            @else
+                                                {{-- Other Department Heads: render a hidden field with their department as the value. --}}
+                                                <input type="hidden" name="target_department[]"
+                                                    value="{{ $userDepartment }}">
+                                                <p style="color: #6c757d; margin-top: 5px;">
+                                                    Targeting is set to your department:
+                                                    <strong>{{ $userDepartment }}</strong> (Fixed)
+                                                </p>
+                                            @endif
                                         @else
                                             {{-- If the user is NOT a Department Head (e.g., OFFICES or other), show the standard checkbox grid --}}
                                             <div class="checkbox-grid">
@@ -240,6 +258,8 @@ $userTitle = $user->title ?? null;
 
                                     <div class="checkbox-group" id="yearLevelsContainer">
                                         @php
+                                            $userDept = auth()->user()->department_name ?? (auth()->user()->department ?? null);
+                                            $isBsisActDeptHead = auth()->user()->title === 'Department Head' && $userDept === 'BSIS/ACT';
                                             $maxYear =
                                                 auth()->user()->title === 'Offices'
                                                     ? $userMaxYearLevels
@@ -247,15 +267,18 @@ $userTitle = $user->title ?? null;
                                             $yearOptions = ['1st Year', '2nd Year', '3rd Year', '4th Year', '5th Year'];
                                             $yearNumbers = [1, 2, 3, 4, 5];
                                         @endphp
-                                        @foreach ($yearOptions as $index => $year)
-                                            @if ($yearNumbers[$index] <= $userMaxYearLevels)
-                                                <div class="checkbox-inline">
-                                                    <input type="checkbox" name="target_year_levels[]"
-                                                        value="{{ $year }}" class="syear">
-                                                    {{ $year }}
-                                                </div>
-                                            @endif
-                                        @endforeach
+                                        {{-- For BSIS/ACT Department Heads, start empty and let JS fill based on selection --}}
+                                        @if (!$isBsisActDeptHead)
+                                            @foreach ($yearOptions as $index => $year)
+                                                @if ($yearNumbers[$index] <= $userMaxYearLevels)
+                                                    <div class="checkbox-inline">
+                                                        <input type="checkbox" name="target_year_levels[]"
+                                                            value="{{ $year }}" class="syear">
+                                                        {{ $year }}
+                                                    </div>
+                                                @endif
+                                            @endforeach
+                                        @endif
                                     </div>
                                 </div>
 
@@ -277,13 +300,20 @@ $userTitle = $user->title ?? null;
 
                                         <!-- Section checkboxes -->
                                         <div class="checkbox-grid" id="sectionsContainer">
-                                            @foreach ($sections as $section)
-                                                <label class="checkbox-item">
-                                                    <input type="checkbox" name="target_sections[]"
-                                                        value="{{ $section }}">
-                                                    <span>{{ $section }}</span>
-                                                </label>
-                                            @endforeach
+                                            @php
+                                                $userDept = auth()->user()->department_name ?? (auth()->user()->department ?? null);
+                                                $isBsisActDeptHead = auth()->user()->title === 'Department Head' && $userDept === 'BSIS/ACT';
+                                            @endphp
+                                            {{-- For BSIS/ACT Department Heads, start empty and let JS fill based on selection --}}
+                                            @if (!$isBsisActDeptHead)
+                                                @foreach ($sections as $section)
+                                                    <label class="checkbox-item">
+                                                        <input type="checkbox" name="target_sections[]"
+                                                            value="{{ $section }}">
+                                                        <span>{{ $section }}</span>
+                                                    </label>
+                                                @endforeach
+                                            @endif
                                         </div>
 
                                         <div class="modal-buttons">
@@ -342,6 +372,7 @@ $userTitle = $user->title ?? null;
                             window.userTitle = @json(auth()->user()->title);
                             window.departmentMaxYearLevels = @json($departmentMaxYearLevels ?? []);
                             window.userMaxYearLevels = @json($userMaxYearLevels ?? 4);
+                            window.userDepartment = @json(auth()->user()->department_name ?? auth()->user()->department ?? null);
                         </script>
                         <script>
                             document.addEventListener('DOMContentLoaded', () => {
@@ -385,7 +416,9 @@ $userTitle = $user->title ?? null;
                                 }
 
                                 function updateYearLevels() {
-                                    if (window.userTitle !== 'Offices') return;
+                                    // Allow for Offices OR BSIS/ACT Department Heads
+                                    const isBsisActDeptHead = window.userTitle === 'Department Head' && window.userDepartment === 'BSIS/ACT';
+                                    if (window.userTitle !== 'Offices' && !isBsisActDeptHead) return;
 
                                     // Get selected departments
                                     const selectedDepts = [...deptCheckboxes]
@@ -475,8 +508,9 @@ $userTitle = $user->title ?? null;
                                 }
 
                                 // Initial setup
-                                if (window.userTitle === 'Offices') {
-                                    // For Offices users, dynamically render year levels
+                                const isBsisActDeptHead = window.userTitle === 'Department Head' && window.userDepartment === 'BSIS/ACT';
+                                if (window.userTitle === 'Offices' || isBsisActDeptHead) {
+                                    // For Offices users or BSIS/ACT Department Heads, dynamically render year levels
                                     updateYearLevels();
                                 } else {
                                     // For other users, just wire the existing checkboxes
@@ -646,7 +680,9 @@ $userTitle = $user->title ?? null;
                                 }
 
                                 function updateSectionsForOffices() {
-                                    if (window.userTitle !== 'Offices') return;
+                                    // Allow for Offices OR BSIS/ACT Department Heads
+                                    const isBsisActDeptHead = window.userTitle === 'Department Head' && window.userDepartment === 'BSIS/ACT';
+                                    if (window.userTitle !== 'Offices' && !isBsisActDeptHead) return;
                                     const selectedDepartments = getSelectedDepartments();
                                     const sections = collectSectionsForDepartments(selectedDepartments);
                                     renderSections(sections);
