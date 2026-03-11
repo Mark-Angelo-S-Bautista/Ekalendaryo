@@ -156,18 +156,42 @@
 
                     {{-- Department Head sees only their department (fixed) --}}
                     @if ($userTitle === 'Department Head')
-                        <input type="hidden" name="target_department[]" value="{{ $userDepartment }}">
-                        <p style="color:#6c757d; margin-top:5px;">
-                            Targeting is set to your department:
-                            <strong>{{ $userDepartment }}</strong> (Fixed)
-                        </p>
+                        @if ($userDepartment === 'BSIS/ACT')
+                            {{-- Special case for BSIS/ACT Department Head: show two checkboxes --}}
+                            <div class="checkbox-grid">
+                                <label class="checkbox-item">
+                                    <input type="checkbox" class="dept-checkbox" name="target_department[]"
+                                        value="BSIS"
+                                        {{ in_array('BSIS', $selectedDepartments) ? (isset($isRestore) && $isRestore ? 'checked' : 'checked disabled') : '' }}>
+                                    <span>BSIS</span>
+                                    @if (in_array('BSIS', $selectedDepartments) && !(isset($isRestore) && $isRestore))
+                                        <input type="hidden" name="target_department[]" value="BSIS">
+                                    @endif
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" class="dept-checkbox" name="target_department[]"
+                                        value="ACT"
+                                        {{ in_array('ACT', $selectedDepartments) ? (isset($isRestore) && $isRestore ? 'checked' : 'checked disabled') : '' }}>
+                                    <span>ACT</span>
+                                    @if (in_array('ACT', $selectedDepartments) && !(isset($isRestore) && $isRestore))
+                                        <input type="hidden" name="target_department[]" value="ACT">
+                                    @endif
+                                </label>
+                            </div>
+                        @else
+                            <input type="hidden" name="target_department[]" value="{{ $userDepartment }}">
+                            <p style="color:#6c757d; margin-top:5px;">
+                                Targeting is set to your department:
+                                <strong>{{ $userDepartment }}</strong> (Fixed)
+                            </p>
+                        @endif
 
                         {{-- Offices sees all except OFFICES --}}
                     @else
                         <div class="checkbox-grid">
                             @foreach ($departments as $dept)
                                 @if ($dept->department_name !== 'OFFICES')
-                                    <label class="checkbox-item">
+                                    <label class="checkbox-item" data-dept="{{ $dept->department_name }}">
                                         <input type="checkbox" class="dept-checkbox" name="target_department[]"
                                             value="{{ $dept->department_name }}"
                                             {{ in_array($dept->department_name, $selectedDepartments) ? (isset($isRestore) && $isRestore ? 'checked' : 'checked disabled') : '' }}>
@@ -296,21 +320,27 @@
                         @php
                             $yearOptions = ['1st Year', '2nd Year', '3rd Year', '4th Year', '5th Year'];
                             $yearNumbers = [1, 2, 3, 4, 5];
+                            $userDept = auth()->user()->department_name ?? (auth()->user()->department ?? null);
+                            $isBsisActDeptHead =
+                                auth()->user()->title === 'Department Head' && $userDept === 'BSIS/ACT';
                         @endphp
-                        @foreach ($yearOptions as $index => $year)
-                            @if ($yearNumbers[$index] <= $userMaxYearLevels)
-                                <div class="checkbox-inline">
-                                    <input type="checkbox" name="target_year_levels[]" value="{{ $year }}"
-                                        class="syear"
-                                        {{ in_array($year, $levels) ? (isset($isRestore) && $isRestore ? 'checked' : 'checked disabled') : '' }}>
-                                    {{ $year }}
-                                    @if (in_array($year, $levels) && !(isset($isRestore) && $isRestore))
-                                        <input type="hidden" name="target_year_levels[]"
-                                            value="{{ $year }}">
-                                    @endif
-                                </div>
-                            @endif
-                        @endforeach
+                        {{-- For BSIS/ACT Department Heads, start empty and let JS fill based on selection --}}
+                        @if (!$isBsisActDeptHead)
+                            @foreach ($yearOptions as $index => $year)
+                                @if ($yearNumbers[$index] <= $userMaxYearLevels)
+                                    <div class="checkbox-inline">
+                                        <input type="checkbox" name="target_year_levels[]"
+                                            value="{{ $year }}" class="syear"
+                                            {{ in_array($year, $levels) ? (isset($isRestore) && $isRestore ? 'checked' : 'checked disabled') : '' }}>
+                                        {{ $year }}
+                                        @if (in_array($year, $levels) && !(isset($isRestore) && $isRestore))
+                                            <input type="hidden" name="target_year_levels[]"
+                                                value="{{ $year }}">
+                                        @endif
+                                    </div>
+                                @endif
+                            @endforeach
+                        @endif
                     </div>
                 </div>
             @endif
@@ -343,13 +373,21 @@
 
                     <!-- Section checkboxes -->
                     <div class="checkbox-grid" id="sectionsContainer">
-                        @foreach ($sections as $section)
-                            <label class="checkbox-item">
-                                <input type="checkbox" name="target_sections[]" value="{{ $section }}"
-                                    {{ in_array($section, $selectedSections) ? (isset($isRestore) && $isRestore ? 'checked' : 'checked disabled') : '' }}>
-                                <span>{{ $section }}</span>
-                            </label>
-                        @endforeach
+                        @php
+                            $userDept = auth()->user()->department_name ?? (auth()->user()->department ?? null);
+                            $isBsisActDeptHead =
+                                auth()->user()->title === 'Department Head' && $userDept === 'BSIS/ACT';
+                        @endphp
+                        {{-- For BSIS/ACT Department Heads, start empty and let JS fill based on selection --}}
+                        @if (!$isBsisActDeptHead)
+                            @foreach ($sections as $section)
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="target_sections[]" value="{{ $section }}"
+                                        {{ in_array($section, $selectedSections) ? (isset($isRestore) && $isRestore ? 'checked' : 'checked disabled') : '' }}>
+                                    <span>{{ $section }}</span>
+                                </label>
+                            @endforeach
+                        @endif
                     </div>
                 </div>
             </div>
@@ -471,6 +509,7 @@
         window.departmentMaxYearLevels = @json($departmentMaxYearLevels ?? []);
         window.userMaxYearLevels = @json($userMaxYearLevels ?? 4);
         window.isRestore = @json(isset($isRestore) && $isRestore);
+        window.userDepartment = @json(auth()->user()->department_name ?? (auth()->user()->department ?? null));
     </script>
     <script>
         function toggleOtherLocation() {
@@ -508,7 +547,10 @@
             }
 
             function updateYearLevelsEdit() {
-                if (window.userTitle !== 'Offices') return;
+                // Allow for Offices OR BSIS/ACT Department Heads
+                const isBsisActDeptHead = window.userTitle === 'Department Head' && window.userDepartment ===
+                    'BSIS/ACT';
+                if (window.userTitle !== 'Offices' && !isBsisActDeptHead) return;
 
                 const selectedDepts = [...deptCheckboxes]
                     .filter(cb => cb.checked)
@@ -620,7 +662,9 @@
             });
 
             // Initial setup for year levels
-            if (window.userTitle === 'Offices') {
+            const isBsisActDeptHead = window.userTitle === 'Department Head' && window.userDepartment ===
+            'BSIS/ACT';
+            if (window.userTitle === 'Offices' || isBsisActDeptHead) {
                 updateYearLevelsEdit();
             } else {
                 wireSelectAllEdit();
@@ -633,6 +677,7 @@
                 const isStudents = targetUsers && targetUsers.value === 'Students';
                 const isOfficesTarget = targetUsers && targetUsers.value === 'Offices';
                 const shouldShow = isStudents || forceShow;
+                const selectedValue = targetUsers ? targetUsers.value : null;
 
                 // Show/hide Office Users container (don't hide year levels)
                 if (isOfficesTarget) {
@@ -653,6 +698,22 @@
                     if (openFacultyBtn) openFacultyBtn.style.display = shouldShow ? 'inline-block' : 'none';
                     if (sectionModalOverlay) sectionModalOverlay.style.display = shouldShow ? 'flex' : 'none';
                     if (facultyModalOverlay) facultyModalOverlay.style.display = shouldShow ? 'flex' : 'none';
+                }
+
+                // For Offices users: Hide BSIS and ACT when targeting Department Heads or Faculty
+                if (window.userTitle === 'Offices') {
+                    const bsisActLabels = document.querySelectorAll(
+                        'label.checkbox-item[data-dept="BSIS"], label.checkbox-item[data-dept="ACT"]');
+                    const hideBsisAct = (selectedValue === 'Department Heads' || selectedValue === 'Faculty');
+
+                    bsisActLabels.forEach(label => {
+                        label.style.display = hideBsisAct ? 'none' : '';
+                        // Uncheck if hiding
+                        if (hideBsisAct) {
+                            const checkbox = label.querySelector('input[type="checkbox"]');
+                            if (checkbox) checkbox.checked = false;
+                        }
+                    });
                 }
             }
 
@@ -831,7 +892,10 @@
             }
 
             function updateSectionsForOffices() {
-                if (!isOffices) return;
+                // Allow for Offices OR BSIS/ACT Department Heads
+                const isBsisActDeptHead = window.userTitle === 'Department Head' && window.userDepartment ===
+                    'BSIS/ACT';
+                if (!isOffices && !isBsisActDeptHead) return;
                 const selectedDepartments = getSelectedDepartments();
                 const effectiveDepartments = selectedDepartments.length ?
                     selectedDepartments :
