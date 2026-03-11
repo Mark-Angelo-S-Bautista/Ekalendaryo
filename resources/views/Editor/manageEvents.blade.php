@@ -147,14 +147,12 @@ $userTitle = $user->title ?? null;
                                                 <div class="checkbox-grid">
                                                     <label class="checkbox-item">
                                                         <input type="checkbox" class="dept-checkbox"
-                                                            name="target_department[]"
-                                                            value="BSIS">
+                                                            name="target_department[]" value="BSIS">
                                                         <span>BSIS</span>
                                                     </label>
                                                     <label class="checkbox-item">
                                                         <input type="checkbox" class="dept-checkbox"
-                                                            name="target_department[]"
-                                                            value="ACT">
+                                                            name="target_department[]" value="ACT">
                                                         <span>ACT</span>
                                                     </label>
                                                 </div>
@@ -258,8 +256,10 @@ $userTitle = $user->title ?? null;
 
                                     <div class="checkbox-group" id="yearLevelsContainer">
                                         @php
-                                            $userDept = auth()->user()->department_name ?? (auth()->user()->department ?? null);
-                                            $isBsisActDeptHead = auth()->user()->title === 'Department Head' && $userDept === 'BSIS/ACT';
+                                            $userDept =
+                                                auth()->user()->department_name ?? (auth()->user()->department ?? null);
+                                            $isBsisActDeptHead =
+                                                auth()->user()->title === 'Department Head' && $userDept === 'BSIS/ACT';
                                             $maxYear =
                                                 auth()->user()->title === 'Offices'
                                                     ? $userMaxYearLevels
@@ -301,8 +301,12 @@ $userTitle = $user->title ?? null;
                                         <!-- Section checkboxes -->
                                         <div class="checkbox-grid" id="sectionsContainer">
                                             @php
-                                                $userDept = auth()->user()->department_name ?? (auth()->user()->department ?? null);
-                                                $isBsisActDeptHead = auth()->user()->title === 'Department Head' && $userDept === 'BSIS/ACT';
+                                                $userDept =
+                                                    auth()->user()->department_name ??
+                                                    (auth()->user()->department ?? null);
+                                                $isBsisActDeptHead =
+                                                    auth()->user()->title === 'Department Head' &&
+                                                    $userDept === 'BSIS/ACT';
                                             @endphp
                                             {{-- For BSIS/ACT Department Heads, start empty and let JS fill based on selection --}}
                                             @if (!$isBsisActDeptHead)
@@ -372,7 +376,7 @@ $userTitle = $user->title ?? null;
                             window.userTitle = @json(auth()->user()->title);
                             window.departmentMaxYearLevels = @json($departmentMaxYearLevels ?? []);
                             window.userMaxYearLevels = @json($userMaxYearLevels ?? 4);
-                            window.userDepartment = @json(auth()->user()->department_name ?? auth()->user()->department ?? null);
+                            window.userDepartment = @json(auth()->user()->department_name ?? (auth()->user()->department ?? null));
                         </script>
                         <script>
                             document.addEventListener('DOMContentLoaded', () => {
@@ -417,7 +421,8 @@ $userTitle = $user->title ?? null;
 
                                 function updateYearLevels() {
                                     // Allow for Offices OR BSIS/ACT Department Heads
-                                    const isBsisActDeptHead = window.userTitle === 'Department Head' && window.userDepartment === 'BSIS/ACT';
+                                    const isBsisActDeptHead = window.userTitle === 'Department Head' && window.userDepartment ===
+                                        'BSIS/ACT';
                                     if (window.userTitle !== 'Offices' && !isBsisActDeptHead) return;
 
                                     // Get selected departments
@@ -508,7 +513,8 @@ $userTitle = $user->title ?? null;
                                 }
 
                                 // Initial setup
-                                const isBsisActDeptHead = window.userTitle === 'Department Head' && window.userDepartment === 'BSIS/ACT';
+                                const isBsisActDeptHead = window.userTitle === 'Department Head' && window.userDepartment ===
+                                'BSIS/ACT';
                                 if (window.userTitle === 'Offices' || isBsisActDeptHead) {
                                     // For Offices users or BSIS/ACT Department Heads, dynamically render year levels
                                     updateYearLevels();
@@ -681,7 +687,8 @@ $userTitle = $user->title ?? null;
 
                                 function updateSectionsForOffices() {
                                     // Allow for Offices OR BSIS/ACT Department Heads
-                                    const isBsisActDeptHead = window.userTitle === 'Department Head' && window.userDepartment === 'BSIS/ACT';
+                                    const isBsisActDeptHead = window.userTitle === 'Department Head' && window.userDepartment ===
+                                        'BSIS/ACT';
                                     if (window.userTitle !== 'Offices' && !isBsisActDeptHead) return;
                                     const selectedDepartments = getSelectedDepartments();
                                     const sections = collectSectionsForDepartments(selectedDepartments);
