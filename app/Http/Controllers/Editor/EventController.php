@@ -189,6 +189,7 @@ class EventController
         $targetFacultyIds = (array) ($eventData->target_faculty ?? []);
         $targetSections = (array) ($eventData->target_sections ?? []);
         $eventCreatorDepartment = $eventData->department ?? Auth::user()->department;
+        $eventCreatorDepartments = $this->normalizeDepartmentTargets($eventCreatorDepartment);
 
         $recipients = collect();
 
@@ -200,7 +201,7 @@ class EventController
             $students = User::where('title', 'Student')
 
                 // ✅ FIX 1: department MUST match event creator department
-                ->where('department', $eventCreatorDepartment)
+                ->whereIn('department', $eventCreatorDepartments)
 
                 // ✅ FIX 2: section MUST be selected
                 ->whereIn('section', $targetSections)
@@ -239,7 +240,7 @@ class EventController
             // Add Department Head of SAME department
             // =====================================================
             $deptHead = User::where('title', 'Department Head')
-                ->where('department', $eventCreatorDepartment)
+                ->whereIn('department', $eventCreatorDepartments)
                 ->first();
 
             if ($deptHead) {
@@ -252,13 +253,13 @@ class EventController
         elseif ($targetUsers === 'Faculty') {
             // Add ALL faculty from the same department
             $allFaculty = User::where('title', 'Faculty')
-                ->where('department', $eventCreatorDepartment)
+                ->whereIn('department', $eventCreatorDepartments)
                 ->get();
             $recipients = $recipients->merge($allFaculty);
 
             // Add Department Head of same department
             $deptHead = User::where('title', 'Department Head')
-                ->where('department', $eventCreatorDepartment)
+                ->whereIn('department', $eventCreatorDepartments)
                 ->first();
             if ($deptHead) {
                 $recipients = $recipients->merge([$deptHead]);
@@ -619,10 +620,11 @@ class EventController
             $targetFacultyIds = (array) ($event->target_faculty ?? []);
             $targetSections = (array) ($event->target_sections ?? []);
             $eventCreatorDepartment = $event->department ?? Auth::user()->department;
+            $eventCreatorDepartments = $this->normalizeDepartmentTargets($eventCreatorDepartment);
 
             if ($targetUsers === 'Students') {
                 $students = User::where('title', 'Student')
-                    ->where('department', $eventCreatorDepartment)
+                    ->whereIn('department', $eventCreatorDepartments)
                     ->whereIn('section', $targetSections)
                     ->get()
                     ->filter(function ($student) use ($targetYearLevels) {
@@ -644,17 +646,17 @@ class EventController
 
                 // Add department head
                 $deptHead = User::where('title', 'Department Head')
-                    ->where('department', $eventCreatorDepartment)
+                    ->whereIn('department', $eventCreatorDepartments)
                     ->first();
                 if ($deptHead) $recipients = $recipients->merge([$deptHead]);
             } elseif ($targetUsers === 'Faculty') {
                 $allFaculty = User::where('title', 'Faculty')
-                    ->where('department', $eventCreatorDepartment)
+                    ->whereIn('department', $eventCreatorDepartments)
                     ->get();
                 $recipients = $recipients->merge($allFaculty);
 
                 $deptHead = User::where('title', 'Department Head')
-                    ->where('department', $eventCreatorDepartment)
+                    ->whereIn('department', $eventCreatorDepartments)
                     ->first();
                 if ($deptHead) $recipients = $recipients->merge([$deptHead]);
             }
@@ -663,6 +665,28 @@ class EventController
         }
 
         return $recipients;
+    }
+
+    private function normalizeDepartmentTargets(?string $department): array
+    {
+        $department = trim((string) $department);
+
+        if ($department === '') {
+            return [];
+        }
+
+        $targets = [$department];
+
+        if (str_contains($department, '/')) {
+            foreach (explode('/', $department) as $part) {
+                $part = trim($part);
+                if ($part !== '') {
+                    $targets[] = $part;
+                }
+            }
+        }
+
+        return array_values(array_unique($targets));
     }
 
     private function resolveTargetSections(Event $event): array
