@@ -509,9 +509,71 @@ h2 {
     padding-bottom: 10px;
 }
 
+.history-search-form {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.history-search-input {
+    flex: 1;
+    min-width: 0;
+    padding: 9px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    outline: none;
+}
+
+.history-search-input:focus {
+    border-color: #22c55e;
+    box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2);
+}
+
+.history-search-btn,
+.history-clear-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 9px 12px;
+    border-radius: 8px;
+    border: none;
+    font-size: 0.9rem;
+    cursor: pointer;
+    text-decoration: none;
+    transition: 0.2s ease;
+}
+
+.history-search-btn {
+    background-color: #16a34a;
+    color: #fff;
+}
+
+.history-search-btn:hover {
+    background-color: #15803d;
+}
+
+.history-clear-btn {
+    background-color: #eef2f7;
+    color: #374151;
+}
+
+.history-clear-btn:hover {
+    background-color: #e5e7eb;
+}
+
 @media (max-width: 1024px) {
     .history-columns {
         grid-template-columns: 1fr;
+    }
+
+    .history-search-form {
+        flex-wrap: wrap;
+    }
+
+    .history-search-input {
+        width: 100%;
     }
 }
 

@@ -665,12 +665,30 @@ class UserManagementController
         $userId = Auth::id();
         $user = Auth::user();
 
+        $createdSearch = trim((string) request()->query('created_search', ''));
+        $invitedSearch = trim((string) request()->query('invited_search', ''));
+
         // Events created by the user (for report upload)
         $createdEvents = Event::withCount('feedbacks')
             ->where('user_id', $userId)
             ->where('status', 'completed')
             ->orderBy('date', 'desc')
             ->get();
+
+        if ($createdSearch !== '') {
+            $createdEvents = $createdEvents->filter(function ($event) use ($createdSearch) {
+                $searchableText = implode(' ', [
+                    $event->title ?? '',
+                    $event->description ?? '',
+                    $event->department ?? '',
+                    $event->location ?? '',
+                    $event->school_year ?? '',
+                    $event->date ?? '',
+                ]);
+
+                return Str::contains(Str::lower($searchableText), Str::lower($createdSearch));
+            })->values();
+        }
 
         // Events the user was invited to (for feedback submission)
         $invitedEvents = Event::query()
@@ -756,7 +774,22 @@ class UserManagementController
             }
 
             return false;
-        });
+        })->values();
+
+        if ($invitedSearch !== '') {
+            $invitedEvents = $invitedEvents->filter(function ($event) use ($invitedSearch) {
+                $searchableText = implode(' ', [
+                    $event->title ?? '',
+                    $event->description ?? '',
+                    $event->department ?? '',
+                    $event->location ?? '',
+                    $event->school_year ?? '',
+                    $event->date ?? '',
+                ]);
+
+                return Str::contains(Str::lower($searchableText), Str::lower($invitedSearch));
+            })->values();
+        }
 
         // Paginate created events
         $perPage = 3;
@@ -802,6 +835,8 @@ class UserManagementController
             'invitedEvents' => $paginatedInvitedEvents,
             'submittedFeedbackIds' => $submittedFeedbackIds,
             'attendedEventIds' => $attendedEventIds,
+            'createdSearch' => $createdSearch,
+            'invitedSearch' => $invitedSearch,
         ]);
     }
 
