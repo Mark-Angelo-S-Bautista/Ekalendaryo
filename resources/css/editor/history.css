@@ -509,9 +509,71 @@ h2 {
     padding-bottom: 10px;
 }
 
+.history-search-form {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.history-search-input {
+    flex: 1;
+    min-width: 0;
+    padding: 9px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    outline: none;
+}
+
+.history-search-input:focus {
+    border-color: #22c55e;
+    box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2);
+}
+
+.history-search-btn,
+.history-clear-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 9px 12px;
+    border-radius: 8px;
+    border: none;
+    font-size: 0.9rem;
+    cursor: pointer;
+    text-decoration: none;
+    transition: 0.2s ease;
+}
+
+.history-search-btn {
+    background-color: #16a34a;
+    color: #fff;
+}
+
+.history-search-btn:hover {
+    background-color: #15803d;
+}
+
+.history-clear-btn {
+    background-color: #eef2f7;
+    color: #374151;
+}
+
+.history-clear-btn:hover {
+    background-color: #e5e7eb;
+}
+
 @media (max-width: 1024px) {
     .history-columns {
         grid-template-columns: 1fr;
+    }
+
+    .history-search-form {
+        flex-wrap: wrap;
+    }
+
+    .history-search-input {
+        width: 100%;
     }
 }
 
@@ -698,7 +760,6 @@ h2 {
     background-color: #f9fafb;
 }
 
-
 /* =========================================
    RESPONSIVE OVERRIDES (Add to bottom)
    ========================================= */
@@ -743,11 +804,11 @@ h2 {
 
     /* 4. Responsive Table (Mobile View) */
     /* This transforms the table into a list-like view so it doesn't overflow */
-    .attendees-modal-body table, 
-    .attendees-modal-body thead, 
-    .attendees-modal-body tbody, 
-    .attendees-modal-body th, 
-    .attendees-modal-body td, 
+    .attendees-modal-body table,
+    .attendees-modal-body thead,
+    .attendees-modal-body tbody,
+    .attendees-modal-body th,
+    .attendees-modal-body td,
     .attendees-modal-body tr {
         display: block;
     }
@@ -786,10 +847,18 @@ h2 {
     }
 
     /* Add labels based on your column order */
-    .attendees-modal-body td:nth-of-type(1):before { content: "Name"; }
-    .attendees-modal-body td:nth-of-type(2):before { content: "Dept"; }
-    .attendees-modal-body td:nth-of-type(3):before { content: "Year"; }
-    .attendees-modal-body td:nth-of-type(4):before { content: "Section"; }
+    .attendees-modal-body td:nth-of-type(1):before {
+        content: "Name";
+    }
+    .attendees-modal-body td:nth-of-type(2):before {
+        content: "Dept";
+    }
+    .attendees-modal-body td:nth-of-type(3):before {
+        content: "Year";
+    }
+    .attendees-modal-body td:nth-of-type(4):before {
+        content: "Section";
+    }
 
     /* 5. Feedback Form Tweaks */
     #submitFeedbackForm textarea {
@@ -822,20 +891,22 @@ h2 {
     }
 
     /* 2. Stack Feedback, Report, and Remove buttons vertically */
-    .feedback-btn, 
-    .report-btn, 
+    .feedback-btn,
+    .report-btn,
     .remove-report-btn,
     .upload-btn {
-        display: block;      /* Ensure they occupy their own line */
-        width: 100%;         /* Full width for easier tapping */
-        margin-top: 8px;     /* Spacing between vertical buttons */
-        padding: 12px;       /* Larger tap area for mobile */
-        text-align: center;  /* Center the text inside the button */
-        font-size: 14px;     /* Slightly larger font for readability */
+        display: block; /* Ensure they occupy their own line */
+        width: 100%; /* Full width for easier tapping */
+        margin-top: 8px; /* Spacing between vertical buttons */
+        padding: 12px; /* Larger tap area for mobile */
+        text-align: center; /* Center the text inside the button */
+        font-size: 14px; /* Slightly larger font for readability */
     }
 
     /* Remove horizontal margins if they were floated or inline */
-    .feedback-btn, .report-btn, .remove-report-btn {
+    .feedback-btn,
+    .report-btn,
+    .remove-report-btn {
         margin-left: 0;
         margin-right: 0;
     }

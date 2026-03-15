@@ -18,6 +18,19 @@
                 {{-- COLUMN 1: Events Created by User (Report Upload) --}}
                 <div class="column-container">
                     <div class="column-title">📝 My Published Events</div>
+                    <form method="GET" action="{{ route('Editor.history') }}" class="history-search-form">
+                        @if (!empty($invitedSearch))
+                            <input type="hidden" name="invited_search" value="{{ $invitedSearch }}">
+                        @endif
+                        @if (request()->filled('invited_page'))
+                            <input type="hidden" name="invited_page" value="{{ request('invited_page') }}">
+                        @endif
+                        <input type="text" name="created_search" value="{{ $createdSearch ?? '' }}"
+                            placeholder="Search my published events..." class="history-search-input">
+                        <button type="submit" class="history-search-btn">Search</button>
+                        <a href="{{ route('Editor.history', request()->except(['created_search', 'created_page'])) }}"
+                            class="history-clear-btn">Clear</a>
+                    </form>
 
                     <div id="createdEventList">
                         @forelse($createdEvents as $event)
@@ -118,6 +131,19 @@
                 {{-- COLUMN 2: Events User Was Invited To (Feedback Submission) --}}
                 <div class="column-container">
                     <div class="column-title">📬 Events Invited To</div>
+                    <form method="GET" action="{{ route('Editor.history') }}" class="history-search-form">
+                        @if (!empty($createdSearch))
+                            <input type="hidden" name="created_search" value="{{ $createdSearch }}">
+                        @endif
+                        @if (request()->filled('created_page'))
+                            <input type="hidden" name="created_page" value="{{ request('created_page') }}">
+                        @endif
+                        <input type="text" name="invited_search" value="{{ $invitedSearch ?? '' }}"
+                            placeholder="Search invited events..." class="history-search-input">
+                        <button type="submit" class="history-search-btn">Search</button>
+                        <a href="{{ route('Editor.history', request()->except(['invited_search', 'invited_page'])) }}"
+                            class="history-clear-btn">Clear</a>
+                    </form>
 
                     <div id="invitedEventList">
                         @forelse($invitedEvents as $event)

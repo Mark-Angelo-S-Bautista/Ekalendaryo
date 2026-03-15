@@ -691,10 +691,11 @@ class EventController
     // =========================================================================
     // MODIFIED: STRICT User-ID filtering applied.
     // =========================================================================
-    public function index()
+    public function index(Request $request)
     {
         // Get the current authenticated user's ID
         $userId = Auth::id();
+        $search = trim((string) $request->query('search', ''));
         
         // Ensure user is authenticated
         if (!$userId) {
@@ -707,6 +708,14 @@ class EventController
             ->where('user_id', $userId)
             ->where('status', '!=', 'cancelled')
             ->where('date', '>=', $today)
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($subQuery) use ($search) {
+                    $subQuery->where('title', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%")
+                        ->orWhere('location', 'like', "%{$search}%")
+                        ->orWhere('status', 'like', "%{$search}%");
+                });
+            })
             ->orderBy('date', 'asc')
             ->paginate(4);
 
@@ -779,7 +788,7 @@ class EventController
             ->where('id', '!=', $user->id)
             ->get();
 
-        return view('Editor.manageEvents', compact('events', 'departments', 'faculty', 'sections', 'sectionsByDepartment', 'userDepartment', 'userMaxYearLevels', 'departmentMaxYearLevels', 'upcomingCount', 'ongoingCount', 'completedCount', 'cancelledCount', 'officeUsers'));
+        return view('Editor.manageEvents', compact('events', 'departments', 'faculty', 'sections', 'sectionsByDepartment', 'userDepartment', 'userMaxYearLevels', 'departmentMaxYearLevels', 'upcomingCount', 'ongoingCount', 'completedCount', 'cancelledCount', 'officeUsers', 'search'));
     }
 
     // =========================================================================

@@ -1135,11 +1135,13 @@ $userTitle = $user->title ?? null;
 
 
                 <!-- Search Bar for Events -->
-                <div class="search-bar">
-                    <input type="text" id="eventSearch"
+                <form method="GET" action="{{ route('Editor.index') }}" class="search-bar">
+                    <input type="text" id="manageEventSearch" name="search" value="{{ $search ?? '' }}"
                         placeholder="🔍 Search events by title, location, or status...">
-                    <button type="button" id="clearSearch">Clear</button>
-                </div>
+                    <button type="submit">Search</button>
+                    <button type="button"
+                        onclick="window.location.href='{{ route('Editor.index') }}'">Clear</button>
+                </form>
 
                 <!-- Sample Event Cards -->
                 <div id="eventList">
@@ -1265,7 +1267,7 @@ $userTitle = $user->title ?? null;
 
                         <!-- Pagination Links -->
                         <div class="pagination-wrapper" style="margin-top: 30px;">
-                            {{ $events->links('pagination::simple') }}
+                            {{ $events->withQueryString()->links('pagination::simple') }}
                         </div>
                     @else
                         <p style="color:#555; text-align:center;">No events found. Create one to get started!</p>
