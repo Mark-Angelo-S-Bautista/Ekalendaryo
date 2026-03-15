@@ -681,6 +681,7 @@ class UserManEventController
     public function index()
     {
         $userId = Auth::id();
+        $search = trim((string) request()->query('search', ''));
         
         if (!$userId) {
             return redirect()->route('login');
@@ -692,6 +693,14 @@ class UserManEventController
             ->where('user_id', $userId)
             ->where('status', '!=', 'cancelled')
             ->where('date', '>=', $today)
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($subQuery) use ($search) {
+                    $subQuery->where('title', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%")
+                        ->orWhere('location', 'like', "%{$search}%")
+                        ->orWhere('status', 'like', "%{$search}%");
+                });
+            })
             ->orderBy('date', 'asc')
             ->paginate(4);
 
@@ -749,7 +758,7 @@ class UserManEventController
             ->where('id', '!=', $user->id)
             ->get();
 
-        return view('UserManagement.manageEvents.manageEvents', compact('events', 'departments', 'faculty', 'sections', 'sectionsByDepartment', 'userDepartment', 'userMaxYearLevels', 'departmentMaxYearLevels', 'upcomingCount', 'ongoingCount', 'completedCount', 'cancelledCount', 'officeUsers'));
+        return view('UserManagement.manageEvents.manageEvents', compact('events', 'departments', 'faculty', 'sections', 'sectionsByDepartment', 'userDepartment', 'userMaxYearLevels', 'departmentMaxYearLevels', 'upcomingCount', 'ongoingCount', 'completedCount', 'cancelledCount', 'officeUsers', 'search'));
     }
 
     // =========================================================================
