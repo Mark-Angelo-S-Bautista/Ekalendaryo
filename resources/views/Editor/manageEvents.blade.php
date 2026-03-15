@@ -127,7 +127,7 @@
                             </script>
 
                             @if (auth()->user()->title === 'Offices' || auth()->user()->title === 'Department Head')
-                                <div class="form-group">
+                                <div class="form-group" id="targetDepartmentContainer">
                                     <label for="targetDepartment">Target Department</label>
 
                                     @php
@@ -534,6 +534,7 @@ $userTitle = $user->title ?? null;
 
                                 function toggleButtons() {
                                     const selectedValue = targetUsers ? targetUsers.value : null;
+                                    const targetDepartmentContainer = document.getElementById('targetDepartmentContainer');
 
                                     // Show/hide Section and Faculty buttons (only for Students)
                                     if (selectedValue === 'Students') {
@@ -551,20 +552,55 @@ $userTitle = $user->title ?? null;
                                         if (officeUsersContainer) officeUsersContainer.style.display = 'none';
                                     }
 
-                                    // For Offices users: Hide BSIS and ACT when targeting Department Heads or Faculty
-                                    if (window.userTitle === 'Offices') {
-                                        const bsisActLabels = document.querySelectorAll(
-                                            'label.checkbox-item[data-dept="BSIS"], label.checkbox-item[data-dept="ACT"]');
-                                        const hideBsisAct = (selectedValue === 'Department Heads' || selectedValue === 'Faculty');
+                                    // Hide entire Target Department when Offices is selected
+                                    if (targetDepartmentContainer) {
+                                        const hideTargetDepartment = selectedValue === 'Offices';
+                                        targetDepartmentContainer.style.display = hideTargetDepartment ? 'none' : '';
 
-                                        bsisActLabels.forEach(label => {
-                                            label.style.display = hideBsisAct ? 'none' : '';
-                                            // Uncheck if hiding
-                                            if (hideBsisAct) {
-                                                const checkbox = label.querySelector('input[type="checkbox"]');
-                                                if (checkbox) checkbox.checked = false;
-                                            }
+                                        const deptChecks = targetDepartmentContainer.querySelectorAll(
+                                            'input.dept-checkbox[type="checkbox"]');
+                                        const deptHiddenInputs = targetDepartmentContainer.querySelectorAll(
+                                            'input[type="hidden"][name="target_department[]"]');
+
+                                        deptChecks.forEach(cb => {
+                                            if (hideTargetDepartment) cb.checked = false;
                                         });
+                                        deptHiddenInputs.forEach(input => {
+                                            input.disabled = hideTargetDepartment;
+                                        });
+                                    }
+
+                                    // For Offices users: department visibility by target users
+                                    if (window.userTitle === 'Offices') {
+                                        const bsisLabel = document.querySelector(
+                                            'label.checkbox-item[data-dept="BSIS"]');
+                                        const actLabel = document.querySelector(
+                                            'label.checkbox-item[data-dept="ACT"]');
+                                        const combinedBsisActLabel = document.querySelector(
+                                            'label.checkbox-item[data-dept="BSIS/ACT"]');
+
+                                        const isStudentsTarget = selectedValue === 'Students';
+                                        const isFacultyOrDeptHeadsTarget =
+                                            selectedValue === 'Faculty' || selectedValue === 'Department Heads';
+
+                                        function setDepartmentLabelVisibility(label, shouldHide) {
+                                            if (!label) return;
+                                            label.style.display = shouldHide ? 'none' : '';
+
+                                            const checkbox = label.querySelector('input.dept-checkbox[type="checkbox"]');
+                                            if (checkbox && shouldHide) checkbox.checked = false;
+
+                                            const hiddenInput = label.querySelector(
+                                                'input[type="hidden"][name="target_department[]"]');
+                                            if (hiddenInput) hiddenInput.disabled = shouldHide;
+                                        }
+
+                                        // Students: hide combined BSIS/ACT; show BSIS and ACT
+                                        setDepartmentLabelVisibility(combinedBsisActLabel, isStudentsTarget);
+
+                                        // Faculty/Department Heads: hide BSIS and ACT; show combined BSIS/ACT
+                                        setDepartmentLabelVisibility(bsisLabel, isFacultyOrDeptHeadsTarget);
+                                        setDepartmentLabelVisibility(actLabel, isFacultyOrDeptHeadsTarget);
                                     }
                                 }
 
