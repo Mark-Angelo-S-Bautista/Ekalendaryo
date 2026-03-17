@@ -15,7 +15,7 @@
             <p>All archived events from previous school years</p>
 
             {{-- FILTER --}}
-            <form method="GET" style="margin: 20px 0;">
+            <form method="GET" class="archive-search-form">
                 <label for="school_year"><strong>Filter by School Year:</strong></label>
                 <select name="school_year" id="school_year" onchange="this.form.submit()">
                     <option value="">All School Years</option>
@@ -25,6 +25,11 @@
                         </option>
                     @endforeach
                 </select>
+                <input type="text" name="search" value="{{ $search ?? '' }}" class="archive-search-input"
+                    placeholder="Search events by title, location, or status...">
+                <button type="submit" class="archive-search-btn">Search</button>
+                <button type="button" class="archive-clear-btn"
+                    onclick="window.location.href='{{ route('Editor.archive') }}'">Clear</button>
             </form>
 
             {{-- TABLE --}}

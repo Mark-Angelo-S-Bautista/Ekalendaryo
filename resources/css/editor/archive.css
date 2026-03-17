@@ -246,6 +246,60 @@ select {
     font-style: italic;
 }
 
+.archive-search-form {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin: 20px 0;
+}
+
+.archive-search-input {
+    flex: 1;
+    min-width: 0;
+    padding: 9px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    outline: none;
+}
+
+.archive-search-input:focus {
+    border-color: #22c55e;
+    box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2);
+}
+
+.archive-search-btn,
+.archive-clear-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 9px 12px;
+    border-radius: 8px;
+    border: none;
+    font-size: 0.9rem;
+    cursor: pointer;
+    text-decoration: none;
+    transition: 0.2s ease;
+}
+
+.archive-search-btn {
+    background-color: #16a34a;
+    color: #fff;
+}
+
+.archive-search-btn:hover {
+    background-color: #15803d;
+}
+
+.archive-clear-btn {
+    background-color: #eef2f7;
+    color: #374151;
+}
+
+.archive-clear-btn:hover {
+    background-color: #e5e7eb;
+}
+
 .archive-table {
     width: 100%;
     min-width: 1000px;
@@ -254,6 +308,16 @@ select {
     border-spacing: 0;
     background: #ffffff;
     font-size: 15px;
+}
+
+@media (max-width: 1024px) {
+    .archive-search-form {
+        flex-wrap: wrap;
+    }
+
+    .archive-search-input {
+        width: 100%;
+    }
 }
 .archive-table thead {
     position: sticky;

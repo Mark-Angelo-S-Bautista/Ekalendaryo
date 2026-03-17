@@ -483,6 +483,7 @@ class EditorController
     {
         $userId = Auth::id();
         $schoolYear = $request->get('school_year');
+        $search = trim((string) $request->query('search', ''));
 
         // School years only from user's archived/cancelled events
         $schoolYears = Event::where('user_id', $userId)
@@ -497,6 +498,15 @@ class EditorController
             ->when($schoolYear, function ($q) use ($schoolYear) {
                 $q->where('school_year', $schoolYear);
             })
+            ->when($search !== '', function ($q) use ($search) {
+                $q->where(function ($subQuery) use ($search) {
+                    $subQuery->where('title', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%")
+                        ->orWhere('location', 'like', "%{$search}%")
+                        ->orWhere('status', 'like', "%{$search}%")
+                        ->orWhere('school_year', 'like', "%{$search}%");
+                });
+            })
             ->orderBy('updated_at', 'desc')
             ->paginate(10)
             ->withQueryString();
@@ -504,7 +514,8 @@ class EditorController
         return view('Editor.archive', compact(
             'archivedEvents',
             'schoolYears',
-            'schoolYear'
+            'schoolYear',
+            'search'
         ));
     }
 

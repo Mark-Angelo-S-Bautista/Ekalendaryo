@@ -13,6 +13,19 @@
         </div>
 
         <form method="GET" class="archive-filters">
+            <div class="filter-group archive-search-group">
+                <label for="search">Search Users</label>
+                <div class="archive-search-row">
+                    <input type="text" id="search" name="search" value="{{ $search ?? '' }}"
+                        placeholder="Search by name, email, or user ID">
+                    <div class="archive-filter-actions">
+                        <button type="submit" class="archive-search-btn">Search</button>
+                        <button type="button" class="archive-clear-btn"
+                            onclick="window.location.href='{{ route('UserManagement.archive') }}'">Clear</button>
+                    </div>
+                </div>
+            </div>
+
             <div class="filter-group">
                 <label for="title">Filter by Title</label>
                 <select name="title" id="title" onchange="this.form.submit()">
@@ -48,6 +61,7 @@
                     @endforeach
                 </select>
             </div>
+
         </form>
 
         <div class="archive-table-wrapper">

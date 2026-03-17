@@ -1094,6 +1094,7 @@ class UserManagementController
     {
         $userId = Auth::id();
         $schoolYear = $request->get('school_year');
+        $search = trim((string) $request->query('search', ''));
 
         $schoolYears = Event::where('user_id', $userId)
             ->whereIn('status', ['archived', 'cancelled'])
@@ -1107,6 +1108,15 @@ class UserManagementController
             ->when($schoolYear, function ($q) use ($schoolYear) {
                 $q->where('school_year', $schoolYear);
             })
+            ->when($search !== '', function ($q) use ($search) {
+                $q->where(function ($subQuery) use ($search) {
+                    $subQuery->where('title', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%")
+                        ->orWhere('location', 'like', "%{$search}%")
+                        ->orWhere('status', 'like', "%{$search}%")
+                        ->orWhere('school_year', 'like', "%{$search}%");
+                });
+            })
             ->orderBy('updated_at', 'desc')
             ->paginate(10)
             ->withQueryString();
@@ -1114,7 +1124,8 @@ class UserManagementController
         return view('UserManagement.eventsArchive.eventsArchive', compact(
             'archivedEvents',
             'schoolYears',
-            'schoolYear'
+            'schoolYear',
+            'search'
         ));
     }
 
@@ -1190,6 +1201,7 @@ class UserManagementController
         $title = $request->get('title');
         $schoolYear = $request->get('school_year');
         $department = $request->get('department');
+        $search = trim((string) $request->query('search', ''));
 
         $archivedUsers = User::whereIn('status', ['dropped', 'fired', 'graduated'])
             ->when($title, function ($q) use ($title) {
@@ -1200,6 +1212,13 @@ class UserManagementController
             })
             ->when($department, function ($q) use ($department) {
                 $q->where('department', $department);
+            })
+            ->when($search !== '', function ($q) use ($search) {
+                $q->where(function ($subQuery) use ($search) {
+                    $subQuery->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%")
+                        ->orWhere('userId', 'like', "%{$search}%");
+                });
             })
             ->orderBy('updated_at', 'desc')
             ->paginate(10)
@@ -1224,7 +1243,7 @@ class UserManagementController
             ->distinct()
             ->pluck('department');
 
-        return view('UserManagement.archive.archive', compact('archivedUsers', 'titles', 'title', 'schoolYears', 'schoolYear', 'departments', 'department'));
+        return view('UserManagement.archive.archive', compact('archivedUsers', 'titles', 'title', 'schoolYears', 'schoolYear', 'departments', 'department', 'search'));
     }
 
     public function changeSchoolYear()
