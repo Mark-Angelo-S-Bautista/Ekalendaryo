@@ -61,7 +61,7 @@
 
                     <div class="employment-row">
                         <div>
-                            <span style="font-weight:300;">Department:</span>
+                            <span style="font-weight:300;">Program:</span>
                             <span style="margin-left:100px;">
                                 @if ($user->department === 'Offices')
                                     {{ $user->office_name ?? 'Not specified' }}
