@@ -285,7 +285,7 @@ class UserManEventController
 
         foreach ($recipients as $user) {
             if (!empty($user->email)) {
-                Mail::to($user->email)->send(
+                Mail::to($user->email)->queue(
                     new EventNotificationMail(
                         $event->id,
                         $user->id,
@@ -334,7 +334,7 @@ class UserManEventController
             // Send emails
             foreach ($users as $user) {
                 if (!empty($user->email)) {
-                    Mail::to($user->email)->send(
+                    Mail::to($user->email)->queue(
                         new EventNotificationMail(
                             $event->id,
                             $user->id,
@@ -449,7 +449,7 @@ class UserManEventController
         // =====================================================
         foreach ($users as $user) {
             if (!empty($user->email)) {
-                Mail::to($user->email)->send(
+                Mail::to($user->email)->queue(
                     new EventNotificationMail(
                         $event->id,
                         $user->id,

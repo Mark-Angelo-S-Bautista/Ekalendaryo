@@ -286,7 +286,7 @@ class EventController
 
         foreach ($recipients as $user) {
             if (!empty($user->email)) {
-                Mail::to($user->email)->send(
+                Mail::to($user->email)->queue(
                     new EventNotificationMail(
                         $event->id,  // ← Pass ID
                         $user->id,   // ← Pass ID
@@ -337,7 +337,7 @@ class EventController
             // Send emails
             foreach ($users as $user) {
                 if (!empty($user->email)) {
-                    Mail::to($user->email)->send(
+                    Mail::to($user->email)->queue(
                         new EventNotificationMail(
                             $event->id,
                             $user->id,
@@ -453,7 +453,7 @@ class EventController
         // =====================================================
         foreach ($users as $user) {
             if (!empty($user->email)) {
-                Mail::to($user->email)->send(
+                Mail::to($user->email)->queue(
                     new EventNotificationMail(
                         $event->id,  // ← Pass ID
                         $user->id,   // ← Pass ID
