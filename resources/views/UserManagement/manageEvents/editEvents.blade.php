@@ -141,7 +141,7 @@
 
             {{-- TARGET DEPARTMENTS AND USERS — SAME LOGIC AS CREATE FORM --}}
             <div class="form-group">
-                <label for="targetDepartment">Target Department</label>
+                <label for="targetDepartment">Target Program</label>
 
                 @php
                     $user = Auth::user();

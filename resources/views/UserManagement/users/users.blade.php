@@ -53,7 +53,7 @@
         </div>
 
         <div class="users_top_actions">
-            <button class="users_add_department" id="openAddDept">＋ Add Department</button>
+            <button class="users_add_department" id="openAddDept">＋ Add Program</button>
         </div>
 
         {{-- SEARCH BAR FEATURE --}}
@@ -131,14 +131,14 @@
         <div class="adddept_modal" id="adddept_overlay">
             <div class="adddept_modal_content">
                 <div class="adddept_modal_header">
-                    <h2>Manage Departments</h2>
+                    <h2>Manage Programs</h2>
                     <span class="adddept_close" onclick="closeAddDeptModal()">&times;</span>
                 </div>
 
                 {{-- Add Department Form --}}
                 <form id="addDepartmentForm" action="{{ route('UserManagement.adddepartment') }}">
                     @csrf
-                    <label for="department_name">Add New Department</label>
+                    <label for="department_name">Add New Program</label>
                     <input type="text" id="department_name" name="department_name"
                         placeholder="e.g. BSIT, BSA, etc.">
 
@@ -165,7 +165,7 @@
 
                 {{-- Existing Departments --}}
                 <div class="adddept_list">
-                    <h3>Existing Departments</h3>
+                    <h3>Existing Program</h3>
                     @if ($departments->count() > 0)
                         <ul>
                             @foreach ($departments as $department)

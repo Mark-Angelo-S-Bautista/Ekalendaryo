@@ -127,7 +127,7 @@
                             </script>
 
                             <div class="form-group" id="targetDepartmentContainer">
-                                <label for="targetDepartment">Target Department</label>
+                                <label for="targetDepartment">Target Program</label>
 
                                 @php
                                     // Get the authenticated user's data for comparison

@@ -142,7 +142,7 @@
             {{-- TARGET DEPARTMENTS AND USERS — SAME LOGIC AS CREATE FORM --}}
             @if (auth()->user()->title === 'Offices' || auth()->user()->title === 'Department Head')
                 <div class="form-group" id="targetDepartmentContainer">
-                    <label for="targetDepartment">Target Department</label>
+                    <label for="targetDepartment">Target Program</label>
 
                     @php
                         $user = Auth::user();
