@@ -194,32 +194,67 @@ class UserManagementController
         // Total active events
         $totalEvents = $activeEvents->count();
 
-        // Count per department
-        $departmentCounts = $activeEvents
-            ->groupBy('department')
-            ->map(fn ($group) => $group->count());
-
-        // Ensure all departments appear
-        $finalDeptCounts = collect($departments)->mapWithKeys(function ($dept) use ($departmentCounts) {
-            return [$dept => $departmentCounts[$dept] ?? 0];
-        });
-
-        // Add Registrar card count (events created by users with title 'Offices')
-        $registrarCount = $events->filter(function ($event) use ($now) {
-            // Exclude cancelled & completed
+        // Count per department based on WHO CREATED the active event
+        $countableEvents = $events->filter(function ($event) use ($now) {
             if (in_array($event->computed_status, ['cancelled', 'completed'])) {
                 return false;
             }
+
             $start = \Carbon\Carbon::parse($event->date . ' ' . $event->start_time);
             $end = \Carbon\Carbon::parse($event->date . ' ' . $event->end_time);
+
             $isOngoing = $start->lessThanOrEqualTo($now) && $end->greaterThanOrEqualTo($now);
             $isUpcoming = $start->greaterThan($now) && $start->lessThanOrEqualTo($now->copy()->addDays(356));
-            if (!$isOngoing && !$isUpcoming) {
-                return false;
+
+            return $isOngoing || $isUpcoming;
+        });
+
+        $rawDepartmentCounts = [];
+        $registrarCount = 0;
+
+        foreach ($countableEvents as $event) {
+            $creator = $event->user;
+            $creatorTitle = trim((string) ($creator->title ?? ''));
+            $creatorDepartment = trim((string) ($creator->department ?? $event->department ?? ''));
+
+            if (strcasecmp($creatorTitle, 'Offices') === 0 || strcasecmp($creatorDepartment, 'OFFICES') === 0) {
+                $registrarCount++;
+                continue;
             }
-            // Filter by creator's title being 'Offices'
-            return $event->user && $event->user->title === 'Offices';
-        })->count();
+
+            $normalizedCreatorDept = $this->normalizeDepartmentKey($creatorDepartment);
+            if ($normalizedCreatorDept === '') {
+                continue;
+            }
+
+            $rawDepartmentCounts[$normalizedCreatorDept] = ($rawDepartmentCounts[$normalizedCreatorDept] ?? 0) + 1;
+        }
+
+        // Build cards from configured departments (excluding OFFICES, represented by Registrar card)
+        $finalDeptCounts = collect($departments)
+            ->reject(fn ($dept) => strtoupper(trim((string) $dept)) === 'OFFICES')
+            ->mapWithKeys(function ($dept) use ($rawDepartmentCounts) {
+                $normalizedDept = $this->normalizeDepartmentKey((string) $dept);
+                $count = 0;
+
+                if ($normalizedDept !== '') {
+                    // Direct match for exact department name
+                    $count += $rawDepartmentCounts[$normalizedDept] ?? 0;
+
+                    // If card is combined (e.g., BSIS/ACT), also include split department creators
+                    if (str_contains($normalizedDept, '/')) {
+                        foreach (explode('/', $normalizedDept) as $part) {
+                            $part = trim($part);
+                            if ($part !== '') {
+                                $count += $rawDepartmentCounts[$part] ?? 0;
+                            }
+                        }
+                    }
+                }
+
+                return [$dept => $count];
+            });
+
         $finalDeptCounts['Registrar'] = $registrarCount;
 
         // Paginate with 8 per page
@@ -242,6 +277,17 @@ class UserManagementController
             'office_name' => $office_name,
             'currentSchoolYearName' => $currentSchoolYearName,
         ]);
+    }
+
+    private function normalizeDepartmentKey(string $department): string
+    {
+        $department = strtoupper(trim($department));
+        if ($department === '') {
+            return '';
+        }
+
+        // Normalize spaces around slashes, e.g., "BSIS / ACT" => "BSIS/ACT"
+        return preg_replace('/\s*\/\s*/', '/', $department) ?? $department;
     }
 
     public function dashboardSearch(Request $request)
