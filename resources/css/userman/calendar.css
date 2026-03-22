@@ -90,11 +90,13 @@ body {
 
 .calendar_day {
     min-height: 80px;
+    min-width: 0;
     border-radius: 8px;
     text-align: left;
     padding: 6px;
     background-color: #fdfdfd;
     cursor: pointer;
+    overflow: hidden;
 }
 
 .calendar_day:hover {
@@ -108,6 +110,10 @@ body {
 
 .calendar_event {
     display: block;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
     font-size: 12px;
     color: white;
     border-radius: 4px;
@@ -116,6 +122,13 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.calendar_event.calendar_registrar {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
 }
 
 .calendar_department {

@@ -247,9 +247,9 @@ class UserManEventController
             }
         }
         // =====================================================
-        // SCENARIO 2: Targeting "Faculty"
+        // SCENARIO 2: Targeting "Faculty" or "Faculty & Department Heads"
         // =====================================================
-        elseif ($targetUsers === 'Faculty') {
+        elseif (in_array($targetUsers, ['Faculty', 'Faculty & Department Heads'])) {
             // Add ALL faculty from the same department
             $allFaculty = User::where('title', 'Faculty')
                 ->where('department', $eventCreatorDepartment)
@@ -360,6 +360,7 @@ class UserManEventController
                 $users->where('title', 'Student');
                 break;
             case 'Faculty':
+            case 'Faculty & Department Heads':
                 $users->whereIn('title', ['Faculty', 'Department Head']);
                 break;
             case 'Department Heads':
@@ -405,7 +406,7 @@ class UserManEventController
         // =====================================================
         // STEP 4: Apply collection-based filters for Faculty when target_users is Faculty
         // =====================================================
-        if ($event->target_users === 'Faculty' && !empty($event->target_faculty)) {
+        if (in_array($event->target_users, ['Faculty', 'Faculty & Department Heads']) && !empty($event->target_faculty)) {
             $users = $users->filter(function ($user) use ($event) {
                 return in_array($user->id, $event->target_faculty);
             });
@@ -558,6 +559,7 @@ class UserManEventController
                     $users->where('title', 'Student');
                     break;
                 case 'Faculty':
+                case 'Faculty & Department Heads':
                     $users->whereIn('title', ['Faculty', 'Department Head']);
                     break;
                 case 'Department Heads':
@@ -634,7 +636,7 @@ class UserManEventController
                     ->where('department', $eventCreatorDepartment)
                     ->first();
                 if ($deptHead) $recipients = $recipients->merge([$deptHead]);
-            } elseif ($targetUsers === 'Faculty') {
+            } elseif (in_array($targetUsers, ['Faculty', 'Faculty & Department Heads'])) {
                 $allFaculty = User::where('title', 'Faculty')
                     ->where('department', $eventCreatorDepartment)
                     ->get();
