@@ -136,17 +136,18 @@ select {
 
 /* Added for Recently Deleted */
 .restore-btn {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    background-color: #4caf50;
-    color: white;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    background: #10b981;
+    color: #ffffff;
     border: none;
-    padding: 6px 12px;
-    border-radius: 6px;
-    cursor: pointer;
+    border-radius: 8px;
     font-size: 13px;
-    transition: background-color 0.2s;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 
 .restore-btn:hover {
@@ -313,25 +314,12 @@ select {
     background-color: #e5e7eb;
 }
 
-@media (max-width: 1024px) {
-    .archive-search-form {
-        flex-wrap: wrap;
-    }
-
-    .archive-search-input {
-        width: 100%;
-    }
-}
-
 .archive-table thead {
     position: sticky;
     top: 0;
     z-index: 10;
     background-color: #38761d;
     color: #ffffff;
-    padding: 14px 16px;
-    white-space: nowrap;
-    border-bottom: 2px solid #2d5e17;
 }
 
 .archive-table th {
@@ -352,90 +340,88 @@ select {
     background-color: #fff;
 }
 
-.archive-table td.action-cell {
-    text-align: center;
-    vertical-align: middle;
-    position: relative;
-    z-index: 1;
-}
-
-.archive-table td.action-cell form {
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    margin: 0 auto;
-    padding: 0;
-}
-
-.archive-table td.action-cell .restore-btn {
-    margin: 0 auto;
-}
-
-.archive-table tbody tr {
-    transition:
-        background 0.25s ease,
-        transform 0.15s ease;
-}
-
 .archive-table tbody tr:hover {
     background: #f4f7ff;
 }
 
-.archive-table tbody tr:hover td {
-    background: #f4f7ff;
-}
+/* =================================
+   RESPONSIVE IMPROVEMENTS (ADDED)
+   ================================= */
 
-/* The viewport container */
-.table-wrapper {
-    width: 100%;
-    max-width: 100%;
-    max-height: 500px;
-    overflow-x: auto;
-    overflow-y: auto;
-    position: relative;
-    border-radius: 10px;
-    border: 1px solid #dbe9dc;
-    background: #fff;
-    -webkit-overflow-scrolling: touch;
-}
+/* Tablet adjustments */
+@media (max-width: 1024px) {
 
-/* Restore Button */
-.restore-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 14px;
-    background: #10b981;
-    color: #ffffff;
-    border: none;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
+    main {
+        padding: 20px;
+    }
 
-.restore-btn:hover {
-    background: #059669;
-    transform: translateY(-1px);
-}
+    .archive-search-form {
+        flex-wrap: wrap;
+    }
 
-.restore-btn:active {
-    transform: translateY(0);
-}
-
-@media (max-width: 768px) {
-    .table-wrapper {
-        max-height: 400px;
+    .archive-search-input {
+        width: 100%;
     }
 
     .archive-table {
         min-width: 900px;
     }
+
 }
 
-@media (max-width: 480px) {
-    .archive-table {
-        min-width: 850px;
+/* Mobile layout */
+@media (max-width: 768px) {
+
+    main {
+        padding: 15px;
     }
+
+    h2 {
+        font-size: 1.3rem;
+    }
+
+    p {
+        font-size: 0.9rem;
+    }
+
+    .archive-search-form {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .archive-search-btn,
+    .archive-clear-btn {
+        width: 100%;
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+        overflow-y: auto;
+        max-height: 400px;
+    }
+
+}
+
+/* Small phone devices */
+@media (max-width: 480px) {
+
+    main {
+        padding: 12px;
+    }
+
+    .archive-table {
+        font-size: 13px;
+        min-width: 800px;
+    }
+
+    .archive-table th,
+    .archive-table td {
+        padding: 10px 12px;
+    }
+
+    .archive-search-input {
+        font-size: 0.9rem;
+    }
+
 }
