@@ -91,6 +91,12 @@
     font-size: 0.8rem;
     color: #444;
 }
+.event-info span:last-child {
+    max-width: 260px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
 
 /* Actions */
 .actions {
