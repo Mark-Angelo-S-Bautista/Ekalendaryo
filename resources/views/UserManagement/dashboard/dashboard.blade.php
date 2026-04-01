@@ -46,13 +46,56 @@
             </div>
         </section>
 
-        <!-- Stats -->
+        <!-- Stats 
         <section class="dashboard_stats">
             <div class="dashboard_stat_box dashboard_clickable" id="dashboard_department_box">
                 <h3>Total Departments and Offices Events</h3>
-                <p>{{ $departmentCounts->sum() }}</p>
+                <p>{{-- {{ $departmentCounts->sum() }} --}}</p>
+            </div>
+        </section> -->
+
+        <section class="dashboard_department_section">
+            <h3 class="dashboard_upcoming_title">Department Events</h3>
+
+            <div class="dashboard_department_grid_cards">
+                {{-- FOR BACKEND
+                
+                @foreach ($departmentsWithEvents as $dept)
+                    <div class="dashboard_department_card_new">
+                        
+                        <!-- Header -->
+                        <div class="dept_card_header">
+                            <h4>{{ $dept['name'] }}</h4> 
+                            <span class="dept_badge">
+                                 {{ $dept['count'] }}Events
+                            </span>
+                        </div>
+
+                        <!-- Events -->
+                        <div class="dept_event_list">
+                            @if (count($dept['events']) > 0)
+                                @foreach ($dept['events'] as $event)
+                                    <div class="dept_event_item">
+                                        <span class="event_title">{{ $event->title }}</span>
+                                        <span class="event_date">
+                                            {{ \Carbon\Carbon::parse($event->date)->format('M d') }}
+                                        </span>
+                                    </div>
+                                @endforeach
+                            @else
+                                <p class="dept_empty">No upcoming events</p>
+                            @endif
+                        </div>
+
+                    </div>
+                @endforeach --}}  
             </div>
         </section>
+
+
+
+
+
 
         <!-- Upcoming Events -->
         <section class="dashboard_upcoming_card">
