@@ -704,6 +704,22 @@ body {
         color-mix(in srgb, var(--dept-color, #0f766e) 16%, transparent);
     display: flex;
     flex-direction: column;
+    cursor: pointer;
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.2s ease;
+}
+
+.dashboard_department_card_new:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px
+        color-mix(in srgb, var(--dept-color, #0f766e) 24%, transparent);
+}
+
+.dashboard_department_card_new:focus-visible {
+    outline: 3px solid
+        color-mix(in srgb, var(--dept-color, #0f766e) 45%, #ffffff 55%);
+    outline-offset: 2px;
 }
 
 /* Header */
@@ -752,6 +768,21 @@ body {
     display: flex;
     flex-direction: column;
     gap: 8px;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition:
+        max-height 0.25s ease,
+        opacity 0.2s ease,
+        margin-top 0.2s ease;
+    margin-top: 0;
+}
+
+.dashboard_department_card_new.is-expanded .dept_event_list {
+    max-height: 320px;
+    overflow-y: auto;
+    opacity: 1;
+    margin-top: 10px;
 }
 
 /* Event item */

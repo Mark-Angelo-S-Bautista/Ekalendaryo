@@ -130,7 +130,8 @@
                         }
                     @endphp
 
-                    <div class="dashboard_department_card_new" style="--dept-color: {{ $deptColor }};">
+                    <div class="dashboard_department_card_new" style="--dept-color: {{ $deptColor }};" role="button"
+                        tabindex="0" aria-expanded="false">
                         <!-- Header -->
                         <div class="dept_card_header">
                             <h4>{{ $dept['name'] }}</h4>
@@ -138,6 +139,26 @@
                                 <span class="dept_count_value">{{ $dept['count'] }}</span>
                                 <span class="dept_count_label">Events</span>
                             </span>
+                        </div>
+
+                        <div class="dept_event_list">
+                            @if (count($dept['events']) > 0)
+                                @foreach ($dept['events'] as $event)
+                                    <div class="dept_event_item">
+                                        <span class="event_title">{{ $event->title }}</span>
+                                        <span class="event_date">
+                                            @if (($event->end_date ?? $event->date) !== $event->date)
+                                                {{ \Carbon\Carbon::parse($event->date)->format('M d, Y') }} -
+                                                {{ \Carbon\Carbon::parse($event->end_date)->format('M d, Y') }}
+                                            @else
+                                                {{ \Carbon\Carbon::parse($event->date)->format('M d, Y') }}
+                                            @endif
+                                        </span>
+                                    </div>
+                                @endforeach
+                            @else
+                                <p class="dept_empty">No upcoming events</p>
+                            @endif
                         </div>
 
                     </div>
@@ -576,6 +597,27 @@
                     if (e.target === deptModal) deptModal.style.display = 'none';
                 });
             }
+
+            // Department card expand/collapse
+            const deptCards = document.querySelectorAll('.dashboard_department_card_new[role="button"]');
+
+            deptCards.forEach(card => {
+                const toggleCard = () => {
+                    const isExpanded = card.classList.toggle('is-expanded');
+                    card.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
+                };
+
+                card.addEventListener('click', () => {
+                    toggleCard();
+                });
+
+                card.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        toggleCard();
+                    }
+                });
+            });
         });
     </script>
 

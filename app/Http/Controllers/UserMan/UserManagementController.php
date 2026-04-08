@@ -308,7 +308,7 @@ class UserManagementController
             $departmentsWithEvents[] = [
                 'name' => $deptName,
                 'count' => $departmentEvents->count(),
-                'events' => $departmentEvents->take(3),
+                'events' => $departmentEvents,
             ];
         }
 
@@ -336,7 +336,7 @@ class UserManagementController
             $departmentsWithEvents[] = [
                 'name' => $officeName,
                 'count' => $sortedOfficeEvents->count(),
-                'events' => $sortedOfficeEvents->take(3),
+                'events' => $sortedOfficeEvents,
             ];
         }
 
