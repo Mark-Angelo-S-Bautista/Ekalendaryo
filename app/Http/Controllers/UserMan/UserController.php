@@ -232,6 +232,7 @@ class UserController
                 'section' => $record['section'] ?? null,
                 'role' => $record['role'] ?? 'Viewer',
                 'password' => Hash::make($generatedPassword),
+                'must_change_password' => true,
                 'school_year_id' => $schoolYearId,
             ]);
 

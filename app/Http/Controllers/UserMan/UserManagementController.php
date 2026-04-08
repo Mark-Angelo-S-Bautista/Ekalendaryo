@@ -508,6 +508,7 @@ class UserManagementController
             'yearlevel' => $request->yearlevel,
             'section' => $request->section,
             'password' => Hash::make($generatedPassword),
+            'must_change_password' => true,
             'school_year_id' => $schoolYearId,
         ]);
 
@@ -631,6 +632,7 @@ class UserManagementController
         // Update password
         auth()->user()->update([
             'password' => bcrypt($request->new_password),
+            'must_change_password' => false,
         ]);
 
         return response()->json([

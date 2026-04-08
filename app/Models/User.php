@@ -37,7 +37,8 @@ class User extends Authenticatable
         'reset_otp_expires_at',
         'pending_email',
         'email_change_token',
-        'notifications_last_viewed_at'
+        'notifications_last_viewed_at',
+        'must_change_password',
     ];
 
     /**

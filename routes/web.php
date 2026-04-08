@@ -39,7 +39,12 @@ Route::get('/profile/verify-email-change/{token}',[UserManagementController::cla
 Route::get('/profile/verify-email-change/{token}',[ViewerController::class, 'verifyNewEmail'])->name('profile.verifyNewEmail');
 
 
-Route::middleware(['auth', 'backhistory'])->group(function () {
+Route::middleware(['auth', 'force.password.change', 'backhistory'])->group(function () {
+    Route::get('/first-login/password', [LoginController::class, 'showFirstLoginPasswordForm'])
+        ->name('firstLogin.password.form');
+    Route::post('/first-login/password', [LoginController::class, 'updateFirstLoginPassword'])
+        ->name('firstLogin.password.update');
+
     // --- A. EDITOR ROUTES (Requires 'auth' + 'role.editor') ---
     // Applies the prefix 'editor/' and the route name prefix 'editor.'
     Route::middleware('role.editor')->prefix('editor')->name('Editor.')->group(function () {

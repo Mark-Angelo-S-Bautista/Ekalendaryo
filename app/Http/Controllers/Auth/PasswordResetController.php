@@ -81,6 +81,7 @@ class PasswordResetController
 
         $user->update([
             'password' => Hash::make($request->password),
+            'must_change_password' => false,
             'reset_otp' => null,
             'reset_otp_expires_at' => null
         ]);

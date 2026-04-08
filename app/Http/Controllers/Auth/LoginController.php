@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
 class LoginController
@@ -39,6 +40,10 @@ class LoginController
             
             // Get the authenticated user
             $user = Auth::user();
+
+            if ($user && $user->must_change_password) {
+                return redirect()->route('firstLogin.password.form');
+            }
             
             if ($user && $user->role === 'Editor') {
                 return redirect()->route('Editor.dashboard');
@@ -77,6 +82,67 @@ class LoginController
         $request->session()->regenerateToken();
 
         // Redirect the user back to the homepage or login page
+        return redirect('/');
+    }
+
+    public function showFirstLoginPasswordForm()
+    {
+        $user = Auth::user();
+
+        if (!$user || !$user->must_change_password) {
+            if ($user && $user->role === 'Editor') {
+                return redirect()->route('Editor.dashboard');
+            }
+
+            if ($user && $user->role === 'UserManagement') {
+                return redirect()->route('UserManagement.dashboard');
+            }
+
+            if ($user && $user->role === 'Viewer') {
+                return redirect()->route('Viewer.dashboard');
+            }
+
+            return redirect('/');
+        }
+
+        return view('Auth.first_login_change_password');
+    }
+
+    public function updateFirstLoginPassword(Request $request)
+    {
+        $request->validate([
+            'new_password' => 'required|string|min:8|confirmed',
+        ]);
+
+        $user = Auth::user();
+
+        if (!$user) {
+            return redirect()->route('Auth.login');
+        }
+
+        if (Hash::check($request->new_password, $user->password)) {
+            return back()->withErrors([
+                'new_password' => 'New password must be different from your current password.',
+            ]);
+        }
+
+        $user->update([
+            'password' => Hash::make($request->new_password),
+            'must_change_password' => false,
+        ]);
+
+        if ($user->role === 'Editor') {
+            return redirect()->route('Editor.dashboard');
+        }
+
+        if ($user->role === 'UserManagement') {
+            return redirect()->route('UserManagement.dashboard');
+        }
+
+        if ($user->role === 'Viewer') {
+            return redirect()->route('Viewer.dashboard');
+        }
+
         return redirect('/');
     }
 }
