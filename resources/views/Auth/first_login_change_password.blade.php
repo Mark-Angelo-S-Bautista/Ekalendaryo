@@ -15,11 +15,20 @@
             <form action="{{ route('firstLogin.password.update') }}" method="POST">
                 @csrf
                 <div class="modal-input">
-                    <input type="password" name="new_password" placeholder="New Password" required minlength="8">
+                    <div class="password-wrapper">
+                        <input id="new_password" type="password" name="new_password" placeholder="New Password" required
+                            minlength="8">
+                        <span class="password-toggle" data-target="new_password"
+                            style="cursor: pointer; user-select:none;">👁️</span>
+                    </div>
                 </div>
                 <div class="modal-input">
-                    <input type="password" name="new_password_confirmation" placeholder="Confirm New Password" required
-                        minlength="8">
+                    <div class="password-wrapper">
+                        <input id="new_password_confirmation" type="password" name="new_password_confirmation"
+                            placeholder="Confirm New Password" required minlength="8">
+                        <span class="password-toggle" data-target="new_password_confirmation"
+                            style="cursor: pointer; user-select:none;">👁️</span>
+                    </div>
                 </div>
 
                 <div class="modal-buttons">
@@ -36,4 +45,23 @@
             </form>
         </div>
     </div>
+
+    <script>
+        document.querySelectorAll('.password-toggle').forEach(function(toggleBtn) {
+            toggleBtn.addEventListener('click', function() {
+                const input = document.getElementById(toggleBtn.dataset.target);
+                if (!input) {
+                    return;
+                }
+
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    toggleBtn.textContent = '👁️‍🗨️';
+                } else {
+                    input.type = 'password';
+                    toggleBtn.textContent = '👁️';
+                }
+            });
+        });
+    </script>
 </x-loginLayout>
