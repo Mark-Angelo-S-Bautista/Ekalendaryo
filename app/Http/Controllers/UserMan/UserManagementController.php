@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use App\Mail\VerifyNewEmail;
+use App\Mail\UserCredentialsMail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
@@ -456,7 +457,6 @@ class UserManagementController
             'role' => 'required|string',
             'department' => 'required|string',
             'title' => 'required|string|max:255',
-            'password' => 'required|string|min:6',
         ];
 
         // Conditional rules
@@ -494,8 +494,10 @@ class UserManagementController
         $activeSchoolYear = SchoolYear::where('is_active', 1)->first();
         $schoolYearId = $activeSchoolYear ? $activeSchoolYear->id : null;
 
+        $generatedPassword = Str::random(12);
+
         // Create user
-        User::create([
+        $user = User::create([
             'name' => $request->name,
             'office_name' => $request->office_name,
             'userId' => $request->userId,
@@ -505,9 +507,19 @@ class UserManagementController
             'title' => $request->title,
             'yearlevel' => $request->yearlevel,
             'section' => $request->section,
-            'password' => bcrypt($request->password),
+            'password' => Hash::make($generatedPassword),
             'school_year_id' => $schoolYearId,
         ]);
+
+        Mail::to($user->email)->queue(new UserCredentialsMail([
+            'name' => $user->name,
+            'userId' => $user->userId,
+            'email' => $user->email,
+            'department' => $user->department,
+            'yearlevel' => $user->yearlevel,
+            'section' => $user->section,
+            'password' => $generatedPassword,
+        ]));
 
         return response()->json([
             'status' => 'success',

@@ -11,7 +11,10 @@ use Illuminate\Support\Facades\Hash;
 use League\Csv\Reader;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use App\Models\Event;
+use App\Mail\UserCredentialsMail;
 
 class UserController
 {
@@ -181,7 +184,6 @@ class UserController
         $activeSchoolYear = SchoolYear::where('is_active', 1)->first();
         $schoolYearId = $activeSchoolYear ? $activeSchoolYear->id : null;
 
-        $defaultPassword = 'password';
         $records = $csv->getRecords();
         $importErrors = [];
 
@@ -217,8 +219,10 @@ class UserController
                 continue; // skip this row
             }
 
+            $generatedPassword = Str::random(12);
+
             // Insert user
-            User::create([
+            $user = User::create([
                 'userId' => $record['userId'],
                 'name' => $record['name'] ?? null,
                 'title' => $record['title'] ?? null,
@@ -227,9 +231,19 @@ class UserController
                 'yearlevel' => $record['yearlevel'] ?? null,
                 'section' => $record['section'] ?? null,
                 'role' => $record['role'] ?? 'Viewer',
-                'password' => Hash::make($record['password'] ?? $defaultPassword),
+                'password' => Hash::make($generatedPassword),
                 'school_year_id' => $schoolYearId,
             ]);
+
+            Mail::to($user->email)->queue(new UserCredentialsMail([
+                'name' => $user->name,
+                'userId' => $user->userId,
+                'email' => $user->email,
+                'department' => $user->department,
+                'yearlevel' => $user->yearlevel,
+                'section' => $user->section,
+                'password' => $generatedPassword,
+            ]));
         }
 
         if (!empty($importErrors)) {
