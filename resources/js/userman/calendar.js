@@ -48,6 +48,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // Unspecified departments get unique random colors
     const departmentColors = {
         // Specified colors
+        bsis: "#0000FF", // Blue
+        act: "#0000FF", // Blue
         bsca: "#808080", // Grey
         bsais: "#FFD700", // Yellow
         btvted: "#87CEEB", // Light blue

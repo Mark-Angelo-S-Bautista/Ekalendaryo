@@ -258,6 +258,88 @@ class UserManagementController
 
         $finalDeptCounts['Registrar'] = $registrarCount;
 
+        // Build dashboard cards for department and office event counts with recent events.
+        $departmentsWithEvents = [];
+
+        // Department cards (configured departments excluding OFFICES)
+        foreach ($departments as $deptName) {
+            if (strtoupper(trim((string) $deptName)) === 'OFFICES') {
+                continue;
+            }
+
+            if ($this->normalizeDepartmentKey((string) $deptName) === 'BSIS/ACT') {
+                continue;
+            }
+
+            $normalizedCardDept = $this->normalizeDepartmentKey((string) $deptName);
+            $departmentEvents = $countableEvents
+                ->filter(function ($event) use ($normalizedCardDept) {
+                    $creator = $event->user;
+                    $creatorTitle = trim((string) ($creator->title ?? ''));
+                    $creatorDepartment = trim((string) ($creator->department ?? $event->department ?? ''));
+
+                    // Office-created events belong to office cards.
+                    if (strcasecmp($creatorTitle, 'Offices') === 0 || strcasecmp($creatorDepartment, 'OFFICES') === 0) {
+                        return false;
+                    }
+
+                    $normalizedCreatorDept = $this->normalizeDepartmentKey($creatorDepartment);
+                    if ($normalizedCreatorDept === '' || $normalizedCardDept === '') {
+                        return false;
+                    }
+
+                    if ($normalizedCreatorDept === $normalizedCardDept) {
+                        return true;
+                    }
+
+                    // Combined card (e.g., BSIS/ACT) should include split creators (BSIS, ACT).
+                    if (str_contains($normalizedCardDept, '/')) {
+                        $parts = array_map('trim', explode('/', $normalizedCardDept));
+                        return in_array($normalizedCreatorDept, $parts, true);
+                    }
+
+                    return false;
+                })
+                ->sortBy(function ($event) {
+                    return Carbon::parse($event->date . ' ' . $event->start_time);
+                })
+                ->values();
+
+            $departmentsWithEvents[] = [
+                'name' => $deptName,
+                'count' => $departmentEvents->count(),
+                'events' => $departmentEvents->take(3),
+            ];
+        }
+
+        // Office cards (group by office name)
+        $officeEventGroups = $countableEvents
+            ->filter(function ($event) {
+                $creator = $event->user;
+                $creatorTitle = trim((string) ($creator->title ?? ''));
+                $creatorDepartment = trim((string) ($creator->department ?? $event->department ?? ''));
+
+                return strcasecmp($creatorTitle, 'Offices') === 0 || strcasecmp($creatorDepartment, 'OFFICES') === 0;
+            })
+            ->groupBy(function ($event) {
+                $office = trim((string) optional($event->user)->office_name);
+                return $office !== '' ? $office : 'Office';
+            });
+
+        foreach ($officeEventGroups as $officeName => $groupedEvents) {
+            $sortedOfficeEvents = $groupedEvents
+                ->sortBy(function ($event) {
+                    return Carbon::parse($event->date . ' ' . $event->start_time);
+                })
+                ->values();
+
+            $departmentsWithEvents[] = [
+                'name' => $officeName,
+                'count' => $sortedOfficeEvents->count(),
+                'events' => $sortedOfficeEvents->take(3),
+            ];
+        }
+
         // Paginate with 8 per page
         $currentPage = LengthAwarePaginator::resolveCurrentPage();
         $perPage = 8;
@@ -274,6 +356,7 @@ class UserManagementController
             'user' => $user,
             'totalEvents' => $totalEvents,
             'departmentCounts' => $finalDeptCounts,
+            'departmentsWithEvents' => $departmentsWithEvents,
             'upcomingEvents' => $paginatedEvents,
             'office_name' => $office_name,
             'currentSchoolYearName' => $currentSchoolYearName,

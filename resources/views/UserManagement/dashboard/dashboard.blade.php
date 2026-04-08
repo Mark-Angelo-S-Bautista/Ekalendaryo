@@ -58,37 +58,90 @@
             <h3 class="dashboard_upcoming_title">Department Events</h3>
 
             <div class="dashboard_department_grid_cards">
-                {{-- FOR BACKEND
-                
+                @php
+                    // Match calendar color rules from resources/js/userman/calendar.js
+                    $calendarDepartmentColors = [
+                        'bsis' => '#0000FF',
+                        'act' => '#0000FF',
+                        'bsca' => '#808080',
+                        'bsais' => '#FFD700',
+                        'btvted' => '#87CEEB',
+                        'bsom' => '#FF6B6B',
+                        'bsis_act' => '#0000FF',
+                        'dhrmt' => '#9370DB',
+                        'default' => '#28a745',
+                    ];
+
+                    $knownDeptPrefixes = ['bs', 'bt', 'dh', 'ab', 'ba'];
+                    $additionalColors = [
+                        '#FF8C00',
+                        '#20B2AA',
+                        '#DB7093',
+                        '#6495ED',
+                        '#32CD32',
+                        '#FF4500',
+                        '#8B4513',
+                        '#4682B4',
+                        '#D2691E',
+                        '#9ACD32',
+                        '#CD5C5C',
+                        '#00CED1',
+                        '#BA55D3',
+                        '#2E8B57',
+                        '#F4A460',
+                    ];
+
+                    $calendarKey = function ($name) {
+                        $n = strtolower(trim((string) $name));
+                        $n = preg_replace('/\s*\/\s*/', '_', $n);
+                        $n = str_replace([' ', '-'], '_', $n);
+                        return preg_replace('/_+/', '_', $n);
+                    };
+
+                    $isAcademicDepartment = function ($key) use ($knownDeptPrefixes) {
+                        foreach ($knownDeptPrefixes as $prefix) {
+                            if (str_starts_with($key, $prefix)) {
+                                return true;
+                            }
+                        }
+                        return false;
+                    };
+                @endphp
+
                 @foreach ($departmentsWithEvents as $dept)
-                    <div class="dashboard_department_card_new">
-                        
+                    @php
+                        $deptNameRaw = trim((string) ($dept['name'] ?? ''));
+                        $deptNameUpper = strtoupper($deptNameRaw);
+
+                        if ($deptNameUpper === 'BSIS/ACT') {
+                            continue;
+                        }
+
+                        $deptKey = $calendarKey($deptNameRaw);
+
+                        if (array_key_exists($deptKey, $calendarDepartmentColors)) {
+                            $deptColor = $calendarDepartmentColors[$deptKey];
+                        } elseif ($isAcademicDepartment($deptKey)) {
+                            $deptColor =
+                                $additionalColors[abs(crc32($deptKey ?: 'default')) % count($additionalColors)];
+                        } else {
+                            // Offices follow calendar default green.
+                            $deptColor = $calendarDepartmentColors['default'];
+                        }
+                    @endphp
+
+                    <div class="dashboard_department_card_new" style="--dept-color: {{ $deptColor }};">
                         <!-- Header -->
                         <div class="dept_card_header">
-                            <h4>{{ $dept['name'] }}</h4> 
+                            <h4>{{ $dept['name'] }}</h4>
                             <span class="dept_badge">
-                                 {{ $dept['count'] }}Events
+                                <span class="dept_count_value">{{ $dept['count'] }}</span>
+                                <span class="dept_count_label">Events</span>
                             </span>
                         </div>
 
-                        <!-- Events -->
-                        <div class="dept_event_list">
-                            @if (count($dept['events']) > 0)
-                                @foreach ($dept['events'] as $event)
-                                    <div class="dept_event_item">
-                                        <span class="event_title">{{ $event->title }}</span>
-                                        <span class="event_date">
-                                            {{ \Carbon\Carbon::parse($event->date)->format('M d') }}
-                                        </span>
-                                    </div>
-                                @endforeach
-                            @else
-                                <p class="dept_empty">No upcoming events</p>
-                            @endif
-                        </div>
-
                     </div>
-                @endforeach --}}
+                @endforeach
             </div>
         </section>
 

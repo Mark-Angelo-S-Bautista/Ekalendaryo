@@ -682,6 +682,7 @@ body {
 /* Department Grid Section */
 .dashboard_department_section {
     margin-top: 2rem;
+    margin-bottom: 2rem;
 }
 
 /* Grid Layout */
@@ -694,10 +695,13 @@ body {
 /* Card */
 .dashboard_department_card_new {
     background: #ffffff;
-    border: 1px solid #d8eeda;
+    border: 1px solid
+        color-mix(in srgb, var(--dept-color, #0f766e) 30%, #ffffff 70%);
+    border-top: 4px solid var(--dept-color, #0f766e);
     border-radius: 12px;
     padding: 16px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 14px
+        color-mix(in srgb, var(--dept-color, #0f766e) 16%, transparent);
     display: flex;
     flex-direction: column;
 }
@@ -712,18 +716,35 @@ body {
 
 .dept_card_header h4 {
     margin: 0;
-    color: #004d25;
+    color: var(--dept-color, #0f766e);
     font-size: 1rem;
 }
 
 /* Badge */
 .dept_badge {
-    background: #eaf6ec;
-    color: #007f3d;
-    font-size: 0.75rem;
-    padding: 4px 10px;
-    border-radius: 20px;
+    background: color-mix(in srgb, var(--dept-color, #0f766e) 85%, #ffffff 15%);
+    color: #ffffff;
+    min-width: 110px;
+    padding: 8px 12px;
+    border-radius: 12px;
     font-weight: 600;
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 6px;
+}
+
+.dept_count_value {
+    font-size: 1.9rem;
+    line-height: 1;
+    font-weight: 800;
+}
+
+.dept_count_label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
 }
 
 /* Event list */
