@@ -211,6 +211,7 @@ class ViewerController
 
                 return [
                     'date' => $event->date,
+                    'endDate' => $event->end_date ?: $event->date,
                     'title' => $event->title,
                     'description' => $event->description ?? 'No description provided.',
                     'moreDetails' => $event->more_details ?? 'No additional details.',

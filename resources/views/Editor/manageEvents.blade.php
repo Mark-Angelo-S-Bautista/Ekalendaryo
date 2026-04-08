@@ -80,6 +80,12 @@
                             </div>
 
                             <div class="form-group">
+                                <label>End Date</label>
+                                <input type="date" id="eventEndDate" name="end_date"
+                                    min="{{ now()->format('Y-m-d') }}" required>
+                            </div>
+
+                            <div class="form-group">
                                 <label>Start Time</label>
                                 <input type="time" id="startTime" name="start_time" min="07:00" max="17:00"
                                     required>
@@ -124,6 +130,28 @@
                                         otherInput.value = '';
                                     }
                                 }
+
+                                function syncEndDateMin() {
+                                    const eventDate = document.getElementById('eventDate');
+                                    const endDate = document.getElementById('eventEndDate');
+                                    if (!eventDate || !endDate) return;
+
+                                    const start = eventDate.value;
+                                    if (!start) return;
+
+                                    endDate.min = start;
+                                    if (!endDate.value || endDate.value < start) {
+                                        endDate.value = start;
+                                    }
+                                }
+
+                                document.addEventListener('DOMContentLoaded', function() {
+                                    const eventDate = document.getElementById('eventDate');
+                                    if (eventDate) {
+                                        eventDate.addEventListener('change', syncEndDateMin);
+                                    }
+                                    syncEndDateMin();
+                                });
                             </script>
 
                             @if (auth()->user()->title === 'Offices' || auth()->user()->title === 'Department Head')
@@ -1162,7 +1190,15 @@ $userTitle = $user->title ?? null;
                                 <p>{{ $event->description ?? 'No description available.' }}</p>
 
                                 <div class="event-info">
-                                    <span>📅 {{ \Carbon\Carbon::parse($event->date)->format('M d, Y') }}</span>
+                                    <span>
+                                        📅
+                                        @if (($event->end_date ?? $event->date) !== $event->date)
+                                            {{ \Carbon\Carbon::parse($event->date)->format('M d, Y') }} -
+                                            {{ \Carbon\Carbon::parse($event->end_date)->format('M d, Y') }}
+                                        @else
+                                            {{ \Carbon\Carbon::parse($event->date)->format('M d, Y') }}
+                                        @endif
+                                    </span>
                                     <span>⏰ {{ \Carbon\Carbon::parse($event->start_time)->format('g:i A') }} -
                                         {{ \Carbon\Carbon::parse($event->end_time)->format('g:i A') }}</span>
                                     <span>📍 {{ $event->location }}</span>

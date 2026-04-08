@@ -36,7 +36,13 @@
                             </div>
 
                             <div class="dashboard_event_details">
-                                📅 {{ \Carbon\Carbon::parse($event->date)->format('n/j/Y') }}
+                                📅
+                                @if (($event->end_date ?? $event->date) !== $event->date)
+                                    {{ \Carbon\Carbon::parse($event->date)->format('n/j/Y') }} -
+                                    {{ \Carbon\Carbon::parse($event->end_date)->format('n/j/Y') }}
+                                @else
+                                    {{ \Carbon\Carbon::parse($event->date)->format('n/j/Y') }}
+                                @endif
                                 &nbsp;&nbsp; 🕓 {{ \Carbon\Carbon::parse($event->start_time)->format('g:i A') }}
                                 - {{ \Carbon\Carbon::parse($event->end_time)->format('g:i A') }}
                                 &nbsp;&nbsp; 📍 {{ $event->location }}
@@ -202,6 +208,9 @@
                             // --- THIS IS THE UPDATED/FIXED PART ---
 
                             const date = new Date(event.date).toLocaleDateString('en-US');
+                            const endDateRaw = event.end_date || event.date;
+                            const endDate = new Date(endDateRaw).toLocaleDateString('en-US');
+                            const dateRange = date === endDate ? date : `${date} - ${endDate}`;
 
                             // FIX 1: Use pre-formatted times from the controller
                             const startTime = event.formatted_start_time || '';
@@ -211,7 +220,7 @@
                             <div class="dashboard_event_card">
                                 <div class="dashboard_event_title">${event.title}</div>
                                 <div class="dashboard_event_details">
-                                    📅 ${date} &nbsp; 🕓 ${startTime} - ${endTime} &nbsp; 📍 ${event.location || ''}
+                                    📅 ${dateRange} &nbsp; 🕓 ${startTime} - ${endTime} &nbsp; 📍 ${event.location || ''}
                                 </div>
                                 <div class="dashboard_event_details">${event.description || ''}</div>
                                 <div class="dashboard_event_tags">

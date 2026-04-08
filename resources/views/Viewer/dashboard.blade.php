@@ -37,7 +37,13 @@
                                     {{ $event->description ?? 'No description provided.' }}
                                 </div>
                                 <div class="dashboard_event_details">
-                                    📅 {{ \Carbon\Carbon::parse($event->date)->format('n/j/Y') }}
+                                    📅
+                                    @if (($event->end_date ?? $event->date) !== $event->date)
+                                        {{ \Carbon\Carbon::parse($event->date)->format('n/j/Y') }} -
+                                        {{ \Carbon\Carbon::parse($event->end_date)->format('n/j/Y') }}
+                                    @else
+                                        {{ \Carbon\Carbon::parse($event->date)->format('n/j/Y') }}
+                                    @endif
                                     &nbsp;&nbsp; 🕓 {{ \Carbon\Carbon::parse($event->start_time)->format('g:i A') }}
                                     - {{ \Carbon\Carbon::parse($event->end_time)->format('g:i A') }}
                                     &nbsp;&nbsp; 📍 {{ $event->location }}

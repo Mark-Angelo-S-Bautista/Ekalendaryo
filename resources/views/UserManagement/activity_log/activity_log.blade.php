@@ -56,6 +56,7 @@
                         @if ($log->model_type === 'Event')
                             @php
                                 $event_date = $log->description['event_date'] ?? null;
+                                $event_end_date = $log->description['event_end_date'] ?? null;
                                 $start_time = $log->description['start_time'] ?? null;
                                 $end_time = $log->description['end_time'] ?? null;
                                 $location = $log->description['location'] ?? null;
@@ -65,6 +66,9 @@
                                 if (empty($sections) || empty($faculty)) {
                                     $logEvent = \App\Models\Event::find($log->model_id);
                                     if ($logEvent) {
+                                        if (empty($event_end_date)) {
+                                            $event_end_date = $logEvent->end_date;
+                                        }
                                         if (empty($sections)) {
                                             $sections = $logEvent->target_sections ?? [];
                                         }
@@ -86,14 +90,27 @@
                                     }
                                     return $value ?? 'N/A';
                                 };
+
+                                $formatDateRange = function ($start, $end) {
+                                    $startVal = $start ?: 'N/A';
+                                    $endVal = $end ?: $start;
+
+                                    if (!$start || !$endVal || $startVal === $endVal) {
+                                        return $startVal;
+                                    }
+
+                                    return $startVal . ' - ' . $endVal;
+                                };
                             @endphp
 
                             <p>📅 Event Date:</p>
                             <p>
                                 @if (is_array($event_date) && ($event_date['old'] ?? '') !== ($event_date['new'] ?? ''))
-                                    <del>{{ $event_date['old'] ?? 'N/A' }}</del> → {{ $event_date['new'] ?? 'N/A' }}
+                                    <del>{{ $formatDateRange($event_date['old'] ?? null, is_array($event_end_date) ? $event_end_date['old'] ?? null : $event_end_date) }}</del>
+                                    →
+                                    {{ $formatDateRange($event_date['new'] ?? null, is_array($event_end_date) ? $event_end_date['new'] ?? null : $event_end_date) }}
                                 @else
-                                    {{ is_array($event_date) ? $event_date['new'] ?? 'N/A' : $event_date ?? 'N/A' }}
+                                    {{ $formatDateRange(is_array($event_date) ? $event_date['new'] ?? null : $event_date, is_array($event_end_date) ? $event_end_date['new'] ?? null : $event_end_date) }}
                                 @endif
                             </p>
 

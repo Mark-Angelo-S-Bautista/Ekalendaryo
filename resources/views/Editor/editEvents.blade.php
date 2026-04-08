@@ -92,6 +92,13 @@
                     min="{{ date('Y-m-d', strtotime('+1 day')) }}">
             </div>
 
+            <div class="form-group">
+                <label>End Date</label>
+                <input type="date" id="eventEndDate" name="end_date"
+                    value="{{ old('end_date', $event->end_date ?? $event->date) }}"
+                    min="{{ old('date', $event->date) }}">
+            </div>
+
             {{-- Start Time --}}
             <div class="form-group">
                 <label>Start Time</label>
@@ -525,7 +532,27 @@
             }
         }
 
+        function syncEndDateMin() {
+            const eventDate = document.getElementById('eventDate');
+            const endDate = document.getElementById('eventEndDate');
+            if (!eventDate || !endDate) return;
+
+            const start = eventDate.value;
+            if (!start) return;
+
+            endDate.min = start;
+            if (!endDate.value || endDate.value < start) {
+                endDate.value = start;
+            }
+        }
+
         document.addEventListener("DOMContentLoaded", () => {
+            const eventDate = document.getElementById('eventDate');
+            if (eventDate) {
+                eventDate.addEventListener('change', syncEndDateMin);
+            }
+            syncEndDateMin();
+
             const targetUsers = document.getElementById("targetUsers");
             const yearLevels = document.getElementById("targetYearLevelsContainer");
             const openSectionBtn = document.getElementById("openSectionModalBtn");

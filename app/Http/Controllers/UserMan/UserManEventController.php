@@ -33,6 +33,7 @@ class UserManEventController
             'description' => 'nullable|string|max:155',
             'more_details' => 'nullable|string',
             'date' => 'required|date|after:today',
+            'end_date' => 'required|date|after_or_equal:date',
 
             'start_time' => [
                 'required',
@@ -89,7 +90,8 @@ class UserManEventController
         // ==============================
         // Check for schedule conflict
         // ==============================
-        $conflict = Event::where('date', $validated['date'])
+        $conflict = Event::where('date', '<=', $validated['end_date'])
+            ->whereRaw('COALESCE(end_date, date) >= ?', [$validated['date']])
             ->where('location', $location)
             ->where('status', '!=', 'cancelled')
             ->where(function ($query) use ($validated) {
@@ -124,6 +126,7 @@ class UserManEventController
             'description' => $validated['description'] ?? null,
             'more_details' => $validated['more_details'] ?? null,
             'date' => $validated['date'],
+            'end_date' => $validated['end_date'],
             'start_time' => $validated['start_time'],
             'end_time' => $validated['end_time'],
             'location' => $location,
@@ -163,6 +166,7 @@ class UserManEventController
             'description' => [
                 'title' => $event->title,
                 'event_date' => $event->date,
+                'event_end_date' => $event->end_date,
                 'start_time' => $event->start_time,
                 'end_time' => $event->end_time,
                 'location' => $event->location,
@@ -464,10 +468,11 @@ class UserManEventController
 
     private function scheduleEventReminders(Event $event, $recipients)
     {
-        $eventDateTime = \Carbon\Carbon::parse($event->date);
+        // Reminders are always based on the first day of the event.
+        $eventStartDateTime = \Carbon\Carbon::parse($event->date . ' 00:00:00', 'Asia/Manila');
 
-        $threeDaysBefore = $eventDateTime->copy()->subDays(3);
-        $oneDayBefore    = $eventDateTime->copy()->subDay();
+        $threeDaysBefore = $eventStartDateTime->copy()->subDays(3);
+        $oneDayBefore    = $eventStartDateTime->copy()->subDay();
 
         foreach ($recipients as $user) {
             if (empty($user->email)) {
@@ -694,7 +699,7 @@ class UserManEventController
         $events = Event::with('user')
             ->where('user_id', $userId)
             ->where('status', '!=', 'cancelled')
-            ->where('date', '>=', $today)
+            ->whereRaw('COALESCE(end_date, date) >= ?', [$today])
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($subQuery) use ($search) {
                     $subQuery->where('title', 'like', "%{$search}%")
@@ -842,6 +847,7 @@ class UserManEventController
             'description' => 'nullable|string',
             'more_details' => 'nullable|string',
             'date' => 'required|date|after_or_equal:today',
+            'end_date' => 'required|date|after_or_equal:date',
             'start_time' => 'required',
             'end_time' => 'required',
             'location' => 'required|string|max:255',
@@ -859,7 +865,8 @@ class UserManEventController
             : $request->location;
 
         $conflict = Event::where('id', '!=', $event->id)
-            ->where('date', $validated['date'])
+            ->where('date', '<=', $validated['end_date'])
+            ->whereRaw('COALESCE(end_date, date) >= ?', [$validated['date']])
             ->where('location', $location)
             ->where('status', '!=', 'cancelled')
             ->where(function ($query) use ($validated) {
@@ -899,6 +906,7 @@ class UserManEventController
             'description' => $validated['description'] ?? null,
             'more_details' => $validated['more_details'] ?? null,
             'date' => $validated['date'],
+            'end_date' => $validated['end_date'],
             'start_time' => $validated['start_time'],
             'end_time' => $validated['end_time'],
             'location' => $location,
@@ -936,6 +944,7 @@ class UserManEventController
                 'description' => [
                     'title' => $event->title,
                     'event_date' => $event->date,
+                    'event_end_date' => $event->end_date,
                     'start_time' => $event->start_time,
                     'end_time' => $event->end_time,
                     'location' => $event->location,
@@ -972,6 +981,10 @@ class UserManEventController
                 'event_date' => [
                     'old' => $oldEvent->date,
                     'new' => $event->date,
+                ],
+                'event_end_date' => [
+                    'old' => $oldEvent->end_date,
+                    'new' => $event->end_date,
                 ],
                 'start_time' => [
                     'old' => $oldEvent->start_time,
@@ -1038,6 +1051,7 @@ class UserManEventController
             'description' => [
                 'title' => $event->title,
                 'event_date' => $event->date,
+                'event_end_date' => $event->end_date,
                 'start_time' => $event->start_time,
                 'end_time' => $event->end_time,
                 'location' => $event->location,
@@ -1073,13 +1087,17 @@ class UserManEventController
     {
         $request->validate([
             'date' => 'required|date',
+            'end_date' => 'nullable|date|after_or_equal:date',
             'start_time' => 'required',
             'end_time' => 'required',
             'location' => 'required|string',
             'event_id' => 'nullable|integer',
         ]);
 
-        $conflict = Event::where('date', $request->date)
+        $rangeEnd = $request->end_date ?: $request->date;
+
+        $conflict = Event::where('date', '<=', $rangeEnd)
+            ->whereRaw('COALESCE(end_date, date) >= ?', [$request->date])
             ->where('location', $request->location)
             ->where('status', '!=', 'cancelled')
             ->when($request->event_id, function($q) use ($request) {
@@ -1119,6 +1137,7 @@ class UserManEventController
     {
         $request->validate([
             'date' => 'required|date',
+            'end_date' => 'nullable|date|after_or_equal:date',
             'start_time' => 'required',
             'end_time' => 'required',
             'target_users' => 'nullable|string',
@@ -1129,7 +1148,10 @@ class UserManEventController
             'event_id' => 'nullable|integer',
         ]);
 
-        $overlappingEvents = Event::where('date', $request->date)
+        $rangeEnd = $request->end_date ?: $request->date;
+
+        $overlappingEvents = Event::where('date', '<=', $rangeEnd)
+            ->whereRaw('COALESCE(end_date, date) >= ?', [$request->date])
             ->where('status', '!=', 'cancelled')
             ->when($request->event_id, function($q) use ($request) {
                 $q->where('id', '!=', $request->event_id);

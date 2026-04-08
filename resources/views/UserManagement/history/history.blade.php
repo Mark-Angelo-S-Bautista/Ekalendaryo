@@ -45,7 +45,15 @@
                                 </p>
 
                                 <div class="event-meta">
-                                    <span>📅 {{ \Carbon\Carbon::parse($event->date)->format('m/d/Y') }}</span>
+                                    <span>
+                                        📅
+                                        @if (($event->end_date ?? $event->date) !== $event->date)
+                                            {{ \Carbon\Carbon::parse($event->date)->format('m/d/Y') }} -
+                                            {{ \Carbon\Carbon::parse($event->end_date)->format('m/d/Y') }}
+                                        @else
+                                            {{ \Carbon\Carbon::parse($event->date)->format('m/d/Y') }}
+                                        @endif
+                                    </span>
                                     <span>⏰ {{ $event->start_time }} - {{ $event->end_time }}</span>
                                     <span>📍 {{ $event->location }}</span>
                                     <span>👤 {{ $event->department }}</span>
@@ -165,7 +173,15 @@
                                 </p>
 
                                 <div class="event-meta">
-                                    <span>📅 {{ \Carbon\Carbon::parse($event->date)->format('m/d/Y') }}</span>
+                                    <span>
+                                        📅
+                                        @if (($event->end_date ?? $event->date) !== $event->date)
+                                            {{ \Carbon\Carbon::parse($event->date)->format('m/d/Y') }} -
+                                            {{ \Carbon\Carbon::parse($event->end_date)->format('m/d/Y') }}
+                                        @else
+                                            {{ \Carbon\Carbon::parse($event->date)->format('m/d/Y') }}
+                                        @endif
+                                    </span>
                                     <span>⏰ {{ $event->start_time }} - {{ $event->end_time }}</span>
                                     <span>📍 {{ $event->location }}</span>
                                     <span>👤 {{ $event->department }}</span>

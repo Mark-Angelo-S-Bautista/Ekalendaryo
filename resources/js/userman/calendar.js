@@ -19,6 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const formattedEvents = events.map((ev) => ({
         date: ev.date,
+        endDate: ev.endDate || ev.date,
         title: ev.title,
         description: ev.description || "No description provided.",
         moreDetails: ev.moreDetails || "No additional details.",
@@ -217,7 +218,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (date === todayStr) dayEl.classList.add("calendar_today");
 
-            const filtered = formattedEvents.filter((ev) => ev.date === date);
+            const filtered = formattedEvents.filter((ev) => {
+                const eventStart = ev.date;
+                const eventEnd = ev.endDate || ev.date;
+                return eventStart <= date && eventEnd >= date;
+            });
             const filterVal = eventFilter.value;
 
             filtered.forEach((ev) => {
@@ -294,7 +299,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 ${eventData.description || "No description provided."}
             </div>
             <div class="calendar_event-info">
-                <div>📅 ${formatShortDate(eventData.date)}</div>
+                <div>📅 ${formatDateRange(eventData.date, eventData.endDate)}</div>
                 <div>⏰ ${formatTo12Hour(eventData.timeStart)} - ${formatTo12Hour(eventData.timeEnd)}</div>
                 <div>📍 ${eventData.location}</div>
                 <div>👤 ${eventData.organizer}</div>
@@ -376,6 +381,14 @@ document.addEventListener("DOMContentLoaded", () => {
     function formatShortDate(dateStr) {
         const d = new Date(dateStr + "T00:00:00");
         return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`;
+    }
+
+    function formatDateRange(startDate, endDate) {
+        const safeEndDate = endDate || startDate;
+        if (safeEndDate === startDate) {
+            return formatShortDate(startDate);
+        }
+        return `${formatShortDate(startDate)} - ${formatShortDate(safeEndDate)}`;
     }
 
     function formatTo12Hour(timeStr) {

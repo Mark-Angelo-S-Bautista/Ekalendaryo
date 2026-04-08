@@ -46,7 +46,7 @@
             </div>
         </section>
 
-        <!-- Stats 
+        <!-- Stats
         <section class="dashboard_stats">
             <div class="dashboard_stat_box dashboard_clickable" id="dashboard_department_box">
                 <h3>Total Departments and Offices Events</h3>
@@ -88,7 +88,7 @@
                         </div>
 
                     </div>
-                @endforeach --}}  
+                @endforeach --}}
             </div>
         </section>
 
@@ -106,7 +106,14 @@
                         <div class="dashboard_event_card">
                             <div class="dashboard_event_title">{{ $event->title }}</div>
                             <div class="dashboard_event_details">
-                                📅 {{ \Carbon\Carbon::parse($event->date)->format('m/d/Y') }} &nbsp;&nbsp;
+                                📅
+                                @if (($event->end_date ?? $event->date) !== $event->date)
+                                    {{ \Carbon\Carbon::parse($event->date)->format('m/d/Y') }} -
+                                    {{ \Carbon\Carbon::parse($event->end_date)->format('m/d/Y') }}
+                                @else
+                                    {{ \Carbon\Carbon::parse($event->date)->format('m/d/Y') }}
+                                @endif
+                                &nbsp;&nbsp;
                                 🕓 {{ \Carbon\Carbon::parse($event->start_time)->format('g:i A') }} -
                                 {{ \Carbon\Carbon::parse($event->end_time)->format('g:i A') }} &nbsp;&nbsp;
                                 📍 {{ $event->location ?? 'N/A' }}
@@ -269,6 +276,9 @@
                 let htmlContent = `<div class="dashboard_events_grid">`;
                 events.forEach((event, index) => {
                     const date = new Date(event.date).toLocaleDateString('en-US');
+                    const endDateRaw = event.end_date || event.date;
+                    const endDate = new Date(endDateRaw).toLocaleDateString('en-US');
+                    const dateRange = date === endDate ? date : `${date} - ${endDate}`;
 
                     const formatTime = t => {
                         if (!t) return 'N/A';
@@ -322,7 +332,7 @@
                         <div class="dashboard_event_card">
                             <div class="dashboard_event_title">${event.title}</div>
                             <div class="dashboard_event_details">
-                                📅 ${date} &nbsp;&nbsp; 🕓 ${startTime} - ${endTime} &nbsp;&nbsp; 📍 ${event.location || 'N/A'}
+                                📅 ${dateRange} &nbsp;&nbsp; 🕓 ${startTime} - ${endTime} &nbsp;&nbsp; 📍 ${event.location || 'N/A'}
                             </div>
                             <div class="dashboard_event_details"><strong>Yearlevel:</strong> ${yearLevelsText}</div>
                             ${sectionsText ? `<div class="dashboard_event_details"><strong>Section:</strong> ${sectionsText}</div>` : ''}

@@ -16,6 +16,7 @@ class Event extends Model
         'more_details',
         'report_path',
         'date',
+        'end_date',
         'start_time',
         'end_time',
         'status',
@@ -63,12 +64,13 @@ class Event extends Model
         }
 
         $today = Carbon::today('Asia/Manila')->toDateString();
+        $endDate = $this->end_date ?: $this->date;
 
         if ($this->date > $today) {
             return 'upcoming';
         }
 
-        if ($this->date == $today) {
+        if ($this->date <= $today && $endDate >= $today) {
             return 'ongoing';
         }
 

@@ -61,7 +61,14 @@
                             </p>
 
                             <div class="notif-details">
-                                <p>📅 {{ $event->date }}</p>
+                                <p>
+                                    📅
+                                    @if (($event->end_date ?? $event->date) !== $event->date)
+                                        {{ $event->date }} - {{ $event->end_date }}
+                                    @else
+                                        {{ $event->date }}
+                                    @endif
+                                </p>
                                 <p>📍 {{ $event->location }}</p>
                                 <p>🕒 {{ $event->start_time }}</p>
                                 <p>👤 {{ $event->department ?? 'Admin' }}</p>
