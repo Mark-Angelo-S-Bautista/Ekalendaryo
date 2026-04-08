@@ -1202,6 +1202,7 @@ class EventController
                 'event' => [
                     'title' => $conflict->title,
                     'date' => $conflict->date,
+                    'end_date' => $conflict->end_date ?: $conflict->date,
                     'start_time' => $conflict->start_time,
                     'end_time' => $conflict->end_time,
                     'location' => $conflict->location,
@@ -1279,6 +1280,7 @@ class EventController
                         'event' => [
                             'title' => $event->title,
                             'date' => $event->date,
+                            'end_date' => $event->end_date ?: $event->date,
                             'start_time' => $event->start_time,
                             'end_time' => $event->end_time,
                             'location' => $event->location,
@@ -1458,6 +1460,7 @@ class EventController
                         'event' => [
                             'title' => $event->title,
                             'date' => $event->date,
+                            'end_date' => $event->end_date ?: $event->date,
                             'start_time' => $event->start_time,
                             'end_time' => $event->end_time,
                             'location' => $event->location,

@@ -776,6 +776,7 @@ $userTitle = $user->title ?? null;
                         <script>
                             document.addEventListener('DOMContentLoaded', () => {
                                 const dateInput = document.getElementById('eventDate');
+                                const endDateInput = document.getElementById('eventEndDate');
                                 const startInput = document.getElementById('startTime');
                                 const endInput = document.getElementById('endTime');
                                 const locationSelect = document.getElementById('eventLocation');
@@ -805,6 +806,7 @@ $userTitle = $user->title ?? null;
 
                                 function checkConflict() {
                                     const date = dateInput.value;
+                                    const endDate = endDateInput ? endDateInput.value : date;
                                     const start = startInput.value;
                                     const end = endInput.value;
 
@@ -812,7 +814,7 @@ $userTitle = $user->title ?? null;
                                     const location = locationSelect.value === 'Other' ? otherInput.value.trim() : locationSelect.value;
 
                                     // Skip if required fields are empty
-                                    if (!date || !start || !end || !location) {
+                                    if (!date || !endDate || !start || !end || !location) {
                                         warningDiv.style.display = 'none';
                                         createBtn.disabled = false;
                                         warningDiv.innerHTML = '';
@@ -827,6 +829,7 @@ $userTitle = $user->title ?? null;
                                             },
                                             body: JSON.stringify({
                                                 date,
+                                                end_date: endDate,
                                                 start_time: start,
                                                 end_time: end,
                                                 location
@@ -835,13 +838,16 @@ $userTitle = $user->title ?? null;
                                         .then(response => response.json())
                                         .then(data => {
                                             if (data.conflict) {
+                                                const conflictDate = data.event.end_date && data.event.end_date !== data.event
+                                                    .date ?
+                                                    `${data.event.date} - ${data.event.end_date}` : data.event.date;
                                                 createBtn.disabled = true;
                                                 warningDiv.style.display = 'block';
                                                 warningDiv.innerHTML = `
                                                 ⚠️ <b>Schedule Conflict!</b><br>
                                                 Event: <b>${data.event.title}</b><br>
                                                 Department: ${data.event.department}</br>
-                                                Date: ${data.event.date}<br>
+                                                Date: ${conflictDate}<br>
                                                 Time: ${data.event.start_time} - ${data.event.end_time}<br>
                                                 Location: ${data.event.location}
                                             `;
@@ -859,11 +865,12 @@ $userTitle = $user->title ?? null;
 
                                 function checkUserConflict() {
                                     const date = dateInput.value;
+                                    const endDate = endDateInput ? endDateInput.value : date;
                                     const start = startInput.value;
                                     const end = endInput.value;
 
                                     // Skip if date/time not filled
-                                    if (!date || !start || !end) {
+                                    if (!date || !endDate || !start || !end) {
                                         userWarningDiv.style.display = 'none';
                                         return;
                                     }
@@ -898,6 +905,7 @@ $userTitle = $user->title ?? null;
                                             },
                                             body: JSON.stringify({
                                                 date,
+                                                end_date: endDate,
                                                 start_time: start,
                                                 end_time: end,
                                                 target_users: targetUsers,
@@ -910,6 +918,9 @@ $userTitle = $user->title ?? null;
                                         .then(response => response.json())
                                         .then(data => {
                                             if (data.conflict) {
+                                                const conflictDate = data.event.end_date && data.event.end_date !== data.event
+                                                    .date ?
+                                                    `${data.event.date} - ${data.event.end_date}` : data.event.date;
                                                 createBtn.disabled = true;
                                                 userWarningDiv.style.display = 'block';
                                                 const conflictType = data.conflict_type === 'faculty' ? 'Faculty' : 'Students';
@@ -919,7 +930,7 @@ $userTitle = $user->title ?? null;
                                                 <b>${data.conflicting_users}</b><br><br>
                                                 Conflicting Event: <b>${data.event.title}</b><br>
                                                 Department: ${data.event.department}<br>
-                                                Date: ${data.event.date}<br>
+                                                Date: ${conflictDate}<br>
                                                 Time: ${data.event.start_time} - ${data.event.end_time}<br>
                                                 Location: ${data.event.location}
                                             `;
@@ -936,7 +947,8 @@ $userTitle = $user->title ?? null;
                                 }
 
                                 // Listen for changes in all relevant inputs
-                                [dateInput, startInput, endInput, locationSelect, otherInput].forEach(el => {
+                                [dateInput, endDateInput, startInput, endInput, locationSelect, otherInput].forEach(el => {
+                                    if (!el) return;
                                     el.addEventListener('change', checkConflict);
                                     el.addEventListener('input', checkConflict);
                                 });
@@ -955,7 +967,8 @@ $userTitle = $user->title ?? null;
                                 });
 
                                 // Also check when date/time changes
-                                [dateInput, startInput, endInput].forEach(el => {
+                                [dateInput, endDateInput, startInput, endInput].forEach(el => {
+                                    if (!el) return;
                                     el.addEventListener('change', checkUserConflict);
                                 });
                             });
