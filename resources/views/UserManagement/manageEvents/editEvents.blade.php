@@ -160,6 +160,13 @@
                     }
                 @endphp
 
+                <div class="checkbox_select">
+                    <div class="checkbox-inline">
+                        <input type="checkbox" id="select_all_programs_edit">
+                        <label for="select_all_programs_edit">Select All Target Programs</label>
+                    </div>
+                </div>
+
                 <div class="checkbox-grid">
                     @foreach ($departments as $dept)
                         @if ($dept->department_name !== 'OFFICES')
@@ -485,8 +492,35 @@
             const sectionModalOverlay = document.getElementById("sectionModalOverlay");
             const facultyModalOverlay = document.getElementById("facultyModalOverlay");
             const deptCheckboxes = document.querySelectorAll('.dept-checkbox');
+            const selectAllProgramsEdit = document.getElementById('select_all_programs_edit');
             const yearLevelsContainerEdit = document.getElementById('yearLevelsContainerEdit');
             const isOffices = String(window.userTitle || '').toLowerCase() === 'offices';
+
+            function getVisibleEnabledDeptCheckboxes() {
+                return [...deptCheckboxes].filter(cb => {
+                    if (cb.disabled) return false;
+                    const label = cb.closest('label.checkbox-item');
+                    return !label || label.offsetParent !== null;
+                });
+            }
+
+            function updateSelectAllProgramsEditState() {
+                if (!selectAllProgramsEdit) return;
+
+                const activeDeptCheckboxes = getVisibleEnabledDeptCheckboxes();
+                if (activeDeptCheckboxes.length === 0) {
+                    selectAllProgramsEdit.checked = false;
+                    selectAllProgramsEdit.indeterminate = false;
+                    return;
+                }
+
+                const checkedCount = activeDeptCheckboxes.filter(cb => cb.checked).length;
+                const allChecked = checkedCount === activeDeptCheckboxes.length;
+                const someChecked = checkedCount > 0 && !allChecked;
+
+                selectAllProgramsEdit.checked = allChecked;
+                selectAllProgramsEdit.indeterminate = someChecked;
+            }
 
             // ==============================
             // Dynamic Year Levels for Offices (Edit)
@@ -607,8 +641,22 @@
             }
 
             deptCheckboxes.forEach(cb => {
-                cb.addEventListener('change', updateYearLevelsEdit);
+                cb.addEventListener('change', () => {
+                    updateYearLevelsEdit();
+                    updateSelectAllProgramsEditState();
+                });
             });
+
+            if (selectAllProgramsEdit) {
+                selectAllProgramsEdit.addEventListener('change', () => {
+                    const activeDeptCheckboxes = getVisibleEnabledDeptCheckboxes();
+                    activeDeptCheckboxes.forEach(cb => {
+                        cb.checked = selectAllProgramsEdit.checked;
+                    });
+                    updateYearLevelsEdit();
+                    updateSelectAllProgramsEditState();
+                });
+            }
 
             // Initial setup for year levels - UserManagement users always have full access
             updateYearLevelsEdit();
@@ -655,6 +703,7 @@
 
             // Always call toggleButtons on initial load for all users
             toggleButtons();
+            updateSelectAllProgramsEditState();
 
             // ==============================
             // Select All Office Users Logic (Edit)

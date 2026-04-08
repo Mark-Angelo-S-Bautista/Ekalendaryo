@@ -172,6 +172,14 @@ $userTitle = $user->title ?? null;
                                         @if ($userTitle === 'Department Head')
                                             @if ($userDepartment === 'BSIS/ACT')
                                                 {{-- Special case for BSIS/ACT Department Head: show two checkboxes --}}
+                                                <div class="checkbox_select">
+                                                    <div class="checkbox-inline">
+                                                        <input type="checkbox" id="select_all_programs">
+                                                        <label for="select_all_programs">Select All Target
+                                                            Programs</label>
+                                                    </div>
+                                                </div>
+
                                                 <div class="checkbox-grid">
                                                     <label class="checkbox-item">
                                                         <input type="checkbox" class="dept-checkbox"
@@ -195,6 +203,13 @@ $userTitle = $user->title ?? null;
                                             @endif
                                         @else
                                             {{-- If the user is NOT a Department Head (e.g., OFFICES or other), show the standard checkbox grid --}}
+                                            <div class="checkbox_select">
+                                                <div class="checkbox-inline">
+                                                    <input type="checkbox" id="select_all_programs">
+                                                    <label for="select_all_programs">Select All Target Programs</label>
+                                                </div>
+                                            </div>
+
                                             <div class="checkbox-grid">
                                                 @foreach ($departments as $dept)
                                                     @php
@@ -211,7 +226,8 @@ $userTitle = $user->title ?? null;
                                                     @endphp
 
                                                     @if ($shouldRender)
-                                                        <label class="checkbox-item" data-dept="{{ $departmentName }}">
+                                                        <label class="checkbox-item"
+                                                            data-dept="{{ $departmentName }}">
                                                             <input type="checkbox" class="dept-checkbox"
                                                                 name="target_department[]"
                                                                 value="{{ $departmentName }}">
@@ -438,7 +454,34 @@ $userTitle = $user->title ?? null;
                                 // Dynamic Year Levels for Offices
                                 // ==============================
                                 const deptCheckboxes = document.querySelectorAll('.dept-checkbox');
+                                const selectAllPrograms = document.getElementById('select_all_programs');
                                 const yearLevelsContainer = document.getElementById('yearLevelsContainer');
+
+                                function getVisibleDeptCheckboxes() {
+                                    return [...deptCheckboxes].filter(cb => {
+                                        if (cb.disabled) return false;
+                                        const label = cb.closest('label.checkbox-item');
+                                        return !label || label.offsetParent !== null;
+                                    });
+                                }
+
+                                function updateSelectAllProgramsState() {
+                                    if (!selectAllPrograms) return;
+                                    const visibleDeptCheckboxes = getVisibleDeptCheckboxes();
+
+                                    if (visibleDeptCheckboxes.length === 0) {
+                                        selectAllPrograms.checked = false;
+                                        selectAllPrograms.indeterminate = false;
+                                        return;
+                                    }
+
+                                    const checkedCount = visibleDeptCheckboxes.filter(cb => cb.checked).length;
+                                    const allChecked = checkedCount === visibleDeptCheckboxes.length;
+                                    const someChecked = checkedCount > 0 && !allChecked;
+
+                                    selectAllPrograms.checked = allChecked;
+                                    selectAllPrograms.indeterminate = someChecked;
+                                }
 
                                 function toNumberYearLevel(value) {
                                     if (typeof value === 'number') return value;
@@ -510,8 +553,20 @@ $userTitle = $user->title ?? null;
 
                                 // Listen to department checkbox changes
                                 deptCheckboxes.forEach(cb => {
-                                    cb.addEventListener('change', updateYearLevels);
+                                    cb.addEventListener('change', () => {
+                                        updateYearLevels();
+                                        updateSelectAllProgramsState();
+                                    });
                                 });
+
+                                if (selectAllPrograms) {
+                                    selectAllPrograms.addEventListener('change', () => {
+                                        const visibleDeptCheckboxes = getVisibleDeptCheckboxes();
+                                        visibleDeptCheckboxes.forEach(cb => cb.checked = selectAllPrograms.checked);
+                                        updateYearLevels();
+                                        updateSelectAllProgramsState();
+                                    });
+                                }
 
                                 // ==============================
                                 // Select All Year Levels Logic
@@ -596,6 +651,11 @@ $userTitle = $user->title ?? null;
                                         deptHiddenInputs.forEach(input => {
                                             input.disabled = hideTargetDepartment;
                                         });
+
+                                        if (hideTargetDepartment && selectAllPrograms) {
+                                            selectAllPrograms.checked = false;
+                                            selectAllPrograms.indeterminate = false;
+                                        }
                                     }
 
                                     // For Offices users: department visibility by target users
@@ -630,12 +690,15 @@ $userTitle = $user->title ?? null;
                                         setDepartmentLabelVisibility(bsisLabel, isFacultyOrDeptHeadsTarget);
                                         setDepartmentLabelVisibility(actLabel, isFacultyOrDeptHeadsTarget);
                                     }
+
+                                    updateSelectAllProgramsState();
                                 }
 
                                 if (targetUsers) {
                                     targetUsers.addEventListener('change', toggleButtons);
                                 }
                                 toggleButtons(); // initial check on page load
+                                updateSelectAllProgramsState();
 
                                 // ==============================
                                 // Select All Office Users Logic
