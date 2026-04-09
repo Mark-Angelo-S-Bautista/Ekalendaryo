@@ -282,7 +282,7 @@
     ">
         
             <div class="modal-content-wrapper"
-            style="width:90%; max-width:800px; background:#fff; border-radius:18px; display:flex; height:70%;flex-direction:column; border-top:7px solid #38761d; box-shadow:0 20px 50px rgba(0,0,0,0.3);">
+            style="width:90%; max-width:800px; background:#fff; border-radius:18px; display:flex; width: 100%;height:70%;flex-direction:column; border-top:7px solid #38761d; box-shadow:0 20px 50px rgba(0,0,0,0.3);">
 
             <h2
                 style="
