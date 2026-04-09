@@ -472,10 +472,25 @@ input[type="text"] {
 .adduser_modal {
     background: #fff;
     border-radius: 12px;
-    width: 420px;
-    padding: 20px 25px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    animation: fadeIn 0.2s ease-in-out;
+    
+    /* 1. Fluid Width */
+    width: 95%;           /* Takes up most of the screen on mobile */
+    max-width: 500px;     /* Prevents it from getting too wide on desktop */
+    
+    /* 2. Adaptive Height */
+    height: auto;         /* Grows based on the number of form fields */
+    max-height: 90vh;     /* Prevents the modal from being taller than the screen */
+    
+    /* 3. Handling Overflow */
+    overflow-y: auto;     /* Adds a scrollbar INSIDE the modal if content is too long */
+    
+    padding: 25px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    position: relative;
+    animation: fadeIn 0.3s ease-out;
+    
+    /* Center it perfectly */
+    margin: 20px auto;
 }
 
 @keyframes fadeIn {
@@ -496,6 +511,7 @@ input[type="text"] {
 
 .adduser_form-group {
     margin-bottom: 14px;
+    width: 100%;
 }
 
 .adduser_label {
@@ -503,15 +519,27 @@ input[type="text"] {
     font-size: 0.9rem;
     display: block;
     margin-bottom: 5px;
+    color: #444; /* better contrast */
 }
 
 .adduser_input,
 .adduser_select {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    font-size: 0.9rem;
+    width: 100%; /* Force 100% width of parent */
+    padding: 10px; /* balanced padding */
+    border: 1.5px solid #d1f0d4; /* system green border */
+    border-radius: 8px; /* rounded corners */
+    font-size: 0.95rem; /* readable font */
+    box-sizing: border-box; /* CRITICAL: Padding included in width */
+    background-color: white;
+    transition: all 0.2s ease;
+    color: #1e392a; /* primary dark green */
+}
+
+.adduser_input:focus,
+.adduser_select:focus {
+    border-color: #27ae60;
+    box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.1);
+    outline: none;
 }
 
 .adduser_actions {
@@ -539,17 +567,27 @@ input[type="text"] {
 }
 
 .adduser_password-box {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    width: 100%;
+    position: relative; /* REQUIRED for absolute positioning of icon */
 }
 
 .adduser_password-box input {
-    flex: 1;
+    width: 100% !important;
+    padding-left: 45px !important; /* Make room for the lock icon on the left */
 }
 
 .adduser_password-lock {
-    font-size: 1.1rem;
+    position: absolute;
+    left: 15px; /* precise alignment */
+    top: 50%;
+    transform: translateY(-50%); /* vertical centering */
+    font-size: 1.2rem;
+    pointer-events: none; /* Let clicks pass through to the input */
+    opacity: 0.7;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
 }
 /* ------------------------------======================================== */
 .container {
@@ -936,11 +974,13 @@ th {
 .adduser_overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.4);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 999;
+    background: rgba(0, 0, 0, 0.5);
+    display: none; 
+    align-items: center;    /* Vertically centers modal */
+    justify-content: center; /* Horizontally centers modal */
+    z-index: 1000;
+    padding: 20px;          /* Prevents modal from touching screen edges */
+    overflow-y: auto;       /* Allows scrolling the whole page if modal is huge */
 }
 
 /* Modal box */
@@ -969,16 +1009,7 @@ th {
     margin-bottom: 1rem;
 }
 
-.adduser_form-group {
-    margin-bottom: 14px;
-}
 
-.adduser_label {
-    font-weight: 600;
-    font-size: 0.9rem;
-    display: block;
-    margin-bottom: 5px;
-}
 
 .adduser_input,
 .adduser_select {
@@ -997,20 +1028,31 @@ th {
 }
 
 .adduser_btn {
-    padding: 8px 14px;
     border: none;
-    border-radius: 6px;
-    font-size: 0.9rem;
+    border-radius: 10px;
+    font-size: 0.95rem;
     cursor: pointer;
+    font-weight: 600;
+    padding: 10px 0; /* Vertical padding only */
+    width: 130px; /* Uniform width for both buttons */
+    text-align: center;
+    transition: all 0.2s ease;
 }
 
 .adduser_btn-cancel {
-    background: #e5e7eb;
+    background-color: #e5e7eb; /* default light grey */
+    color: #444;
+}
+.adduser_btn-cancel:hover {
+    background-color: #d1d5db;
 }
 
 .adduser_btn-create {
-    background: #16a34a;
+    background-color: #27ae60; /* primary green */
     color: white;
+}
+.adduser_btn-create:hover {
+    background-color: #219150;
 }
 
 .adduser_password-box {
@@ -1688,5 +1730,13 @@ th {
         width: 100%; /* Each button gets its own line */
     }
 
+    .adduser_actions {
+        flex-direction: column-reverse; /* Cancel button on bottom */
+        gap: 10px;
+    }
+    
+    .adduser_btn {
+        width: 100%; /* Full width buttons for easier tapping */
+    }
     
 }
