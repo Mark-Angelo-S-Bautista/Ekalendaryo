@@ -1323,7 +1323,7 @@ $userTitle = $user->title ?? null;
                                         👥 {{ $event->attendees->count() }} attending
                                     </button>
 
-                                    <button class="btn-view-details" data-details="{{ $event->more_details }}">
+                                    <button class="btn-base btn-green" data-details="{{ $event->more_details }}">
                                         👁️ View Details
                                     </button>
 
@@ -1335,7 +1335,7 @@ $userTitle = $user->title ?? null;
                                             style="display:inline;">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="delete"
+                                            <button type="submit" class="btn-red"
                                                 onclick="return confirm('Are you sure you want to delete this event?')">
                                                 🗑️ Delete
                                             </button>
