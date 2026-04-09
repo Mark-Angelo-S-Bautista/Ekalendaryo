@@ -245,21 +245,89 @@ body {
     margin-top: 20px;
 }
 
+.dashboard_modal_close_btn{
+    display:flex; 
+    justify-content:flex-end; 
+    margin-top:18px;
+}
+
 /* Make sure the cards fill the height if description lengths vary */
 .dashboard_event_card {
-    background: #fff;
-    border-radius: 12px;
-    padding: 5px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    position: relative;
+    border-radius: 18px;
+    padding: 18px;
+    color: #ffffff;
+
+    /* GREEN GRADIENT */
+    background: linear-gradient(135deg, #0f7a4f, #0c5f3f);
+
+    box-shadow:
+        0 10px 25px rgba(0, 0, 0, 0.18),
+        inset 0 1px 1px rgba(255, 255, 255, 0.08);
+
+    overflow: hidden;
+
     display: flex;
     flex-direction: column;
-    height: 100%; /* Ensures cards in the same row are equal height */
+    height: 100%;
+
+    transition: all 0.35s ease;
+}
+
+.dashboard_event_card > div:last-child {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.dashboard_view_btn,
+.dashboard_attend_btn {
+    border-radius: 999px;
+    padding: 10px 16px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.dashboard_view_btn {
+    background: rgba(255,255,255,0.15);
+    color: #ffffff;
+    backdrop-filter: blur(6px);
+}
+
+.dashboard_view_btn:hover {
+    background: rgba(255,255,255,0.28);
+}
+
+.dashboard_attend_btn {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: #ffffff;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+}
+
+.dashboard_attend_btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 22px rgba(0,0,0,0.35);
+}
+
+.dashboard_attend_btn:disabled {
+    background: #4CAF50;
+    opacity: 0.85;
+    cursor: not-allowed;
 }
 
 .dashboard_event_details {
     font-size: 0.85rem;
     color: #444;
     margin: 4px 0;
+}
+
+.dashboard_event_actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
 }
 
 /* RESPONSIVENESS: Adjust columns for smaller screens */
@@ -281,38 +349,55 @@ body {
     }
 }
 
+.dashboard_event_card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top right,
+        rgba(255,255,255,0.18),
+        transparent 60%);
+    pointer-events: none;
+}
+
 .dashboard_event_card:hover {
-    background-color: #f5fbf5;
+    transform: translateY(-6px) scale(1.01);
+    box-shadow:
+        0 18px 40px rgba(0, 0, 0, 0.25),
+        0 0 25px rgba(34, 197, 94, 0.35);
 }
 
 .dashboard_event_title {
+    font-size: 1.1rem;
     font-weight: 600;
-    color: #004d25;
+    color: #ffffff;
+    margin-bottom: 6px;
 }
 
 .dashboard_event_details {
     font-size: 0.85rem;
-    color: #444;
+    color: rgba(255,255,255,0.85);
     margin: 4px 0;
 }
 
 .dashboard_event_tags {
+    margin-top: auto;
     display: flex;
+    flex-wrap: wrap;
     gap: 6px;
-    margin-top: 6px;
+    margin-bottom: 8px;
 }
 
 .dashboard_tag {
-    font-size: 0.75rem;
-    padding: 4px 8px;
-    border-radius: 5px;
+    font-size: 0.7rem;
+    padding: 5px 10px;
+    border-radius: 999px;
     font-weight: 500;
-    text-transform: lowercase;
+    backdrop-filter: blur(6px);
 }
 
 .dashboard_tag_admin {
-    background-color: #007f3d;
-    color: white;
+    background: rgba(255,255,255,0.18);
+    color: #fff;
 }
 
 /* Modal */
@@ -562,16 +647,17 @@ body {
     background-color: #e0e7ff;
 }
 .dashboard_tag_upcoming {
-    background: #2b5eff;
-    color: #fff;
+    background: #38bdf8;
 }
 .dashboard_tag_ongoing {
-    background: #ffb800;
-    color: #fff;
+    background: #facc15;
+    color: #000;
+}
+.dashboard_tag_completed {
+    background: #22c55e;
 }
 .dashboard_tag_cancelled {
-    background: #e53935;
-    color: #fff;
+    background: #ef4444;
 }
 
 /* Responsive adjustments */

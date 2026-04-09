@@ -230,10 +230,9 @@
                                     {{ strtolower($event->computed_status ?? ($event->status ?? 'upcoming')) }}
                                 </span>
                             </div>
-                            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <div class="dashboard_event_actions">
                                 <button class="dashboard_view_btn"
-                                    data-more-details="{{ htmlspecialchars($event->more_details ?? 'No additional details.', ENT_QUOTES, 'UTF-8') }}"
-                                    style="padding:10px 22px; background:#e8ecf5; border:none; border-radius:10px; font-size:1rem; cursor:pointer; font-weight:600; color:#36415d; margin-top:10px;">
+                                    data-more-details="{{ htmlspecialchars($event->more_details ?? 'No additional details.', ENT_QUOTES, 'UTF-8') }}">
                                     👁️ View Details
                                 </button>
                                 <button class="dashboard_attend_btn" data-event-id="{{ $event->id }}"
@@ -306,10 +305,7 @@
                 style="flex:1; overflow-y:auto; padding:15px; font-size:1.05rem; border-radius:12px; background:#f1f4fb; color:#2b2b2b; white-space: pre-wrap;">
             </div>
             <div style="display:flex; justify-content:flex-end; margin-top:18px;">
-                <button id="userDetailsCloseBtn"
-                    style="padding:10px 22px; background:#e8ecf5; border:none; border-radius:10px; font-size:1rem; cursor:pointer; font-weight:600; color:#36415d;"
-                    onmouseover="this.style.background='#d4d9e6'"
-                    onmouseout="this.style.background='#e8ecf5'">Close</button>
+                <button id="userDetailsCloseBtn">Close</button>
             </div>
         </div>
     </div>
@@ -419,8 +415,7 @@
                                 <span class="dashboard_tag ${status.class}">${status.text}</span>
                             </div>
                             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                                <button class="dashboard_view_btn" data-index="${index}"
-                                    style="padding:10px 22px; background:#e8ecf5; border:none; border-radius:10px; font-size:1rem; cursor:pointer; font-weight:600; color:#36415d; margin-top:10px;">
+                                <button class="dashboard_view_btn" data-index="${index}"">
                                     👁️ View Details
                                 </button>
                                 <button class="dashboard_attend_btn" data-event-id="${event.id}"
