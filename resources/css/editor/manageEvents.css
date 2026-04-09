@@ -1041,3 +1041,29 @@ button {
 
 .btn-blue { background-color: #1a73e8 !important; }
 .btn-blue:hover { background-color: #1557b0 !important; }
+
+
+
+.modal-content-wrapper {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* CRITICAL: This clips any child overflow */
+    background: #ffffff;
+    border-radius: 18px;
+    /* ... your other styles ... */
+}
+
+/* Update the Textarea */
+#dashboardDetailsTextarea {
+    width: 100%;
+    min-height: 200px; /* Gives a base size on mobile */
+    max-height: 60vh;  /* Prevents it from pushing the 'Close' button off-screen */
+    padding: 20px;
+    box-sizing: border-box; /* Ensures padding doesn't add to width */
+    border: 1px solid #d0d7e3;
+    background: #f9fbff;
+    line-height: 1.6;
+    font-family: inherit;
+    resize: none; /* Prevents users from breaking the layout manually */
+    overflow-y: auto; /* Adds a scrollbar INSIDE the textarea if text is long */
+}

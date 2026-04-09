@@ -280,22 +280,9 @@
         justify-content:center; align-items:center;
         padding:20px;
     ">
-
-        <div
-            style="
-            background:#ffffff;
-            padding:30px;
-            width:85%;
-            max-width:1200px;
-            height:85%;
-            border-radius:18px;
-            box-shadow:0 12px 45px rgba(0,0,0,0.30);
-            display:flex;
-            flex-direction:column;
-            animation: fadeInScale 0.28s ease-out;
-
-            border-top:7px solid #38761d;
-        ">
+        
+            <div class="modal-content-wrapper"
+            style="width:90%; max-width:800px; background:#fff; border-radius:18px; display:flex; height:70%;flex-direction:column; border-top:7px solid #38761d; box-shadow:0 20px 50px rgba(0,0,0,0.3);">
 
             <h2
                 style="
@@ -340,7 +327,9 @@
                 </button>
             </div>
 
+        
         </div>
+        
     </div>
 
 </x-editorLayout>
