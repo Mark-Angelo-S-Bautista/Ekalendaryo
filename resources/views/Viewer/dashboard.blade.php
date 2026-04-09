@@ -2,6 +2,7 @@
 
         <head>
             <meta name="csrf-token" content="{{ csrf_token() }}">
+            @vite(['resources/css/viewer/viewerdashboard.css'])
         </head>
         <div class="dashboard_container">
             <!-- Welcome -->
@@ -94,29 +95,13 @@
                                 </div>
                                 <div>
                                     <button class="dashboard_view_btn"
-                                        data-details="{{ e($event->more_details ?? 'No additional details.') }}"
-                                        style="margin-right: 110px; padding:10px 22px; background:#e8ecf5; border:none; border-radius:10px; font-size:1rem; cursor:pointer; font-weight:600; color:#36415d; margin-top:10px;">
+                                        data-details="{{ e($event->more_details ?? 'No additional details.') }}">
                                         👁️ View Details
                                     </button>
-                                    <button class="dashboard_attend_btn" data-event-id="{{ $event->id }}"
-                                        style="padding:10px 22px; 
-                                            border-radius:10px; 
-                                            font-size:1rem; 
-                                            cursor:pointer; 
-                                            font-weight:600; 
-                                            margin-top:10px; 
-                                            margin-left:5px; 
-                                            transition: all 0.3s ease;
-                                            @if ($event->attendees->contains(Auth::id())) background:#4CAF50; 
-                                                color:#ffffff; 
-                                                border:1px solid #4CAF50; 
-                                                cursor:not-allowed;
-                                            @else
-                                                background:#ffffff; 
-                                                color:#36415d; 
-                                                border:1px solid #36415d; @endif
-                                        "
+                                    <button class="dashboard_attend_btn"
+                                        data-event-id="{{ $event->id }}"
                                         @if ($event->attendees->contains(Auth::id())) disabled @endif>
+
                                         @if ($event->attendees->contains(Auth::id()))
                                             ✅ Attending
                                         @else
