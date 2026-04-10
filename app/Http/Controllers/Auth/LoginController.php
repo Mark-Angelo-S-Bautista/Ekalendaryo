@@ -111,7 +111,17 @@ class LoginController
     public function updateFirstLoginPassword(Request $request)
     {
         $request->validate([
-            'new_password' => 'required|string|min:8|confirmed',
+            'new_password' => [
+                'required',
+                'string',
+                'min:5',
+                'regex:/[A-Z]/',
+                'regex:/[^A-Za-z0-9]/',
+                'confirmed',
+            ],
+        ], [
+            'new_password.min' => 'Password must be at least 5 characters.',
+            'new_password.regex' => 'Password must include at least one uppercase letter and one special character.',
         ]);
 
         $user = Auth::user();
