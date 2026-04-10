@@ -242,7 +242,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     e.addEventListener("click", (event) => {
                         event.stopPropagation();
-                        openEventDetail(ev);
+                        openEventDetail(ev, date);
                     });
 
                     dayEl.appendChild(e);
@@ -263,9 +263,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const moreDetailsContent = document.getElementById("moreDetailsContent");
     const moreDetailsClose = document.getElementById("closeMoreDetailsBtn");
 
-    function openEventDetail(eventData) {
+    function openEventDetail(eventData, selectedDate = null) {
         modal.style.display = "flex";
-        modalTitle.textContent = formatDate(eventData.date);
+        modalTitle.textContent = formatDate(selectedDate || eventData.date);
 
         let yearLevelsString = "All year levels";
         if (typeof eventData.targetYearLevels === "string") {
