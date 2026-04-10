@@ -113,7 +113,7 @@
                         $deptNameRaw = trim((string) ($dept['name'] ?? ''));
                         $deptNameUpper = strtoupper($deptNameRaw);
 
-                        if ($deptNameUpper === 'BSIS/ACT') {
+                        if (in_array($deptNameUpper, ['BSIS', 'ACT'], true)) {
                             continue;
                         }
 

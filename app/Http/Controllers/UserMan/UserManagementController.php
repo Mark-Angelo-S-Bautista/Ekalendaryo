@@ -267,11 +267,12 @@ class UserManagementController
                 continue;
             }
 
-            if ($this->normalizeDepartmentKey((string) $deptName) === 'BSIS/ACT') {
+            $normalizedDeptName = $this->normalizeDepartmentKey((string) $deptName);
+            if (in_array($normalizedDeptName, ['BSIS', 'ACT'], true)) {
                 continue;
             }
 
-            $normalizedCardDept = $this->normalizeDepartmentKey((string) $deptName);
+            $normalizedCardDept = $normalizedDeptName;
             $departmentEvents = $countableEvents
                 ->filter(function ($event) use ($normalizedCardDept) {
                     $creator = $event->user;
