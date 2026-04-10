@@ -55,7 +55,7 @@
         </section> -->
 
         <section class="dashboard_department_section">
-            <h3 class="dashboard_upcoming_title">Department Events</h3>
+            <h3 class="dashboard_upcoming_title">All Events</h3>
 
             <div class="dashboard_department_grid_cards">
                 @php
