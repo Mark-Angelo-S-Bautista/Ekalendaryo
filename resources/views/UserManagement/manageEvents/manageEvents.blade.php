@@ -74,7 +74,7 @@
                             <input type="hidden" id="moreDetailsInput" name="more_details">
 
                             <div class="form-group">
-                                <label>Date</label>
+                                <label>Start Date</label>
                                 <input type="date" id="eventDate" name="date" min="{{ now()->format('Y-m-d') }}"
                                     required>
                             </div>
