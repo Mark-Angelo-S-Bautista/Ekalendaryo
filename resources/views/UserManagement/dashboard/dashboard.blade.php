@@ -192,19 +192,22 @@
                                 {{ \Carbon\Carbon::parse($event->end_time)->format('g:i A') }} &nbsp;&nbsp;
                                 📍 {{ $event->location ?? 'N/A' }}
                             </div>
-                            <div class="dashboard_event_details">
-                                <strong>Yearlevel:</strong>
-                                @if (is_array($event->target_year_levels) && count($event->target_year_levels) > 0)
-                                    {{ implode(', ', $event->target_year_levels) }}
-                                @elseif(is_string($event->target_year_levels) && $event->target_year_levels)
-                                    @php
-                                        $levels = json_decode($event->target_year_levels, true);
-                                    @endphp
-                                    {{ is_array($levels) ? implode(', ', $levels) : $event->target_year_levels }}
-                                @else
-                                    No target group
-                                @endif
-                            </div>
+                            @php
+                                $yearLevelsText = 'No target group';
+                                if (is_array($event->target_year_levels) && count($event->target_year_levels) > 0) {
+                                    $yearLevelsText = implode(', ', $event->target_year_levels);
+                                } elseif (is_string($event->target_year_levels) && $event->target_year_levels) {
+                                    $levels = json_decode($event->target_year_levels, true);
+                                    $yearLevelsText = is_array($levels)
+                                        ? implode(', ', $levels)
+                                        : $event->target_year_levels;
+                                }
+                            @endphp
+                            @if (trim((string) $yearLevelsText) !== 'No target group')
+                                <div class="dashboard_event_details">
+                                    <strong>Yearlevel:</strong> {{ $yearLevelsText }}
+                                </div>
+                            @endif
                             @if (is_array($event->target_sections) && count($event->target_sections) > 0)
                                 <div class="dashboard_event_details">
                                     <strong>Section:</strong> {{ implode(', ', $event->target_sections) }}
@@ -374,6 +377,8 @@
                     } else if (event.target_users) {
                         yearLevelsText = event.target_users;
                     }
+                    const yearLevelHtml = yearLevelsText === 'No target group' ? '' :
+                        `<div class="dashboard_event_details"><strong>Yearlevel:</strong> ${yearLevelsText}</div>`;
 
                     let sectionsText = '';
                     if (Array.isArray(event.target_sections) && event.target_sections.length > 0) {
@@ -404,7 +409,7 @@
                             <div class="dashboard_event_details">
                                 📅 ${dateRange} &nbsp;&nbsp; 🕓 ${startTime} - ${endTime} &nbsp;&nbsp; 📍 ${event.location || 'N/A'}
                             </div>
-                            <div class="dashboard_event_details"><strong>Yearlevel:</strong> ${yearLevelsText}</div>
+                            ${yearLevelHtml}
                             ${sectionsText ? `<div class="dashboard_event_details"><strong>Section:</strong> ${sectionsText}</div>` : ''}
                             <div class="dashboard_event_details" style="max-width:100%; white-space:normal; word-break:break-word; overflow-wrap:anywhere;">
                                 ${event.description || 'No description provided.'}
